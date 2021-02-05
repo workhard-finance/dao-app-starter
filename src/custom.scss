@@ -1,0 +1,14 @@
+// // Override default variables before the import
+// $body-bg: #000;
+
+// Import Bootstrap and its default variables
+// Solar 4.6.0
+// Bootswatch
+
+//
+// Color system
+//
+
+@import "~bootswatch/dist/sketchy/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/sketchy/bootswatch";
