@@ -16,7 +16,7 @@ const NavBarBrand = (props: React.ComponentProps<any>) => {
         display: "flex",
         flexDirection: "column",
         textAlign: "left",
-        fontSize: '4vmin'
+        fontSize: "4vmin",
       }}
     >
       <strong>WORK HARD</strong>

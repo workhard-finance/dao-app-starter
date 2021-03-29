@@ -44,4 +44,3 @@ export function useInactiveListener(suppress: boolean = false) {
     }
   }, [active, error, suppress, activate]);
 }
-

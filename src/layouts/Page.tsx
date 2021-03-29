@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import { useVisionDaoTheme } from "../providers/WorkhardThemeProvider";
 import { MenuContext } from "../contexts/menu";
 
-export type PageProps = React.ComponentProps<any>
+export type PageProps = React.ComponentProps<any>;
 
 const Page = (props: React.ComponentProps<any>) => {
   const menus = useContext(MenuContext);
@@ -22,7 +22,7 @@ const Page = (props: React.ComponentProps<any>) => {
         <Container>{props.children}</Container>
       </Row>
       <br />
-      <hr style={{ borderTop: '1px solid rgba(0,0,0,0.5)' }}/>
+      <hr style={{ borderTop: "1px solid rgba(0,0,0,0.5)" }} />
       <Footer />
     </Container>
   );
