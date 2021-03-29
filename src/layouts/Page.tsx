@@ -3,8 +3,10 @@ import { Container, Row } from "react-bootstrap";
 
 import NavBar from "../components/nav/NavBar";
 import Footer from "../components/Footer";
-import { useVisionDaoTheme } from "../providers/VisionDaoThemeProvider";
-import { MenuContext } from "../context";
+import { useVisionDaoTheme } from "../providers/WorkhardThemeProvider";
+import { MenuContext } from "../contexts/menu";
+
+export type PageProps = React.ComponentProps<any>
 
 const Page = (props: React.ComponentProps<any>) => {
   const menus = useContext(MenuContext);

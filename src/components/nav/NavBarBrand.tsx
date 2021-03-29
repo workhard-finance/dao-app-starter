@@ -1,7 +1,7 @@
 import React from "react";
 import { Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useVisionDaoTheme } from "../../providers/VisionDaoThemeProvider";
+import { useVisionDaoTheme } from "../../providers/WorkhardThemeProvider";
 
 const NavBarBrand = (props: React.ComponentProps<any>) => {
   const theme = useVisionDaoTheme();

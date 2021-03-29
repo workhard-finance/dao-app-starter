@@ -8,7 +8,8 @@ import {
 import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from "@web3-react/walletconnect-connector";
 import { providers } from "ethers";
 import { Spinner } from "./Spinner";
-import { useEagerConnect, useInactiveListener } from "../hooks";
+import { useInactiveListener } from "../hooks/InactivListener";
+import { useEagerConnect } from "../hooks/EagerConnect";
 import { AbstractConnector } from "@web3-react/abstract-connector";
 import {
   injected,
@@ -17,7 +18,7 @@ import {
   trezor,
   walletconnect,
   walletlink,
-} from "../connectors";
+} from "../web3/connectors";
 
 function getErrorMessage(error: Error) {
   if (error instanceof NoEthereumProviderError) {

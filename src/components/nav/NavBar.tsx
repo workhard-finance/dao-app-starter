@@ -2,51 +2,18 @@ import React from "react";
 import { Nav, Row, Navbar } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 import NavBarBrand from "./NavBarBrand";
-import FarmIcon from "../icons/FarmIcon";
-import WorkIcon from "../icons/WorkIcon";
-import VoteIcon from "../icons/VoteIcon";
-import MineIcon from "../icons/MineIcon";
-import DocsIcon from "../icons/DocsIcon";
 import Wallet from "../Wallet";
+import { Menu } from "../../contexts/menu";
 // import NavBarMenu from "./NavBarMenu";
 
-type Menu = {
-  Icon: (...props: any) => JSX.Element;
-  name: string;
-  url: string;
-};
+export interface NavBarProps {
+  menus: Menu[];
+}
 
-const NavBar = (props: React.ComponentProps<any>) => {
+const NavBar: React.FC<NavBarProps> = ({ menus }) => {
   // const menus = useContext(MenuContext);
   // const theme = useVisionDaoTheme();
   const history = useHistory();
-  const menus: Menu[] = [
-    {
-      Icon: FarmIcon,
-      name: "Farm",
-      url: "/farm",
-    },
-    {
-      Icon: MineIcon,
-      name: "Mine",
-      url: "/mine",
-    },
-    {
-      Icon: WorkIcon,
-      name: "Work",
-      url: "/work",
-    },
-    {
-      Icon: VoteIcon,
-      name: "Vote",
-      url: "/vote",
-    },
-    {
-      Icon: DocsIcon,
-      name: "Docs",
-      url: "/docs",
-    },
-  ];
   return (
     <Navbar expand="lg" className="navbar-light bg-light">
       <NavBarBrand />
@@ -65,9 +32,7 @@ const NavBar = (props: React.ComponentProps<any>) => {
               to={menu.url}
               style={{
                 color:
-                  history.location.pathname === menu.url
-                    ? "green"
-                    : undefined,
+                  history.location.pathname === menu.url ? "green" : undefined,
                 textDecoration:
                   history.location.pathname === menu.url
                     ? "underline"

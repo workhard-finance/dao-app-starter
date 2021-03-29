@@ -1,59 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 
-import { injected } from "./connectors";
-
-function getWindowDimensions() {
-  const { innerWidth: width, innerHeight: height } = window;
-  return {
-    width,
-    height,
-  };
-}
-
-export default function useWindowDimensions() {
-  const [windowDimensions, setWindowDimensions] = useState(
-    getWindowDimensions()
-  );
-
-  useEffect(() => {
-    function handleResize() {
-      setWindowDimensions(getWindowDimensions());
-    }
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return windowDimensions;
-}
-
-export function useEagerConnect() {
-  const { activate, active } = useWeb3React();
-
-  const [tried, setTried] = useState(false);
-
-  useEffect(() => {
-    injected.isAuthorized().then((isAuthorized: boolean) => {
-      if (isAuthorized) {
-        activate(injected, undefined, true).catch(() => {
-          setTried(true);
-        });
-      } else {
-        setTried(true);
-      }
-    });
-  }, []); // intentionally only running on mount (make sure it's only mounted once :))
-
-  // if the connection worked, wait until we get confirmation of that to flip the flag
-  useEffect(() => {
-    if (!tried && active) {
-      setTried(true);
-    }
-  }, [tried, active]);
-
-  return tried;
-}
+import { injected } from "../web3/connectors";
 
 export function useInactiveListener(suppress: boolean = false) {
   const { active, error, activate } = useWeb3React();
@@ -96,3 +44,4 @@ export function useInactiveListener(suppress: boolean = false) {
     }
   }, [active, error, suppress, activate]);
 }
+
