@@ -2,7 +2,7 @@ import { createTheme } from "./utils";
 
 const dark = createTheme({
   palette: {
-    visionDao: {
+    workhard: {
       base: "#98ACF8",
       dark: "#B088F9",
       light: "#DA9FF9",

@@ -1,10 +1,10 @@
 import React from "react";
 import { Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useVisionDaoTheme } from "../../providers/WorkhardThemeProvider";
+import { useWorkhardTheme } from "../../providers/WorkhardThemeProvider";
 
 const NavBarBrand = (props: React.ComponentProps<any>) => {
-  const theme = useVisionDaoTheme();
+  const theme = useWorkhardTheme();
   return (
     <Navbar.Brand
       {...props}
@@ -12,7 +12,7 @@ const NavBarBrand = (props: React.ComponentProps<any>) => {
       to="/"
       style={{
         fontFamily: theme.typography.fontFamilies.title,
-        // color: theme.palette.visionDao.light,
+        // color: theme.palette.workhard.light,
         display: "flex",
         flexDirection: "column",
         textAlign: "left",

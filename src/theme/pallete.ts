@@ -1,4 +1,4 @@
-export type VisionPalette = {
+export type WorkhardPalette = {
   base: string;
   dark: string;
   light: string;

@@ -8,12 +8,12 @@ export interface CustomTheme {
     };
   };
   palette: {
-    visionDao: {
-      base: string
-      dark: string      
-      light: string      
-      lightest: string      
-      signature: string      
-    }
-  }
+    workhard: {
+      base: string;
+      dark: string;
+      light: string;
+      lightest: string;
+      signature: string;
+    };
+  };
 }

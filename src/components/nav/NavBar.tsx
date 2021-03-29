@@ -12,7 +12,7 @@ export interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ menus }) => {
   // const menus = useContext(MenuContext);
-  // const theme = useVisionDaoTheme();
+  // const theme = useWorkhardTheme();
   const history = useHistory();
   return (
     <Navbar expand="lg" className="navbar-light bg-light">

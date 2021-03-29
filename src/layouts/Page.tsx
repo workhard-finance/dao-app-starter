@@ -3,16 +3,16 @@ import { Container, Row } from "react-bootstrap";
 
 import NavBar from "../components/nav/NavBar";
 import Footer from "../components/Footer";
-import { useVisionDaoTheme } from "../providers/WorkhardThemeProvider";
+import { useWorkhardTheme } from "../providers/WorkhardThemeProvider";
 import { MenuContext } from "../contexts/menu";
 
-export type PageProps = React.ComponentProps<any>;
+export type PageProps = React.ComponentProps<any>
 
 const Page = (props: React.ComponentProps<any>) => {
   const menus = useContext(MenuContext);
-  const theme = useVisionDaoTheme();
-  console.log(theme.palette.visionDao.dark);
-  console.dir(theme.palette.visionDao);
+  const theme = useWorkhardTheme();
+  console.log(theme.palette.workhard.dark);
+  console.dir(theme.palette.workhard);
   return (
     <Container style={{ minHeight: "100vh" }}>
       <br />
@@ -22,7 +22,7 @@ const Page = (props: React.ComponentProps<any>) => {
         <Container>{props.children}</Container>
       </Row>
       <br />
-      <hr style={{ borderTop: "1px solid rgba(0,0,0,0.5)" }} />
+      <hr style={{ borderTop: '1px solid rgba(0,0,0,0.5)' }}/>
       <Footer />
     </Container>
   );

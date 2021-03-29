@@ -16,7 +16,7 @@ const light = createTheme({
     },
   },
   palette: {
-    visionDao: {
+    workhard: {
       base: "#52057b",
       dark: "#000000",
       light: "#2aa198",

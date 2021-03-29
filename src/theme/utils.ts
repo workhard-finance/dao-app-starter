@@ -1,9 +1,8 @@
 import { CustomTheme } from "./custom";
 
-export type VisionDaoTheme = CustomTheme;
+export type WorkhardTheme = CustomTheme;
 
-export function createTheme(custom: CustomTheme): VisionDaoTheme {
+export function createTheme(custom: CustomTheme): WorkhardTheme {
   // const theme = deepmerge(defaultTheme, custom);
   return custom;
-
 }
