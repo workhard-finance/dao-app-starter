@@ -40,7 +40,7 @@ export const trezor = new TrezorConnector({
   chainId: 1,
   url: RPC_URL,
   pollingInterval: POLLING_INTERVAL,
-  manifestEmail: 'kimduhan@protonmail.com',
+  manifestEmail: '0xMayflower@protonmail.com',
   manifestAppUrl: 'https://workhard.finance'
 })
 
