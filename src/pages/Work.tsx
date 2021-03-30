@@ -48,7 +48,8 @@ const Work = () => {
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
       <hr />
-      <h1>Let me work!!!</h1>
+      <h1>Crypto Job Board</h1>
+      <p>Work for projects and earn $COMMITMENT tokens.</p>
       <Tabs defaultActiveKey="active" id="uncontrolled-tab-example">
         <Tab eventKey="active" title="Active" style={{ marginTop: "1rem" }}>
           <Card>
