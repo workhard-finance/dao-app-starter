@@ -75,7 +75,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
     <Card>
       <Card.Header as="h5">{title}</Card.Header>
       <Card.Body>
-        <Card.Title>Budgets</Card.Title>
+        <Card.Title>Fund</Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
           {fund} $COMMITMENT {/*TODO compute in USD ($163710)*/}
         </Card.Text>

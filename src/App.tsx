@@ -54,24 +54,24 @@ const menus: Menu[] = [
 function App() {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
-      <WorkhardContractsProvider>
-        <WorkhardThemeProvider theme={themes.light}>
-          <MenuContext.Provider value={menus}>
-            <Router>
-              {/* A <Switch> looks through its children <Route>s and
+      {/* <WorkhardContractsProvider> */}
+      <WorkhardThemeProvider theme={themes.light}>
+        <MenuContext.Provider value={menus}>
+          <Router>
+            {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
-              <Switch>
-                {menus.map((menu) => (
-                  <Route path={menu.url}>{menu.Page}</Route>
-                ))}
-                <Route path="/">
-                  <Home />
-                </Route>
-              </Switch>
-            </Router>
-          </MenuContext.Provider>
-        </WorkhardThemeProvider>
-      </WorkhardContractsProvider>
+            <Switch>
+              {menus.map((menu) => (
+                <Route path={menu.url}>{menu.Page}</Route>
+              ))}
+              <Route path="/">
+                <Home />
+              </Route>
+            </Switch>
+          </Router>
+        </MenuContext.Provider>
+      </WorkhardThemeProvider>
+{/* </WorkhardContractsProvider> */}
     </Web3ReactProvider>
   );
 }

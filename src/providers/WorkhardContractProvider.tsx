@@ -6,7 +6,7 @@ import {
   Deployed,
   getNetworkName,
 } from "@workhard/protocol/deployed";
-import devDeploy from "../../deployed.dev.json";
+import devDeploy from "../deployed.dev.json";
 import {
   BurnMining,
   BurnMining__factory,

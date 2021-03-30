@@ -36,7 +36,11 @@ const Work = () => {
       <Image
         className="jumbotron"
         src={process.env.PUBLIC_URL + "/images/work.jpg"}
-        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
+        style={{
+          width: "100%",
+          padding: "0px",
+          borderWidth: "5px",
+        }}
       />
       <blockquote className="blockquote" style={{ textAlign: "right" }}>
         <p className="mb-0">
