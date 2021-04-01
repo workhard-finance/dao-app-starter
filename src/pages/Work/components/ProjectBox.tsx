@@ -9,8 +9,8 @@ import {
 import { useWeb3React } from "@web3-react/core";
 import { formatEther } from "@ethersproject/units";
 import { getAddress } from "@ethersproject/address";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
-import { BudgetManage } from "./BudgetMange";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { BudgetManage } from "../../../components/box/BudgetMange";
 
 export interface ProjectProps {
   projId: BigNumberish;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Page from "../layouts/Page";
 import { Button, Container, Image } from "react-bootstrap";
 const Home = () => {

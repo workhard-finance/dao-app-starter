@@ -4,15 +4,12 @@ import { Link, useHistory } from "react-router-dom";
 import NavBarBrand from "./NavBarBrand";
 import Wallet from "../Wallet";
 import { Menu } from "../../contexts/menu";
-// import NavBarMenu from "./NavBarMenu";
 
 export interface NavBarProps {
   menus: Menu[];
 }
 
 const NavBar: React.FC<NavBarProps> = ({ menus }) => {
-  // const menus = useContext(MenuContext);
-  // const theme = useWorkhardTheme();
   const history = useHistory();
   return (
     <Navbar expand="lg" className="navbar-light bg-light">

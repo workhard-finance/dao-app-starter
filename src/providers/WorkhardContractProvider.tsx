@@ -15,6 +15,8 @@ import {
   FarmersUnion,
   FarmersUnion__factory,
   Project,
+  ProjectManager,
+  ProjectManager__factory,
   Project__factory,
   StakeMining,
   StakeMining__factory,
@@ -33,6 +35,7 @@ let deployedContracts: Deployed = devDeploy;
 
 export interface WorkhardContracts {
   project: Project;
+  projectManager: ProjectManager;
   cryptoJobBoard: CryptoJobBoard;
   visionFarm: VisionFarm;
   liquidityMining: StakeMining;
@@ -41,7 +44,7 @@ export interface WorkhardContracts {
   farmersUnion: FarmersUnion;
 }
 
-const WorkhardContractCtx = React.createContext<WorkhardContracts | undefined>(
+export const WorkhardContractCtx = React.createContext<WorkhardContracts | undefined>(
   undefined
 );
 
@@ -52,7 +55,6 @@ export function useWorkhardContracts() {
 
 export const WorkhardContractsProvider = ({ children }: { children: any }) => {
   const { active, library, chainId } = useWeb3React();
-
   const getContext = () => {
     if (!active) return undefined;
     if (!library) return undefined;
@@ -61,6 +63,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     if (
       !contracts ||
       !contracts.Project ||
+      !contracts.ProjectManager ||
       !contracts.CryptoJobBoard ||
       !contracts.VisionFarm ||
       !contracts.LiquidityMining ||
@@ -72,6 +75,10 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     }
 
     const project = Project__factory.connect(contracts.Project, library);
+    const projectManager = ProjectManager__factory.connect(
+      contracts.ProjectManager,
+      library
+    );
     const cryptoJobBoard = CryptoJobBoard__factory.connect(
       contracts.CryptoJobBoard,
       library
@@ -98,6 +105,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     );
     const context: WorkhardContracts = {
       project,
+      projectManager,
       visionFarm,
       liquidityMining,
       commitmentMining,
@@ -107,9 +115,10 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     };
     return context;
   };
+  const context = getContext()
 
   return (
-    <WorkhardContractCtx.Provider value={getContext()}>
+    <WorkhardContractCtx.Provider value={context}>
       {children}
     </WorkhardContractCtx.Provider>
   );

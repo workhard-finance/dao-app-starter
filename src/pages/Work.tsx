@@ -1,36 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
 import {
-  Alert,
   Button,
   Card,
-  Col,
   Form,
   FormControl,
   FormLabel,
   Image,
   InputGroup,
-  ListGroup,
-  ListGroupItem,
   OverlayTrigger,
-  ProgressBar,
-  Row,
   Tab,
   Tabs,
   Tooltip,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+// import { PostAJobBox } from "./Work/tabs/PostAJob";
+import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { BigNumber } from "ethers";
 
-const getVariant = (percent: number) => {
-  if (percent <= 25) return "danger";
-  else if (percent <= 50) return "warning";
-  else if (percent <= 75) return "info";
-  else return "success";
-};
-const Work = () => {
-  const stakePercent = 60;
-  const lockedPercent = 90;
-  const remainingPercent = 10;
+const Work: React.FC = () => {
+  const contracts = useWorkhardContracts()
+  // const { account, library, chainId } = useWeb3React();
+
+  const [activeProjects, setActiveProjects] = useState<string[]>(
+    [] as string[]
+  );
+  const [inactiveProjects, setInactiveProjects] = useState<string[]>(
+    [] as string[]
+  );
+
+  useEffect(() => {
+    if (!!contracts) {
+      let stale = false;
+      const { project, projectManager } = contracts;
+      project
+        .totalSupply()
+        .then((n: BigNumber) => {
+          if (!stale) {
+            Array(n.toNumber())
+              .fill(undefined)
+              .map((_, i) => i.toString())
+              .forEach((projId) => {
+                projectManager.approvedProjects(projId).then((approved) => {
+                  if (approved) {
+                    activeProjects.push(projId);
+                    setActiveProjects([...new Set(activeProjects)]);
+                  } else {
+                    inactiveProjects.push(projId);
+                    setInactiveProjects([...new Set(inactiveProjects)]);
+                  }
+                });
+              });
+          }
+        })
+        .catch(() => {
+          if (!stale) {
+            setActiveProjects([]);
+            setInactiveProjects([]);
+          }
+        });
+
+      return () => {
+        stale = true;
+        setActiveProjects([]);
+        setInactiveProjects([]);
+      };
+    }
+  }, [contracts]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
     <Page>
       <Image
@@ -54,8 +89,12 @@ const Work = () => {
       <hr />
       <h1>Crypto Job Board</h1>
       <p>Work for projects and earn $COMMITMENT tokens.</p>
-      <Tabs defaultActiveKey="active" id="uncontrolled-tab-example">
-        <Tab eventKey="active" title="Active" style={{ marginTop: "1rem" }}>
+      <Tabs defaultActiveKey="activeProjects" id="uncontrolled-tab-example">
+        <Tab
+          eventKey="activeProjects"
+          title="Active projects"
+          style={{ marginTop: "1rem" }}
+        >
           <Card>
             <Card.Header as="h5">Curve dev</Card.Header>
             <Card.Body>
@@ -173,48 +212,7 @@ const Work = () => {
         ></Tab>
         <Tab eventKey="ended" title="Ended" style={{ marginTop: "1rem" }}></Tab>
         <Tab eventKey="post" title="Post a job" style={{ marginTop: "1rem" }}>
-          <Card>
-            <Card.Header as="h5">Post a crypto job</Card.Header>
-            <Card.Body>
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Token</Card.Title>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
-                    />
-                  </InputGroup>
-                  <Card.Title>Amount</Card.Title>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="1234.00000000000000001"
-                    />
-                    <InputGroup.Append>
-                      <InputGroup.Text>MAX</InputGroup.Text>
-                    </InputGroup.Append>
-                  </InputGroup>
-                  <Card.Title>Url</Card.Title>
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="discord or telegram url to reach out to the budget owner"
-                    />
-                  </InputGroup>
-                  <Card.Title>Details</Card.Title>
-                  <InputGroup className="mb-2">
-                    <Form.Control as="textarea" rows={3} />
-                  </InputGroup>
-                </Form.Group>
-                <Button variant="primary" type="submit">
-                  Submit
-                </Button>{" "}
-              </Form>
-            </Card.Body>
-          </Card>
+          {/* <PostAJobBox /> */}
         </Tab>
         <Tab
           eventKey="buy"
