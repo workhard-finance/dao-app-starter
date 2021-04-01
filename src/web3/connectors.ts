@@ -17,7 +17,7 @@ const RPC_URL =
   "https://eth-mainnet.alchemyapi.io/v2/bivBn3T5USHWOXkTyBCXTp0R9ogelinE";
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 42],
+  supportedChainIds: [1, 3, 4, 5, 42, 31337],
 });
 
 export const network = new NetworkConnector({

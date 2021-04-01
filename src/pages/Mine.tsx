@@ -35,6 +35,7 @@ const Mine = () => {
         src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
         style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
       />
+      <h1>Mine</h1>
       <Alert variant={"info"}>
         You can mine $VISION tokens here by providing Uniswap $VISION/ETH pair
         or burning your $COMMITMENT tokens. Currently 50% of the total emission

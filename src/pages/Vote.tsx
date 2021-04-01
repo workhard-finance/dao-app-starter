@@ -41,51 +41,11 @@ const Vote = () => {
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
-      <Card>
-        <Card.Header as="h5">Submit a new proposal</Card.Header>
-        <Card.Body>
-          <Form>
-            <Form.Group controlId="formBasicEmail">
-              <Card.Title>To</Card.Title>
-              {/* <Form.Label>Staking</Form.Label> */}
-              <InputGroup className="mb-2">
-                <FormControl
-                  id="inlineFormInputGroup"
-                  placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
-                />
-              </InputGroup>
-              <Card.Title>Value</Card.Title>
-              {/* <Form.Label>Staking</Form.Label> */}
-              <InputGroup className="mb-2">
-                <FormControl
-                  id="inlineFormInputGroup"
-                  placeholder="1234.00000000000000001"
-                />
-                <InputGroup.Append>
-                  <InputGroup.Text>MAX</InputGroup.Text>
-                </InputGroup.Append>
-              </InputGroup>
-              <Card.Title>Data</Card.Title>
-              <InputGroup className="mb-2">
-                <FormControl id="inlineFormInputGroup" placeholder="msg.data" />
-              </InputGroup>
-              <Card.Title>Details</Card.Title>
-              <InputGroup className="mb-2">
-                <Form.Control as="textarea" rows={3} />
-              </InputGroup>
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>{" "}
-          </Form>
-        </Card.Body>
-      </Card>
-      <hr />
-      <h1>Vote</h1>
+      <h1>Farmers Union</h1>
       <Tabs defaultActiveKey="voting" id="uncontrolled-tab-example">
         <Tab eventKey="voting" title="Voting" style={{ marginTop: "1rem" }}>
           <Card>
-            <Card.Header as="h5">WHIP #32</Card.Header>
+            <Card.Header as="h5">WIP #32</Card.Header>
             <Card.Body>
               <Card.Title>To</Card.Title>
               <Card.Text>0xABCDEF0123456789ABCDEF0123456789ABCDEF01</Card.Text>
@@ -141,6 +101,50 @@ const Vote = () => {
           title="Pending"
           style={{ marginTop: "1rem" }}
         ></Tab>
+        <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
+          <Card>
+            <Card.Header as="h5">Submit a new proposal</Card.Header>
+            <Card.Body>
+              <Form>
+                <Form.Group controlId="formBasicEmail">
+                  <Card.Title>To</Card.Title>
+                  {/* <Form.Label>Staking</Form.Label> */}
+                  <InputGroup className="mb-2">
+                    <FormControl
+                      id="inlineFormInputGroup"
+                      placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
+                    />
+                  </InputGroup>
+                  <Card.Title>Value</Card.Title>
+                  {/* <Form.Label>Staking</Form.Label> */}
+                  <InputGroup className="mb-2">
+                    <FormControl
+                      id="inlineFormInputGroup"
+                      placeholder="1234.00000000000000001"
+                    />
+                    <InputGroup.Append>
+                      <InputGroup.Text>MAX</InputGroup.Text>
+                    </InputGroup.Append>
+                  </InputGroup>
+                  <Card.Title>Data</Card.Title>
+                  <InputGroup className="mb-2">
+                    <FormControl
+                      id="inlineFormInputGroup"
+                      placeholder="msg.data"
+                    />
+                  </InputGroup>
+                  <Card.Title>Details</Card.Title>
+                  <InputGroup className="mb-2">
+                    <Form.Control as="textarea" rows={3} />
+                  </InputGroup>
+                </Form.Group>
+                <Button variant="primary" type="submit">
+                  Submit
+                </Button>{" "}
+              </Form>
+            </Card.Body>
+          </Card>
+        </Tab>
       </Tabs>
     </Page>
   );

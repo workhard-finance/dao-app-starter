@@ -37,6 +37,7 @@ const Farm = () => {
         src={process.env.PUBLIC_URL + "/images/farm.jpg"}
         style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
       />
+      <h1>Sow seeds of $VISION and farm yields</h1>
       <Alert variant={"info"}>
         To dispatch farmers, you need to stake and lock $VISION tokens. You can
         get $VISION token by <a href="https://app.uniswap.org">trading</a> or{" "}
