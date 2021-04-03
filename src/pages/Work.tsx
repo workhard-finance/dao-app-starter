@@ -5,7 +5,6 @@ import {
   Card,
   Form,
   FormControl,
-  FormLabel,
   Image,
   InputGroup,
   OverlayTrigger,
@@ -13,12 +12,13 @@ import {
   Tabs,
   Tooltip,
 } from "react-bootstrap";
-// import { PostAJobBox } from "./Work/tabs/PostAJob";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
+import { ProjectBox } from "../components/web3/ProjectBox";
+import { PostAJobBox } from "../components/web3/PostAJob";
 
 const Work: React.FC = () => {
-  const contracts = useWorkhardContracts()
+  const contracts = useWorkhardContracts();
   // const { account, library, chainId } = useWeb3React();
 
   const [activeProjects, setActiveProjects] = useState<string[]>(
@@ -89,130 +89,36 @@ const Work: React.FC = () => {
       <hr />
       <h1>Crypto Job Board</h1>
       <p>Work for projects and earn $COMMITMENT tokens.</p>
-      <Tabs defaultActiveKey="activeProjects" id="uncontrolled-tab-example">
+      <Tabs
+        defaultActiveKey="activeProjects"
+        id="uncontrolled-tab-example"
+      >
         <Tab
           eventKey="activeProjects"
           title="Active projects"
           style={{ marginTop: "1rem" }}
         >
-          <Card>
-            <Card.Header as="h5">Curve dev</Card.Header>
-            <Card.Body>
-              <Card.Title>Budgets</Card.Title>
-              <Card.Text style={{ fontSize: "3rem" }}>
-                93219 $COMMITMENT ($163710)
-              </Card.Text>
-              <Card.Title>Details</Card.Title>
-              <Card.Text>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </Card.Text>
-              <Card.Title>Budget owner</Card.Title>
-              <Card.Text>
-                <a
-                  target="_blank"
-                  rel="noreferrer"
-                  href="https://etherscan.com"
-                >
-                  0xABCDEF0123456789ABCDEF0123456789ABCDEF
-                </a>
-              </Card.Text>
-              <Card.Title>Workspace</Card.Title>
-              <a target="_blank" rel="noreferrer" href="https://github.com">
-                https://discord.gg/gg
-              </a>
-              {/* <Card.Text as={"a"}>https://discord.gg/gg</Card.Text> */}
-              <hr />
-              <Button variant={"outline-primary"}>
-                ▼ Open budget owner tool
-              </Button>
-            </Card.Body>
-          </Card>
-          <br />
-          <Card>
-            <Card.Header as="h5">YFI dev</Card.Header>
-            <Card.Body>
-              <Card.Title>Budgets</Card.Title>
-              <Card.Text style={{ fontSize: "3rem" }}>
-                43210 $COMMITMENT ($73710)
-              </Card.Text>
-              <Card.Title>Details</Card.Title>
-              <Card.Text>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-                sunt in culpa qui officia deserunt mollit anim id est laborum.
-              </Card.Text>
-              <Card.Title>Budget owner</Card.Title>
-              <Card.Text>
-                <a
-                  target="_blank"
-                  rel="noreferrer"
-                  href="https://etherscan.com"
-                >
-                  0xABCDEF0123456789ABCDEF0123456789ABCDEF
-                </a>
-              </Card.Text>
-              <Card.Title>Workspace</Card.Title>
-              <Card.Text as={"a"}>https://discord.gg/gg</Card.Text>
-              <hr />
-              <Button variant={"outline-primary"}>
-                ▲ Close budget owner tool
-              </Button>
+          {activeProjects.map((id) => (
+            <>
+              <ProjectBox projId={id} />
               <br />
-              <br />
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Pay wages</Card.Title>
-                  {/* <Form.Label>Lock</Form.Label> */}
-                  <FormLabel>Employee address</FormLabel>
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF"
-                    />
-                  </InputGroup>
-                  <FormLabel>Amount</FormLabel>
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="3214.23"
-                    />
-                  </InputGroup>
-                </Form.Group>
-                <OverlayTrigger
-                  // key={placement}
-                  // placement={placement}
-                  overlay={
-                    <Tooltip id={`tooltip-dispatchable-farmers`}>
-                      Only budget owner can call this function.
-                    </Tooltip>
-                  }
-                >
-                  <Button variant="primary" type="submit">
-                    Pay
-                  </Button>
-                </OverlayTrigger>{" "}
-              </Form>
-            </Card.Body>
-          </Card>
+            </>
+          ))}
         </Tab>
         <Tab
-          eventKey="pending"
-          title="Pending"
+          eventKey="inactiveProjects"
+          title="Inactive/pending projects"
           style={{ marginTop: "1rem" }}
-        ></Tab>
-        <Tab eventKey="ended" title="Ended" style={{ marginTop: "1rem" }}></Tab>
+        >
+          {inactiveProjects.map((id) => (
+            <>
+              <ProjectBox projId={id} />
+              <br />
+            </>
+          ))}
+        </Tab>
         <Tab eventKey="post" title="Post a job" style={{ marginTop: "1rem" }}>
-          {/* <PostAJobBox /> */}
+          <PostAJobBox />
         </Tab>
         <Tab
           eventKey="buy"

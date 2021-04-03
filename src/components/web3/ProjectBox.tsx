@@ -1,16 +1,26 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
+import ReactHtmlParser from "react-html-parser";
 import {
   Card,
   Button,
+  Tabs,
+  Tab,
+  Container,
+  Row,
+  Col,
+  Nav,
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { formatEther } from "@ethersproject/units";
 import { getAddress } from "@ethersproject/address";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { BudgetManage } from "../../../components/box/BudgetMange";
+import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { Compensate } from "../box/Compensate";
+import { AddBudget } from "../box/AddBudget";
+import { Link } from "react-router-dom";
+import { wrapUrl } from "../../utils/utils";
 
 export interface ProjectProps {
   projId: BigNumberish;
@@ -24,7 +34,6 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
   const [title, setTitle] = useState("");
   const [fund, setFund] = useState("");
   const [budgetOwner, setBudgetOwner] = useState("");
-  const [admin, toggleAdmin] = useState(false);
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
       let stale = false;
@@ -56,7 +65,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
       cryptoJobBoard
         .projectFund(projId)
         .then((fund: BigNumber) => {
-          if (!stale) setFund(formatEther(fund));
+          if (!stale) setFund(fund.toString());
         })
         .catch(() => {
           if (!stale) setFund("Unknown");
@@ -80,7 +89,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
           {fund} $COMMITMENT {/*TODO compute in USD ($163710)*/}
         </Card.Text>
         <Card.Title>Details</Card.Title>
-        <Card.Text>{description}</Card.Text>
+        <Card.Text>{ReactHtmlParser(wrapUrl(description))}</Card.Text>
         <Card.Title>Budget owner</Card.Title>
         <Card.Text>
           <a
@@ -91,28 +100,22 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
             {budgetOwner}
           </a>
         </Card.Text>
-        <hr />
         <OverlayTrigger
-          // key={placement}
-          // placement={placement}
-          show={!admin}
+          show={account === budgetOwner ? false : undefined}
           overlay={
-            <Tooltip id={`tooltip-dispatchable-farmers`}>
-              Only budget owner can call this function.
+            <Tooltip id={`tooltip-budgetowner`}>
+              Please log in with budget owner account.
             </Tooltip>
           }
         >
           <Button
-            variant={"outline-primary"}
-            disabled={!admin}
-            onClick={() => toggleAdmin(!admin)}
-          >
-            {admin ? "▲ Close" : "▼ Open"} budget owner tool
-          </Button>
+            variant={"primary"}
+            as={budgetOwner === account ? Link : Button}
+            to={`/proj/${projId}`}
+            disabled={budgetOwner !== account}
+            children={"Go to admin tool"}
+          />
         </OverlayTrigger>
-        {!!account && getAddress(account) === budgetOwner ? (
-          <BudgetManage projId={projId} fund={fund} />
-        ) : null}
       </Card.Body>
     </Card>
   );
