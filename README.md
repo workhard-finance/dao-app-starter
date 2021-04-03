@@ -1,46 +1,53 @@
-# Getting Started with Create React App
+## Front-env v1
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Based on
+1. Create-React-App
+2. Typechain
+3. Ethers-v5
+4. react-bootstrap
+5. web3-react
+6. bootswatch - where the design came from
 
-## Available Scripts
 
-In the project directory, you can run:
+## Run local node for frontend dev
 
-### `yarn start`
+1. Clone protocol and run hardhat node
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+    ```
+    $ git clone https://github.com/workhard-finance/protocol
+    $ cd protocol
+    $ yarn hardhat node --network localhost
+    ```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2. Open a new terminal and deploy fixtures on the local node
 
-### `yarn test`
+    ```
+    yarn deploy:localhost
+    ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    This will update or generate `deployed.dev.json` file
+  
+3. Make sure that you've compiled the typescript artifacts correctly.
+    ```
+    yarn compile # this automatically generates typed contracts using typechain
+    ```
 
-### `yarn build`
+4. Go to its parent directory and clone frontenv-v1 repository. Then, add the local dependency.
+  
+    ```
+    $ cd ../ 
+    $ git clone https://github.com/workhard-finance/frontend-v1
+    $ yarn # install dependencies
+    $ yarn add ../protocol
+    $ yarn start
+    ```
+    * you may want to use `yarn link` or `npm link` but that will break ts-loader setting of this CRA webpack setting.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+5. Open a browser and import default hardhat testing metamask key. Recommend to you a separate chrome or firefox profile to manage new metamask keys.
+    ```
+    test test test test test test test test test test test junk
+    ```
+  
+6. Go to metamask setup and add your local network to metamask with network id 31337. Usually you may change the network id of localhost:8545 from 1337 to 31337
+7. Enjoy UI testing.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
