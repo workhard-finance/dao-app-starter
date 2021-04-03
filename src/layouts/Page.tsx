@@ -16,9 +16,9 @@ const Page = (props: React.ComponentProps<any>) => {
   const theme = useWorkhardTheme();
   const menus: Menu[] = [
     {
-      Icon: FarmIcon,
-      name: "Farm",
-      url: "/farm",
+      Icon: WorkIcon,
+      name: "Work",
+      url: "/work",
     },
     {
       Icon: MineIcon,
@@ -26,9 +26,9 @@ const Page = (props: React.ComponentProps<any>) => {
       url: "/mine",
     },
     {
-      Icon: WorkIcon,
-      name: "Work",
-      url: "/work",
+      Icon: FarmIcon,
+      name: "Farm",
+      url: "/farm",
     },
     {
       Icon: VoteIcon,

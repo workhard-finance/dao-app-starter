@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import Page from "../layouts/Page";
 import { Button, Container, Image } from "react-bootstrap";
+import { Link } from "react-router-dom";
 const Home = () => {
   return (
     <Page>
@@ -23,7 +24,7 @@ const Home = () => {
           pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
           culpa qui officia deserunt mollit anim id est laborum.
         </p>
-        <Button variant="primary">Go to farm</Button>{" "}
+        <Button as={Link} to={`/work`} variant="primary">Go to work</Button>{" "}
         <Button variant="secondary">Docs</Button>
       </Container>
     </Page>

@@ -22,9 +22,9 @@ function App() {
         <WorkhardThemeProvider theme={themes.light}>
           <Router>
             <Switch>
-              <Route path="/farm" children={<Farm />} />
-              <Route path="/mine" children={<Mine />} />
               <Route path="/work" children={<Work />} />
+              <Route path="/mine" children={<Mine />} />
+              <Route path="/farm" children={<Farm />} />
               <Route path="/vote" children={<Vote />} />
               <Route path="/docs" children={<Docs />} />
               <Route path="/proj/:id" children={<ProjectTool />} />
