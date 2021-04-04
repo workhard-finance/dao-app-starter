@@ -92,10 +92,7 @@ const Work: React.FC = () => {
       <hr />
       <h1>Crypto Job Board</h1>
       <p>Work for projects and earn $COMMITMENT tokens.</p>
-      <Tabs
-        defaultActiveKey="activeProjects"
-        id="uncontrolled-tab-example"
-      >
+      <Tabs defaultActiveKey="activeProjects" id="uncontrolled-tab-example">
         <Tab
           eventKey="activeProjects"
           title="Active projects"
@@ -103,7 +100,7 @@ const Work: React.FC = () => {
         >
           {activeProjects.map((id) => (
             <>
-              <ProjectBox projId={id} />
+              <ProjectBox projId={id} active={true} />
               <br />
             </>
           ))}
@@ -115,7 +112,7 @@ const Work: React.FC = () => {
         >
           {inactiveProjects.map((id) => (
             <>
-              <ProjectBox projId={id} />
+              <ProjectBox projId={id} active={false} />
               <br />
             </>
           ))}
@@ -128,7 +125,7 @@ const Work: React.FC = () => {
           title="Buy $COMMITMENT"
           style={{ marginTop: "1rem" }}
         >
-          <BuyCommitment/>
+          <BuyCommitment />
         </Tab>
       </Tabs>
     </Page>
