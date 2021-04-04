@@ -17,6 +17,7 @@ import { BigNumber } from "ethers";
 import { ProjectBox } from "../components/contracts/project/ProjectBox";
 import { PostAJobBox } from "../components/contracts/crypto-job-board/PostAJob";
 import { BuyCommitment } from "../components/contracts/commitment-fund/BuyCommitment";
+import { RedeemCommitment } from "../components/contracts/commitment-fund/RedeemCommitment";
 
 const Work: React.FC = () => {
   const contracts = useWorkhardContracts();
@@ -121,11 +122,15 @@ const Work: React.FC = () => {
           <PostAJobBox />
         </Tab>
         <Tab
-          eventKey="buy"
-          title="Buy $COMMITMENT"
+          eventKey="commitment-token"
+          title="$COMMITMENT"
           style={{ marginTop: "1rem" }}
         >
+          <RedeemCommitment />
+          <br/>
           <BuyCommitment />
+          <br/>
+          <Button variant={"info"} children="Trade $COMMITMENT on Uniswap"/>
         </Tab>
       </Tabs>
     </Page>
