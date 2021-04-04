@@ -144,9 +144,7 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
         <Card.Title>Your balance:</Card.Title>
-        <Card.Text>$DAI: {formatEther(daiBalance || "0")} </Card.Text>
-        <Card.Text>
-          $COMMITMENT: {formatEther(commitmentBalance || "0")}
+        <Card.Text>$DAI: {formatEther(daiBalance || "0")} / $COMMITMENT: {formatEther(commitmentBalance || "0")}
         </Card.Text>
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
         <Form onSubmit={handleSubmit}>
