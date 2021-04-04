@@ -51,3 +51,7 @@ Based on
 6. Go to metamask setup and add your local network to metamask with network id 31337. Usually you may change the network id of localhost:8545 from 1337 to 31337
 7. Enjoy UI testing.
 
+## Tips for testing
+
+1. If you restart your local hardhat node, don't forget to reset your account in the metamask advanced menu.
+
