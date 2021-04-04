@@ -24,6 +24,12 @@ import {
   VisionFarm__factory,
   VisionTokenEmitter,
   VisionTokenEmitter__factory,
+  ERC20Mock as ERC20,
+  ERC20Mock__factory as ERC20__factory,
+  CommitmentToken,
+  VisionToken,
+  CommitmentToken__factory,
+  VisionToken__factory,
 } from "@workhard/protocol";
 
 // let deployedContracts: Deployed = deployed;
@@ -42,11 +48,14 @@ export interface WorkhardContracts {
   commitmentMining: BurnMining;
   visionTokenEmitter: VisionTokenEmitter;
   farmersUnion: FarmersUnion;
+  baseCurrency: ERC20;
+  commitmentToken: CommitmentToken;
+  visionToken: VisionToken;
 }
 
-export const WorkhardContractCtx = React.createContext<WorkhardContracts | undefined>(
-  undefined
-);
+export const WorkhardContractCtx = React.createContext<
+  WorkhardContracts | undefined
+>(undefined);
 
 export function useWorkhardContracts() {
   const contracts = useContext(WorkhardContractCtx);
@@ -69,6 +78,9 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       !contracts.LiquidityMining ||
       !contracts.CommitmentMining ||
       !contracts.FarmersUnion ||
+      !contracts.BaseCurrency ||
+      !contracts.CommitmentToken ||
+      !contracts.VisionToken ||
       !contracts.VisionTokenEmitter
     ) {
       return undefined;
@@ -103,6 +115,18 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       contracts.FarmersUnion,
       library
     );
+    const baseCurrency = ERC20__factory.connect(
+      contracts.BaseCurrency,
+      library
+    );
+    const commitmentToken = CommitmentToken__factory.connect(
+      contracts.CommitmentToken,
+      library
+    );
+    const visionToken = VisionToken__factory.connect(
+      contracts.VisionToken,
+      library
+    );
     const context: WorkhardContracts = {
       project,
       cryptoJobBoard,
@@ -112,10 +136,13 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       visionTokenEmitter,
       commitmentFund,
       farmersUnion,
+      baseCurrency,
+      commitmentToken,
+      visionToken,
     };
     return context;
   };
-  const context = getContext()
+  const context = getContext();
 
   return (
     <WorkhardContractCtx.Provider value={context}>
