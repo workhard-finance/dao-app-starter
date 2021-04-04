@@ -14,8 +14,8 @@ import {
 } from "react-bootstrap";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
-import { ProjectBox } from "../components/web3/ProjectBox";
-import { PostAJobBox } from "../components/web3/PostAJob";
+import { ProjectBox } from "../components/contracts/project/ProjectBox";
+import { PostAJobBox } from "../components/contracts/crypto-job-board/PostAJob";
 
 const Work: React.FC = () => {
   const contracts = useWorkhardContracts();

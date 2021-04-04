@@ -12,7 +12,7 @@ import Work from "./pages/Work";
 import Vote from "./pages/Vote";
 import Docs from "./pages/Docs";
 import { WorkhardContractsProvider } from "./providers/WorkhardContractProvider";
-import ProjectTool from "./pages/ProjectTool";
+import Project from "./pages/Project";
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
               <Route path="/farm" children={<Farm />} />
               <Route path="/vote" children={<Vote />} />
               <Route path="/docs" children={<Docs />} />
-              <Route path="/proj/:id" children={<ProjectTool />} />
+              <Route path="/proj/:id" children={<Project />} />
               <Route path="/" children={<Home />} />
             </Switch>
           </Router>

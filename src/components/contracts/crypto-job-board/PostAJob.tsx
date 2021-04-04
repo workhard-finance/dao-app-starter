@@ -1,8 +1,8 @@
 import { useState, FormEventHandler } from "react";
 import { Card, Button, Form } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
-import { parseLog } from "../../utils/utils";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { parseLog } from "../../../utils/utils";
 
 export const PostAJobBox: React.FC = () => {
   const { account, library } = useWeb3React();

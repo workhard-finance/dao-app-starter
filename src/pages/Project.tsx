@@ -8,12 +8,12 @@ import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
 import { getAddress } from "ethers/lib/utils";
-import { Compensate } from "../components/box/Compensate";
-import { AddBudget } from "../components/box/AddBudget";
+import { Compensate } from "../components/contracts/commitment-fund/Compensate";
+import { AddBudget } from "../components/contracts/crypto-job-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import { wrapUrl } from "../utils/utils";
 
-const ProjectTool: React.FC = () => {
+const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
   const history = useHistory();
   const contracts = useWorkhardContracts();
@@ -129,4 +129,4 @@ const ProjectTool: React.FC = () => {
   );
 };
 
-export default ProjectTool;
+export default Project;

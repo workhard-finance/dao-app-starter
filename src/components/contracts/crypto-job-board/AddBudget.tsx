@@ -11,7 +11,7 @@ import {
   OverlayTrigger,
 } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
