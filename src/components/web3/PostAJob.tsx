@@ -15,8 +15,8 @@ export const PostAJobBox: React.FC = () => {
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const projectManager = contracts?.projectManager;
-    if (!projectManager) {
+    const cryptoJobBoard = contracts?.cryptoJobBoard;
+    if (!cryptoJobBoard) {
       alert("Not connected");
       return;
     }
@@ -29,14 +29,14 @@ export const PostAJobBox: React.FC = () => {
       return;
     }
     const signer = library.getSigner(account);
-    projectManager
+    cryptoJobBoard
       .connect(signer)
       .createProject(title, description, "")
       .then((tx) => {
         tx.wait()
           .then((receipt) => {
             const parsed = parseLog(
-              projectManager,
+              cryptoJobBoard,
               receipt.logs,
               "ProjectPosted(uint256)"
             );

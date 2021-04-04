@@ -31,7 +31,7 @@ const Work: React.FC = () => {
   useEffect(() => {
     if (!!contracts) {
       let stale = false;
-      const { project, projectManager } = contracts;
+      const { project, cryptoJobBoard } = contracts;
       project
         .totalSupply()
         .then((n: BigNumber) => {
@@ -40,7 +40,7 @@ const Work: React.FC = () => {
               .fill(undefined)
               .map((_, i) => i.toString())
               .forEach((projId) => {
-                projectManager.approvedProjects(projId).then((approved) => {
+                cryptoJobBoard.approvedProjects(projId).then((approved) => {
                   if (approved) {
                     activeProjects.push(projId);
                     setActiveProjects([...new Set(activeProjects)]);

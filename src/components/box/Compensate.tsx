@@ -34,8 +34,8 @@ export const Compensate: React.FC<CompensateProps> = ({
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const cryptoJobBoard = contracts?.cryptoJobBoard;
-    if (!cryptoJobBoard) {
+    const commitmentFund = contracts?.commitmentFund;
+    if (!commitmentFund) {
       alert("Not connected");
       return;
     }
@@ -49,7 +49,7 @@ export const Compensate: React.FC<CompensateProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    cryptoJobBoard
+    commitmentFund
       .connect(signer)
       .compensate(projId, payTo, payAmountInWei)
       .then((tx) => {

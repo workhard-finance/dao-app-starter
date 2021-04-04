@@ -60,7 +60,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           if (!stale) setBalance(undefined);
         });
       erc20
-        .allowance(account, contracts.projectManager.address)
+        .allowance(account, contracts.cryptoJobBoard.address)
         .then((allowance) => {
           if (!stale) {
             setTokenAllowance(allowance);
@@ -92,7 +92,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       const erc20 = TestERC20__factory.connect(token, library); // todo use ERC20__factory instead
       erc20
         .connect(signer)
-        .approve(contracts.projectManager.address, constants.MaxUint256)
+        .approve(contracts.cryptoJobBoard.address, constants.MaxUint256)
         .then((tx) => {
           tx.wait()
             .then((_) => {
@@ -106,8 +106,8 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         });
       return;
     }
-    const projectManager = contracts?.projectManager;
-    if (!projectManager) {
+    const cryptoJobBoard = contracts?.cryptoJobBoard;
+    if (!cryptoJobBoard) {
       alert("Not connected");
       return;
     }
@@ -123,7 +123,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
     console.log(projId);
     console.log(token);
     console.log(amountInWei);
-    projectManager
+    cryptoJobBoard
       .connect(signer)
       .addBudget(projId, token, amountInWei)
       .then((tx) => {

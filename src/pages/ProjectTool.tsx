@@ -28,7 +28,7 @@ const ProjectTool: React.FC = () => {
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
       let stale = false;
-      const { project, cryptoJobBoard } = contracts;
+      const { project, commitmentFund } = contracts;
       project
         .titles(id)
         .then((t: string) => {
@@ -53,7 +53,7 @@ const ProjectTool: React.FC = () => {
         .catch(() => {
           if (!stale) setBudgetOwner("");
         });
-      cryptoJobBoard
+      commitmentFund
         .projectFund(id)
         .then((fund: BigNumber) => {
           if (!stale) setFund(fund.toString());

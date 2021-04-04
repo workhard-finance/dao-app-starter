@@ -10,13 +10,13 @@ import devDeploy from "@workhard/protocol/deployed.dev.json";
 import {
   BurnMining,
   BurnMining__factory,
-  CryptoJobBoard,
-  CryptoJobBoard__factory,
+  CommitmentFund,
+  CommitmentFund__factory,
   FarmersUnion,
   FarmersUnion__factory,
   Project,
-  ProjectManager,
-  ProjectManager__factory,
+  CryptoJobBoard,
+  CryptoJobBoard__factory,
   Project__factory,
   StakeMining,
   StakeMining__factory,
@@ -35,8 +35,8 @@ let deployedContracts: Deployed = devDeploy;
 
 export interface WorkhardContracts {
   project: Project;
-  projectManager: ProjectManager;
   cryptoJobBoard: CryptoJobBoard;
+  commitmentFund: CommitmentFund;
   visionFarm: VisionFarm;
   liquidityMining: StakeMining;
   commitmentMining: BurnMining;
@@ -63,8 +63,8 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     if (
       !contracts ||
       !contracts.Project ||
-      !contracts.ProjectManager ||
       !contracts.CryptoJobBoard ||
+      !contracts.CommitmentFund ||
       !contracts.VisionFarm ||
       !contracts.LiquidityMining ||
       !contracts.CommitmentMining ||
@@ -75,12 +75,12 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     }
 
     const project = Project__factory.connect(contracts.Project, library);
-    const projectManager = ProjectManager__factory.connect(
-      contracts.ProjectManager,
-      library
-    );
     const cryptoJobBoard = CryptoJobBoard__factory.connect(
       contracts.CryptoJobBoard,
+      library
+    );
+    const commitmentFund = CommitmentFund__factory.connect(
+      contracts.CommitmentFund,
       library
     );
     const visionFarm = VisionFarm__factory.connect(
@@ -105,12 +105,12 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     );
     const context: WorkhardContracts = {
       project,
-      projectManager,
+      cryptoJobBoard,
       visionFarm,
       liquidityMining,
       commitmentMining,
       visionTokenEmitter,
-      cryptoJobBoard,
+      commitmentFund,
       farmersUnion,
     };
     return context;

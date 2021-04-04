@@ -37,7 +37,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
       let stale = false;
-      const { project, cryptoJobBoard } = contracts;
+      const { project, commitmentFund } = contracts;
       project
         .titles(projId)
         .then((t: string) => {
@@ -62,7 +62,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
         .catch(() => {
           if (!stale) setBudgetOwner("");
         });
-      cryptoJobBoard
+      commitmentFund
         .projectFund(projId)
         .then((fund: BigNumber) => {
           if (!stale) setFund(fund.toString());
