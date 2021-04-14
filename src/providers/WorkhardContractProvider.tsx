@@ -24,6 +24,8 @@ import {
   VisionFarm__factory,
   VisionTokenEmitter,
   VisionTokenEmitter__factory,
+  TimelockedGovernance,
+  TimelockedGovernance__factory,
 } from "@workhard/protocol";
 
 // let deployedContracts: Deployed = deployed;
@@ -42,6 +44,7 @@ export interface WorkhardContracts {
   commitmentMining: BurnMining;
   visionTokenEmitter: VisionTokenEmitter;
   farmersUnion: FarmersUnion;
+  timeLockGovernance: TimelockedGovernance;
 }
 
 export const WorkhardContractCtx = React.createContext<WorkhardContracts | undefined>(
@@ -69,7 +72,8 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       !contracts.LiquidityMining ||
       !contracts.CommitmentMining ||
       !contracts.FarmersUnion ||
-      !contracts.VisionTokenEmitter
+      !contracts.VisionTokenEmitter ||
+      !contracts.TimelockedGovernance
     ) {
       return undefined;
     }
@@ -103,6 +107,10 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       contracts.FarmersUnion,
       library
     );
+    const timeLockGovernance = TimelockedGovernance__factory.connect(
+        contracts.TimelockedGovernance,
+        library
+    )
     const context: WorkhardContracts = {
       project,
       cryptoJobBoard,
@@ -112,6 +120,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       visionTokenEmitter,
       commitmentFund,
       farmersUnion,
+      timeLockGovernance
     };
     return context;
   };

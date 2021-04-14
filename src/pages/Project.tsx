@@ -12,6 +12,7 @@ import { Compensate } from "../components/contracts/commitment-fund/Compensate";
 import { AddBudget } from "../components/contracts/crypto-job-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import { wrapUrl } from "../utils/utils";
+import {ApproveProject} from "../components/contracts/crypto-job-board/ApproveProject";
 
 const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -119,7 +120,7 @@ const Project: React.FC = () => {
                 <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
               </Tab.Pane>
               <Tab.Pane eventKey="approve">
-                <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} />
+                <ApproveProject projId={id} fund={fund} budgetOwner={budgetOwner} />
               </Tab.Pane>
             </Tab.Content>
           </Col>
