@@ -16,6 +16,8 @@ import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../components/contracts/project/ProjectBox";
 import { PostAJobBox } from "../components/contracts/crypto-job-board/PostAJob";
+import { BuyCommitment } from "../components/contracts/commitment-fund/BuyCommitment";
+import { RedeemCommitment } from "../components/contracts/commitment-fund/RedeemCommitment";
 
 const Work: React.FC = () => {
   const contracts = useWorkhardContracts();
@@ -27,6 +29,8 @@ const Work: React.FC = () => {
   const [inactiveProjects, setInactiveProjects] = useState<string[]>(
     [] as string[]
   );
+
+  // TODO listen CryptoJobBoard events and add dependency to useEffect()
 
   useEffect(() => {
     if (!!contracts) {
@@ -89,10 +93,7 @@ const Work: React.FC = () => {
       <hr />
       <h1>Crypto Job Board</h1>
       <p>Work for projects and earn $COMMITMENT tokens.</p>
-      <Tabs
-        defaultActiveKey="activeProjects"
-        id="uncontrolled-tab-example"
-      >
+      <Tabs defaultActiveKey="activeProjects" id="uncontrolled-tab-example">
         <Tab
           eventKey="activeProjects"
           title="Active projects"
@@ -100,7 +101,7 @@ const Work: React.FC = () => {
         >
           {activeProjects.map((id) => (
             <>
-              <ProjectBox projId={id} />
+              <ProjectBox projId={id} active={true} />
               <br />
             </>
           ))}
@@ -112,7 +113,7 @@ const Work: React.FC = () => {
         >
           {inactiveProjects.map((id) => (
             <>
-              <ProjectBox projId={id} />
+              <ProjectBox projId={id} active={false} />
               <br />
             </>
           ))}
@@ -121,52 +122,15 @@ const Work: React.FC = () => {
           <PostAJobBox />
         </Tab>
         <Tab
-          eventKey="buy"
-          title="Buy $COMMITMENT"
+          eventKey="commitment-token"
+          title="$COMMITMENT"
           style={{ marginTop: "1rem" }}
         >
-          <Card>
-            <Card.Header as="h5">
-              I'll pay instead of working to get $COMMITMENT
-            </Card.Header>
-            <Card.Body>
-              <Card.Title>
-                DAI per $COMMITMENT
-                <OverlayTrigger
-                  // key={placement}
-                  // placement={placement}
-                  overlay={
-                    <Tooltip id={`tooltip-dispatchable-farmers`}>
-                      Annual Percentage Yield by Burning $Commitment token =
-                      (Revenue - Burn) / Year
-                    </Tooltip>
-                  }
-                >
-                  <span style={{ fontSynthesis: "o" }}>❔</span>
-                </OverlayTrigger>
-              </Card.Title>
-              <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
-              {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Buy</Card.Title>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>MAX</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="Username"
-                    />
-                  </InputGroup>
-                </Form.Group>
-                <Button variant="primary" type="submit">
-                  Get $COMMITMENT
-                </Button>{" "}
-              </Form>
-            </Card.Body>
-          </Card>
+          <RedeemCommitment />
+          <br/>
+          <BuyCommitment />
+          <br/>
+          <Button variant={"info"} children="Trade $COMMITMENT on Uniswap"/>
         </Tab>
       </Tabs>
     </Page>

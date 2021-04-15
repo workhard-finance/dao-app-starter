@@ -1,32 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 import ReactHtmlParser from "react-html-parser";
-import {
-  Card,
-  Button,
-  Tabs,
-  Tab,
-  Container,
-  Row,
-  Col,
-  Nav,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
+import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { formatEther } from "@ethersproject/units";
 import { getAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { Compensate } from "../commitment-fund/Compensate";
-import { AddBudget } from "../crypto-job-board/AddBudget";
 import { Link } from "react-router-dom";
 import { wrapUrl } from "../../../utils/utils";
 
 export interface ProjectProps {
   projId: BigNumberish;
+  active: boolean;
 }
 
-export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
+export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
   const contracts = useWorkhardContracts();
 
@@ -34,6 +21,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId }) => {
   const [title, setTitle] = useState("");
   const [fund, setFund] = useState("");
   const [budgetOwner, setBudgetOwner] = useState("");
+
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
       let stale = false;

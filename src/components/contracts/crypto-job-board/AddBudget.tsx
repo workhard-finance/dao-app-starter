@@ -15,8 +15,7 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
-import { TestERC20__factory } from "@workhard/protocol";
-import { connect } from "http2";
+import { ERC20Mock__factory } from "@workhard/protocol";
 
 export interface AddBudgetProps {
   projId: BigNumberish;
@@ -31,7 +30,7 @@ const acceptableTokenList = [
   },
   {
     symbol: "BASECURRENCY-TEST",
-    address: devDeploy.localhost.StableCoin,
+    address: devDeploy.localhost.BaseCurrency,
   },
 ];
 
@@ -50,7 +49,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
-      const erc20 = TestERC20__factory.connect(token, library); // todo use ERC20__factory instead
+      const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
       erc20
         .balanceOf(account)
         .then((bal) => {
@@ -64,7 +63,6 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         .then((allowance) => {
           if (!stale) {
             setTokenAllowance(allowance);
-            console.log('allowed', allowance)
             if (allowance.gt(amount || 0)) setApproved(true);
             else setApproved(false);
           }
@@ -89,7 +87,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
     }
     const signer = library.getSigner(account);
     if (!approved) {
-      const erc20 = TestERC20__factory.connect(token, library); // todo use ERC20__factory instead
+      const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
       erc20
         .connect(signer)
         .approve(contracts.cryptoJobBoard.address, constants.MaxUint256)

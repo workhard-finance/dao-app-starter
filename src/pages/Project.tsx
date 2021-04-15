@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
 
 import { Row, Col, Tab, Nav, Card, Button } from "react-bootstrap";
-import ReactHtmlParser from 'react-html-parser'
+import ReactHtmlParser from "react-html-parser";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
@@ -12,6 +12,8 @@ import { Compensate } from "../components/contracts/commitment-fund/Compensate";
 import { AddBudget } from "../components/contracts/crypto-job-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import { wrapUrl } from "../utils/utils";
+import {ApproveProject} from "../components/contracts/crypto-job-board/ApproveProject";
+import { CloseProject } from "../components/contracts/crypto-job-board/CloseProject";
 
 const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -24,6 +26,7 @@ const Project: React.FC = () => {
   const [fund, setFund] = useState("");
   const [budgetOwner, setBudgetOwner] = useState("");
   const [admin, toggleAdmin] = useState(false);
+  const [exist, setExist] = useState<boolean>();
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
@@ -48,10 +51,13 @@ const Project: React.FC = () => {
       project
         .ownerOf(id)
         .then((owner: string) => {
-          if (!stale) setBudgetOwner(getAddress(owner));
+          if (!stale) {
+            setBudgetOwner(getAddress(owner));
+            setExist(true);
+          }
         })
         .catch(() => {
-          if (!stale) setBudgetOwner("");
+          if (!stale) setExist(false);
         });
       commitmentFund
         .projectFund(id)
@@ -71,21 +77,9 @@ const Project: React.FC = () => {
     }
   }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
 
-  return (
-    <Page>
-      <Row>
-        <Col md={4}>
-          <h1>Project setting</h1>
-        </Col>
-        <Col md={{ span: 4, offset: 4 }} style={{ textAlign: "end" }}>
-          <Button
-            variant="outline-primary"
-            onClick={() => history.goBack()}
-            children={"Go back"}
-          />
-        </Col>
-      </Row>
-      <hr />
+  const WhenNotExist = () => <p>Not exist</p>;
+  const WhenExist = () => (
+    <>
       <Card>
         <Card.Body>
           <Card.Subtitle>Name</Card.Subtitle>
@@ -106,7 +100,7 @@ const Project: React.FC = () => {
                 <Nav.Link eventKey="budget">Add budget</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="approve">Approve project</Nav.Link>
+                <Nav.Link eventKey="etc">Etc</Nav.Link>
               </Nav.Item>
             </Nav>
           </Col>
@@ -118,13 +112,35 @@ const Project: React.FC = () => {
               <Tab.Pane eventKey="budget">
                 <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
               </Tab.Pane>
-              <Tab.Pane eventKey="approve">
-                <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} />
+              <Tab.Pane eventKey="etc">
+                <>
+                  <ApproveProject projId={id} fund={fund} budgetOwner={budgetOwner} />
+                  <hr/>
+                  <CloseProject projId={id} budgetOwner={budgetOwner} />
+                </>
               </Tab.Pane>
             </Tab.Content>
           </Col>
         </Row>
       </Tab.Container>
+    </>
+  );
+  return (
+    <Page>
+      <Row>
+        <Col md={4}>
+          <h1>Project setting</h1>
+        </Col>
+        <Col md={{ span: 4, offset: 4 }} style={{ textAlign: "end" }}>
+          <Button
+            variant="outline-primary"
+            onClick={() => history.goBack()}
+            children={"Go back"}
+          />
+        </Col>
+      </Row>
+      <hr />
+      {exist ? WhenExist() : WhenNotExist()}
     </Page>
   );
 };
