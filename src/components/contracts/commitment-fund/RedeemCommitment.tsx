@@ -11,7 +11,6 @@ import {
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { ERC20Mock__factory } from "@workhard/protocol";
 
 export interface RedeemCommitmentProps {}
 
@@ -22,10 +21,10 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
   const [commitmentBalance, setCommitmentBalance] = useState<BigNumber>();
   const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [approved, setApproved] = useState(false);
-  const [buyAmount, setBuyAmount] = useState<string>();
+  const [redeemAmount, setRedeemAmount] = useState<string>();
   const [lastTx, setLastTx] = useState<string>();
 
-  const getMaxBuy = () => formatEther(daiBalance?.div(2) || "0");
+  const getMaxRedeem = () => formatEther(commitmentBalance || "0");
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -36,7 +35,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
     }
     const signer = library.getSigner(account);
     if (!approved) {
-      contracts.baseCurrency
+      contracts.commitmentToken
         .connect(signer)
         .approve(contracts.commitmentFund.address, constants.MaxUint256)
         .then((tx) => {
@@ -53,17 +52,17 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
       return;
     }
     const commitmentFund = contracts?.commitmentFund;
-    const buyAmountInWei = parseEther(buyAmount || "0");
+    const redeemAmountInWei = parseEther(redeemAmount || "0");
     if (!daiBalance) {
       alert("Fetching balance..");
       return;
-    } else if (daiBalance && buyAmountInWei.gt(daiBalance)) {
-      alert("Not enough amount of base currency");
+    } else if (commitmentBalance && redeemAmountInWei.gt(commitmentBalance)) {
+      alert("Not enough amount of commitment balance");
       return;
     }
     commitmentFund
       .connect(signer)
-      .payInsteadOfWorking(buyAmountInWei)
+      .redeem(redeemAmountInWei)
       .then((tx) => {
         tx.wait()
           .then((receipt) => {
@@ -102,12 +101,12 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
         .catch(() => {
           if (!stale) setCommitmentBalance(undefined);
         });
-      baseCurrency
+      commitmentToken
         .allowance(account, contracts.commitmentFund.address)
         .then((allowance) => {
           if (!stale) {
             setTokenAllowance(allowance);
-            if (allowance.gt(buyAmount || 0)) setApproved(true);
+            if (allowance.gt(redeemAmount || 0)) setApproved(true);
             else setApproved(false);
           }
         })
@@ -124,11 +123,11 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
   return (
     <Card>
       <Card.Header as="h5">
-        Redeem $COMMITMENT for $DAI
+        Redeem $COMMITMENT to $DAI
       </Card.Header>
       <Card.Body>
         <Card.Title>
-          DAI per $COMMITMENT
+          $COMMITMENT per $DAI
           <OverlayTrigger
             // key={placement}
             // placement={placement}
@@ -142,7 +141,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
             <span style={{ fontSynthesis: "o" }}>❔</span>
           </OverlayTrigger>
         </Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
+        <Card.Text style={{ fontSize: "3rem" }}>1 COMMITMENT TOKEN</Card.Text>
         <Card.Title>Your balance:</Card.Title>
         <Card.Text>
           $DAI: {formatEther(daiBalance || "0")} / $COMMITMENT:{" "}
@@ -151,7 +150,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
         <Form onSubmit={handleSubmit}>
           <Form.Group controlId="buy">
-            <Card.Title>Buy</Card.Title>
+            <Card.Title>Redeem</Card.Title>
             {/* <Form.Label>Staking</Form.Label> */}
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
@@ -159,21 +158,21 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
               </InputGroup.Prepend>
               <Form.Control
                 id="base-currency-amount"
-                value={buyAmount}
-                onChange={({ target: { value } }) => setBuyAmount(value)}
-                placeholder={getMaxBuy()}
+                value={redeemAmount}
+                onChange={({ target: { value } }) => setRedeemAmount(value)}
+                placeholder={getMaxRedeem()}
               />
               <InputGroup.Append
                 style={{ cursor: "pointer" }}
-                onClick={() => setBuyAmount(getMaxBuy())}
+                onClick={() => setRedeemAmount(getMaxRedeem())}
               >
                 <InputGroup.Text>MAX</InputGroup.Text>
               </InputGroup.Append>
             </InputGroup>
           </Form.Group>
           <Form.Text>
-            Buying {formatEther(parseEther(buyAmount || "0"))} $COMMITMENT with{" "}
-            {formatEther(parseEther(buyAmount || "0").mul(2))} $DAI
+            Redeem {formatEther(parseEther(redeemAmount || "0"))} $COMMITMENT with{" "}
+            {formatEther(parseEther(redeemAmount || "0"))} $DAI
           </Form.Text>
           <br />
           <Button variant="primary" type="submit">
