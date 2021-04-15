@@ -112,11 +112,12 @@ const Project: React.FC = () => {
               <Tab.Pane eventKey="budget">
                 <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
               </Tab.Pane>
-              <Tab.Pane eventKey="approve">
-                <ApproveProject projId={id} fund={fund} budgetOwner={budgetOwner} />
-              </Tab.Pane>
               <Tab.Pane eventKey="etc">
-                <CloseProject projId={id} budgetOwner={budgetOwner} />
+                <>
+                  <ApproveProject projId={id} fund={fund} budgetOwner={budgetOwner} />
+                  <hr/>
+                  <CloseProject projId={id} budgetOwner={budgetOwner} />
+                </>
               </Tab.Pane>
             </Tab.Content>
           </Col>
