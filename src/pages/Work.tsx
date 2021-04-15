@@ -16,6 +16,7 @@ import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../components/contracts/project/ProjectBox";
 import { PostAJobBox } from "../components/contracts/crypto-job-board/PostAJob";
+import { BuyCommitment } from "../components/contracts/commitment-fund/BuyCommitment";
 
 const Work: React.FC = () => {
   const contracts = useWorkhardContracts();
@@ -27,6 +28,8 @@ const Work: React.FC = () => {
   const [inactiveProjects, setInactiveProjects] = useState<string[]>(
     [] as string[]
   );
+
+  // TODO listen CryptoJobBoard events and add dependency to useEffect()
 
   useEffect(() => {
     if (!!contracts) {
@@ -125,48 +128,7 @@ const Work: React.FC = () => {
           title="Buy $COMMITMENT"
           style={{ marginTop: "1rem" }}
         >
-          <Card>
-            <Card.Header as="h5">
-              I'll pay instead of working to get $COMMITMENT
-            </Card.Header>
-            <Card.Body>
-              <Card.Title>
-                DAI per $COMMITMENT
-                <OverlayTrigger
-                  // key={placement}
-                  // placement={placement}
-                  overlay={
-                    <Tooltip id={`tooltip-dispatchable-farmers`}>
-                      Annual Percentage Yield by Burning $Commitment token =
-                      (Revenue - Burn) / Year
-                    </Tooltip>
-                  }
-                >
-                  <span style={{ fontSynthesis: "o" }}>❔</span>
-                </OverlayTrigger>
-              </Card.Title>
-              <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
-              {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Buy</Card.Title>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>MAX</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="Username"
-                    />
-                  </InputGroup>
-                </Form.Group>
-                <Button variant="primary" type="submit">
-                  Get $COMMITMENT
-                </Button>{" "}
-              </Form>
-            </Card.Body>
-          </Card>
+          <BuyCommitment/>
         </Tab>
       </Tabs>
     </Page>
