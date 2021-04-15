@@ -47,15 +47,15 @@ const Vote = () => {
           <Card>
             <Card.Header as="h5">WIP #32</Card.Header>
             <Card.Body>
-              <Card.Title>To</Card.Title>
+              <Form.Label>To</Form.Label>
               <Card.Text>0xABCDEF0123456789ABCDEF0123456789ABCDEF01</Card.Text>
-              <Card.Title>Value</Card.Title>
+              <Form.Label>Value</Form.Label>
               <Card.Text>1234123489123418</Card.Text>
-              <Card.Title>Data</Card.Title>
+              <Form.Label>Data</Form.Label>
               <Card.Text>
                 0x912818abc87a7807af79e78c797a978e9798d79d912818abc87a7807af79e78c797a978e9798d79912818abc87a7807af79e78c797a978e9798d79dd
               </Card.Text>
-              <Card.Title>Details</Card.Title>
+              <Form.Label>Details</Form.Label>
               <Card.Text>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
                 eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
@@ -65,7 +65,7 @@ const Vote = () => {
                 nulla pariatur. Excepteur sint occaecat cupidatat non proident,
                 sunt in culpa qui officia deserunt mollit anim id est laborum.
               </Card.Text>
-              <Card.Title>Voting</Card.Title>
+              <Form.Label>Voting</Form.Label>
               <ProgressBar>
                 <ProgressBar animated variant="success" now={30} key={1} />
                 <ProgressBar animated variant="danger" now={70} key={2} />
@@ -73,7 +73,7 @@ const Vote = () => {
               <Card.Text>1432 votes for / 4323 votes against</Card.Text>
               <Form>
                 <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Amount</Card.Title>
+                  <Form.Label>Amount</Form.Label>
                   {/* <Form.Label>Staking</Form.Label> */}
                   <InputGroup className="mb-2">
                     <FormControl
@@ -107,7 +107,7 @@ const Vote = () => {
             <Card.Body>
               <Form>
                 <Form.Group controlId="formBasicEmail">
-                  <Card.Title>To</Card.Title>
+                  <Form.Label>To</Form.Label>
                   {/* <Form.Label>Staking</Form.Label> */}
                   <InputGroup className="mb-2">
                     <FormControl
@@ -115,7 +115,7 @@ const Vote = () => {
                       placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
                     />
                   </InputGroup>
-                  <Card.Title>Value</Card.Title>
+                  <Form.Label>Value</Form.Label>
                   {/* <Form.Label>Staking</Form.Label> */}
                   <InputGroup className="mb-2">
                     <FormControl
@@ -126,14 +126,14 @@ const Vote = () => {
                       <InputGroup.Text>MAX</InputGroup.Text>
                     </InputGroup.Append>
                   </InputGroup>
-                  <Card.Title>Data</Card.Title>
+                  <Form.Label>Data</Form.Label>
                   <InputGroup className="mb-2">
                     <FormControl
                       id="inlineFormInputGroup"
                       placeholder="msg.data"
                     />
                   </InputGroup>
-                  <Card.Title>Details</Card.Title>
+                  <Form.Label>Details</Form.Label>
                   <InputGroup className="mb-2">
                     <Form.Control as="textarea" rows={3} />
                   </InputGroup>
