@@ -63,7 +63,6 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         .then((allowance) => {
           if (!stale) {
             setTokenAllowance(allowance);
-            console.log('allowed', allowance)
             if (allowance.gt(amount || 0)) setApproved(true);
             else setApproved(false);
           }

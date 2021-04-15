@@ -144,7 +144,9 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
         <Card.Title>Your balance:</Card.Title>
-        <Card.Text>$DAI: {formatEther(daiBalance || "0")} / $COMMITMENT: {formatEther(commitmentBalance || "0")}
+        <Card.Text>
+          $DAI: {formatEther(daiBalance || "0")} / $COMMITMENT:{" "}
+          {formatEther(commitmentBalance || "0")}
         </Card.Text>
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
         <Form onSubmit={handleSubmit}>
@@ -152,8 +154,8 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
             <Card.Title>Buy</Card.Title>
             {/* <Form.Label>Staking</Form.Label> */}
             <InputGroup className="mb-2">
-              <InputGroup.Prepend onClick={() => setBuyAmount(getMaxBuy())}>
-                <InputGroup.Text>MAX</InputGroup.Text>
+              <InputGroup.Prepend>
+                <InputGroup.Text>$COMMITMENT</InputGroup.Text>
               </InputGroup.Prepend>
               <Form.Control
                 id="base-currency-amount"
@@ -161,6 +163,12 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
                 onChange={({ target: { value } }) => setBuyAmount(value)}
                 placeholder={getMaxBuy()}
               />
+              <InputGroup.Append
+                style={{ cursor: "pointer" }}
+                onClick={() => setBuyAmount(getMaxBuy())}
+              >
+                <InputGroup.Text>MAX</InputGroup.Text>
+              </InputGroup.Append>
             </InputGroup>
           </Form.Group>
           <Form.Text>

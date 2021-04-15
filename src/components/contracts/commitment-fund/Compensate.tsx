@@ -1,5 +1,5 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import {
   Card,
   Button,
@@ -12,7 +12,7 @@ import {
 } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { parseEther } from "ethers/lib/utils";
+import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 
 export interface CompensateProps {
@@ -30,6 +30,8 @@ export const Compensate: React.FC<CompensateProps> = ({
   const contracts = useWorkhardContracts();
   const [payTo, setPayTo] = useState("");
   const [payAmount, setPayAmount] = useState<number>();
+  const [balance, setBalance] = useState<BigNumberish>(fund);
+  const [lastTx, setLastTx] = useState<string>();
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -44,7 +46,7 @@ export const Compensate: React.FC<CompensateProps> = ({
       alert("Invalid address");
       return;
     }
-    if (payAmountInWei.gt(fund)) {
+    if (payAmountInWei.gt(balance)) {
       alert("Not enough amount of $COMMITMENT tokens");
       return;
     }
@@ -55,7 +57,7 @@ export const Compensate: React.FC<CompensateProps> = ({
       .then((tx) => {
         tx.wait()
           .then((receipt) => {
-            alert(`${receipt.transactionHash} submitted.`);
+            setLastTx(receipt.transactionHash);
           })
           .catch((rejected) => {
             alert(`Rejected: ${rejected}.`);
@@ -68,8 +70,22 @@ export const Compensate: React.FC<CompensateProps> = ({
         alert(`Failed: ${reason}`);
       });
   };
+
+  useEffect(() => {
+    if (!!account && !!library && !!contracts) {
+      let stale = false;
+      const { commitmentFund } = contracts;
+      commitmentFund.projectFund(projId).then((bal: BigNumber) => {
+        if (!stale) setBalance(bal);
+      });
+    }
+  }, [lastTx]);
   return (
     <Form onSubmit={handleSubmit}>
+      <Form.Group controlId="compensate">
+        <Form.Label>Budget</Form.Label>
+        <Form.Text>{formatEther(balance || "0")} $COMMITMENT</Form.Text>
+      </Form.Group>
       <Form.Group controlId="compensate">
         <FormLabel>Contributor address</FormLabel>
         <FormControl
