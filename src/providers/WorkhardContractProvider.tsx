@@ -24,6 +24,8 @@ import {
   VisionFarm__factory,
   VisionTokenEmitter,
   VisionTokenEmitter__factory,
+  TimelockedGovernance,
+  TimelockedGovernance__factory,
   ERC20Mock as ERC20,
   ERC20Mock__factory as ERC20__factory,
   CommitmentToken,
@@ -48,6 +50,7 @@ export interface WorkhardContracts {
   commitmentMining: BurnMining;
   visionTokenEmitter: VisionTokenEmitter;
   farmersUnion: FarmersUnion;
+  timeLockGovernance: TimelockedGovernance;
   baseCurrency: ERC20;
   commitmentToken: CommitmentToken;
   visionToken: VisionToken;
@@ -78,6 +81,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       !contracts.LiquidityMining ||
       !contracts.CommitmentMining ||
       !contracts.FarmersUnion ||
+      !contracts.TimelockedGovernance ||
       !contracts.BaseCurrency ||
       !contracts.CommitmentToken ||
       !contracts.VisionToken ||
@@ -115,6 +119,10 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       contracts.FarmersUnion,
       library
     );
+    const timeLockGovernance = TimelockedGovernance__factory.connect(
+        contracts.TimelockedGovernance,
+        library
+    )
     const baseCurrency = ERC20__factory.connect(
       contracts.BaseCurrency,
       library
@@ -136,6 +144,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       visionTokenEmitter,
       commitmentFund,
       farmersUnion,
+      timeLockGovernance,
       baseCurrency,
       commitmentToken,
       visionToken,
