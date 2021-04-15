@@ -8,12 +8,12 @@ assignees: ''
 ---
 
 **Related Contracts Functions**
-- `ContractName.function()`
+- [ContractName.function()](permalink)
 
 **Related Pages**
-- eg) `src/pages/Votes.tsx`
+- [path/page.tsx](permalink)
 
 **Similar to**
-- eg) `src/components/~.tsx`
+- [path/component.tsx](permalink)
 
 **Description**
