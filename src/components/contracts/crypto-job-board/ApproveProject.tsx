@@ -71,7 +71,7 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
 
             <Form.Group controlId="time-lock">
                 <Form.Label>
-                    timelock
+                    Approve project by the timelocked admin  (will be replaced with FarmersUnion.sol soon)
                 </Form.Label>
                 <Form.Control
                     required
