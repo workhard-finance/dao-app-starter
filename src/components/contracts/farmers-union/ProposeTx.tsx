@@ -71,7 +71,7 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
         });
       farmersUnion
         .getVotes(account)
-        .then((votes) => {
+        .then((votes: any) => {
           setMyVotes(votes);
         })
         .catch(() => {
