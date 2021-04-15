@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { ProposeTx } from "../components/contracts/farmers-union/ProposeTx";
 
 const getVariant = (percent: number) => {
   if (percent <= 25) return "danger";
@@ -102,48 +103,7 @@ const Vote = () => {
           style={{ marginTop: "1rem" }}
         ></Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
-          <Card>
-            <Card.Header as="h5">Submit a new proposal</Card.Header>
-            <Card.Body>
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Form.Label>To</Form.Label>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
-                    />
-                  </InputGroup>
-                  <Form.Label>Value</Form.Label>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="1234.00000000000000001"
-                    />
-                    <InputGroup.Append>
-                      <InputGroup.Text>MAX</InputGroup.Text>
-                    </InputGroup.Append>
-                  </InputGroup>
-                  <Form.Label>Data</Form.Label>
-                  <InputGroup className="mb-2">
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="msg.data"
-                    />
-                  </InputGroup>
-                  <Form.Label>Details</Form.Label>
-                  <InputGroup className="mb-2">
-                    <Form.Control as="textarea" rows={3} />
-                  </InputGroup>
-                </Form.Group>
-                <Button variant="primary" type="submit">
-                  Submit
-                </Button>{" "}
-              </Form>
-            </Card.Body>
-          </Card>
+          <ProposeTx/>
         </Tab>
       </Tabs>
     </Page>
