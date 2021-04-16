@@ -20,7 +20,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
 
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
-  const [fund, setFund] = useState("");
+  const [fund, setFund] = useState<BigNumber>();
   const [budgetOwner, setBudgetOwner] = useState("");
 
   useEffect(() => {
@@ -54,17 +54,17 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
       commitmentFund
         .projectFund(projId)
         .then((fund: BigNumber) => {
-          if (!stale) setFund(fund.toString());
+          if (!stale) setFund(fund);
         })
         .catch(() => {
-          if (!stale) setFund("Unknown");
+          if (!stale) setFund(undefined);
         });
 
       return () => {
         stale = true;
         setDescription("Disconnected");
         setTitle("Disconnected");
-        setFund("Disconnected");
+        setFund(undefined);
       };
     }
   }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
@@ -75,7 +75,8 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
       <Card.Body>
         <Card.Title>Fund</Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
-          {formatEther(fund)} $COMMITMENT {/*TODO compute in USD ($163710)*/}
+          {formatEther(fund || 0)} $COMMITMENT{" "}
+          {/*TODO compute in USD ($163710)*/}
         </Card.Text>
         <Card.Title>Details</Card.Title>
         <Card.Text>{ReactHtmlParser(wrapUrl(description))}</Card.Text>
