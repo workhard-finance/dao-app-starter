@@ -180,7 +180,7 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
         variant="primary"
         type="submit"
         enabledWhen={hasProposerRole}
-        whyDisabled="Only the timelock admin can call this function for now. This permission will be moved to FarmersUnion."
+        whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to FarmersUnion."
         children={buttonText(approvalStatus)}
       />
     </Form>
