@@ -13,6 +13,13 @@ export interface AddBudgetProps {
   budgetOwner: string;
 }
 
+enum ApprovalStatus {
+  NOT_SCHEDULED,
+  PENDING,
+  READY,
+  DONE,
+}
+
 // Timelock Version
 export const ApproveProject: React.FC<AddBudgetProps> = ({
   projId,
@@ -22,6 +29,9 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
   const contracts = useWorkhardContracts();
   const [timelock, setTimelock] = useState<string>("86400");
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
+  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>(
+    ApprovalStatus.NOT_SCHEDULED
+  );
   const [lastTx, setLastTx] = useState<ContractTransaction>();
 
   const handleSubmit: FormEventHandler = async (event) => {
@@ -31,6 +41,7 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
       alert("Not connected");
       return;
     }
+
     const signer = library.getSigner(account);
     const cryptoJobBoard = contracts.cryptoJobBoard;
     const timeLockGovernance = contracts.timeLockGovernance;
@@ -41,48 +52,114 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
       alert("invalid data");
       return;
     }
-
-    timeLockGovernance
-      .connect(signer)
-      .schedule(
-        contracts.cryptoJobBoard.address,
-        0,
-        data,
-        ethers.constants.HashZero,
-        ethers.constants.HashZero,
-        BigNumber.from(timelock)
-      )
-      .then(txWait)
-      .catch(handleException);
-
-    timeLockGovernance
-      .connect(signer)
-      .execute(
-        contracts.cryptoJobBoard.address,
-        0,
-        data,
-        ethers.constants.HashZero,
-        ethers.constants.HashZero
-      )
-      .then(txWait)
-      .catch(handleException);
+    switch (approvalStatus) {
+      case ApprovalStatus.PENDING:
+        alert("Should wait the timelock");
+        break;
+      case ApprovalStatus.DONE:
+        alert("Already executed");
+        break;
+      case ApprovalStatus.NOT_SCHEDULED:
+        timeLockGovernance
+          .connect(signer)
+          .schedule(
+            contracts.cryptoJobBoard.address,
+            0,
+            data,
+            ethers.constants.HashZero,
+            ethers.constants.HashZero,
+            BigNumber.from(timelock)
+          )
+          .then((tx) => {
+            setLastTx(tx);
+            txWait(tx);
+          })
+          .catch(handleException);
+        break;
+      case ApprovalStatus.READY:
+        timeLockGovernance
+          .connect(signer)
+          .execute(
+            contracts.cryptoJobBoard.address,
+            0,
+            data,
+            ethers.constants.HashZero,
+            ethers.constants.HashZero
+          )
+          .then((tx) => {
+            setLastTx(tx);
+            txWait(tx);
+          })
+          .catch(handleException);
+        break;
+      default:
+        break;
+    }
   };
 
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
       const timeLockGovernance = contracts.timeLockGovernance;
+      const cryptoJobBoard = contracts.cryptoJobBoard;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)
         .catch(handleException);
+      cryptoJobBoard.populateTransaction
+        .approveProject(projId)
+        .then(async (tx) => {
+          if (tx.data) {
+            const txId = await timeLockGovernance.hashOperation(
+              cryptoJobBoard.address,
+              0,
+              tx.data,
+              ethers.constants.HashZero,
+              ethers.constants.HashZero
+            );
+            const scheduled = await timeLockGovernance.isOperation(txId);
+            if (!scheduled) {
+              setApprovalStatus(ApprovalStatus.NOT_SCHEDULED);
+              return;
+            }
+            const ready = await timeLockGovernance.isOperationReady(txId);
+            if (ready) {
+              setApprovalStatus(ApprovalStatus.READY);
+              return;
+            }
+            const done = await timeLockGovernance.isOperationDone(txId);
+            if (done) {
+              setApprovalStatus(ApprovalStatus.DONE);
+              return;
+            }
+            const pending = await timeLockGovernance.isOperationPending(txId);
+            if (pending) {
+              setApprovalStatus(ApprovalStatus.PENDING);
+              return;
+            }
+          }
+        });
       return () => {
         stale = true;
         setTimelock("86400");
         setHasProposerRole(false);
+        setApprovalStatus(ApprovalStatus.NOT_SCHEDULED);
       };
     }
-  }, [account, contracts]);
+  }, [account, contracts, projId, lastTx]);
+
+  const buttonText = (status: ApprovalStatus) => {
+    switch (status) {
+      case ApprovalStatus.NOT_SCHEDULED:
+        return "Schedule transaction";
+      case ApprovalStatus.PENDING:
+        return "Waiting timelock";
+      case ApprovalStatus.READY:
+        return "Execute approval";
+      case ApprovalStatus.DONE:
+        return "Already approved";
+    }
+  };
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group controlId="time-lock">
@@ -90,19 +167,21 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
           Approve project by the timelocked admin (will be replaced with
           FarmersUnion.sol soon)
         </Form.Label>
-        <Form.Control
-          required
-          type="text"
-          onChange={({ target: { value } }) => setTimelock(value)}
-          value={timelock}
-        />
+        {approvalStatus === ApprovalStatus.NOT_SCHEDULED && (
+          <Form.Control
+            required
+            type="text"
+            onChange={({ target: { value } }) => setTimelock(value)}
+            value={timelock}
+          />
+        )}
       </Form.Group>
       <ConditionalButton
         variant="primary"
         type="submit"
         enabledWhen={hasProposerRole}
         whyDisabled="Only the timelock admin can call this function for now. This permission will be moved to FarmersUnion."
-        children="Approve Project(admin only)"
+        children={buttonText(approvalStatus)}
       />
     </Form>
   );
