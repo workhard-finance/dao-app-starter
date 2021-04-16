@@ -1,9 +1,11 @@
-import React, { FormEventHandler, useState } from "react";
+import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
 import { Button, Form, Tooltip, OverlayTrigger } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers/lib.esm";
+import { ConditionalButton } from "../../ConditionalButton";
+import { solidityKeccak256 } from "ethers/lib/utils";
 
 export interface AddBudgetProps {
   projId: BigNumberish;
@@ -11,6 +13,7 @@ export interface AddBudgetProps {
   budgetOwner: string;
 }
 
+// Timelock Version
 export const ApproveProject: React.FC<AddBudgetProps> = ({
   projId,
   budgetOwner,
@@ -18,6 +21,8 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   const [timelock, setTimelock] = useState<string>("86400");
+  const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
+  const [lastTx, setLastTx] = useState<ContractTransaction>();
 
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
@@ -62,6 +67,22 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
       .then(txWait)
       .catch(handleException);
   };
+
+  useEffect(() => {
+    if (!!account && !!contracts) {
+      let stale = false;
+      const timeLockGovernance = contracts.timeLockGovernance;
+      timeLockGovernance
+        .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
+        .then(setHasProposerRole)
+        .catch(handleException);
+      return () => {
+        stale = true;
+        setTimelock("86400");
+        setHasProposerRole(false);
+      };
+    }
+  }, [account, contracts]);
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group controlId="time-lock">
@@ -76,22 +97,13 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
           value={timelock}
         />
       </Form.Group>
-      <OverlayTrigger
-        show={account === budgetOwner ? false : undefined}
-        overlay={
-          <Tooltip id={`tooltip-budgetowner`}>
-            Only the project owner can call this function.
-          </Tooltip>
-        }
-      >
-        <Button
-          variant="primary"
-          type="submit"
-          disabled={account !== budgetOwner}
-        >
-          Approve Project(Admin Only)
-        </Button>
-      </OverlayTrigger>
+      <ConditionalButton
+        variant="primary"
+        type="submit"
+        enabledWhen={hasProposerRole}
+        whyDisabled="Only the timelock admin can call this function for now. This permission will be moved to FarmersUnion."
+        children="Approve Project(admin only)"
+      />
     </Form>
   );
 };
