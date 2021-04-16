@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
+import { formatEther } from "ethers/lib/utils";
 import ReactHtmlParser from "react-html-parser";
 import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
@@ -74,7 +75,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
       <Card.Body>
         <Card.Title>Fund</Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
-          {fund} $COMMITMENT {/*TODO compute in USD ($163710)*/}
+          {formatEther(fund)} $COMMITMENT {/*TODO compute in USD ($163710)*/}
         </Card.Text>
         <Card.Title>Details</Card.Title>
         <Card.Text>{ReactHtmlParser(wrapUrl(description))}</Card.Text>
