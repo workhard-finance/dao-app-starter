@@ -78,9 +78,11 @@ const Project: React.FC = () => {
       cryptoJobBoard.getTotalBudgets(id).then((len: BigNumber) => {
         setBudgets(new Array(len.toNumber()));
         for (let i = 0; i < len.toNumber(); i += 1) {
-          cryptoJobBoard.projectBudgets(id, i).then((proj) => {
+          cryptoJobBoard.projectBudgets(id, i).then((budget) => {
+            console.log("heres budget", budget);
             const _budgets = Array.from(budgets);
-            _budgets[i] = proj;
+            _budgets[i] = budget;
+            console.log(_budgets);
             setBudgets(_budgets);
           });
         }
@@ -128,19 +130,23 @@ const Project: React.FC = () => {
                 <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} />
               </Tab.Pane>
               <Tab.Pane eventKey="budget">
+                <h2>Add budget</h2>
                 <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
                 <hr />
-                {budgets.forEach(
-                  (budget, i) =>
-                    budget && (
+                <h2>History</h2>
+                {budgets.map((budget, i) => {
+                  console.log("her budget", budget, i);
+                  if (!!budget) {
+                    return (
                       <ExecuteBudget
                         projId={id}
                         budgetIndex={i}
                         budgetOwner={budgetOwner}
                         {...budget}
                       />
-                    )
-                )}
+                    );
+                  }
+                })}
               </Tab.Pane>
               <Tab.Pane eventKey="etc">
                 <>

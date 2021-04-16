@@ -16,23 +16,13 @@ import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
 import { ERC20Mock__factory } from "@workhard/protocol";
+import { acceptableTokenList } from "../../../utils/utils";
 
 export interface AddBudgetProps {
   projId: BigNumberish;
   fund: BigNumberish;
   budgetOwner: string;
 }
-
-const acceptableTokenList = [
-  {
-    symbol: "DAI",
-    address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-  },
-  {
-    symbol: "BASECURRENCY-TEST",
-    address: devDeploy.localhost.BaseCurrency,
-  },
-];
 
 export const AddBudget: React.FC<AddBudgetProps> = ({
   projId,

@@ -5,6 +5,7 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { formatEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
+import { getTokenSymbol } from "../../../utils/utils";
 
 export interface ExecuteBudgetProps {
   projId: BigNumberish;
@@ -60,9 +61,11 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
     <Card>
       <Card.Header as="h5"># {budgetIndex}</Card.Header>
       <Card.Body>
-        <Card.Text>Currency: {currency}</Card.Text>
+        <Card.Text>
+          Currency: {getTokenSymbol(currency)}({currency})
+        </Card.Text>
         <Card.Text>Amount: {formatEther(amount)}</Card.Text>
-        <Card.Text>Executed: {transferred}</Card.Text>
+        <Card.Text>Executed: {transferred ? "True" : "False"}</Card.Text>
         {!transferred && !executed && (
           <Form onSubmit={handleSubmit}>
             <ConditionalButton

@@ -1,5 +1,7 @@
 import { Interface, LogDescription } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
+import { getAddress } from "@ethersproject/address";
+import devDeploy from "@workhard/protocol/deployed.dev.json";
 
 export const parseLog = (
   contract: {
@@ -35,4 +37,26 @@ export const wrapUrl = (text: string) => {
     return `<a href="${href}" target="_blank">${url}</a>`;
   });
   return wrapped;
+};
+
+export const acceptableTokenList = [
+  {
+    symbol: "DAI",
+    address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+  },
+  {
+    symbol: "BASECURRENCY-TEST",
+    address: devDeploy.localhost.BaseCurrency,
+  },
+];
+
+export const getTokenSymbol = (address: string): string | undefined => {
+  const token = acceptableTokenList.find(
+    (a) => getAddress(a.address) === getAddress(address)
+  );
+  if (token) {
+    return token.symbol;
+  } else {
+    return undefined;
+  }
 };
