@@ -21,7 +21,6 @@ export const WorkhardLoggedDataProvider = ({ children }: { children: any }) => {
   const contracts = useWorkhardContracts();
   if (contracts) {
     const { cryptoJobBoard } = contracts;
-    console.log("filtering now");
     cryptoJobBoard
       .queryFilter(cryptoJobBoard.filters.ProjectPosted(null))
       .then((result) => console.log("filtered result", result));

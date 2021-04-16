@@ -108,9 +108,6 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       alert("Not enough amount of $COMMITMENT tokens");
       return;
     }
-    console.log(projId);
-    console.log(token);
-    console.log(amountInWei);
     cryptoJobBoard
       .connect(signer)
       .addBudget(projId, token, amountInWei)

@@ -79,10 +79,8 @@ const Project: React.FC = () => {
         setBudgets(new Array(len.toNumber()));
         for (let i = 0; i < len.toNumber(); i += 1) {
           cryptoJobBoard.projectBudgets(id, i).then((budget) => {
-            console.log("heres budget", budget);
             const _budgets = Array.from(budgets);
             _budgets[i] = budget;
-            console.log(_budgets);
             setBudgets(_budgets);
           });
         }
@@ -135,7 +133,6 @@ const Project: React.FC = () => {
                 <hr />
                 <h2>History</h2>
                 {budgets.map((budget, i) => {
-                  console.log("her budget", budget, i);
                   if (!!budget) {
                     return (
                       <ExecuteBudget

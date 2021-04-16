@@ -89,7 +89,6 @@ const Wallet = (props: React.ComponentProps<any>) => {
 
   // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
   useInactiveListener(!triedEager || !!activatingConnector);
-  console.dir(connector);
   return (
     <div {...props}>
       <Button
