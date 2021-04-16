@@ -27,12 +27,9 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    const cryptoJobBoard = contracts?.cryptoJobBoard;
-    const timeLockGovernance = contracts?.timeLockGovernance;
-    if (!cryptoJobBoard) {
-      alert("Not connected");
-      return;
-    }
+    const cryptoJobBoard = contracts.cryptoJobBoard;
+    const timeLockGovernance = contracts.timeLockGovernance;
+
     const tx = await cryptoJobBoard.populateTransaction.approveProject(projId);
     const data = tx?.data;
     if (data == undefined) {
