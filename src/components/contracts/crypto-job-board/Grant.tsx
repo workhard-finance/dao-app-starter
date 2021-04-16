@@ -1,12 +1,6 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
-import {
-  Button,
-  Form,
-  Tooltip,
-  OverlayTrigger,
-  InputGroup,
-} from "react-bootstrap";
+import { Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers/lib.esm";
@@ -17,13 +11,6 @@ export interface GrantProps {
   projId: BigNumberish;
 }
 
-enum GrantStatus {
-  NOT_SCHEDULED,
-  PENDING,
-  READY,
-  DONE,
-}
-
 // Timelock Version
 export const Grant: React.FC<GrantProps> = ({ projId }) => {
   const { account, library } = useWeb3React();
@@ -32,9 +19,6 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
   const [grantAmount, setGrantAmount] = useState<string>();
   const [mintable, setMintable] = useState<BigNumber>();
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
-  const [approvalStatus, setGrantStatus] = useState<GrantStatus>(
-    GrantStatus.NOT_SCHEDULED
-  );
   const [lastTx, setLastTx] = useState<ContractTransaction>();
 
   const getMaxGrant = () => formatEther(mintable || "0");
@@ -61,49 +45,21 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
       alert("invalid data");
       return;
     }
-    switch (approvalStatus) {
-      case GrantStatus.PENDING:
-        alert("Should wait the timelock");
-        break;
-      case GrantStatus.DONE:
-        alert("Already executed");
-        break;
-      case GrantStatus.NOT_SCHEDULED:
-        timeLockGovernance
-          .connect(signer)
-          .schedule(
-            contracts.cryptoJobBoard.address,
-            0,
-            data,
-            ethers.constants.HashZero,
-            ethers.constants.HashZero,
-            BigNumber.from(timelock)
-          )
-          .then((tx) => {
-            setLastTx(tx);
-            txWait(tx);
-          })
-          .catch(handleException);
-        break;
-      case GrantStatus.READY:
-        timeLockGovernance
-          .connect(signer)
-          .execute(
-            contracts.cryptoJobBoard.address,
-            0,
-            data,
-            ethers.constants.HashZero,
-            ethers.constants.HashZero
-          )
-          .then((tx) => {
-            setLastTx(tx);
-            txWait(tx);
-          })
-          .catch(handleException);
-        break;
-      default:
-        break;
-    }
+    timeLockGovernance
+      .connect(signer)
+      .schedule(
+        contracts.cryptoJobBoard.address,
+        0,
+        data,
+        ethers.constants.HashZero,
+        ethers.utils.randomBytes(32),
+        BigNumber.from(timelock)
+      )
+      .then((tx) => {
+        setLastTx(tx);
+        txWait(tx);
+      })
+      .catch(handleException);
   };
 
   useEffect(() => {
@@ -122,61 +78,13 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
         .catch(() => {
           if (!stale) setMintable(undefined);
         });
-      const grantAmountInWei = parseEther(grantAmount || "0");
-      cryptoJobBoard.populateTransaction
-        .grant(projId, grantAmountInWei)
-        .then(async (tx) => {
-          if (tx.data) {
-            const txId = await timeLockGovernance.hashOperation(
-              cryptoJobBoard.address,
-              0,
-              tx.data,
-              ethers.constants.HashZero,
-              ethers.constants.HashZero
-            );
-            const scheduled = await timeLockGovernance.isOperation(txId);
-            if (!scheduled) {
-              setGrantStatus(GrantStatus.NOT_SCHEDULED);
-              return;
-            }
-            const ready = await timeLockGovernance.isOperationReady(txId);
-            if (ready) {
-              setGrantStatus(GrantStatus.READY);
-              return;
-            }
-            const done = await timeLockGovernance.isOperationDone(txId);
-            if (done) {
-              setGrantStatus(GrantStatus.DONE);
-              return;
-            }
-            const pending = await timeLockGovernance.isOperationPending(txId);
-            if (pending) {
-              setGrantStatus(GrantStatus.PENDING);
-              return;
-            }
-          }
-        });
       return () => {
         stale = true;
         setTimelock("86400");
         setHasProposerRole(false);
-        setGrantStatus(GrantStatus.NOT_SCHEDULED);
       };
     }
   }, [account, contracts, projId, lastTx]);
-
-  const buttonText = (status: GrantStatus) => {
-    switch (status) {
-      case GrantStatus.NOT_SCHEDULED:
-        return "Schedule transaction";
-      case GrantStatus.PENDING:
-        return "Waiting timelock";
-      case GrantStatus.READY:
-        return "Execute approval";
-      case GrantStatus.DONE:
-        return "Already approved";
-    }
-  };
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group controlId="time-lock">
@@ -198,21 +106,19 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
             <InputGroup.Text>MAX</InputGroup.Text>
           </InputGroup.Append>
         </InputGroup>
-        {approvalStatus === GrantStatus.NOT_SCHEDULED && (
-          <Form.Control
-            required
-            type="text"
-            onChange={({ target: { value } }) => setTimelock(value)}
-            value={timelock}
-          />
-        )}
+        <Form.Control
+          required
+          type="text"
+          onChange={({ target: { value } }) => setTimelock(value)}
+          value={timelock}
+        />
       </Form.Group>
       <ConditionalButton
         variant="primary"
         type="submit"
         enabledWhen={hasProposerRole}
         whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to FarmersUnion."
-        children={buttonText(approvalStatus)}
+        children="Schedule grant"
       />
     </Form>
   );
