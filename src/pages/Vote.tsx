@@ -1,27 +1,24 @@
 import React from "react";
 import Page from "../layouts/Page";
 import {
-  Alert,
   Button,
   Card,
-  Col,
   Form,
   FormControl,
-  FormLabel,
   Image,
   InputGroup,
-  ListGroup,
-  ListGroupItem,
-  OverlayTrigger,
   ProgressBar,
-  Row,
   Tab,
   Tabs,
-  Tooltip,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
 import { ProposeTx } from "../components/contracts/farmers-union/ProposeTx";
 import { ProposeBatchTx } from "../components/contracts/farmers-union/ProposeBatchTx";
+import {
+  PARAM_TYPE,
+  PresetProposal,
+  PresetProposalProps,
+} from "../components/contracts/farmers-union/PresetProposal";
+import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 
 const getVariant = (percent: number) => {
   if (percent <= 25) return "danger";
@@ -30,6 +27,19 @@ const getVariant = (percent: number) => {
   else return "success";
 };
 const Vote = () => {
+  const contracts = useWorkhardContracts();
+  // todo: add more.
+  const presets: PresetProposalProps[] = [
+    {
+      paramArray: [
+        { name: "projId", type: PARAM_TYPE.NUMBER },
+        { name: "amount", type: PARAM_TYPE.NUMBER },
+      ],
+      methodName: "grant",
+      contract: contracts?.cryptoJobBoard,
+    },
+  ];
+
   const stakePercent = 60;
   const lockedPercent = 90;
   const remainingPercent = 10;
@@ -106,6 +116,15 @@ const Vote = () => {
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
           <ProposeTx />
           <ProposeBatchTx />
+          {presets.map((prop) => {
+            return (
+              <PresetProposal
+                paramArray={prop.paramArray}
+                methodName={prop.methodName}
+                contract={prop.contract}
+              />
+            );
+          })}
         </Tab>
       </Tabs>
     </Page>
