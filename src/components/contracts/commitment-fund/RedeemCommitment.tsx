@@ -122,9 +122,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
   }, [account, contracts, lastTx]);
   return (
     <Card>
-      <Card.Header as="h5">
-        Redeem $COMMITMENT to $DAI
-      </Card.Header>
+      <Card.Header as="h5">Redeem $COMMITMENT to $DAI</Card.Header>
       <Card.Body>
         <Card.Title>
           $COMMITMENT per $DAI
@@ -171,8 +169,8 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
             </InputGroup>
           </Form.Group>
           <Form.Text>
-            Redeem {formatEther(parseEther(redeemAmount || "0"))} $COMMITMENT with{" "}
-            {formatEther(parseEther(redeemAmount || "0"))} $DAI
+            Redeem {formatEther(parseEther(redeemAmount || "0"))} $COMMITMENT
+            with {formatEther(parseEther(redeemAmount || "0"))} $DAI
           </Form.Text>
           <br />
           <Button variant="primary" type="submit">

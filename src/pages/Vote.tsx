@@ -21,7 +21,7 @@ import {
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { ProposeTx } from "../components/contracts/farmers-union/ProposeTx";
-import {ProposeBatchTx} from "../components/contracts/farmers-union/ProposeBatchTx";
+import { ProposeBatchTx } from "../components/contracts/farmers-union/ProposeBatchTx";
 
 const getVariant = (percent: number) => {
   if (percent <= 25) return "danger";
@@ -104,8 +104,8 @@ const Vote = () => {
           style={{ marginTop: "1rem" }}
         ></Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
-          <ProposeTx/>
-          <ProposeBatchTx/>
+          <ProposeTx />
+          <ProposeBatchTx />
         </Tab>
       </Tabs>
     </Page>

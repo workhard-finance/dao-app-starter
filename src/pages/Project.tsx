@@ -12,7 +12,7 @@ import { Compensate } from "../components/contracts/commitment-fund/Compensate";
 import { AddBudget } from "../components/contracts/crypto-job-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import { wrapUrl } from "../utils/utils";
-import {ApproveProject} from "../components/contracts/crypto-job-board/ApproveProject";
+import { ApproveProject } from "../components/contracts/crypto-job-board/ApproveProject";
 import { CloseProject } from "../components/contracts/crypto-job-board/CloseProject";
 
 const Project: React.FC = () => {
@@ -114,8 +114,12 @@ const Project: React.FC = () => {
               </Tab.Pane>
               <Tab.Pane eventKey="etc">
                 <>
-                  <ApproveProject projId={id} fund={fund} budgetOwner={budgetOwner} />
-                  <hr/>
+                  <ApproveProject
+                    projId={id}
+                    fund={fund}
+                    budgetOwner={budgetOwner}
+                  />
+                  <hr />
                   <CloseProject projId={id} budgetOwner={budgetOwner} />
                 </>
               </Tab.Pane>

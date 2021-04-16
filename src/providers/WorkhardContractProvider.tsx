@@ -120,9 +120,9 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       library
     );
     const timeLockGovernance = TimelockedGovernance__factory.connect(
-        contracts.TimelockedGovernance,
-        library
-    )
+      contracts.TimelockedGovernance,
+      library
+    );
     const baseCurrency = ERC20__factory.connect(
       contracts.BaseCurrency,
       library

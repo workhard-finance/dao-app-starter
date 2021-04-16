@@ -24,7 +24,9 @@ const Home = () => {
           pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
           culpa qui officia deserunt mollit anim id est laborum.
         </p>
-        <Button as={Link} to={`/work`} variant="primary">Go to work</Button>{" "}
+        <Button as={Link} to={`/work`} variant="primary">
+          Go to work
+        </Button>{" "}
         <Button variant="secondary">Docs</Button>
       </Container>
     </Page>

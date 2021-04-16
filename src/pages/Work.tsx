@@ -127,10 +127,10 @@ const Work: React.FC = () => {
           style={{ marginTop: "1rem" }}
         >
           <RedeemCommitment />
-          <br/>
+          <br />
           <BuyCommitment />
-          <br/>
-          <Button variant={"info"} children="Trade $COMMITMENT on Uniswap"/>
+          <br />
+          <Button variant={"info"} children="Trade $COMMITMENT on Uniswap" />
         </Tab>
       </Tabs>
     </Page>

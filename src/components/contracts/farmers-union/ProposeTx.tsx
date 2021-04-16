@@ -27,15 +27,18 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
   const [myVotes, setMyVotes] = useState<BigNumber>();
   const [minimumPending, setMinimumPending] = useState<BigNumberish>();
   const [maximumPending, setMaximumPending] = useState<BigNumberish>();
-  const [minimumVotingPeriod, setMinimumVotingPeriod] = useState<
-    BigNumberish
-  >();
-  const [maximumVotingPeriod, setMaximumVotingPeriod] = useState<
-    BigNumberish
-  >();
-  const [minimumVotesForProposal, setMinimumVotesForProposal] = useState<
-    BigNumberish
-  >();
+  const [
+    minimumVotingPeriod,
+    setMinimumVotingPeriod,
+  ] = useState<BigNumberish>();
+  const [
+    maximumVotingPeriod,
+    setMaximumVotingPeriod,
+  ] = useState<BigNumberish>();
+  const [
+    minimumVotesForProposal,
+    setMinimumVotesForProposal,
+  ] = useState<BigNumberish>();
 
   useEffect(() => {
     if (!!account && !!contracts) {

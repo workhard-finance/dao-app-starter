@@ -5,5 +5,5 @@ export const getLibrary = (
 ) => {
   const library = new providers.Web3Provider(provider); // this will vary according to whether you use e.g. ethers or web3.js
   library.pollingInterval = 12000;
-  return library
+  return library;
 };

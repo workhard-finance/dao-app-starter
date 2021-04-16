@@ -54,9 +54,12 @@ export const CloseProject: React.FC<CloseProjectProps> = ({
   return (
     <>
       <Form>
-        <Form.Label>Do you want to close this project? Please keep in mind that you cannot revert this action.</Form.Label>
+        <Form.Label>
+          Do you want to close this project? Please keep in mind that you cannot
+          revert this action.
+        </Form.Label>
         <br />
-        <Button variant={"danger"} children="close" onClick={closeProject}/>
+        <Button variant={"danger"} children="close" onClick={closeProject} />
       </Form>
     </>
   );
