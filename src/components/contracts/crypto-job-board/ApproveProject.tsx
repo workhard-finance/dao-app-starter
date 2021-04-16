@@ -7,7 +7,7 @@ import { ethers } from "ethers/lib.esm";
 import { ConditionalButton } from "../../ConditionalButton";
 import { solidityKeccak256 } from "ethers/lib/utils";
 
-export interface AddBudgetProps {
+export interface ApproveProjectProps {
   projId: BigNumberish;
   fund: BigNumberish;
   budgetOwner: string;
@@ -21,7 +21,7 @@ enum ApprovalStatus {
 }
 
 // Timelock Version
-export const ApproveProject: React.FC<AddBudgetProps> = ({
+export const ApproveProject: React.FC<ApproveProjectProps> = ({
   projId,
   budgetOwner,
 }) => {
