@@ -29,6 +29,7 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
   const contracts = useWorkhardContracts();
   const [timelock, setTimelock] = useState<string>("86400");
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
+  const [hasExecutorRole, setHasExecutorRole] = useState<boolean>(false);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>(
     ApprovalStatus.NOT_SCHEDULED
   );
@@ -106,6 +107,10 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)
         .catch(handleException);
+      timeLockGovernance
+        .hasRole(solidityKeccak256(["string"], ["EXECUTOR_ROLE"]), account)
+        .then(setHasExecutorRole)
+        .catch(handleException);
       cryptoJobBoard.populateTransaction
         .approveProject(projId)
         .then(async (tx) => {
@@ -143,6 +148,7 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
         stale = true;
         setTimelock("86400");
         setHasProposerRole(false);
+        setHasExecutorRole(false);
         setApprovalStatus(ApprovalStatus.NOT_SCHEDULED);
       };
     }
@@ -179,7 +185,11 @@ export const ApproveProject: React.FC<AddBudgetProps> = ({
       <ConditionalButton
         variant="primary"
         type="submit"
-        enabledWhen={hasProposerRole}
+        enabledWhen={
+          (hasProposerRole &&
+            approvalStatus === ApprovalStatus.NOT_SCHEDULED) ||
+          (hasExecutorRole && approvalStatus === ApprovalStatus.READY)
+        }
         whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to FarmersUnion."
         children={buttonText(approvalStatus)}
       />
