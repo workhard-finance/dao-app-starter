@@ -116,6 +116,7 @@ const Vote = () => {
         ></Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
           <ProposeTx />
+          <br />
           <ProposeBatchTx />
           {presets.map((prop) => {
             return (
