@@ -14,6 +14,7 @@ import { useHistory } from "react-router-dom";
 import { wrapUrl } from "../utils/utils";
 import { ApproveProject } from "../components/contracts/crypto-job-board/ApproveProject";
 import { CloseProject } from "../components/contracts/crypto-job-board/CloseProject";
+import { ExecuteBudget } from "../components/contracts/crypto-job-board/ExecuteBudget";
 
 const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -27,11 +28,18 @@ const Project: React.FC = () => {
   const [budgetOwner, setBudgetOwner] = useState("");
   const [admin, toggleAdmin] = useState(false);
   const [exist, setExist] = useState<boolean>();
+  const [budgets, setBudgets] = useState<
+    Array<{
+      currency: string;
+      amount: BigNumber;
+      transferred: boolean;
+    }>
+  >(new Array(0));
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
       let stale = false;
-      const { project, commitmentFund } = contracts;
+      const { project, commitmentFund, cryptoJobBoard } = contracts;
       project
         .titles(id)
         .then((t: string) => {
@@ -67,6 +75,16 @@ const Project: React.FC = () => {
         .catch(() => {
           if (!stale) setFund("Unknown");
         });
+      cryptoJobBoard.getTotalBudgets(id).then((len: BigNumber) => {
+        setBudgets(new Array(len.toNumber()));
+        for (let i = 0; i < len.toNumber(); i += 1) {
+          cryptoJobBoard.projectBudgets(id, i).then((proj) => {
+            const _budgets = Array.from(budgets);
+            _budgets[i] = proj;
+            setBudgets(_budgets);
+          });
+        }
+      });
 
       return () => {
         stale = true;
@@ -97,7 +115,7 @@ const Project: React.FC = () => {
                 <Nav.Link eventKey="pay">Pay</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="budget">Add budget</Nav.Link>
+                <Nav.Link eventKey="budget">Budget</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link eventKey="etc">Etc</Nav.Link>
@@ -111,6 +129,18 @@ const Project: React.FC = () => {
               </Tab.Pane>
               <Tab.Pane eventKey="budget">
                 <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
+                <hr />
+                {budgets.forEach(
+                  (budget, i) =>
+                    budget && (
+                      <ExecuteBudget
+                        projId={id}
+                        budgetIndex={i}
+                        budgetOwner={budgetOwner}
+                        {...budget}
+                      />
+                    )
+                )}
               </Tab.Pane>
               <Tab.Pane eventKey="etc">
                 <>
