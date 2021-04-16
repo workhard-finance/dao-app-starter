@@ -39,6 +39,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
+      setApproved(false);
       const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
       erc20
         .balanceOf(account)
