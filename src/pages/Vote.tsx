@@ -11,15 +11,16 @@ import {
   Tab,
   Tabs,
 } from "react-bootstrap";
-import { ProposeTx } from "../components/contracts/farmers-union/ProposeTx";
-import { ProposeBatchTx } from "../components/contracts/farmers-union/ProposeBatchTx";
+import { ProposeTx } from "../components/contracts/farmers-union/proposal-types/ProposeTx";
+import { ProposeBatchTx } from "../components/contracts/farmers-union/proposal-types/ProposeBatchTx";
 import {
   PARAM_TYPE,
   PresetProposal,
   PresetProposalProps,
-} from "../components/contracts/farmers-union/PresetProposal";
+} from "../components/contracts/farmers-union/proposal-types/PresetProposal";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { TimelockTxs } from "../components/contracts/timelocked-governance/TimelockTxs";
+import { Propose } from "../components/contracts/farmers-union/Propose";
 
 const getVariant = (percent: number) => {
   if (percent <= 25) return "danger";
@@ -28,19 +29,6 @@ const getVariant = (percent: number) => {
   else return "success";
 };
 const Vote = () => {
-  const contracts = useWorkhardContracts();
-  // todo: add more.
-  const presets: PresetProposalProps[] = [
-    {
-      paramArray: [
-        { name: "projId", type: PARAM_TYPE.NUMBER },
-        { name: "amount", type: PARAM_TYPE.NUMBER },
-      ],
-      methodName: "grant",
-      contract: contracts?.cryptoJobBoard,
-    },
-  ];
-
   const stakePercent = 60;
   const lockedPercent = 90;
   const remainingPercent = 10;
@@ -115,18 +103,7 @@ const Vote = () => {
           style={{ marginTop: "1rem" }}
         ></Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
-          <ProposeTx />
-          <br />
-          <ProposeBatchTx />
-          {presets.map((prop) => {
-            return (
-              <PresetProposal
-                paramArray={prop.paramArray}
-                methodName={prop.methodName}
-                contract={prop.contract}
-              />
-            );
-          })}
+          <Propose />
         </Tab>
         <Tab eventKey="timelock" title="Timelock" style={{ marginTop: "1rem" }}>
           <TimelockTxs />

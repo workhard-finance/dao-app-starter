@@ -1,21 +1,21 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
-import { Card, Form, InputGroup } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { formatEther, parseEther, randomBytes } from "ethers/lib/utils";
+import { Button, Card, Form, InputGroup } from "react-bootstrap";
+import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
+import { randomBytes } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { ConditionalButton } from "../../ConditionalButton";
+import { ConditionalButton } from "../../../ConditionalButton";
 
-export interface ProposeTxProps {}
+interface ProposeTx {
+  msgTo: string;
+  msgValue: string;
+  msgData: string;
+}
 
-export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
+export const ProposeBatchTx: React.FC = ({}) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
-  const [daiBalance, setDaiBalance] = useState<BigNumber>();
   /** Proposal */
-  const [msgTo, setMsgTo] = useState<string>();
-  const [msgValue, setMsgValue] = useState<string>();
-  const [msgData, setMsgData] = useState<string>();
   const [predecessor, setPredecessor] = useState<string>();
   const [salt, setSalt] = useState<string>();
   const [proposalDetails, setProposalDetails] = useState<string>();
@@ -40,6 +40,13 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
     setMinimumVotesForProposal,
   ] = useState<BigNumberish>();
 
+  /** array of proposals **/
+  const [indexes, setIndexes] = React.useState<number[]>([]);
+  const [counter, setCounter] = React.useState(0);
+  const [proposalProperties, setProposalProperties] = React.useState<{
+    [key: number]: ProposeTx;
+  }>({});
+
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
@@ -53,7 +60,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
             _minimumVotingPeriod,
             _maximumVotingPeriod,
             _minimumVotesForProposal,
-            _minimumVotesForPassing,
           ] = result;
           setMinimumPending(_minimumPending);
           setMaximumPending(_maximumPending);
@@ -90,9 +96,8 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
       alert("Not connected");
       return;
     }
-    if (!msgTo) return alert("To is not set");
-    if (!msgValue) return alert("Value is not set");
-    if (!msgData) return alert("Data is not set");
+    if (Object.values(proposalProperties).length == 0)
+      return alert("properties are not set");
     if (!predecessor) return alert("Predecessor is not set");
     if (!salt) return alert("Salt is not set");
     if (!startsIn) return alert("Starts In is not set");
@@ -101,10 +106,10 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
     const signer = library.getSigner(account);
     contracts.farmersUnion
       .connect(signer)
-      .proposeTx(
-        msgTo,
-        msgValue,
-        msgData,
+      .proposeBatchTx(
+        Object.values(proposalProperties).map((prop) => prop.msgTo),
+        Object.values(proposalProperties).map((prop) => prop.msgValue),
+        Object.values(proposalProperties).map((prop) => prop.msgData),
         predecessor,
         salt,
         startsIn,
@@ -115,11 +120,107 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
       });
   };
 
+  const addPropose = () => {
+    setIndexes((prevIndexes) => [...prevIndexes, counter]);
+    setProposalProperties((prevState) => {
+      return {
+        ...prevState,
+        [counter]: {
+          msgTo: "",
+          msgData: "",
+          msgValue: "",
+        },
+      };
+    });
+    setCounter((prevCounter) => prevCounter + 1);
+  };
+
+  const removePropose = (index: any) => () => {
+    setIndexes((prevIndexes) => [
+      ...prevIndexes.filter((item) => item !== index),
+    ]);
+    setProposalProperties((prevState) => {
+      delete prevState[index];
+      return prevState;
+    });
+  };
+
   return (
     <Card>
-      <Card.Header as="h5">Submit a new proposal (manual)</Card.Header>
+      <Card.Header as="h5">
+        Submit a new proposal Batch manner (manual)
+      </Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
+          {indexes.map((index) => {
+            return (
+              <Card>
+                <h3>proposal</h3>
+                <Form.Group>
+                  <Form.Label>To</Form.Label>
+                  <Form.Control
+                    id="propose-tx-to"
+                    value={proposalProperties[index].msgTo}
+                    onChange={({ target: { value } }) =>
+                      setProposalProperties((prevState) => {
+                        return {
+                          ...prevState,
+                          [index]: {
+                            ...prevState[index],
+                            msgTo: value,
+                          },
+                        };
+                      })
+                    }
+                    placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>Data</Form.Label>
+                  <Form.Control
+                    id="propose-tx-data"
+                    value={proposalProperties[index].msgData}
+                    onChange={({ target: { value } }) =>
+                      setProposalProperties((prevState) => {
+                        return {
+                          ...prevState,
+                          [index]: {
+                            ...prevState[index],
+                            msgData: value,
+                          },
+                        };
+                      })
+                    }
+                    placeholder="0x"
+                  />
+                </Form.Group>
+
+                <Form.Group>
+                  <Form.Label>Value</Form.Label>
+                  <Form.Control
+                    id="propose-tx-value"
+                    value={proposalProperties[index].msgValue}
+                    onChange={({ target: { value } }) =>
+                      setProposalProperties((prevState) => {
+                        return {
+                          ...prevState,
+                          [index]: {
+                            ...prevState[index],
+                            msgValue: value,
+                          },
+                        };
+                      })
+                    }
+                    defaultValue="0"
+                  />
+                </Form.Group>
+
+                <button type="button" onClick={removePropose(index)}>
+                  Remove
+                </button>
+              </Card>
+            );
+          })}
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control
@@ -129,42 +230,17 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
               placeholder="Describe your proposal"
             />
           </Form.Group>
-          <Form.Group>
-            <Form.Label>To</Form.Label>
-            <Form.Control
-              id="propose-tx-to"
-              value={msgTo}
-              onChange={({ target: { value } }) => setMsgTo(value)}
-              placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Data</Form.Label>
-            <Form.Control
-              id="propose-tx-data"
-              value={msgData}
-              onChange={({ target: { value } }) => setMsgData(value)}
-              placeholder="0x"
-            />
-          </Form.Group>
+
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
             <Form.Control
               id="propose-tx-predecessor"
-              value={msgData}
+              value={predecessor}
               onChange={({ target: { value } }) => setPredecessor(value)}
               defaultValue="0"
             />
           </Form.Group>
-          <Form.Group>
-            <Form.Label>Value</Form.Label>
-            <Form.Control
-              id="propose-tx-value"
-              value={msgValue}
-              onChange={({ target: { value } }) => setMsgValue(value)}
-              defaultValue="0"
-            />
-          </Form.Group>
+
           <Form.Group>
             <Form.Label>Salt</Form.Label>
             <InputGroup className="mb-2">
@@ -217,6 +293,7 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
               placeholder={BigNumber.from(minimumVotingPeriod || 0).toString()}
             />
           </Form.Group>
+          <Button onClick={addPropose}>add propose</Button>
           <ConditionalButton
             variant="primary"
             type="submit"

@@ -1,27 +1,43 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
-import { Button, Card, Form, InputGroup } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { randomBytes } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { ConditionalButton } from "../../ConditionalButton";
+import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
+import { BigNumber, BigNumberish, ContractTransaction, Contract } from "ethers";
+import { Card, Form, InputGroup } from "react-bootstrap";
+import { randomBytes } from "ethers/lib/utils";
+import { ConditionalButton } from "../../../ConditionalButton";
 
-interface ProposeTx {
-  msgTo: string;
-  msgValue: string;
-  msgData: string;
+export enum PARAM_TYPE {
+  STRING = "string",
+  BOOLEAN = "boolean",
+  NUMBER = "number",
+}
+export interface Param {
+  name: string;
+  type: PARAM_TYPE;
+}
+export interface PresetProposalProps {
+  paramArray: Param[];
+  methodName: string;
+  contract?: Contract;
+  contractName: string;
 }
 
-export const ProposeBatchTx: React.FC = ({}) => {
+export const PresetProposal: React.FC<PresetProposalProps> = ({
+  paramArray,
+  methodName,
+  contract,
+}) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>();
   const [salt, setSalt] = useState<string>();
-  const [proposalDetails, setProposalDetails] = useState<string>();
   const [startsIn, setStartsIn] = useState<number>();
   const [votingPeriod, setVotingPeriod] = useState<number>();
   const [lastTx, setLastTx] = useState<ContractTransaction>();
+
+  /** arguments **/
+  const [args, setArgs] = useState<{ [key: string]: string }>({});
 
   /** Memorandom */
   const [myVotes, setMyVotes] = useState<BigNumber>();
@@ -40,20 +56,13 @@ export const ProposeBatchTx: React.FC = ({}) => {
     setMinimumVotesForProposal,
   ] = useState<BigNumberish>();
 
-  /** array of proposals **/
-  const [indexes, setIndexes] = React.useState<number[]>([]);
-  const [counter, setCounter] = React.useState(0);
-  const [proposalProperties, setProposalProperties] = React.useState<{
-    [key: number]: ProposeTx;
-  }>({});
-
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
       const farmersUnion = contracts.farmersUnion;
       farmersUnion
         .memorandom()
-        .then((result) => {
+        .then((result: any) => {
           const [
             _minimumPending,
             _maximumPending,
@@ -89,147 +98,77 @@ export const ProposeBatchTx: React.FC = ({}) => {
     }
   }, [account, contracts, lastTx]);
 
-  const handleSubmit: FormEventHandler = (event) => {
+  const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts) {
+    if (!account || !contracts || !contract) {
       alert("Not connected");
       return;
     }
-    if (Object.values(proposalProperties).length == 0)
-      return alert("properties are not set");
+    const getType = (valueName: string) => {
+      const argInfo: Param = paramArray.filter((x) => x.name == valueName)[0];
+      return argInfo.type;
+    };
+    const convertType = (type: PARAM_TYPE, value: string) => {
+      switch (type) {
+        case PARAM_TYPE.STRING:
+          return value;
+        case PARAM_TYPE.BOOLEAN:
+          return value == "true";
+        case PARAM_TYPE.NUMBER:
+          return Number(value);
+        default:
+          return value;
+      }
+    };
+    const params = Object.entries(args).map((x) =>
+      convertType(getType(x[0]), x[1])
+    );
+    const { data } = await contract.populateTransaction[methodName](...params);
     if (!predecessor) return alert("Predecessor is not set");
+    if (!data) return alert("data is not set");
     if (!salt) return alert("Salt is not set");
     if (!startsIn) return alert("Starts In is not set");
     if (!votingPeriod) return alert("Voting Period is not set");
-
     const signer = library.getSigner(account);
     contracts.farmersUnion
       .connect(signer)
-      .proposeBatchTx(
-        Object.values(proposalProperties).map((prop) => prop.msgTo),
-        Object.values(proposalProperties).map((prop) => prop.msgValue),
-        Object.values(proposalProperties).map((prop) => prop.msgData),
+      .proposeTx(
+        contract.address,
+        0,
+        data,
         predecessor,
         salt,
         startsIn,
         votingPeriod
       )
-      .then((tx) => {
+      .then((tx: any) => {
         setLastTx(tx);
       });
   };
-
-  const addPropose = () => {
-    setIndexes((prevIndexes) => [...prevIndexes, counter]);
-    setProposalProperties((prevState) => {
-      return {
-        ...prevState,
-        [counter]: {
-          msgTo: "",
-          msgData: "",
-          msgValue: "",
-        },
-      };
-    });
-    setCounter((prevCounter) => prevCounter + 1);
-  };
-
-  const removePropose = (index: any) => () => {
-    setIndexes((prevIndexes) => [
-      ...prevIndexes.filter((item) => item !== index),
-    ]);
-    setProposalProperties((prevState) => {
-      delete prevState[index];
-      return prevState;
-    });
-  };
-
   return (
     <Card>
-      <Card.Header as="h5">
-        Submit a new proposal Batch manner (manual)
-      </Card.Header>
+      <Card.Header as="h5">preset proposal: {methodName}</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
-          {indexes.map((index) => {
+          {paramArray.map((arg) => {
             return (
-              <Card>
-                <h3>proposal</h3>
-                <Form.Group>
-                  <Form.Label>To</Form.Label>
-                  <Form.Control
-                    id="propose-tx-to"
-                    value={proposalProperties[index].msgTo}
-                    onChange={({ target: { value } }) =>
-                      setProposalProperties((prevState) => {
-                        return {
-                          ...prevState,
-                          [index]: {
-                            ...prevState[index],
-                            msgTo: value,
-                          },
-                        };
-                      })
-                    }
-                    placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>Data</Form.Label>
-                  <Form.Control
-                    id="propose-tx-data"
-                    value={proposalProperties[index].msgData}
-                    onChange={({ target: { value } }) =>
-                      setProposalProperties((prevState) => {
-                        return {
-                          ...prevState,
-                          [index]: {
-                            ...prevState[index],
-                            msgData: value,
-                          },
-                        };
-                      })
-                    }
-                    placeholder="0x"
-                  />
-                </Form.Group>
-
-                <Form.Group>
-                  <Form.Label>Value</Form.Label>
-                  <Form.Control
-                    id="propose-tx-value"
-                    value={proposalProperties[index].msgValue}
-                    onChange={({ target: { value } }) =>
-                      setProposalProperties((prevState) => {
-                        return {
-                          ...prevState,
-                          [index]: {
-                            ...prevState[index],
-                            msgValue: value,
-                          },
-                        };
-                      })
-                    }
-                    defaultValue="0"
-                  />
-                </Form.Group>
-
-                <button type="button" onClick={removePropose(index)}>
-                  Remove
-                </button>
-              </Card>
+              <Form.Group>
+                <Form.Label>{arg.name}</Form.Label>
+                <Form.Control
+                  id={arg.name}
+                  value={args[arg.name]}
+                  onChange={({ target: { value } }) =>
+                    setArgs({
+                      ...args,
+                      [arg.name]: value,
+                    })
+                  }
+                  placeholder={arg.name}
+                />
+              </Form.Group>
             );
           })}
-          <Form.Group>
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              id="propose-tx-details"
-              value={proposalDetails}
-              onChange={({ target: { value } }) => setProposalDetails(value)}
-              placeholder="Describe your proposal"
-            />
-          </Form.Group>
 
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
@@ -240,7 +179,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
               defaultValue="0"
             />
           </Form.Group>
-
           <Form.Group>
             <Form.Label>Salt</Form.Label>
             <InputGroup className="mb-2">
@@ -293,7 +231,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
               placeholder={BigNumber.from(minimumVotingPeriod || 0).toString()}
             />
           </Form.Group>
-          <Button onClick={addPropose}>add propose</Button>
           <ConditionalButton
             variant="primary"
             type="submit"

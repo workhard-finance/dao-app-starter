@@ -1,42 +1,27 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { BigNumber, BigNumberish, ContractTransaction, Contract } from "ethers";
+import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
-import { randomBytes } from "ethers/lib/utils";
-import { ConditionalButton } from "../../ConditionalButton";
+import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
+import { formatEther, parseEther, randomBytes } from "ethers/lib/utils";
+import { useWeb3React } from "@web3-react/core";
+import { ConditionalButton } from "../../../ConditionalButton";
 
-export enum PARAM_TYPE {
-  STRING = "string",
-  BOOLEAN = "boolean",
-  NUMBER = "number",
-}
-export interface Param {
-  name: string;
-  type: PARAM_TYPE;
-}
-export interface PresetProposalProps {
-  paramArray: Param[];
-  methodName: string;
-  contract?: Contract;
-}
+export interface ProposeTxProps {}
 
-export const PresetProposal: React.FC<PresetProposalProps> = ({
-  paramArray,
-  methodName,
-  contract,
-}) => {
+export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
+  const [daiBalance, setDaiBalance] = useState<BigNumber>();
   /** Proposal */
+  const [msgTo, setMsgTo] = useState<string>();
+  const [msgValue, setMsgValue] = useState<string>();
+  const [msgData, setMsgData] = useState<string>();
   const [predecessor, setPredecessor] = useState<string>();
   const [salt, setSalt] = useState<string>();
+  const [proposalDetails, setProposalDetails] = useState<string>();
   const [startsIn, setStartsIn] = useState<number>();
   const [votingPeriod, setVotingPeriod] = useState<number>();
   const [lastTx, setLastTx] = useState<ContractTransaction>();
-
-  /** arguments **/
-  const [args, setArgs] = useState<{ [key: string]: string }>({});
 
   /** Memorandom */
   const [myVotes, setMyVotes] = useState<BigNumber>();
@@ -61,13 +46,14 @@ export const PresetProposal: React.FC<PresetProposalProps> = ({
       const farmersUnion = contracts.farmersUnion;
       farmersUnion
         .memorandom()
-        .then((result: any) => {
+        .then((result) => {
           const [
             _minimumPending,
             _maximumPending,
             _minimumVotingPeriod,
             _maximumVotingPeriod,
             _minimumVotesForProposal,
+            _minimumVotesForPassing,
           ] = result;
           setMinimumPending(_minimumPending);
           setMaximumPending(_maximumPending);
@@ -97,84 +83,85 @@ export const PresetProposal: React.FC<PresetProposalProps> = ({
     }
   }, [account, contracts, lastTx]);
 
-  const handleSubmit: FormEventHandler = async (event) => {
+  const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts || !contract) {
+    if (!account || !contracts) {
       alert("Not connected");
       return;
     }
-    const getType = (valueName: string) => {
-      const argInfo: Param = paramArray.filter((x) => x.name == valueName)[0];
-      return argInfo.type;
-    };
-    const convertType = (type: PARAM_TYPE, value: string) => {
-      switch (type) {
-        case PARAM_TYPE.STRING:
-          return value;
-        case PARAM_TYPE.BOOLEAN:
-          return value == "true";
-        case PARAM_TYPE.NUMBER:
-          return Number(value);
-        default:
-          return value;
-      }
-    };
-    const params = Object.entries(args).map((x) =>
-      convertType(getType(x[0]), x[1])
-    );
-    const { data } = await contract.populateTransaction[methodName](...params);
+    if (!msgTo) return alert("To is not set");
+    if (!msgValue) return alert("Value is not set");
+    if (!msgData) return alert("Data is not set");
     if (!predecessor) return alert("Predecessor is not set");
-    if (!data) return alert("data is not set");
     if (!salt) return alert("Salt is not set");
     if (!startsIn) return alert("Starts In is not set");
     if (!votingPeriod) return alert("Voting Period is not set");
+
     const signer = library.getSigner(account);
     contracts.farmersUnion
       .connect(signer)
       .proposeTx(
-        contract.address,
-        0,
-        data,
+        msgTo,
+        msgValue,
+        msgData,
         predecessor,
         salt,
         startsIn,
         votingPeriod
       )
-      .then((tx: any) => {
+      .then((tx) => {
         setLastTx(tx);
       });
   };
+
   return (
     <Card>
-      <Card.Header as="h5">preset proposal: {methodName}</Card.Header>
+      <Card.Header as="h5">Submit a new proposal (manual)</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
-          {paramArray.map((arg) => {
-            return (
-              <Form.Group>
-                <Form.Label>{arg.name}</Form.Label>
-                <Form.Control
-                  id={arg.name}
-                  value={args[arg.name]}
-                  onChange={({ target: { value } }) =>
-                    setArgs({
-                      ...args,
-                      [arg.name]: value,
-                    })
-                  }
-                  placeholder={arg.name}
-                />
-              </Form.Group>
-            );
-          })}
-
+          <Form.Group>
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              id="propose-tx-details"
+              value={proposalDetails}
+              onChange={({ target: { value } }) => setProposalDetails(value)}
+              placeholder="Describe your proposal"
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>To</Form.Label>
+            <Form.Control
+              id="propose-tx-to"
+              value={msgTo}
+              onChange={({ target: { value } }) => setMsgTo(value)}
+              placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Data</Form.Label>
+            <Form.Control
+              id="propose-tx-data"
+              value={msgData}
+              onChange={({ target: { value } }) => setMsgData(value)}
+              placeholder="0x"
+            />
+          </Form.Group>
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
             <Form.Control
               id="propose-tx-predecessor"
-              value={predecessor}
+              value={msgData}
               onChange={({ target: { value } }) => setPredecessor(value)}
+              defaultValue="0"
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Value</Form.Label>
+            <Form.Control
+              id="propose-tx-value"
+              value={msgValue}
+              onChange={({ target: { value } }) => setMsgValue(value)}
               defaultValue="0"
             />
           </Form.Group>
