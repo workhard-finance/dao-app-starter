@@ -19,6 +19,7 @@ import {
   PresetProposalProps,
 } from "../components/contracts/farmers-union/PresetProposal";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { TimelockTxs } from "../components/contracts/timelocked-governance/TimelockTxs";
 
 const getVariant = (percent: number) => {
   if (percent <= 25) return "danger";
@@ -125,6 +126,9 @@ const Vote = () => {
               />
             );
           })}
+        </Tab>
+        <Tab eventKey="timelock" title="Timelock" style={{ marginTop: "1rem" }}>
+          <TimelockTxs />
         </Tab>
       </Tabs>
     </Page>
