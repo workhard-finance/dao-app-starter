@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
-import { Alert, Col, Image, Row } from "react-bootstrap";
+import { Alert, Button, Col, Image, Row } from "react-bootstrap";
 import { StakeMiningPool } from "../components/contracts/mining-pool/StakeMiningPool";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -9,22 +9,31 @@ import { parseEther } from "@ethersproject/units";
 import { BurnMiningPool } from "../components/contracts/mining-pool/BurnMiningPool";
 import { getAddress } from "ethers/lib/utils";
 import { getPriceFromCoingecko } from "../utils/coingecko";
+import { ContractReceipt } from "@ethersproject/contracts";
 
 const Mine = () => {
-  const { library } = useWeb3React();
+  const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   const [pools, setPools] = useState<string[]>();
   const [poolLength, setPoolLength] = useState<BigNumber>();
   const [visionPrice, setVisionPrice] = useState<number>();
   const [emission, setEmission] = useState<BigNumber>();
+  const [distributionEnabled, setDistributionEnabled] = useState<boolean>(
+    false
+  );
 
   const [liquidityMiningIdx, setLiquidityMiningIdx] = useState<number>(-1);
   const [commitmentMiningIdx, setCommitmentMiningIdx] = useState<number>(-1);
+  const [lastTx, setLastTx] = useState<ContractReceipt>();
 
   useEffect(() => {
     if (!!contracts) {
       let stale = false;
       contracts.visionTokenEmitter.getNumberOfPools().then(setPoolLength);
+      contracts.visionTokenEmitter.estimateGas
+        .distribute()
+        .then((_) => setDistributionEnabled(true))
+        .catch((_) => setDistributionEnabled(false));
       return () => {
         stale = true;
         setPoolLength(undefined);
@@ -74,6 +83,19 @@ const Mine = () => {
     }
   }, [library, contracts, pools]);
 
+  const distribute = () => {
+    if (!!account && !!contracts && !!library) {
+      const signer = library.getSigner(account);
+      contracts.visionTokenEmitter
+        .connect(signer)
+        .distribute()
+        .then((tx) => {
+          tx.wait().then(setLastTx);
+        })
+        .catch(alert);
+    }
+  };
+
   return (
     <Page>
       <Image
@@ -83,10 +105,12 @@ const Mine = () => {
       />
       <h1>Mine</h1>
       <Alert variant={"info"}>
-        You can mine $VISION tokens here by providing Uniswap $VISION/ETH pair
-        or burning your $COMMITMENT tokens. Currently 50% of the total emission
-        goes to the liquidity mining pool and the other 50% goes to the
-        commitment mining pool.
+        You just discovered a $VISION mine. Please call that smart contract
+        function now.
+        {"  "}
+        <Button onClick={distribute} variant={"info"}>
+          distribute()
+        </Button>
       </Alert>
       <Row>
         <Col>

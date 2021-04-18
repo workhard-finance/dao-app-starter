@@ -15,6 +15,7 @@ import {
   getPriceFromCoingecko,
   getTokenDetailsFromCoingecko,
 } from "../../../utils/coingecko";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
 export enum StakeMiningPoolType {
   STAKE_MINING_POOL,
@@ -41,6 +42,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
   collapsible,
 }) => {
   const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [collapsed, setCollapsed] = useState<boolean>(
     collapsible ? true : false
@@ -102,7 +104,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
         setMined(undefined);
       };
     }
-  }, [account, contracts, tokenAddress, lastTx]);
+  }, [account, contracts, tokenAddress, lastTx, blockNumber]);
 
   useEffect(() => {
     const amountInWei = parseEther(amount || "0");

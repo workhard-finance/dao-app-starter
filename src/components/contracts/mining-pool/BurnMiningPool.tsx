@@ -16,6 +16,7 @@ import {
   getTokenDetailsFromCoingecko,
 } from "../../../utils/coingecko";
 import { OverlayTooltip } from "../../OverlayTooltip";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
 export enum BurnMiningPoolType {
   STAKE_MINING_POOL,
@@ -42,6 +43,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   collapsible,
 }) => {
   const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [collapsed, setCollapsed] = useState<boolean>(
     collapsible ? true : false
@@ -79,6 +81,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
 
   useEffect(() => {
     if (!!account && !!contracts && !!tokenAddress) {
+      console.log("blocknum", blockNumber);
       let stale = false;
       const token = IERC20__factory.connect(tokenAddress, library);
       token.balanceOf(account).then(setTokenBalance);
@@ -99,7 +102,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
         setMined(undefined);
       };
     }
-  }, [account, contracts, tokenAddress, lastTx]);
+  }, [account, contracts, tokenAddress, lastTx, blockNumber]);
 
   useEffect(() => {
     const amountInWei = parseEther(amount || "0");
@@ -242,9 +245,8 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
           now={burnPercent}
         />
         <Card.Text>
-          {formatEther(burnedAmount || 0)} /
-          {formatEther(burnedAmount?.add(tokenBalance || 0) || 0)} of your{" "}
-          {tokenName || tokenDetails?.name} token is burnd.
+          Burned: {formatEther(burnedAmount || 0)} / Balance:{" "}
+          {formatEther(tokenBalance || 0)}
         </Card.Text>
         <Button variant="primary" onClick={approved ? burn : approve}>
           {approved ? "Burn" : "Approve"}

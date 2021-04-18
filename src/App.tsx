@@ -13,27 +13,30 @@ import Vote from "./pages/Vote";
 import Docs from "./pages/Docs";
 import { WorkhardContractsProvider } from "./providers/WorkhardContractProvider";
 import Project from "./pages/Project";
+import { BlockNumberProvider } from "./providers/BlockNumberProvider";
 
 function App() {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
-      <WorkhardContractsProvider>
-        {/* <WorkhardLoggedDataProvider> */}
-        <WorkhardThemeProvider theme={themes.light}>
-          <Router>
-            <Switch>
-              <Route path="/work" children={<Work />} />
-              <Route path="/mine" children={<Mine />} />
-              <Route path="/farm" children={<Farm />} />
-              <Route path="/vote" children={<Vote />} />
-              <Route path="/docs" children={<Docs />} />
-              <Route path="/proj/:id" children={<Project />} />
-              <Route path="/" children={<Home />} />
-            </Switch>
-          </Router>
-        </WorkhardThemeProvider>
-        {/* </WorkhardLoggedDataProvider> */}
-      </WorkhardContractsProvider>
+      <BlockNumberProvider>
+        <WorkhardContractsProvider>
+          {/* <WorkhardLoggedDataProvider> */}
+          <WorkhardThemeProvider theme={themes.light}>
+            <Router>
+              <Switch>
+                <Route path="/work" children={<Work />} />
+                <Route path="/mine" children={<Mine />} />
+                <Route path="/farm" children={<Farm />} />
+                <Route path="/vote" children={<Vote />} />
+                <Route path="/docs" children={<Docs />} />
+                <Route path="/proj/:id" children={<Project />} />
+                <Route path="/" children={<Home />} />
+              </Switch>
+            </Router>
+          </WorkhardThemeProvider>
+          {/* </WorkhardLoggedDataProvider> */}
+        </WorkhardContractsProvider>
+      </BlockNumberProvider>
     </Web3ReactProvider>
   );
 }
