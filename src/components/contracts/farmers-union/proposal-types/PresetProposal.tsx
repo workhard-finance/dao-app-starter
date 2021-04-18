@@ -5,30 +5,14 @@ import {
   BigNumber,
   BigNumberish,
   ContractTransaction,
-  Contract,
   constants,
 } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
 import { randomBytes } from "ethers/lib/utils";
 import { ConditionalButton } from "../../../ConditionalButton";
+import { Param, Preset, convertType } from "../../../../utils/preset";
 
-export enum PARAM_TYPE {
-  STRING = "string",
-  BOOLEAN = "boolean",
-  NUMBER = "number",
-}
-export interface Param {
-  name: string;
-  type: PARAM_TYPE;
-}
-export interface PresetProposalProps {
-  paramArray: Param[];
-  methodName: string;
-  contract?: Contract;
-  contractName: string;
-}
-
-export const PresetProposal: React.FC<PresetProposalProps> = ({
+export const PresetProposal: React.FC<Preset> = ({
   paramArray,
   methodName,
   contract,
@@ -117,18 +101,7 @@ export const PresetProposal: React.FC<PresetProposalProps> = ({
       const argInfo: Param = paramArray.filter((x) => x.name == valueName)[0];
       return argInfo.type;
     };
-    const convertType = (type: PARAM_TYPE, value: string) => {
-      switch (type) {
-        case PARAM_TYPE.STRING:
-          return value;
-        case PARAM_TYPE.BOOLEAN:
-          return value == "true";
-        case PARAM_TYPE.NUMBER:
-          return Number(value);
-        default:
-          return value;
-      }
-    };
+
     const params = Object.entries(args).map((x) =>
       convertType(getType(x[0]), x[1])
     );

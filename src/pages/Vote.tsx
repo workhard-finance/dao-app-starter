@@ -11,14 +11,6 @@ import {
   Tab,
   Tabs,
 } from "react-bootstrap";
-import { ProposeTx } from "../components/contracts/farmers-union/proposal-types/ProposeTx";
-import { ProposeBatchTx } from "../components/contracts/farmers-union/proposal-types/ProposeBatchTx";
-import {
-  PARAM_TYPE,
-  PresetProposal,
-  PresetProposalProps,
-} from "../components/contracts/farmers-union/proposal-types/PresetProposal";
-import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { TimelockTxs } from "../components/contracts/timelocked-governance/TimelockTxs";
 import { Propose } from "../components/contracts/farmers-union/Propose";
 

@@ -2,12 +2,6 @@ import { Interface, LogDescription } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
 import { getAddress } from "@ethersproject/address";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
-import {
-  PARAM_TYPE,
-  PresetProposalProps,
-} from "../components/contracts/farmers-union/proposal-types/PresetProposal";
-import { Contract } from "ethers";
-import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
   contract: {
@@ -53,116 +47,6 @@ export const acceptableTokenList = [
   {
     symbol: "BASECURRENCY-TEST",
     address: devDeploy.localhost.BaseCurrency,
-  },
-];
-
-export const buildPresets = (
-  contracts: WorkhardContracts | undefined
-): PresetProposalProps[] => [
-  {
-    paramArray: [
-      { name: "projId", type: PARAM_TYPE.NUMBER },
-      { name: "amount", type: PARAM_TYPE.NUMBER },
-    ],
-    methodName: "grant",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "currency", type: PARAM_TYPE.STRING }],
-    methodName: "addCurrency",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "currency", type: PARAM_TYPE.STRING }],
-    methodName: "removeCurrency",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [
-      { name: "manager", type: PARAM_TYPE.STRING },
-      { name: "active", type: PARAM_TYPE.BOOLEAN },
-    ],
-    methodName: "setManager",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "projId", type: PARAM_TYPE.NUMBER }],
-    methodName: "approveProject",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "projId", type: PARAM_TYPE.NUMBER }],
-    methodName: "disapproveProject",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "_oneInch", type: PARAM_TYPE.STRING }],
-    methodName: "setExchange",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
-    methodName: "setTaxRate",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
-    methodName: "setTaxRateForUndeclared",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [
-      { name: "currency", type: PARAM_TYPE.STRING },
-      { name: "amount", type: PARAM_TYPE.NUMBER },
-    ],
-    methodName: "taxToVisionFarm",
-    contract: contracts?.cryptoJobBoard,
-    contractName: "CryptoJobBoard",
-  },
-  {
-    paramArray: [{ name: "planter", type: PARAM_TYPE.STRING }],
-    methodName: "addPlanter",
-    contract: contracts?.visionFarm,
-    contractName: "VisionFarm",
-  },
-  {
-    paramArray: [{ name: "planter", type: PARAM_TYPE.STRING }],
-    methodName: "removePlanter",
-    contract: contracts?.visionFarm,
-    contractName: "VisionFarm",
-  },
-  {
-    paramArray: [{ name: "_fund", type: PARAM_TYPE.STRING }],
-    methodName: "setProtocolFund",
-    contract: contracts?.visionTokenEmitter,
-    contractName: "VisionTokenEmitter",
-  },
-  {
-    paramArray: [],
-    methodName: "start",
-    contract: contracts?.visionTokenEmitter,
-    contractName: "VisionTokenEmitter",
-  },
-  {
-    paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
-    methodName: "setMinimumRate",
-    contract: contracts?.visionTokenEmitter,
-    contractName: "VisionTokenEmitter",
-  },
-  {
-    paramArray: [{ name: "period", type: PARAM_TYPE.NUMBER }],
-    methodName: "setEmissionPeriod",
-    contract: contracts?.visionTokenEmitter,
-    contractName: "VisionTokenEmitter",
   },
 ];
 

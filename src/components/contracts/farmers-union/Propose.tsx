@@ -2,18 +2,15 @@ import React from "react";
 import { Dropdown, Nav } from "react-bootstrap";
 import { Col, Row, Tab } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import {
-  PresetProposal,
-  PresetProposalProps,
-} from "./proposal-types/PresetProposal";
 import { ProposeTx } from "./proposal-types/ProposeTx";
 import { ProposeBatchTx } from "./proposal-types/ProposeBatchTx";
 import { TimelockPresetProposal } from "../timelocked-governance/TimelockPresetProposal";
-import { buildPresets } from "../../../utils/utils";
+import { buildPresets, Preset } from "../../../utils/preset";
+import { PresetProposal } from "./proposal-types/PresetProposal";
 
 export const Propose: React.FC = ({}) => {
   const contracts = useWorkhardContracts();
-  const presets: PresetProposalProps[] = buildPresets(contracts);
+  const presets: Preset[] | undefined = buildPresets(contracts);
   return (
     <Tab.Container id="left-tabs-example" defaultActiveKey="manual">
       <Row>
@@ -32,7 +29,7 @@ export const Propose: React.FC = ({}) => {
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     {presets
-                      .filter((preset) => preset.contractName === contractName)
+                      ?.filter((preset) => preset.contractName === contractName)
                       .map((prop) => {
                         return (
                           <Dropdown.Item
@@ -77,7 +74,7 @@ export const Propose: React.FC = ({}) => {
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     {presets
-                      .filter((preset) => preset.contractName === contractName)
+                      ?.filter((preset) => preset.contractName === contractName)
                       .map((prop) => {
                         return (
                           <Dropdown.Item
@@ -101,7 +98,7 @@ export const Propose: React.FC = ({}) => {
             <Tab.Pane eventKey="maunal(batch)">
               <ProposeBatchTx />
             </Tab.Pane>
-            {presets.map((prop) => {
+            {presets?.map((prop) => {
               return (
                 <Tab.Pane eventKey={`${prop.contractName}.${prop.methodName}`}>
                   <PresetProposal
@@ -113,7 +110,7 @@ export const Propose: React.FC = ({}) => {
                 </Tab.Pane>
               );
             })}
-            {presets.map((prop) => {
+            {presets?.map((prop) => {
               return (
                 <Tab.Pane
                   eventKey={`timelock-${prop.contractName}.${prop.methodName}`}
