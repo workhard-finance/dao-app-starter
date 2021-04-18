@@ -1,7 +1,13 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
-import { BigNumber, BigNumberish, ContractTransaction, Contract } from "ethers";
+import {
+  BigNumber,
+  BigNumberish,
+  ContractTransaction,
+  Contract,
+  constants,
+} from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
 import { randomBytes } from "ethers/lib/utils";
 import { ConditionalButton } from "../../../ConditionalButton";
@@ -30,8 +36,10 @@ export const PresetProposal: React.FC<PresetProposalProps> = ({
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   /** Proposal */
-  const [predecessor, setPredecessor] = useState<string>();
-  const [salt, setSalt] = useState<string>();
+  const [predecessor, setPredecessor] = useState<string>(constants.HashZero);
+  const [salt, setSalt] = useState<string>(
+    BigNumber.from(randomBytes(32)).toHexString()
+  );
   const [startsIn, setStartsIn] = useState<number>();
   const [votingPeriod, setVotingPeriod] = useState<number>();
   const [lastTx, setLastTx] = useState<ContractTransaction>();
@@ -186,11 +194,11 @@ export const PresetProposal: React.FC<PresetProposalProps> = ({
                 id="propose-tx-salt"
                 value={salt}
                 onChange={({ target: { value } }) => setSalt(value)}
-                defaultValue={BigNumber.from(randomBytes(32)).toString()}
+                defaultValue={BigNumber.from(randomBytes(32)).toHexString()}
               />
               <InputGroup.Append
                 onClick={() =>
-                  setSalt(BigNumber.from(randomBytes(32)).toString())
+                  setSalt(BigNumber.from(randomBytes(32)).toHexString())
                 }
               >
                 <InputGroup.Text>RAND</InputGroup.Text>
