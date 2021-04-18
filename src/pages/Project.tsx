@@ -15,7 +15,6 @@ import { wrapUrl } from "../utils/utils";
 import { ApproveProject } from "../components/contracts/crypto-job-board/ApproveProject";
 import { CloseProject } from "../components/contracts/crypto-job-board/CloseProject";
 import { ExecuteBudget } from "../components/contracts/crypto-job-board/ExecuteBudget";
-import { Grant } from "../components/contracts/crypto-job-board/Grant";
 
 const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -119,9 +118,6 @@ const Project: React.FC = () => {
                 <Nav.Link eventKey="budget">Budget</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="grant">Grant</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
                 <Nav.Link eventKey="etc">Etc</Nav.Link>
               </Nav.Item>
             </Nav>
@@ -148,9 +144,6 @@ const Project: React.FC = () => {
                     );
                   }
                 })}
-              </Tab.Pane>
-              <Tab.Pane eventKey="grant">
-                <Grant projId={id} />
               </Tab.Pane>
               <Tab.Pane eventKey="etc">
                 <>
