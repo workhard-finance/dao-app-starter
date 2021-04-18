@@ -17,10 +17,10 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
   useEffect(() => {
     if (!!contracts) {
       let stale = false;
-      const timeLockGovernance = contracts.timeLockGovernance;
-      timeLockGovernance
+      const timelockedGovernance = contracts.timelockedGovernance;
+      timelockedGovernance
         .queryFilter(
-          timeLockGovernance.filters.CallScheduled(
+          timelockedGovernance.filters.CallScheduled(
             null,
             null,
             null,

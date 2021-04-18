@@ -1,16 +1,20 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import {
   BigNumber,
+  Contract,
   ContractTransaction,
   providers,
   Signer,
   Transaction,
 } from "ethers";
 import { Card, Form } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import {
+  useWorkhardContracts,
+  WorkhardContracts,
+} from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import { solidityKeccak256 } from "ethers/lib/utils";
+import { getAddress, Result, solidityKeccak256 } from "ethers/lib/utils";
 
 export interface TimelockTxProps {
   id: string;
@@ -57,6 +61,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   const [scheduledTx, setScheduledTx] = useState<
     ScheduledTx | BatchScheduledTx
   >();
+  const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
   const [hasExecutorRole, setHasExecutorRole] = useState<boolean>(false);
   const [timestamp, setTimestamp] = useState<number>(0);
   const [timelockTxStatus, setTimelockTxStatus] = useState<TimelockTxStatus>(
@@ -66,7 +71,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   useEffect(() => {
     if (!!contracts && !!library) {
       let stale = false;
-      const timeLockGovernance = contracts.timeLockGovernance;
+      const timeLockGovernance = contracts.timelockedGovernance;
       library
         .getBlock(blockNumber)
         .then((block) => {
@@ -130,6 +135,28 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     }
   }, [library, contracts, lastTx]);
 
+  useEffect(() => {
+    if (!!contracts && !!scheduledTx) {
+      const _tx: ScheduledTx | undefined = (scheduledTx as ScheduledTx).target
+        ? (scheduledTx as ScheduledTx)
+        : undefined;
+      const _batchTx:
+        | BatchScheduledTx
+        | undefined = (scheduledTx as BatchScheduledTx).targets
+        ? (scheduledTx as BatchScheduledTx)
+        : undefined;
+      if (_tx) {
+        setDecodedTxData([decodeTxDetails(contracts, _tx.target, _tx.data)]);
+      } else if (_batchTx) {
+        setDecodedTxData(
+          _batchTx.targets.map((target: string, i: number) =>
+            decodeTxDetails(contracts, target, _batchTx.datas[i])
+          )
+        );
+      }
+    }
+  }, [contracts, scheduledTx]);
+
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -139,7 +166,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     }
 
     const signer: Signer = library.getSigner(account);
-    const timeLockGovernance = contracts.timeLockGovernance;
+    const timeLockGovernance = contracts.timelockedGovernance;
 
     switch (timelockTxStatus) {
       case TimelockTxStatus.PENDING:
@@ -189,7 +216,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
-      const timeLockGovernance = contracts.timeLockGovernance;
+      const timeLockGovernance = contracts.timelockedGovernance;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["EXECUTOR_ROLE"]), account)
         .then(setHasExecutorRole)
@@ -262,18 +289,29 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           Remaining: {remaining} seconds (= ~{(remaining / 86400).toFixed(1)}{" "}
           days)
         </Card.Text>
-        <Card.Text>target: {target?.toString()}</Card.Text>
-        <Card.Text>value: {value?.toString()}</Card.Text>
-        <Card.Text>data: {data}</Card.Text>
-        <Card.Text>predecessor: {predecessor}</Card.Text>
-        <Card.Text>salt: {salt?.toString()}</Card.Text>
-        <Card.Text>delay: {delay?.toString()}</Card.Text>
         <Card.Text>
           txHash:{" "}
           <a target="_blank" href={`https://etherscan.io/tx/${tx.hash}`}>
             {tx.hash?.toString()}
           </a>
         </Card.Text>
+        <Card.Text>predecessor: {predecessor}</Card.Text>
+        <Card.Text>salt: {salt?.toString()}</Card.Text>
+        {decodedTxData?.map((decoded, i) => (
+          <>
+            <hr />
+            <Card.Text>
+              {decoded.contractName}.{decoded.methodName}
+              {parseValueToSolidityForm(value, i)}({`{`}
+              {Object.keys(decoded.args)
+                .map((argName) => {
+                  return `\n${argName}: ${decoded.args[argName]}`;
+                })
+                .join(",")}
+              {`}`})
+            </Card.Text>
+          </>
+        ))}
         <Form onSubmit={handleSubmit}>
           <ConditionalButton
             variant="primary"
@@ -305,4 +343,61 @@ function txWait(tx: ContractTransaction) {
 function handleException(reason: any) {
   // TODO UI update w/stale
   alert(`Failed: ${reason.data.message}`);
+}
+
+interface DecodedTxData {
+  contractName: string;
+  methodName: string;
+  args: { [key: string]: any };
+}
+
+function decodeTxDetails(
+  contracts: WorkhardContracts,
+  target: string,
+  data: string
+): DecodedTxData {
+  const result = (Object.entries(contracts) as Array<[string, Contract]>).find(
+    ([_, contract]) => getAddress(target) === getAddress(contract.address)
+  );
+  if (result) {
+    const [contractName, contract] = result;
+    const fragment = contract.interface.getFunction(data.slice(0, 10));
+    const methodName = fragment.name;
+    const decoded = contract.interface.decodeFunctionData(fragment, data);
+    const argNames = Object.getOwnPropertyNames(decoded).filter((name) => {
+      return ![
+        ...Array(decoded.length)
+          .fill(0)
+          .map((_, i) => `${i}`),
+        "length",
+      ].includes(name);
+    });
+    const args: { [key: string]: any } = {};
+    argNames.forEach((key) => {
+      args[key] = decoded[key];
+    });
+    return {
+      contractName:
+        contractName.slice(0, 1).toUpperCase() + contractName.slice(1),
+      methodName,
+      args,
+    };
+  } else {
+    throw Error("Failed to find contract interface");
+  }
+}
+
+function parseValueToSolidityForm(
+  value: BigNumber | BigNumber[] | undefined,
+  i: number
+): string {
+  if (!value) return "";
+  let v;
+  if (Array.isArray(value)) {
+    v = value[i].toString();
+  } else {
+    v = value.toString();
+  }
+  if (v === "0") return "";
+  else return `{value: ${v}}`;
 }

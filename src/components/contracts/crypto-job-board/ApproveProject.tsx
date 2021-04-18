@@ -45,7 +45,7 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
 
     const signer = library.getSigner(account);
     const cryptoJobBoard = contracts.cryptoJobBoard;
-    const timeLockGovernance = contracts.timeLockGovernance;
+    const timeLockGovernance = contracts.timelockedGovernance;
 
     const tx = await cryptoJobBoard.populateTransaction.approveProject(projId);
     const data = tx?.data;
@@ -101,7 +101,7 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
-      const timeLockGovernance = contracts.timeLockGovernance;
+      const timeLockGovernance = contracts.timelockedGovernance;
       const cryptoJobBoard = contracts.cryptoJobBoard;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)

@@ -33,7 +33,7 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
 
     const signer = library.getSigner(account);
     const cryptoJobBoard = contracts.cryptoJobBoard;
-    const timeLockGovernance = contracts.timeLockGovernance;
+    const timeLockGovernance = contracts.timelockedGovernance;
 
     const grantAmountInWei = parseEther(grantAmount || "0");
     const tx = await cryptoJobBoard.populateTransaction.grant(
@@ -65,7 +65,11 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
-      const { timeLockGovernance, cryptoJobBoard, commitmentFund } = contracts;
+      const {
+        timelockedGovernance: timeLockGovernance,
+        cryptoJobBoard,
+        commitmentFund,
+      } = contracts;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)

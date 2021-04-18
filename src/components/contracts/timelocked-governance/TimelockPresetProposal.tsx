@@ -1,7 +1,7 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { BigNumber, ContractTransaction, Contract } from "ethers";
+import { BigNumber, ContractTransaction, Contract, constants } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
 import { randomBytes, solidityKeccak256 } from "ethers/lib/utils";
 import { ConditionalButton } from "../../ConditionalButton";
@@ -30,9 +30,11 @@ export const TimelockPresetProposal: React.FC<TimelockPresetProposalProps> = ({
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   /** Proposal */
-  const [predecessor, setPredecessor] = useState<string>();
-  const [salt, setSalt] = useState<string>();
-  const [delay, setDelay] = useState<number>();
+  const [predecessor, setPredecessor] = useState<string>(constants.HashZero);
+  const [salt, setSalt] = useState<string>(
+    BigNumber.from(randomBytes(32)).toHexString()
+  );
+  const [delay, setDelay] = useState<number>(86400);
   const [lastTx, setLastTx] = useState<ContractTransaction>();
 
   /** arguments **/
@@ -45,20 +47,20 @@ export const TimelockPresetProposal: React.FC<TimelockPresetProposalProps> = ({
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
-      const { timeLockGovernance } = contracts;
-      timeLockGovernance
+      const { timelockedGovernance } = contracts;
+      timelockedGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)
         .catch(() => {
           if (!stale) setHasProposerRole(undefined);
         });
-      timeLockGovernance
+      timelockedGovernance
         .getMinDelay()
         .then((_delay) => {
           setDelay(_delay.toNumber());
         })
         .catch(() => {
-          if (!stale) setDelay(undefined);
+          if (!stale) setDelay(86400);
         });
     }
   }, [account, contracts, lastTx]);
@@ -90,12 +92,10 @@ export const TimelockPresetProposal: React.FC<TimelockPresetProposalProps> = ({
       convertType(getType(x[0]), x[1])
     );
     const { data } = await contract.populateTransaction[methodName](...params);
-    if (!predecessor) return alert("Predecessor is not set");
     if (!data) return alert("data is not set");
-    if (!salt) return alert("Salt is not set");
-    if (!delay) return alert("Starts In is not set");
     const signer = library.getSigner(account);
-    contracts.timeLockGovernance
+    console.log("mypredecessor", predecessor);
+    contracts.timelockedGovernance
       .connect(signer)
       .schedule(contract.address, 0, data, predecessor, salt, delay)
       .then((tx) => {
@@ -132,7 +132,6 @@ export const TimelockPresetProposal: React.FC<TimelockPresetProposalProps> = ({
               id="propose-tx-predecessor"
               value={predecessor}
               onChange={({ target: { value } }) => setPredecessor(value)}
-              defaultValue="0"
             />
           </Form.Group>
           <Form.Group>
@@ -142,11 +141,10 @@ export const TimelockPresetProposal: React.FC<TimelockPresetProposalProps> = ({
                 id="propose-tx-salt"
                 value={salt}
                 onChange={({ target: { value } }) => setSalt(value)}
-                defaultValue={BigNumber.from(randomBytes(32)).toString()}
               />
               <InputGroup.Append
                 onClick={() =>
-                  setSalt(BigNumber.from(randomBytes(32)).toString())
+                  setSalt(BigNumber.from(randomBytes(32)).toHexString())
                 }
               >
                 <InputGroup.Text>RAND</InputGroup.Text>
@@ -159,7 +157,7 @@ export const TimelockPresetProposal: React.FC<TimelockPresetProposalProps> = ({
               seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-starts-in"
+              id="propose-tx-delay"
               type="number"
               value={delay}
               min={BigNumber.from(minDelay || 0).toNumber()}

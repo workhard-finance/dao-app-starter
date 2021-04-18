@@ -50,7 +50,7 @@ export interface WorkhardContracts {
   commitmentMining: BurnMining;
   visionTokenEmitter: VisionTokenEmitter;
   farmersUnion: FarmersUnion;
-  timeLockGovernance: TimelockedGovernance;
+  timelockedGovernance: TimelockedGovernance;
   baseCurrency: ERC20;
   commitmentToken: CommitmentToken;
   visionToken: VisionToken;
@@ -144,7 +144,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       visionTokenEmitter,
       commitmentFund,
       farmersUnion,
-      timeLockGovernance,
+      timelockedGovernance: timeLockGovernance,
       baseCurrency,
       commitmentToken,
       visionToken,
