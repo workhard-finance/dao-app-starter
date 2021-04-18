@@ -1,33 +1,79 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Form,
-  FormControl,
-  Image,
-  InputGroup,
-  ListGroup,
-  ListGroupItem,
-  OverlayTrigger,
-  ProgressBar,
-  Row,
-  Tooltip,
-} from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Alert, Col, Image, Row } from "react-bootstrap";
+import { StakeMiningPool } from "../components/contracts/mining-pool/StakeMiningPool";
+import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { BigNumber } from "@ethersproject/bignumber";
+import { useWeb3React } from "@web3-react/core";
+import { parseEther } from "@ethersproject/units";
+import { BurnMiningPool } from "../components/contracts/mining-pool/BurnMiningPool";
+import { getAddress } from "ethers/lib/utils";
+import { getPriceFromCoingecko } from "../utils/coingecko";
 
-const getVariant = (percent: number) => {
-  if (percent <= 25) return "danger";
-  else if (percent <= 50) return "warning";
-  else if (percent <= 75) return "info";
-  else return "success";
-};
 const Mine = () => {
-  const stakePercent = 60;
-  const lockedPercent = 90;
-  const remainingPercent = 10;
+  const { library } = useWeb3React();
+  const contracts = useWorkhardContracts();
+  const [pools, setPools] = useState<string[]>();
+  const [poolLength, setPoolLength] = useState<BigNumber>();
+  const [visionPrice, setVisionPrice] = useState<number>();
+  const [emission, setEmission] = useState<BigNumber>();
+
+  const [liquidityMiningIdx, setLiquidityMiningIdx] = useState<number>(-1);
+  const [commitmentMiningIdx, setCommitmentMiningIdx] = useState<number>(-1);
+
+  useEffect(() => {
+    if (!!contracts) {
+      let stale = false;
+      contracts.visionTokenEmitter.getNumberOfPools().then(setPoolLength);
+      return () => {
+        stale = true;
+        setPoolLength(undefined);
+      };
+    }
+  }, [contracts]);
+
+  useEffect(() => {
+    if (!!contracts && !!poolLength) {
+      let stale = false;
+      const { visionTokenEmitter } = contracts;
+      Promise.all(
+        Array(poolLength.toNumber())
+          .fill(0)
+          .map((_, i) => visionTokenEmitter.pools(i))
+      ).then(setPools);
+      return () => {
+        stale = true;
+        setPools([]);
+      };
+    }
+  }, [contracts, poolLength]);
+
+  useEffect(() => {
+    if (!!contracts && !!pools) {
+      let stale = false;
+      setLiquidityMiningIdx(
+        pools.findIndex(
+          (v) => getAddress(v) === getAddress(contracts.liquidityMining.address)
+        )
+      );
+      setCommitmentMiningIdx(
+        pools.findIndex(
+          (v) =>
+            getAddress(v) === getAddress(contracts.commitmentMining.address)
+        )
+      );
+      contracts.visionTokenEmitter.getEmission().then(setEmission);
+      getPriceFromCoingecko(contracts.visionToken.address).then(setVisionPrice);
+      return () => {
+        stale = true;
+        setPoolLength(undefined);
+        setEmission(undefined);
+        setLiquidityMiningIdx(-1);
+        setCommitmentMiningIdx(-1);
+      };
+    }
+  }, [library, contracts, pools]);
+
   return (
     <Page>
       <Image
@@ -44,97 +90,28 @@ const Mine = () => {
       </Alert>
       <Row>
         <Col>
-          <Card>
-            <Card.Header as="h5">Liquidity mining - staking</Card.Header>
-            <Card.Body>
-              <Card.Title>APY</Card.Title>
-              <Card.Text style={{ fontSize: "3rem" }}>4321 %</Card.Text>
-              {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Staking</Card.Title>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>MAX</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="Username"
-                    />
-                  </InputGroup>
-                </Form.Group>
-                <ProgressBar
-                  variant={getVariant(stakePercent)}
-                  animated
-                  now={stakePercent}
-                />
-                <Card.Text>
-                  1432 / 4323 of your $VISION/ETH lp token is staked.
-                </Card.Text>
-                <Button variant="primary" type="submit">
-                  Stake
-                </Button>{" "}
-                <Button variant="secondary" type="submit">
-                  Withdraw
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
+          {pools && liquidityMiningIdx !== -1 && (
+            <StakeMiningPool
+              poolIdx={liquidityMiningIdx}
+              title={"Liquidity Mining"}
+              tokenName={"VISION/ETH LP"}
+              poolAddress={pools[liquidityMiningIdx]}
+              tokenEmission={emission || BigNumber.from(0)}
+              visionPrice={visionPrice || 0}
+            />
+          )}
         </Col>
         <Col>
-          <Card>
-            <Card.Header as="h5">Commitment mining - burning</Card.Header>
-            <Card.Body>
-              <Card.Title>
-                APYBC
-                <OverlayTrigger
-                  // key={placement}
-                  // placement={placement}
-                  overlay={
-                    <Tooltip id={`tooltip-dispatchable-farmers`}>
-                      Annual Percentage Yield by Burning $Commitment token =
-                      (Revenue - Burn) / Year
-                    </Tooltip>
-                  }
-                >
-                  <span style={{ fontSynthesis: "o" }}>❔</span>
-                </OverlayTrigger>
-              </Card.Title>
-              <Card.Text style={{ fontSize: "3rem" }}>4321 %</Card.Text>
-              {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-              <Form>
-                <Form.Group controlId="formBasicEmail">
-                  <Card.Title>Burn</Card.Title>
-                  {/* <Form.Label>Staking</Form.Label> */}
-                  <InputGroup className="mb-2">
-                    <InputGroup.Prepend>
-                      <InputGroup.Text>MAX</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl
-                      id="inlineFormInputGroup"
-                      placeholder="Username"
-                    />
-                  </InputGroup>
-                </Form.Group>
-                <ProgressBar
-                  variant={getVariant(stakePercent)}
-                  animated
-                  now={stakePercent}
-                />
-                <Card.Text>
-                  1432 / 2132 of your $COMMITMENT token is burnt for commitment
-                  mining.
-                </Card.Text>
-                <Button variant="primary" type="submit">
-                  Burn
-                </Button>{" "}
-                <Button variant="secondary" type="submit">
-                  Stop mining & withdraw reward
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
+          {pools && commitmentMiningIdx !== -1 && (
+            <BurnMiningPool
+              poolIdx={commitmentMiningIdx}
+              title={"Commitment Mining"}
+              tokenName={"COMMITMENT"}
+              poolAddress={pools[commitmentMiningIdx]}
+              tokenEmission={emission || BigNumber.from(0)}
+              visionPrice={visionPrice || 0}
+            />
+          )}
         </Col>
       </Row>
       <hr />
@@ -147,71 +124,25 @@ const Mine = () => {
         protocol, get in touch with Workhard community. You can boost your
         protocol while hiring talents in the very crypto way.
       </p>
-      <Card>
-        <Card.Header as="h5">Stake $YFI</Card.Header>
-        <Card.Body>
-          <Card.Title>APY</Card.Title>
-          <Card.Text style={{ fontSize: "3rem" }}>4321 %</Card.Text>
-          {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-          <Form>
-            <Form.Group controlId="formBasicEmail">
-              <Card.Title>Staking</Card.Title>
-              {/* <Form.Label>Staking</Form.Label> */}
-              <InputGroup className="mb-2">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>MAX</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl id="inlineFormInputGroup" placeholder="Username" />
-              </InputGroup>
-            </Form.Group>
-            <ProgressBar
-              variant={getVariant(stakePercent)}
-              animated
-              now={stakePercent}
-            />
-            <Card.Text>1432 / 4323 of your $YFI token is staked.</Card.Text>
-            <Button variant="primary" type="submit">
-              Stake
-            </Button>{" "}
-            <Button variant="secondary" type="submit">
-              Withdraw
-            </Button>
-          </Form>
-        </Card.Body>
-      </Card>
-      <br />
-      <Card>
-        <Card.Header as="h5">Stake $BAS</Card.Header>
-        <Card.Body>
-          <Card.Title>APY</Card.Title>
-          <Card.Text style={{ fontSize: "3rem" }}>4321 %</Card.Text>
-          {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-          <Form>
-            <Form.Group controlId="formBasicEmail">
-              <Card.Title>Staking</Card.Title>
-              {/* <Form.Label>Staking</Form.Label> */}
-              <InputGroup className="mb-2">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>MAX</InputGroup.Text>
-                </InputGroup.Prepend>
-                <FormControl id="inlineFormInputGroup" placeholder="Username" />
-              </InputGroup>
-            </Form.Group>
-            <ProgressBar
-              variant={getVariant(stakePercent)}
-              animated
-              now={stakePercent}
-            />
-            <Card.Text>1432 / 4323 of your $BAS token is staked.</Card.Text>
-            <Button variant="primary" type="submit">
-              Stake
-            </Button>{" "}
-            <Button variant="secondary" type="submit">
-              Withdraw
-            </Button>
-          </Form>
-        </Card.Body>
-      </Card>
+      {pools?.map((addr, idx) => {
+        if (idx === liquidityMiningIdx || idx === commitmentMiningIdx)
+          return undefined;
+        else
+          return (
+            <>
+              <br />
+              <StakeMiningPool
+                poolIdx={idx}
+                title={"Liquidity Mining"}
+                tokenName={"VISION/ETH LP"}
+                poolAddress={addr}
+                tokenEmission={emission || BigNumber.from(0)}
+                visionPrice={visionPrice || 0}
+                collapsible={true}
+              />
+            </>
+          );
+      })}
     </Page>
   );
 };

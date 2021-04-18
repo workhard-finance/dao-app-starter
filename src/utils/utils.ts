@@ -176,3 +176,10 @@ export const getTokenSymbol = (address: string): string | undefined => {
     return undefined;
   }
 };
+
+export const getVariantForProgressBar = (percent: number) => {
+  if (percent <= 25) return "danger";
+  else if (percent <= 50) return "warning";
+  else if (percent <= 75) return "info";
+  else return "success";
+};

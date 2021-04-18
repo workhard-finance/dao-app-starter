@@ -27,6 +27,7 @@
     "deepmerge": "^4.2.2",
     "ethers": "^5.0.26",
     "mdx.macro": "^0.2.9",
+    "node-fetch": "^2.6.1",
     "node-sass": "4.14.1",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.3",

@@ -54,6 +54,7 @@ export interface WorkhardContracts {
   baseCurrency: ERC20;
   commitmentToken: CommitmentToken;
   visionToken: VisionToken;
+  visionLP: ERC20;
 }
 
 export const WorkhardContractCtx = React.createContext<
@@ -85,7 +86,8 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       !contracts.BaseCurrency ||
       !contracts.CommitmentToken ||
       !contracts.VisionToken ||
-      !contracts.VisionTokenEmitter
+      !contracts.VisionTokenEmitter ||
+      !contracts.VisionLP
     ) {
       return undefined;
     }
@@ -135,6 +137,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       contracts.VisionToken,
       library
     );
+    const visionLP = ERC20__factory.connect(contracts.VisionLP, library);
     const context: WorkhardContracts = {
       project,
       cryptoJobBoard,
@@ -148,6 +151,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       baseCurrency,
       commitmentToken,
       visionToken,
+      visionLP,
     };
     return context;
   };
