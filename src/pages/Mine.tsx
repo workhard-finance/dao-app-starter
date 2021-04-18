@@ -104,14 +104,16 @@ const Mine = () => {
         style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
       />
       <h1>Mine</h1>
-      <Alert variant={"info"}>
-        You just discovered a $VISION mine. Please call that smart contract
-        function now.
-        {"  "}
-        <Button onClick={distribute} variant={"info"}>
-          distribute()
-        </Button>
-      </Alert>
+      {distributionEnabled && (
+        <Alert variant={"info"}>
+          You just discovered a $VISION mine. Please call that smart contract
+          function now.
+          {"  "}
+          <Button onClick={distribute} variant={"info"}>
+            distribute()
+          </Button>
+        </Alert>
+      )}
       <Row>
         <Col>
           {pools && liquidityMiningIdx !== -1 && (
