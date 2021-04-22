@@ -148,9 +148,9 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
     token
       .connect(signer)
       .approve(poolAddress, constants.MaxUint256)
-      .then((tx) => {
+      .then((tx: any) => {
         tx.wait()
-          .then((_) => {
+          .then((_: any) => {
             setTokenAllowance(constants.MaxUint256);
             setApproved(true);
           })
