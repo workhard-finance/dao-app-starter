@@ -10,15 +10,16 @@ import React, { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { BigNumber, BigNumberish } from "ethers";
+import { parseEther } from "ethers/lib/utils";
 
 interface Proposal {
   id: number;
   proposer: string;
   txHash: string;
-  start: number;
-  end: number;
-  totalForVotes: number;
-  totalAgainstVotes: number;
+  start: BigNumberish;
+  end: BigNumberish;
+  totalForVotes: BigNumberish;
+  totalAgainstVotes: BigNumberish;
   executed: boolean;
   to?: string;
   value?: number;
@@ -30,6 +31,7 @@ export const VoteFor: React.FC = () => {
   const contracts = useWorkhardContracts();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [myVotes, setMyVotes] = useState<BigNumber>();
+  const [page, setPage] = useState(0);
   const [projIdToVote, setProjIdToVote] = useState();
   useEffect(() => {
     if (!account || !library || !chainId || !contracts) {
@@ -40,7 +42,7 @@ export const VoteFor: React.FC = () => {
     farmersUnion.getVotes(account).then((vote) => {
       setMyVotes(vote);
     });
-    paginatedProposals(0);
+    paginatedProposals(page);
     return () => {
       stale = true;
     };
@@ -70,19 +72,23 @@ export const VoteFor: React.FC = () => {
                 <ProgressBar
                   animated
                   variant="success"
-                  now={
-                    (100 * p.totalForVotes) /
-                    (p.totalForVotes + p.totalAgainstVotes)
-                  }
+                  now={BigNumber.from(p.totalForVotes)
+                    .mul(100)
+                    .div(
+                      BigNumber.from(p.totalForVotes).add(p.totalAgainstVotes)
+                    )
+                    .toNumber()}
                   key={1}
                 />
                 <ProgressBar
                   animated
                   variant="danger"
-                  now={
-                    (100 * p.totalAgainstVotes) /
-                    (p.totalForVotes + p.totalAgainstVotes)
-                  }
+                  now={BigNumber.from(p.totalAgainstVotes)
+                    .mul(100)
+                    .div(
+                      BigNumber.from(p.totalForVotes).add(p.totalAgainstVotes)
+                    )
+                    .toNumber()}
                   key={2}
                 />
               </ProgressBar>
@@ -97,17 +103,17 @@ export const VoteFor: React.FC = () => {
                   <InputGroup className="mb-2">
                     <FormControl
                       id="inlineFormInputGroup"
-                      placeholder={myVotes}
+                      placeholder={myVotes?.toString()}
                     />
                     <InputGroup.Append>
                       <InputGroup.Text>MAX</InputGroup.Text>
                     </InputGroup.Append>
                   </InputGroup>
                 </Form.Group>
-                <Button variant="success" onClick={onVoteFor(p.id)}>
+                <Button variant="success" onClick={onVote(p.id, true)}>
                   For
                 </Button>{" "}
-                <Button variant="danger" onClick={onVoteAgainst(p.id)}>
+                <Button variant="danger" onClick={onVote(p.id, false)}>
                   Against
                 </Button>{" "}
               </Form>
@@ -115,6 +121,10 @@ export const VoteFor: React.FC = () => {
           </Card>
         );
       })}
+      {/*todo: pagination*/}
+      {/*<Button variant="danger" onClick={onStaking}>*/}
+      {/*  Stake*/}
+      {/*</Button>{" "}*/}
     </Card>
   );
 
@@ -127,54 +137,70 @@ export const VoteFor: React.FC = () => {
     const farmersUnion = contracts.farmersUnion;
     for (let i = size * page; i < size * (page + 1); i++) {
       try {
-        result.push(await farmersUnion.proposals(i));
+        let proposal = await farmersUnion.proposals(i);
+        let tx = await library.getTransaction(proposal.txHash);
+        result.push({
+          id: i,
+          totalAgainstVotes: proposal.totalAgainstVotes,
+          totalForVotes: proposal.totalForVotes,
+          txHash: proposal.txHash,
+          proposer: proposal.proposer,
+          start: proposal.start,
+          end: proposal.end,
+          executed: proposal.executed,
+          to: tx.to,
+          value: tx.value,
+          data: tx.data,
+        } as Proposal);
       } catch (e) {}
     }
-    // setProposals(result.filter((x: any) => !!x))
+    setProposals(result.filter((x: any) => !!x));
     // todo: set id, to, value, data from tx info
-    setProposals([
-      {
-        id: 0,
-        totalAgainstVotes: 10,
-        totalForVotes: 20,
-        txHash: "0x0",
-        proposer: "0x0",
-        start: 111,
-        end: 222,
-        executed: false,
-        to: "0x0",
-        value: 0,
-        data: "0x0",
-      },
-    ]);
+    // setProposals([
+    //   {
+    //     id: 0,
+    //     totalAgainstVotes: 10,
+    //     totalForVotes: 20,
+    //     txHash: "0x0",
+    //     proposer: "0x0",
+    //     start: 111,
+    //     end: 222,
+    //     executed: false,
+    //     to: "0x0",
+    //     value: 0,
+    //     data: "0x0",
+    //   },
+    // ]);
     console.log("proposals", proposals);
   }
-
-  function onVoteFor(projId: string) {
+  // async function onStaking(event: any) {
+  //   event.preventDefault();
+  //   event.stopPropagation();
+  //   if (!account || !contracts) {
+  //     return;
+  //   }
+  //   const visionToken = contracts.visionToken;
+  //   const visionFarm = contracts.visionFarm;
+  //   const signer = await library.getSigner(account);
+  //
+  //   await visionToken
+  //       .connect(signer)
+  //       .mint(account, parseEther("1000000"));
+  //   await visionToken
+  //       .connect(signer)
+  //       .approve(visionFarm.address, parseEther("1000000"));
+  //   await visionFarm.connect(signer).stakeAndLock(parseEther("100"), 40);
+  // }
+  function onVote(projId: number, agree: boolean) {
     return async function (event: any) {
       event.preventDefault();
       event.stopPropagation();
-      console.log("vote for", projId);
       if (!contracts) {
         return;
       }
       const farmersUnion = contracts.farmersUnion;
       const signer = await library.getSigner(account);
-      await farmersUnion.connect(signer).vote(projId, true);
-    };
-  }
-
-  function onVoteAgainst(projId: string) {
-    return async function (event: any) {
-      event.preventDefault();
-      event.stopPropagation();
-      console.log("vote against", projId);
-      if (!contracts) {
-        return;
-      }
-      const farmersUnion = contracts.farmersUnion;
-      const signer = await library.getSigner(account);
-      await farmersUnion.connect(signer).vote(projId, false);
+      await farmersUnion.connect(signer).vote(projId, agree);
     };
   }
 };
