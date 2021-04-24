@@ -90,7 +90,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
     if (scheduledTimestamp.eq(0)) {
       setTxState(TxState.NOT_SCHEDULED);
     } else if (scheduledTimestamp.eq(1)) {
-      setTxState(TxState.NOT_SCHEDULED);
+      setTxState(TxState.DONE);
     } else {
       library.getBlock(blockNumber).then((block) => {
         if (scheduledTimestamp.gt(block.timestamp)) {
