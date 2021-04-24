@@ -35,6 +35,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   const [amount, setAmount] = useState("0");
   const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [approved, setApproved] = useState(false);
+  const [projectApproved, setProjectApproved] = useState(false);
 
   useEffect(() => {
     if (!!account && !!contracts) {
@@ -61,6 +62,9 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         .catch(() => {
           if (!stale) setTokenAllowance(undefined);
         });
+      contracts.cryptoJobBoard
+        .approvedProjects(projId)
+        .then(setProjectApproved);
       return () => {
         stale = true;
         setBalance(undefined);
@@ -109,9 +113,13 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       alert("Not enough amount of $COMMITMENT tokens");
       return;
     }
-    cryptoJobBoard
-      .connect(signer)
-      .addBudget(projId, token, amountInWei)
+    const txPromise = projectApproved
+      ? cryptoJobBoard
+          .connect(signer)
+          .addAndExecuteBudget(projId, token, amountInWei, "0x")
+      : cryptoJobBoard.connect(signer).addBudget(projId, token, amountInWei);
+
+    txPromise
       .then((tx) => {
         tx.wait()
           .then((receipt) => {
@@ -169,7 +177,11 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           type="submit"
           disabled={account !== budgetOwner}
         >
-          {approved ? "Add" : "Approve token usage"}
+          {approved
+            ? projectApproved
+              ? "Add and execute"
+              : "Add"
+            : "Approve token usage"}
         </Button>
       </OverlayTrigger>
     </Form>

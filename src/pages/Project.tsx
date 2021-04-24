@@ -76,14 +76,13 @@ const Project: React.FC = () => {
           if (!stale) setFund("Unknown");
         });
       cryptoJobBoard.getTotalBudgets(id).then((len: BigNumber) => {
-        setBudgets(new Array(len.toNumber()));
-        for (let i = 0; i < len.toNumber(); i += 1) {
-          cryptoJobBoard.projectBudgets(id, i).then((budget) => {
-            const _budgets = Array.from(budgets);
-            _budgets[i] = budget;
-            setBudgets(_budgets);
-          });
-        }
+        Promise.all(
+          new Array(len.toNumber())
+            .fill(0)
+            .map((_, i) => cryptoJobBoard.projectBudgets(id, i))
+        ).then((_budgets) => {
+          setBudgets(_budgets);
+        });
       });
 
       return () => {
@@ -132,18 +131,23 @@ const Project: React.FC = () => {
                 <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
                 <hr />
                 <h2>History</h2>
-                {budgets.map((budget, i) => {
-                  if (!!budget) {
-                    return (
-                      <ExecuteBudget
-                        projId={id}
-                        budgetIndex={i}
-                        budgetOwner={budgetOwner}
-                        {...budget}
-                      />
-                    );
-                  }
-                })}
+                {budgets
+                  .map((budget, i) => {
+                    if (!!budget) {
+                      return (
+                        <>
+                          <br />
+                          <ExecuteBudget
+                            projId={id}
+                            budgetIndex={i}
+                            budgetOwner={budgetOwner}
+                            {...budget}
+                          />
+                        </>
+                      );
+                    }
+                  })
+                  .reverse()}
               </Tab.Pane>
               <Tab.Pane eventKey="etc">
                 <>
