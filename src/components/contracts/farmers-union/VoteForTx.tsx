@@ -256,7 +256,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         {status === VoteForTxStatus.Ended && (
           <>
             <ConditionalButton
-              variant="info"
+              variant="primary"
               enabledWhen={
                 txState === TxState.NOT_SCHEDULED &&
                 proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
@@ -270,7 +270,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
               children={"Schedule"}
             />{" "}
             <ConditionalButton
-              variant="info"
+              variant="secondary"
               enabledWhen={
                 txState === TxState.READY &&
                 proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
