@@ -1,6 +1,8 @@
 import { Interface, LogDescription } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
 import { getAddress } from "@ethersproject/address";
+import { BigNumberish } from "@ethersproject/bignumber";
+import { formatEther, parseEther } from "@ethersproject/units";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
 
 export const parseLog = (
@@ -66,4 +68,8 @@ export const getVariantForProgressBar = (percent: number) => {
   else if (percent <= 50) return "warning";
   else if (percent <= 75) return "info";
   else return "success";
+};
+
+export const bigNumToFixed = (n: BigNumberish) => {
+  return parseFloat(parseFloat(formatEther(n)).toFixed(2));
 };

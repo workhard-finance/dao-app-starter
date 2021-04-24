@@ -4,7 +4,7 @@ import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { getVariantForProgressBar } from "../../../utils/utils";
+import { bigNumToFixed, getVariantForProgressBar } from "../../../utils/utils";
 import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
@@ -214,8 +214,12 @@ export const MyFarm: React.FC<MyFarmProps> = ({}) => {
           />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
-          {formatEther(stakedAmount)} x {getLockedPeriod()} ={" "}
-          {formatEther(dispatchableFarmers || 0)}
+          {bigNumToFixed(stakedAmount)}
+          <span style={{ fontSize: "1rem" }}> $VISION</span> x{" "}
+          {getLockedPeriod()}
+          <span style={{ fontSize: "1rem" }}> epoch(s)</span> ={" "}
+          {bigNumToFixed(dispatchableFarmers || 0)}
+          <span style={{ fontSize: "1rem" }}> Farmers</span>
         </Card.Text>
         <hr />
         <StakeAndLock />

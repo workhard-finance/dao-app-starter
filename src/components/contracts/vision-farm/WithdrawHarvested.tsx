@@ -7,9 +7,10 @@ import {
   InputGroup,
   ProgressBar,
   ListGroup,
+  Col,
 } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { formatEther, parseEther } from "ethers/lib/utils";
+import { formatEther, getAddress, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { getVariantForProgressBar } from "../../../utils/utils";
 import { OverlayTooltip } from "../../OverlayTooltip";
@@ -29,9 +30,7 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
   const contracts = useWorkhardContracts();
 
   const [tokens, setTokens] = useState<string[]>([]);
-  const [selectedTokens, setSelectedTokens] = useState<{
-    [token: string]: boolean;
-  }>({});
+  const [tokensToWithdraw, setTokensToWithdraw] = useState<string[]>([]);
   const [amounts, setAmounts] = useState<BigNumber[]>([]);
   const [prices, setPrices] = useState<(number | undefined)[]>([]);
   const [details, setDetails] = useState<(CoingeckoTokenDetails | undefined)[]>(
@@ -43,11 +42,6 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
   useEffect(() => {
     if (!!contracts && !!account) {
       contracts.visionFarm.getAllHarvestedCropsOf(account).then((res) => {
-        setSelectedTokens(
-          res.tokens.reduce((acc, token) => {
-            return { ...acc, [token]: true };
-          }, {})
-        );
         setTokens(res.tokens);
         setAmounts(res.amounts);
       });
@@ -61,6 +55,7 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
     Promise.all(
       tokens.map((token) => getTokenDetailsFromCoingecko(token))
     ).then(setDetails);
+    setTokensToWithdraw(tokens);
   }, [tokens]);
 
   useEffect(() => {
@@ -92,12 +87,9 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
       return;
     }
     const signer = library.getSigner(account);
-    const selected = Object.keys(selectedTokens).filter(
-      (token) => selectedTokens[token]
-    );
     contracts.visionFarm
       .connect(signer)
-      .withdraw(selected)
+      .withdraw(tokensToWithdraw)
       .then((tx) => {
         tx.wait().then((receipt) => {
           setLastTx(receipt.transactionHash);
@@ -106,33 +98,43 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
       .catch((err) => alert(err));
   };
 
+  const isChecked = (addr: string): boolean => {
+    return (
+      tokensToWithdraw?.find((t) => getAddress(t) === getAddress(addr)) !==
+      undefined
+    );
+  };
+
   return (
     <Form onSubmit={handleSubmit}>
-      <Card.Title>Harvested crops</Card.Title>
+      <Card.Title>Harvested</Card.Title>
       <Card.Text style={{ fontSize: "3rem" }}>$ {totalInUSD}</Card.Text>
-      <ListGroup className="list-group-flush">
-        {isSynced() &&
-          tokens.map((token, i) => {
-            <ListGroup.Item>
-              <Form.Check
-                inline
-                label={`$${details[i]?.symbol || "?"}: ${formatEther(
-                  amounts[i]
-                )} ($${valueInUSD(amounts[i], prices[i])})`}
-                defaultChecked={true}
-                type="checkbox"
-                onChange={() => {
-                  const selected = selectedTokens[token];
-                  setSelectedTokens({
-                    ...selectedTokens,
-                    [token]: !selected,
-                  });
-                }}
-              />
-            </ListGroup.Item>;
-          })}
-        ;
-      </ListGroup>
+      {tokens.length > 0 && (
+        <ListGroup className="list-group-flush">
+          {isSynced() &&
+            tokens.map((token, i) => (
+              <ListGroup.Item>
+                <Col>
+                  <Form.Check
+                    label={`$${details[i]?.symbol || "?"}: ${formatEther(
+                      amounts[i]
+                    )} ($${valueInUSD(amounts[i], prices[i])})`}
+                    type="checkbox"
+                    onChange={(_) => {
+                      const _tokensToWithdraw = isChecked(token)
+                        ? tokensToWithdraw?.filter(
+                            (t) => getAddress(t) !== getAddress(token)
+                          )
+                        : [...(tokensToWithdraw || []), token];
+                      setTokensToWithdraw(_tokensToWithdraw);
+                    }}
+                    checked={isChecked(token)}
+                  />
+                </Col>
+              </ListGroup.Item>
+            ))}
+        </ListGroup>
+      )}
       <br />
       <Button variant="primary" type="submit">
         Withdraw harvested crops

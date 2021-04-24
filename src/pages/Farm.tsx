@@ -48,16 +48,16 @@ const Farm = () => {
         <a href="https://app.uniswap.org">trading</a> or{" "}
         <Link to="/mine">mining</Link>!
       </Alert>
-      <Tabs defaultActiveKey="farms" id="uncontrolled-tab-example">
-        <Tab eventKey="farms" title="Farms" style={{ marginTop: "1rem" }}>
-          <Farms />
-        </Tab>
+      <Tabs defaultActiveKey="my-farmers" id="uncontrolled-tab-example">
         <Tab
           eventKey="my-farmers"
           title="My Farmers"
           style={{ marginTop: "1rem" }}
         >
           <MyFarm />
+        </Tab>
+        <Tab eventKey="farms" title="Farms" style={{ marginTop: "1rem" }}>
+          <Farms />
         </Tab>
       </Tabs>
     </Page>

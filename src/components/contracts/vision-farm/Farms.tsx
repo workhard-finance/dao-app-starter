@@ -42,15 +42,18 @@ export const Farms: React.FC<FarmsProps> = ({}) => {
   return (
     <>
       {epoch &&
-        Array(epoch.toNumber())
+        Array(epoch.toNumber() + 1)
           .fill(undefined)
           .map((_, i) => {
             return (
-              <Epoch
-                epoch={i + 1}
-                farming={epoch.eq(i + 1)}
-                visionPrice={visionPrice || 0}
-              />
+              <>
+                <br />
+                <Epoch
+                  epoch={i + 1}
+                  planting={epoch.eq(i)}
+                  visionPrice={visionPrice || 0}
+                />
+              </>
             );
           })
           .reverse()}
