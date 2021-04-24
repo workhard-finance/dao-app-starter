@@ -1,30 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
-import {
-  Button,
-  Card,
-  Form,
-  FormControl,
-  Image,
-  InputGroup,
-  ProgressBar,
-  Tab,
-  Tabs,
-} from "react-bootstrap";
+import { Image, Tab, Tabs } from "react-bootstrap";
 import { TimelockTxs } from "../components/contracts/timelocked-governance/TimelockTxs";
 import { Propose } from "../components/contracts/farmers-union/Propose";
-import { VoteFor } from "../components/contracts/farmers-union/VoteFor";
+import {
+  VoteForTx,
+  ProposedTx,
+  VoteForTxStatus,
+} from "../components/contracts/farmers-union/VoteForTx";
+import { useWeb3React } from "@web3-react/core";
+import { useBlockNumber } from "../providers/BlockNumberProvider";
+import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { BigNumber, providers } from "ethers";
 
-const getVariant = (percent: number) => {
-  if (percent <= 25) return "danger";
-  else if (percent <= 50) return "warning";
-  else if (percent <= 75) return "info";
-  else return "success";
-};
-const Vote = () => {
-  const stakePercent = 60;
-  const lockedPercent = 90;
-  const remainingPercent = 10;
+const Vote: React.FC = () => {
+  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
+  const { blockNumber } = useBlockNumber();
+  const contracts = useWorkhardContracts();
+  const [proposedTxs, setProposedTxs] = useState<ProposedTx[]>([]);
+  const [myVotes, setMyVotes] = useState<BigNumber>();
+  // const [page, setPage] = useState(0);
+  // const [projIdToVote, setProjIdToVote] = useState();
+  const [fetchedBlock, setFetchedBlock] = useState<number>(0);
+  const [timestamp, setTimestamp] = useState<number>(0);
+  useEffect(() => {
+    if (!account || !library || !chainId || !contracts) {
+      return;
+    }
+    let stale = false;
+    const farmersUnion = contracts.farmersUnion;
+    farmersUnion.getVotes(account).then((vote) => {
+      setMyVotes(vote);
+    });
+    return () => {
+      stale = true;
+    };
+  }, [account, library, chainId]);
+
+  useEffect(() => {
+    if (!library || !contracts || !blockNumber) {
+      return;
+    }
+    const farmersUnion = contracts.farmersUnion;
+    farmersUnion
+      .queryFilter(
+        farmersUnion.filters.TxProposed(
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ),
+        fetchedBlock,
+        blockNumber
+      )
+      .then((events) => {
+        if (blockNumber) setFetchedBlock(blockNumber);
+        setProposedTxs([...proposedTxs, ...events.map((event) => event.args)]);
+      });
+    library
+      .getBlock(blockNumber)
+      .then((block) => setTimestamp(block.timestamp));
+  }, [contracts, blockNumber]);
+
   return (
     <Page>
       <Image
@@ -38,14 +79,50 @@ const Vote = () => {
       <h1>Farmers Union</h1>
       <Tabs defaultActiveKey="voting" id="uncontrolled-tab-example">
         <Tab eventKey="voting" title="Voting" style={{ marginTop: "1rem" }}>
-          <VoteFor />
+          {proposedTxs
+            .filter(
+              (proposedTx) =>
+                proposedTx.start.lt(timestamp) && proposedTx.end.gt(timestamp)
+            )
+            .map((proposedTx) => (
+              <>
+                <VoteForTx
+                  tx={proposedTx}
+                  myVotes={myVotes}
+                  status={VoteForTxStatus.Voting}
+                />
+                <br />
+              </>
+            ))}
         </Tab>
-        <Tab eventKey="ended" title="Ended" style={{ marginTop: "1rem" }}></Tab>
-        <Tab
-          eventKey="pending"
-          title="Pending"
-          style={{ marginTop: "1rem" }}
-        ></Tab>
+        <Tab eventKey="ended" title="Ended" style={{ marginTop: "1rem" }}>
+          {proposedTxs
+            .filter((proposedTx) => proposedTx.end.lt(timestamp))
+            .map((proposedTx) => (
+              <>
+                <VoteForTx
+                  tx={proposedTx}
+                  myVotes={myVotes}
+                  status={VoteForTxStatus.Ended}
+                />
+                <br />
+              </>
+            ))}
+        </Tab>
+        <Tab eventKey="pending" title="Pending" style={{ marginTop: "1rem" }}>
+          {proposedTxs
+            .filter((proposedTx) => proposedTx.start.gt(timestamp))
+            .map((proposedTx) => (
+              <>
+                <VoteForTx
+                  tx={proposedTx}
+                  myVotes={myVotes}
+                  status={VoteForTxStatus.Pending}
+                />
+                <br />
+              </>
+            ))}
+        </Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
           <Propose />
         </Tab>

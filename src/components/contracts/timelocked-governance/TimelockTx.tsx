@@ -14,7 +14,7 @@ import {
 } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import { getAddress, Result, solidityKeccak256 } from "ethers/lib/utils";
+import { formatEther, solidityKeccak256 } from "ethers/lib/utils";
 import { DecodedTxData, decodeTxDetails, flatten } from "../../../utils/utils";
 
 export interface TimelockTxProps {
@@ -282,23 +282,26 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         #{index} - tx id: {id}
       </Card.Header>
       <Card.Body>
-        <Card.Text>
-          Scheduled at: {new Date(timestamp * 1000).toLocaleString()}(
-          {blockNumber})
-        </Card.Text>
-        <Card.Text>
-          Remaining: {remaining} seconds (= ~{(remaining / 86400).toFixed(1)}{" "}
-          days)
-        </Card.Text>
-        <Card.Text>
-          txHash:{" "}
-          <a target="_blank" href={`https://etherscan.io/tx/${tx.hash}`}>
-            {tx.hash?.toString()}
-          </a>
-        </Card.Text>
-        <Card.Text>predecessor: {predecessor}</Card.Text>
-        <Card.Text>salt: {salt?.toString()}</Card.Text>
-        <Card.Text>Transactions:</Card.Text>
+        <Card.Text>Schedule:</Card.Text>
+        <ul>
+          <li>
+            Scheduled at: {new Date(timestamp * 1000).toLocaleString()}( block
+            number: {blockNumber})
+          </li>
+          <li>
+            Remaining: {remaining} seconds (= ~{(remaining / 86400).toFixed(1)}{" "}
+            days)
+          </li>
+          <li>
+            txHash:{" "}
+            <a target="_blank" href={`https://etherscan.io/tx/${tx.hash}`}>
+              {tx.hash?.toString()}
+            </a>
+          </li>
+          <li>predecessor: {predecessor}</li>
+          <li>salt: {salt?.toString()}</li>
+        </ul>
+        <Card.Text>Transaction:</Card.Text>
         <Accordion>
           {decodedTxData?.map((decoded, i) => (
             <Card>
@@ -309,10 +312,17 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
               </Card.Header>
               <Accordion.Collapse eventKey={`${i}`}>
                 <Card.Body>
-                  <Card.Text>Contract: {decoded.address}</Card.Text>
+                  Contract: {decoded.address}
+                  <br />
+                  Value:{" "}
+                  {formatEther(
+                    Array.isArray(tx.value) ? tx.value[i] : tx.value
+                  )}{" "}
+                  ETH
+                  <br />
                   {Object.getOwnPropertyNames(decoded.args).length > 0 && (
                     <>
-                      <Card.Text>Params</Card.Text>
+                      Params
                       <ul>
                         {Object.getOwnPropertyNames(decoded.args).map((key) => (
                           <li>

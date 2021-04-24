@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown, Nav } from "react-bootstrap";
 import { Col, Row, Tab } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
@@ -7,10 +7,30 @@ import { ProposeBatchTx } from "./proposal-types/ProposeBatchTx";
 import { TimelockPresetProposal } from "../timelocked-governance/TimelockPresetProposal";
 import { buildPresets, Preset } from "../../../utils/preset";
 import { PresetProposal } from "./proposal-types/PresetProposal";
+import { solidityKeccak256 } from "ethers/lib/utils";
+import { useWeb3React } from "@web3-react/core";
+import { providers } from "ethers";
 
 export const Propose: React.FC = ({}) => {
+  const { account, library } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
   const presets: Preset[] | undefined = buildPresets(contracts);
+  const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!!account && !!contracts) {
+      let stale = false;
+      const timeLockGovernance = contracts.timelockedGovernance;
+      timeLockGovernance
+        .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
+        .then(setHasProposerRole);
+
+      return () => {
+        stale = true;
+        setHasProposerRole(false);
+      };
+    }
+  }, [account, contracts]);
   return (
     <Tab.Container id="left-tabs-example" defaultActiveKey="manual">
       <Row>
@@ -61,32 +81,38 @@ export const Propose: React.FC = ({}) => {
               </Dropdown.Menu>
             </Dropdown>
             <hr />
-            <h4>Timelock</h4>
-            {["CryptoJobBoard", "VisionFarm", "VisionTokenEmitter"].map(
-              (contractName) => (
-                <Dropdown as={Nav.Item}>
-                  <Dropdown.Toggle
-                    variant="success"
-                    id={`dropdown-timelock-${contractName}`}
-                    as={Nav.Link}
-                  >
-                    {contractName}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
-                    {presets
-                      ?.filter((preset) => preset.contractName === contractName)
-                      .map((prop) => {
-                        return (
-                          <Dropdown.Item
-                            eventKey={`timelock-${prop.contractName}.${prop.methodName}`}
-                          >
-                            {`${prop.methodName}`}
-                          </Dropdown.Item>
-                        );
-                      })}
-                  </Dropdown.Menu>
-                </Dropdown>
-              )
+            {hasProposerRole && (
+              <>
+                <h4>Timelock</h4>
+                {["CryptoJobBoard", "VisionFarm", "VisionTokenEmitter"].map(
+                  (contractName) => (
+                    <Dropdown as={Nav.Item}>
+                      <Dropdown.Toggle
+                        variant="success"
+                        id={`dropdown-timelock-${contractName}`}
+                        as={Nav.Link}
+                      >
+                        {contractName}
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        {presets
+                          ?.filter(
+                            (preset) => preset.contractName === contractName
+                          )
+                          .map((prop) => {
+                            return (
+                              <Dropdown.Item
+                                eventKey={`timelock-${prop.contractName}.${prop.methodName}`}
+                              >
+                                {`${prop.methodName}`}
+                              </Dropdown.Item>
+                            );
+                          })}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  )
+                )}
+              </>
             )}
           </Nav>
         </Col>
