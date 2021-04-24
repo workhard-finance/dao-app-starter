@@ -3,11 +3,13 @@ import Page from "../layouts/Page";
 import {
   Button,
   Card,
+  Col,
   Form,
   FormControl,
   Image,
   InputGroup,
   OverlayTrigger,
+  Row,
   Tab,
   Tabs,
   Tooltip,
@@ -126,9 +128,14 @@ const Work: React.FC = () => {
           title="$COMMITMENT"
           style={{ marginTop: "1rem" }}
         >
-          <RedeemCommitment />
-          <br />
-          <BuyCommitment />
+          <Row>
+            <Col>
+              <RedeemCommitment />
+            </Col>
+            <Col>
+              <BuyCommitment />
+            </Col>
+          </Row>
           <br />
           <Button variant={"info"} children="Trade $COMMITMENT on Uniswap" />
         </Tab>

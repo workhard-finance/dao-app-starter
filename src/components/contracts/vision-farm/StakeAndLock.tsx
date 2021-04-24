@@ -11,6 +11,8 @@ import { ConditionalButton } from "../../ConditionalButton";
 
 export interface StakeAndLockProps {}
 
+const MAX_LOCK_EPOCHS = 50;
+
 export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -43,25 +45,26 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
 
   const getLockedPeriod = () => {
     if (!lockedUntil) return 0;
-    const locked = lockedUntil + 1 - (currentEpoch?.toNumber() || 0);
+    const locked = lockedUntil - (currentEpoch?.toNumber() || 0);
     return locked > 0 ? locked : 0;
   };
 
   const getLockedPercent = () => {
-    return (getLockedPeriod() * 100) / 200;
+    return (getLockedPeriod() * 100) / MAX_LOCK_EPOCHS;
   };
 
   const stakeAndLock = () => {
     if (!!contracts && !!library && !!account) {
       if (!amount || !lockPeriod) return;
-      if (BigNumber.from(amount).lt(tokenBalance || 0)) {
+      const amountInWei = parseEther(amount);
+      if (amountInWei.lt(tokenBalance || 0)) {
         alert("Not enough balance");
         return;
       }
       const signer = library.getSigner(account);
       contracts.visionFarm
         .connect(signer)
-        .stakeAndLock(parseEther(amount), lockPeriod || 0)
+        .stakeAndLock(amountInWei, lockPeriod || 0)
         .then((tx) => {
           tx.wait()
             .then((receipt) => {
@@ -253,16 +256,16 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
             id="inlineFormInputGroup"
             placeholder={`min: ${
               getLockedPeriod() + 1
-            } week(s) / max: 200 weeks`}
+            } epoch(s) ~= 4 weeks / max: 50 epoch(s) ~= 4 years`}
             type="number"
             min={getLockedPeriod() + 1}
-            max="200"
+            max={MAX_LOCK_EPOCHS}
             value={lockPeriod}
             onChange={({ target: { value } }) => setLockPeriod(parseInt(value))}
           />
           <InputGroup.Append
             style={{ cursor: "pointer" }}
-            onClick={() => setLockPeriod(200)}
+            onClick={() => setLockPeriod(MAX_LOCK_EPOCHS)}
           >
             <InputGroup.Text>MAX</InputGroup.Text>
           </InputGroup.Append>
@@ -274,7 +277,7 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
         now={getLockedPercent()}
       />
       <Card.Text>
-        {getLockedPeriod()} / 200 week(s) locked.{" "}
+        {getLockedPeriod()} / {MAX_LOCK_EPOCHS} epoch(s) locked.{" "}
         {started &&
           `You can withdraw
             ${new Date(
@@ -284,7 +287,7 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
       </Card.Text>
       <Button variant="primary" onClick={approved ? stakeAndLock : approve}>
         {approved
-          ? `Stake and lock` + (lockPeriod ? `${lockPeriod} week(s)` : ``)
+          ? `Stake and lock ` + (lockPeriod ? `${lockPeriod} epoch(s)` : ``)
           : "approve"}
       </Button>{" "}
       <ConditionalButton
