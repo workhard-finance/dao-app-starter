@@ -9,17 +9,18 @@ import {
 import React, { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { BigNumber, BigNumberish } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { BigNumber } from "ethers";
+import { id, defaultAbiCoder } from "ethers/lib/utils";
+import { FarmersUnion } from "@workhard/protocol";
 
 interface Proposal {
   id: number;
   proposer: string;
   txHash: string;
-  start: BigNumberish;
-  end: BigNumberish;
-  totalForVotes: BigNumberish;
-  totalAgainstVotes: BigNumberish;
+  start: number;
+  end: number;
+  totalForVotes: number;
+  totalAgainstVotes: number;
   executed: boolean;
   to?: string;
   value?: number;
@@ -42,7 +43,7 @@ export const VoteFor: React.FC = () => {
     farmersUnion.getVotes(account).then((vote) => {
       setMyVotes(vote);
     });
-    paginatedProposals(page);
+    paginatedProposals(page).then((result) => setProposals(result));
     return () => {
       stale = true;
     };
@@ -72,23 +73,23 @@ export const VoteFor: React.FC = () => {
                 <ProgressBar
                   animated
                   variant="success"
-                  now={BigNumber.from(p.totalForVotes)
-                    .mul(100)
-                    .div(
-                      BigNumber.from(p.totalForVotes).add(p.totalAgainstVotes)
-                    )
-                    .toNumber()}
+                  now={frac(
+                    BigNumber.from(p.totalForVotes).toNumber(),
+                    BigNumber.from(p.totalForVotes)
+                      .add(p.totalAgainstVotes)
+                      .toNumber()
+                  )}
                   key={1}
                 />
                 <ProgressBar
                   animated
                   variant="danger"
-                  now={BigNumber.from(p.totalAgainstVotes)
-                    .mul(100)
-                    .div(
-                      BigNumber.from(p.totalForVotes).add(p.totalAgainstVotes)
-                    )
-                    .toNumber()}
+                  now={frac(
+                    BigNumber.from(p.totalAgainstVotes).toNumber(),
+                    BigNumber.from(p.totalForVotes)
+                      .add(p.totalAgainstVotes)
+                      .toNumber()
+                  )}
                   key={2}
                 />
               </ProgressBar>
@@ -121,76 +122,36 @@ export const VoteFor: React.FC = () => {
           </Card>
         );
       })}
-      {/*todo: pagination*/}
-      {/*<Button variant="danger" onClick={onStaking}>*/}
-      {/*  Stake*/}
-      {/*</Button>{" "}*/}
+      <Card.Body>
+        <Button variant="primary" onClick={nextPage}>
+          next page
+        </Button>
+        <Button variant="secondary" onClick={prevPage}>
+          previous page
+        </Button>{" "}
+      </Card.Body>
     </Card>
   );
 
-  async function paginatedProposals(page: number, size: number = 10) {
-    const result = [] as any;
-    setProposals([]);
+  async function paginatedProposals(
+    page: number,
+    size: number = 10
+  ): Promise<Proposal[]> {
+    let result: Proposal[] = [] as any;
     if (!contracts) {
-      return;
+      return result;
     }
     const farmersUnion = contracts.farmersUnion;
-    for (let i = size * page; i < size * (page + 1); i++) {
+    for (let i = size * page; i < size * (page + 1); ++i) {
       try {
-        let proposal = await farmersUnion.proposals(i);
-        let tx = await library.getTransaction(proposal.txHash);
-        result.push({
-          id: i,
-          totalAgainstVotes: proposal.totalAgainstVotes,
-          totalForVotes: proposal.totalForVotes,
-          txHash: proposal.txHash,
-          proposer: proposal.proposer,
-          start: proposal.start,
-          end: proposal.end,
-          executed: proposal.executed,
-          to: tx.to,
-          value: tx.value,
-          data: tx.data,
-        } as Proposal);
-      } catch (e) {}
+        result.push(await getProposal(i, farmersUnion));
+      } catch (e) {
+        console.log(e);
+      }
     }
-    setProposals(result.filter((x: any) => !!x));
-    // todo: set id, to, value, data from tx info
-    // setProposals([
-    //   {
-    //     id: 0,
-    //     totalAgainstVotes: 10,
-    //     totalForVotes: 20,
-    //     txHash: "0x0",
-    //     proposer: "0x0",
-    //     start: 111,
-    //     end: 222,
-    //     executed: false,
-    //     to: "0x0",
-    //     value: 0,
-    //     data: "0x0",
-    //   },
-    // ]);
-    console.log("proposals", proposals);
+    return result.filter((p) => !p.executed);
   }
-  // async function onStaking(event: any) {
-  //   event.preventDefault();
-  //   event.stopPropagation();
-  //   if (!account || !contracts) {
-  //     return;
-  //   }
-  //   const visionToken = contracts.visionToken;
-  //   const visionFarm = contracts.visionFarm;
-  //   const signer = await library.getSigner(account);
-  //
-  //   await visionToken
-  //       .connect(signer)
-  //       .mint(account, parseEther("1000000"));
-  //   await visionToken
-  //       .connect(signer)
-  //       .approve(visionFarm.address, parseEther("1000000"));
-  //   await visionFarm.connect(signer).stakeAndLock(parseEther("100"), 40);
-  // }
+
   function onVote(projId: number, agree: boolean) {
     return async function (event: any) {
       event.preventDefault();
@@ -199,8 +160,74 @@ export const VoteFor: React.FC = () => {
         return;
       }
       const farmersUnion = contracts.farmersUnion;
+      const proposal = await getProposal(projId, farmersUnion);
+      const now = Math.floor(new Date().getTime() / 1000);
+      if (now < proposal.start || now > proposal.end) {
+        alert("not voting period");
+        return;
+      }
       const signer = await library.getSigner(account);
       await farmersUnion.connect(signer).vote(projId, agree);
     };
+  }
+
+  async function nextPage() {
+    const results = await paginatedProposals(page + 1);
+    if (results?.length == 0) {
+      alert("this is last page");
+      return;
+    }
+    setProposals(results);
+    setPage(page + 1);
+  }
+
+  async function prevPage() {
+    if (page == 0) {
+      alert("this is first page");
+      return;
+    }
+    setProposals(await paginatedProposals(page - 1));
+    setPage(page - 1);
+  }
+
+  async function getProposal(proposalId: number, farmersUnion: FarmersUnion) {
+    let proposal = await farmersUnion.callStatic.proposals(proposalId);
+    let filter = {
+      address: farmersUnion.address,
+      fromBlock: 0,
+      toBlock: "latest",
+      topics: [
+        id("TxProposed(bytes32,address,uint256,bytes,uint256,uint256)"),
+        proposal.txHash,
+      ],
+    };
+    const logs = await library.getLogs(filter);
+    const log = defaultAbiCoder.decode(
+      ["bytes32", "address", "uint256", "bytes32", "uint256", "uint256"],
+      logs[0].data
+    );
+    const to = log[1];
+    const value = (log[2] as BigNumber).toNumber();
+    const data = (log[3] as BigNumber).toString();
+    return {
+      id: proposalId,
+      totalAgainstVotes: proposal.totalAgainstVotes.toNumber(),
+      totalForVotes: proposal.totalForVotes.toNumber(),
+      txHash: proposal.txHash,
+      proposer: proposal.proposer,
+      start: proposal.start.toNumber(),
+      end: proposal.end.toNumber(),
+      executed: proposal.executed,
+      to,
+      value,
+      data,
+    } as Proposal;
+  }
+
+  function frac(a: number, b: number): number {
+    if (a == 0 && b == 0) {
+      return 0;
+    }
+    return (a / b) * 100;
   }
 };
