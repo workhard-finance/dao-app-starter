@@ -126,6 +126,7 @@ const Mine = () => {
               visionPrice={visionPrice || 0}
             />
           )}
+          <br />
         </Col>
         <Col>
           {pools && commitmentMiningIdx !== -1 && (
@@ -138,6 +139,7 @@ const Mine = () => {
               visionPrice={visionPrice || 0}
             />
           )}
+          <br />
         </Col>
       </Row>
       <hr />
@@ -160,7 +162,6 @@ const Mine = () => {
               <StakeMiningPool
                 poolIdx={idx}
                 title={"Liquidity Mining"}
-                tokenName={"VISION/ETH LP"}
                 poolAddress={addr}
                 tokenEmission={emission || BigNumber.from(0)}
                 visionPrice={visionPrice || 0}
