@@ -122,9 +122,9 @@ export function decodeTxDetails(
 
 type ContractValue = string | number | BigNumber | undefined;
 
-export function toString(val: ContractValue | ContractValue[]): string {
+export function flatten(val: ContractValue | ContractValue[]): string {
   if (Array.isArray(val)) {
-    return `[${val.map((v) => toString(v))}]`;
+    return `[${val.map((v) => flatten(v))}]`;
   } else {
     if (typeof val === "string") {
       return val;

@@ -15,7 +15,7 @@ import {
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import { getAddress, Result, solidityKeccak256 } from "ethers/lib/utils";
-import { DecodedTxData, decodeTxDetails, toString } from "../../../utils/utils";
+import { DecodedTxData, decodeTxDetails, flatten } from "../../../utils/utils";
 
 export interface TimelockTxProps {
   id: string;
@@ -316,8 +316,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
                       <ul>
                         {Object.getOwnPropertyNames(decoded.args).map((key) => (
                           <li>
-                            <strong>{key}</strong>:{" "}
-                            {toString(decoded.args[key])}
+                            <strong>{key}</strong>: {flatten(decoded.args[key])}
                           </li>
                         ))}
                       </ul>
