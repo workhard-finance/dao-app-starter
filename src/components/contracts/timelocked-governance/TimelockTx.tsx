@@ -73,6 +73,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     if (!!contracts && !!library) {
       let stale = false;
       const timeLockGovernance = contracts.timelockedGovernance;
+      const farmersUnion = contracts.farmersUnion;
       library
         .getBlock(blockNumber)
         .then((block) => {
@@ -80,20 +81,38 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         })
         .catch(handleException);
       try {
-        const decoded = timeLockGovernance.interface.decodeFunctionData(
-          timeLockGovernance.interface.functions[
-            "schedule(address,uint256,bytes,bytes32,bytes32,uint256)"
-          ],
-          tx.data
-        );
-        setScheduledTx({
-          target: decoded.target,
-          value: decoded.value,
-          data: decoded.data,
-          predecessor: decoded.predecessor,
-          salt: decoded.salt,
-          delay: decoded.delay,
-        });
+        let decoded;
+        if (tx.to === timeLockGovernance.address) {
+          const decoded = timeLockGovernance.interface.decodeFunctionData(
+            timeLockGovernance.interface.functions[
+              "schedule(address,uint256,bytes,bytes32,bytes32,uint256)"
+            ],
+            tx.data
+          );
+          setScheduledTx({
+            target: decoded.target,
+            value: decoded.value,
+            data: decoded.data,
+            predecessor: decoded.predecessor,
+            salt: decoded.salt,
+            delay: decoded.delay,
+          });
+        } else if (tx.to === farmersUnion.address) {
+          const decoded = farmersUnion.interface.decodeFunctionData(
+            farmersUnion.interface.functions[
+              "schedule(address,uint256,bytes,bytes32,bytes32)"
+            ],
+            tx.data
+          );
+          setScheduledTx({
+            target: decoded.target,
+            value: decoded.value,
+            data: decoded.data,
+            predecessor: decoded.predecessor,
+            salt: decoded.salt,
+            delay: BigNumber.from(86400),
+          });
+        }
       } catch (err) {}
       try {
         const decoded = timeLockGovernance.interface.decodeFunctionData(

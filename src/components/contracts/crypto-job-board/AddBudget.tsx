@@ -157,7 +157,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       <ConditionalButton
         variant="primary"
         type="submit"
-        enabledWhen={account === budgetOwner ? false : undefined}
+        enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only the project owner can call this function.`}
         children={
           approved

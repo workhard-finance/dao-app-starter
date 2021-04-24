@@ -2,7 +2,7 @@ import { Button, Card, ProgressBar } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber, providers, Signer } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { DecodedTxData, decodeTxDetails } from "../../../utils/utils";
@@ -15,7 +15,6 @@ interface Proposal {
   end: BigNumber;
   totalForVotes: BigNumber;
   totalAgainstVotes: BigNumber;
-  executed: boolean;
 }
 
 export interface ProposedTx {
@@ -52,24 +51,55 @@ export interface VoteForTxProps {
   myVotes?: BigNumber;
 }
 
+enum TxState {
+  NOT_SCHEDULED = "Not scheduled",
+  PENDING = "Pending",
+  READY = "Ready",
+  DONE = "Executed",
+}
+
 export const VoteForTx: React.FC<VoteForTxProps> = ({
   myVotes,
   tx,
   status,
 }) => {
-  const { account, library, chainId } = useWeb3React();
+  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [proposal, setProposal] = useState<Proposal>();
+  const [scheduledTimestamp, setScheduledTimestamp] = useState<BigNumber>();
+  const [txState, setTxState] = useState<TxState>();
   const [lastTx, setLastTx] = useState<string>();
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
 
   useEffect(() => {
-    if (!contracts) {
+    if (!contracts || !library || !blockNumber) {
       return;
     }
-    const farmersUnion = contracts.farmersUnion;
+    const { farmersUnion, timelockedGovernance } = contracts;
     farmersUnion.callStatic.proposals(tx.txHash).then(setProposal);
+    timelockedGovernance.callStatic
+      .getTimestamp(tx.txHash)
+      .then(setScheduledTimestamp);
+  }, [contracts]);
+
+  useEffect(() => {
+    if (!contracts || !library || !blockNumber || !scheduledTimestamp) {
+      return;
+    }
+    if (scheduledTimestamp.eq(0)) {
+      setTxState(TxState.NOT_SCHEDULED);
+    } else if (scheduledTimestamp.eq(1)) {
+      setTxState(TxState.NOT_SCHEDULED);
+    } else {
+      library.getBlock(blockNumber).then((block) => {
+        if (scheduledTimestamp.gt(block.timestamp)) {
+          setTxState(TxState.PENDING);
+        } else {
+          setTxState(TxState.READY);
+        }
+      });
+    }
   }, [contracts, blockNumber]);
 
   useEffect(() => {
@@ -92,15 +122,49 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   }, [contracts, proposal]);
 
   const onVote = (agree: boolean) => async () => {
-    if (!contracts) {
+    if (!contracts || !library || !account) {
       return;
     }
     const farmersUnion = contracts.farmersUnion;
     const signer = await library.getSigner(account);
     await farmersUnion.connect(signer).vote(tx.txHash, agree);
   };
+
+  const schedule = () => {
+    if (!contracts || !library || !account) {
+      return;
+    }
+    const farmersUnion = contracts.farmersUnion;
+    const signer: Signer = library.getSigner(account);
+    if (
+      !Array.isArray(tx.target) &&
+      !Array.isArray(tx.value) &&
+      !Array.isArray(tx.data)
+    ) {
+      farmersUnion
+        .connect(signer)
+        .schedule(tx.target, tx.value, tx.data, tx.predecessor, tx.salt)
+        .then((res) => {
+          res.wait().then((receipt) => setLastTx(receipt.transactionHash));
+        });
+    } else if (
+      Array.isArray(tx.target) &&
+      Array.isArray(tx.value) &&
+      Array.isArray(tx.data)
+    ) {
+      farmersUnion
+        .connect(signer)
+        .scheduleBatch(tx.target, tx.value, tx.data, tx.predecessor, tx.salt)
+        .then((res) => {
+          res.wait().then((receipt) => setLastTx(receipt.transactionHash));
+        });
+    } else {
+      throw Error("unexpected type");
+    }
+  };
+
   const execute = () => {
-    if (!contracts) {
+    if (!contracts || !library || !account) {
       return;
     }
     const farmersUnion = contracts.farmersUnion;
@@ -131,7 +195,6 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       throw Error("unexpected type");
     }
   };
-
   return (
     <Card>
       <Card.Header as="h5">propose: {tx.txHash}</Card.Header>
@@ -144,7 +207,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
             {" ~ "}
             {new Date(tx.end.mul(1000).toNumber()).toLocaleString()}
           </li>
-          <li>executed: {proposal?.executed.toString()}</li>
+          <li>executed: {txState}</li>
         </ul>
         <Card.Text>Transaction:</Card.Text>
         {decodedTxData && <DecodedTxs txs={decodedTxData} values={tx.value} />}
@@ -187,48 +250,62 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
             </Button>{" "}
             <Button variant="danger" onClick={onVote(false)}>
               Against
-            </Button>{" "}
+            </Button>
           </>
         )}
         {status === VoteForTxStatus.Ended && (
-          <ConditionalButton
-            variant="info"
-            enabledWhen={
-              !proposal?.executed &&
-              proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
-            }
-            onClick={execute}
-            whyDisabled={
-              proposal?.executed
-                ? "Already executed"
-                : "Proposal is not passed."
-            }
-            children={"Execute"}
-          />
+          <>
+            <ConditionalButton
+              variant="info"
+              enabledWhen={
+                txState === TxState.NOT_SCHEDULED &&
+                proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
+              }
+              onClick={schedule}
+              whyDisabled={
+                txState === TxState.NOT_SCHEDULED
+                  ? "Proposal is not passed"
+                  : "Already scheduled"
+              }
+              children={"Schedule"}
+            />{" "}
+            <ConditionalButton
+              variant="info"
+              enabledWhen={
+                txState === TxState.READY &&
+                proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
+              }
+              onClick={execute}
+              whyDisabled={
+                txState === TxState.DONE ? "Already executed" : "Pending."
+              }
+              children={"Execute"}
+            />
+          </>
         )}
       </Card.Body>
     </Card>
   );
 
-  async function paginatedProposals(
-    page: number,
-    size: number = 10
-  ): Promise<Proposal[]> {
-    let result: Proposal[] = [] as any;
-    if (!contracts) {
-      return result;
-    }
-    // Promise.all()
-    const farmersUnion = contracts.farmersUnion;
-    for (let i = size * page; i < size * (page + 1); ++i) {
-      try {
-        // result.push(await getProposal(i, farmersUnion));
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    return result.filter((p) => !p.executed);
-  }
+  // async function paginatedProposals(
+  //   page: number,
+  //   size: number = 10
+  // ): Promise<Proposal[]> {
+  //   let result: Proposal[] = [] as any;
+  //   if (!contracts) {
+  //     return result;
+  //   }
+  //   // Promise.all()
+  //   const farmersUnion = contracts.farmersUnion;
+  //   for (let i = size * page; i < size * (page + 1); ++i) {
+  //     try {
+  //       // result.push(await getProposal(i, farmersUnion));
+  //     } catch (e) {
+  //       console.log(e);
+  //     }
+  //   }
+  //   return result.filter((p) => !p.executed);
+  // }
 
   // async function nextPage() {
   //   const results = await paginatedProposals(page + 1);

@@ -100,7 +100,7 @@ export const Compensate: React.FC<CompensateProps> = ({
       <ConditionalButton
         variant="primary"
         type="submit"
-        enabledWhen={account === budgetOwner ? false : undefined}
+        enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only budget owner can call this function.`}
       />
     </Form>

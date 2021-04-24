@@ -59,7 +59,14 @@ const Vote: React.FC = () => {
       )
       .then((events) => {
         if (blockNumber) setFetchedBlock(blockNumber);
-        setProposedTxs([...proposedTxs, ...events.map((event) => event.args)]);
+        const _txs = [...proposedTxs, ...events.map((event) => event.args)];
+        const txHashes = new Set(_txs.map((_tx) => _tx.txHash)).keys();
+        setProposedTxs(
+          _txs.filter(
+            (_tx) =>
+              Array.from(txHashes).find((tx) => tx === _tx.txHash) !== undefined
+          )
+        );
       });
     library
       .getBlock(blockNumber)
