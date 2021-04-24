@@ -122,7 +122,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
   }, [account, contracts, lastTx]);
   return (
     <Card>
-      <Card.Header as="h5">Redeem $COMMITMENT to $DAI</Card.Header>
+      <Card.Header as="h5">Redeem $COMMITMENT for $DAI</Card.Header>
       <Card.Body>
         <Card.Title>
           $COMMITMENT per $DAI
@@ -174,7 +174,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
           </Form.Text>
           <br />
           <Button variant="primary" type="submit">
-            {approved ? "Get $COMMITMENT" : "Approve"}
+            {approved ? "Redeem for $DAI" : "Approve"}
           </Button>
         </Form>
       </Card.Body>
