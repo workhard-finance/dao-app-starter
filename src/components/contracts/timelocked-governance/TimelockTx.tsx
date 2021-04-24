@@ -7,7 +7,7 @@ import {
   Signer,
   Transaction,
 } from "ethers";
-import { Card, Form } from "react-bootstrap";
+import { Accordion, Button, Card, Form } from "react-bootstrap";
 import {
   useWorkhardContracts,
   WorkhardContracts,
@@ -15,6 +15,7 @@ import {
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import { getAddress, Result, solidityKeccak256 } from "ethers/lib/utils";
+import { DecodedTxData, decodeTxDetails, toString } from "../../../utils/utils";
 
 export interface TimelockTxProps {
   id: string;
@@ -297,21 +298,37 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         </Card.Text>
         <Card.Text>predecessor: {predecessor}</Card.Text>
         <Card.Text>salt: {salt?.toString()}</Card.Text>
-        {decodedTxData?.map((decoded, i) => (
-          <>
-            <hr />
-            <Card.Text>
-              {decoded.contractName}.{decoded.methodName}
-              {parseValueToSolidityForm(value, i)}({`{`}
-              {Object.keys(decoded.args)
-                .map((argName) => {
-                  return `\n${argName}: ${decoded.args[argName]}`;
-                })
-                .join(",")}
-              {`}`})
-            </Card.Text>
-          </>
-        ))}
+        <Card.Text>Transactions:</Card.Text>
+        <Accordion>
+          {decodedTxData?.map((decoded, i) => (
+            <Card>
+              <Card.Header>
+                <Accordion.Toggle as={Button} variant="link" eventKey={`${i}`}>
+                  {decoded.contractName} - {decoded.methodName}
+                </Accordion.Toggle>
+              </Card.Header>
+              <Accordion.Collapse eventKey={`${i}`}>
+                <Card.Body>
+                  <Card.Text>Contract: {decoded.address}</Card.Text>
+                  {Object.getOwnPropertyNames(decoded.args).length > 0 && (
+                    <>
+                      <Card.Text>Params</Card.Text>
+                      <ul>
+                        {Object.getOwnPropertyNames(decoded.args).map((key) => (
+                          <li>
+                            <strong>{key}</strong>:{" "}
+                            {toString(decoded.args[key])}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </Card.Body>
+              </Accordion.Collapse>
+            </Card>
+          ))}
+        </Accordion>
+        <br />
         <Form onSubmit={handleSubmit}>
           <ConditionalButton
             variant="primary"
@@ -343,48 +360,6 @@ function txWait(tx: ContractTransaction) {
 function handleException(reason: any) {
   // TODO UI update w/stale
   alert(`Failed: ${reason.data.message}`);
-}
-
-interface DecodedTxData {
-  contractName: string;
-  methodName: string;
-  args: { [key: string]: any };
-}
-
-function decodeTxDetails(
-  contracts: WorkhardContracts,
-  target: string,
-  data: string
-): DecodedTxData {
-  const result = (Object.entries(contracts) as Array<[string, Contract]>).find(
-    ([_, contract]) => getAddress(target) === getAddress(contract.address)
-  );
-  if (result) {
-    const [contractName, contract] = result;
-    const fragment = contract.interface.getFunction(data.slice(0, 10));
-    const methodName = fragment.name;
-    const decoded = contract.interface.decodeFunctionData(fragment, data);
-    const argNames = Object.getOwnPropertyNames(decoded).filter((name) => {
-      return ![
-        ...Array(decoded.length)
-          .fill(0)
-          .map((_, i) => `${i}`),
-        "length",
-      ].includes(name);
-    });
-    const args: { [key: string]: any } = {};
-    argNames.forEach((key) => {
-      args[key] = decoded[key];
-    });
-    return {
-      contractName:
-        contractName.slice(0, 1).toUpperCase() + contractName.slice(1),
-      methodName,
-      args,
-    };
-  } else {
-    throw Error("Failed to find contract interface");
-  }
 }
 
 function parseValueToSolidityForm(
