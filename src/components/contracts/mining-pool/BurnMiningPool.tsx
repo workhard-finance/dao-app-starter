@@ -266,8 +266,13 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       <Card.Header as="h5">{title}</Card.Header>
       <Card.Body>
         <Card.Title>
-          Annual Revenue
-          <OverlayTooltip tip={""} children={"?"} />
+          ARR
+          <OverlayTooltip
+            tip={
+              "Annual Revenue Run Rate = (earned vision - burned commitment) * 12 months / burned commitment"
+            }
+            text="❔"
+          />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>{annualRevenue}%</Card.Text>
         {collapsible && (

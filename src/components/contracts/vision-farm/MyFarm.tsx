@@ -210,7 +210,7 @@ export const MyFarm: React.FC<MyFarmProps> = ({}) => {
           Current dispatchable farmers
           <OverlayTooltip
             tip={`= staked amount x locking period`}
-            children={`❔`}
+            text={`❔`}
           />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>

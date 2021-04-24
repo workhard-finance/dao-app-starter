@@ -1,17 +1,10 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  Tooltip,
-  OverlayTrigger,
-  InputGroup,
-} from "react-bootstrap";
+import { Card, Button, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { ERC20Mock__factory } from "@workhard/protocol";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export interface BuyCommitmentProps {}
 
@@ -22,10 +15,10 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
   const [commitmentBalance, setCommitmentBalance] = useState<BigNumber>();
   const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [approved, setApproved] = useState(false);
-  const [buyAmount, setBuyAmount] = useState<string>();
+  const [spendingDai, setSpendingDai] = useState<string>();
   const [lastTx, setLastTx] = useState<string>();
 
-  const getMaxBuy = () => formatEther(daiBalance?.div(2) || "0");
+  const getMaxSpending = () => formatEther(daiBalance || "0");
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -53,11 +46,11 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
       return;
     }
     const commitmentFund = contracts?.commitmentFund;
-    const buyAmountInWei = parseEther(buyAmount || "0");
+    const buyAmountInWei = parseEther(spendingDai || "0").div(2);
     if (!daiBalance) {
       alert("Fetching balance..");
       return;
-    } else if (daiBalance && buyAmountInWei.gt(daiBalance)) {
+    } else if (daiBalance && parseEther(spendingDai || "0").gt(daiBalance)) {
       alert("Not enough amount of base currency");
       return;
     }
@@ -107,7 +100,7 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
         .then((allowance) => {
           if (!stale) {
             setTokenAllowance(allowance);
-            if (allowance.gt(buyAmount || 0)) setApproved(true);
+            if (allowance.gt(spendingDai || 0)) setApproved(true);
             else setApproved(false);
           }
         })
@@ -129,18 +122,11 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
       <Card.Body>
         <Card.Title>
           DAI per $COMMITMENT
-          <OverlayTrigger
-            // key={placement}
-            // placement={placement}
-            overlay={
-              <Tooltip id={`tooltip-dispatchable-farmers`}>
-                Annual Percentage Yield by Burning $Commitment token = (Revenue
-                - Burn) / Year
-              </Tooltip>
-            }
-          >
-            <span style={{ fontSynthesis: "o" }}>❔</span>
-          </OverlayTrigger>
+          <OverlayTooltip
+            tip=" Annual Percentage Yield by Burning $Commitment token = (Revenue
+                - Burn) / Year"
+            text="❔"
+          />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
         <Card.Title>Your balance:</Card.Title>
@@ -155,26 +141,27 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
             {/* <Form.Label>Staking</Form.Label> */}
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
-                <InputGroup.Text>$COMMITMENT</InputGroup.Text>
+                <InputGroup.Text>$DAI</InputGroup.Text>
               </InputGroup.Prepend>
               <Form.Control
                 id="base-currency-amount"
-                value={buyAmount}
-                onChange={({ target: { value } }) => setBuyAmount(value)}
-                placeholder={getMaxBuy()}
+                value={spendingDai}
+                onChange={({ target: { value } }) => setSpendingDai(value)}
+                placeholder={getMaxSpending()}
               />
               <InputGroup.Append
                 style={{ cursor: "pointer" }}
-                onClick={() => setBuyAmount(getMaxBuy())}
+                onClick={() => setSpendingDai(getMaxSpending())}
               >
                 <InputGroup.Text>MAX</InputGroup.Text>
               </InputGroup.Append>
             </InputGroup>
           </Form.Group>
-          <Form.Text>
-            Buying {formatEther(parseEther(buyAmount || "0"))} $COMMITMENT with{" "}
-            {formatEther(parseEther(buyAmount || "0").mul(2))} $DAI
-          </Form.Text>
+          <Card.Text>
+            {`= ${formatEther(
+              parseEther(spendingDai || "0").div(2)
+            )} $COMMITMENT`}
+          </Card.Text>
           <br />
           <Button variant="primary" type="submit">
             {approved ? "Get $COMMITMENT" : "Approve"}

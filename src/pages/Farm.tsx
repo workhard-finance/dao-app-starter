@@ -1,24 +1,7 @@
 import React from "react";
 import Page from "../layouts/Page";
-import {
-  Alert,
-  Button,
-  Card,
-  Form,
-  FormControl,
-  Image,
-  InputGroup,
-  ListGroup,
-  ListGroupItem,
-  OverlayTrigger,
-  ProgressBar,
-  Tooltip,
-  Tab,
-  Tabs,
-} from "react-bootstrap";
+import { Alert, Image, Tab, Tabs } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
 import { MyFarm } from "../components/contracts/vision-farm/MyFarm";
 import { Farms } from "../components/contracts/vision-farm/Farms";
 

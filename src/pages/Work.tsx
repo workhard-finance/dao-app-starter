@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
-import {
-  Button,
-  Card,
-  Col,
-  Form,
-  FormControl,
-  Image,
-  InputGroup,
-  OverlayTrigger,
-  Row,
-  Tab,
-  Tabs,
-  Tooltip,
-} from "react-bootstrap";
+import { Button, Col, Image, Row, Tab, Tabs } from "react-bootstrap";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../components/contracts/project/ProjectBox";

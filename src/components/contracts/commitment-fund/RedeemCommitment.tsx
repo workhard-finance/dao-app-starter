@@ -1,16 +1,10 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  Tooltip,
-  OverlayTrigger,
-  InputGroup,
-} from "react-bootstrap";
+import { Card, Button, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export interface RedeemCommitmentProps {}
 
@@ -125,19 +119,11 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
       <Card.Header as="h5">Redeem $COMMITMENT for $DAI</Card.Header>
       <Card.Body>
         <Card.Title>
-          $COMMITMENT per $DAI
-          <OverlayTrigger
-            // key={placement}
-            // placement={placement}
-            overlay={
-              <Tooltip id={`tooltip-dispatchable-farmers`}>
-                Annual Percentage Yield by Burning $Commitment token = (Revenue
-                - Burn) / Year
-              </Tooltip>
-            }
-          >
-            <span style={{ fontSynthesis: "o" }}>❔</span>
-          </OverlayTrigger>
+          $DAI per $COMMITMENT
+          <OverlayTooltip
+            tip="You can redeem 1 $COMMITMENT for 1 $DAI."
+            text="❔"
+          />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>1 COMMITMENT TOKEN</Card.Text>
         <Card.Title>Your balance:</Card.Title>
@@ -168,10 +154,9 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
               </InputGroup.Append>
             </InputGroup>
           </Form.Group>
-          <Form.Text>
-            Redeem {formatEther(parseEther(redeemAmount || "0"))} $COMMITMENT
-            with {formatEther(parseEther(redeemAmount || "0"))} $DAI
-          </Form.Text>
+          <Card.Text>
+            {`= ${formatEther(parseEther(redeemAmount || "0"))} $DAI`}
+          </Card.Text>
           <br />
           <Button variant="primary" type="submit">
             {approved ? "Redeem for $DAI" : "Approve"}

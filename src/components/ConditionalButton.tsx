@@ -5,11 +5,13 @@ import { ButtonProps } from "react-bootstrap";
 export interface ConditonalButtonProps extends ButtonProps {
   enabledWhen?: boolean;
   whyDisabled: string;
+  to?: string;
 }
 
 export const ConditionalButton: React.FC<ConditonalButtonProps> = ({
   enabledWhen,
   whyDisabled,
+  to,
   ...props
 }) => {
   return (
@@ -17,7 +19,7 @@ export const ConditionalButton: React.FC<ConditonalButtonProps> = ({
       show={enabledWhen ? false : undefined}
       overlay={<Tooltip id={``}>{whyDisabled}</Tooltip>}
     >
-      <Button disabled={!enabledWhen} {...props} />
+      <Button disabled={!enabledWhen} {...props} to={to} />
     </OverlayTrigger>
   );
 };

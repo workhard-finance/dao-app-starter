@@ -184,7 +184,7 @@ export const Epoch: React.FC<EpochProps> = ({
           APY
           <OverlayTooltip
             tip="Calculated with maximum lock period."
-            children="❔"
+            text="❔"
           />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>{apy?.toFixed(2)} %</Card.Text>

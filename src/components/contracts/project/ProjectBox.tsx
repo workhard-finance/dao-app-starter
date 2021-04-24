@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 import { formatEther } from "ethers/lib/utils";
 import ReactHtmlParser from "react-html-parser";
-import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Card, Button } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { getAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { Link } from "react-router-dom";
 import { wrapUrl } from "../../../utils/utils";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export interface ProjectProps {
   projId: BigNumberish;
@@ -90,22 +91,14 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
             {budgetOwner}
           </a>
         </Card.Text>
-        <OverlayTrigger
-          show={account === budgetOwner ? false : undefined}
-          overlay={
-            <Tooltip id={`tooltip-budgetowner`}>
-              Please log in with budget owner account.
-            </Tooltip>
-          }
-        >
-          <Button
-            variant={"primary"}
-            as={budgetOwner === account ? Link : Button}
-            to={`/proj/${projId}`}
-            disabled={budgetOwner !== account}
-            children={"Go to admin tool"}
-          />
-        </OverlayTrigger>
+        <ConditionalButton
+          as={budgetOwner === account ? Link : Button}
+          to={`/proj/${projId}`}
+          variant={"primary"}
+          enabledWhen={account === budgetOwner ? false : undefined}
+          whyDisabled={"Please log in with budget owner account."}
+          children={"Go to admin tool"}
+        />
       </Card.Body>
     </Card>
   );

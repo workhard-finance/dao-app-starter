@@ -1,19 +1,11 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  FormControl,
-  FormLabel,
-  InputGroup,
-  Tooltip,
-  OverlayTrigger,
-} from "react-bootstrap";
+import { Form, FormControl, FormLabel } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export interface CompensateProps {
   projId: BigNumberish;
@@ -105,22 +97,12 @@ export const Compensate: React.FC<CompensateProps> = ({
           onChange={(event) => setPayAmount(parseFloat(event.target.value))}
         />
       </Form.Group>
-      <OverlayTrigger
-        show={account === budgetOwner ? false : undefined}
-        overlay={
-          <Tooltip id={`tooltip-budgetowner`}>
-            Only budget owner can call this function.
-          </Tooltip>
-        }
-      >
-        <Button
-          variant="primary"
-          type="submit"
-          disabled={account !== budgetOwner}
-        >
-          Pay
-        </Button>
-      </OverlayTrigger>
+      <ConditionalButton
+        variant="primary"
+        type="submit"
+        enabledWhen={account === budgetOwner ? false : undefined}
+        whyDisabled={`Only budget owner can call this function.`}
+      />
     </Form>
   );
 };

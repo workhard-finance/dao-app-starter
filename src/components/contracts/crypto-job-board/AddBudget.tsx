@@ -1,22 +1,13 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish, constants } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  FormControl,
-  FormLabel,
-  InputGroup,
-  Tooltip,
-  OverlayTrigger,
-} from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import devDeploy from "@workhard/protocol/deployed.dev.json";
 import { ERC20Mock__factory } from "@workhard/protocol";
 import { acceptableTokenList } from "../../../utils/utils";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export interface AddBudgetProps {
   projId: BigNumberish;
@@ -163,27 +154,19 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           value={amount}
         />
       </Form.Group>
-
-      <OverlayTrigger
-        show={account === budgetOwner ? false : undefined}
-        overlay={
-          <Tooltip id={`tooltip-budgetowner`}>
-            Only the project owner can call this function.
-          </Tooltip>
-        }
-      >
-        <Button
-          variant="primary"
-          type="submit"
-          disabled={account !== budgetOwner}
-        >
-          {approved
+      <ConditionalButton
+        variant="primary"
+        type="submit"
+        enabledWhen={account === budgetOwner ? false : undefined}
+        whyDisabled={`Only the project owner can call this function.`}
+        children={
+          approved
             ? projectApproved
               ? "Add and execute"
               : "Add"
-            : "Approve token usage"}
-        </Button>
-      </OverlayTrigger>
+            : "Approve token usage"
+        }
+      />
     </Form>
   );
 };

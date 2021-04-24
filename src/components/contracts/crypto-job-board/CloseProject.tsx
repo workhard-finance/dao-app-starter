@@ -1,17 +1,7 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumberish, constants } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  Tooltip,
-  OverlayTrigger,
-  InputGroup,
-  Row,
-  Col,
-} from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { BigNumberish } from "ethers";
+import { Button, Form } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 
 export interface CloseProjectProps {
