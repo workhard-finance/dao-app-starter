@@ -1,15 +1,18 @@
-import { useState, FormEventHandler } from "react";
+import { useState, FormEventHandler, useEffect } from "react";
 import { Card, Button, Form } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { parseLog } from "../../../utils/utils";
+import { ContractTransaction } from "@ethersproject/contracts";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export const PostAJobBox: React.FC = () => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
 
-  const [description, setDescription] = useState<string | undefined>();
-  const [title, setTitle] = useState<string | undefined>();
+  const [description, setDescription] = useState<string>();
+  const [title, setTitle] = useState<string>();
+  const [lastTx, setLastTx] = useState<ContractTransaction>();
   // const [uri, setURI] = useState<string | undefined>(); // TODO
 
   const handleSubmit: FormEventHandler = (event) => {
@@ -33,24 +36,32 @@ export const PostAJobBox: React.FC = () => {
       .connect(signer)
       .createProject(title, description, "")
       .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            const parsed = parseLog(
-              cryptoJobBoard,
-              receipt.logs,
-              "ProjectPosted(uint256)"
-            );
-            const log = parsed[0];
-            alert(
-              `You created a new project. The NFT id is ${log.args.projId}`
-            );
-          })
-          .catch((rejected) => {
-            alert(`rejected: ${rejected}`);
-          });
+        setLastTx(tx);
       })
-      .catch((e) => alert(`tx repsonse error ${e.message}`));
+      .catch((e) => alert(`tx response error ${e.message}`));
   };
+
+  useEffect(() => {
+    if (contracts && lastTx) {
+      lastTx
+        .wait()
+        .then((receipt) => {
+          const parsed = parseLog(
+            contracts.cryptoJobBoard,
+            receipt.logs,
+            "ProjectPosted(uint256)"
+          );
+          const log = parsed[0];
+          alert(`You created a new project. The NFT id is ${log.args.projId}`);
+          setLastTx(undefined);
+          setTitle("");
+          setDescription("");
+        })
+        .catch((rejected) => {
+          alert(`rejected: ${rejected}`);
+        });
+    }
+  }, [contracts, lastTx]);
 
   return (
     <Card>
@@ -60,7 +71,6 @@ export const PostAJobBox: React.FC = () => {
           <Form.Group controlId="NewProjectTitle">
             <Form.Label>Project title</Form.Label>
             <Form.Control
-              required
               type="text"
               placeholder="Workhard Core Dev"
               onChange={({ target: { value } }) => setTitle(value)}
@@ -70,7 +80,6 @@ export const PostAJobBox: React.FC = () => {
           <Form.Group controlId="NewProjectTitle">
             <Form.Label>Description</Form.Label>
             <Form.Control
-              required
               type="text"
               placeholder="eg) https://hackmd.io/samplejobpost"
               onChange={({ target: { value } }) => setDescription(value)}
@@ -78,9 +87,13 @@ export const PostAJobBox: React.FC = () => {
             />
           </Form.Group>
           {/** TODO: IPFS & NFT */}
-          <Button variant="primary" type="submit">
-            Submit
-          </Button>
+          <ConditionalButton
+            variant="primary"
+            type="submit"
+            enabledWhen={lastTx === undefined}
+            whyDisabled={"Submitted transaction is in pending"}
+            children={lastTx ? "Pending" : "Submit"}
+          />
         </Form>
       </Card.Body>
     </Card>
