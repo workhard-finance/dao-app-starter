@@ -8,10 +8,7 @@ import {
   Transaction,
 } from "ethers";
 import { Accordion, Button, Card, Form } from "react-bootstrap";
-import {
-  useWorkhardContracts,
-  WorkhardContracts,
-} from "../../../providers/WorkhardContractProvider";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import { formatEther, solidityKeccak256 } from "ethers/lib/utils";
@@ -30,23 +27,20 @@ enum TimelockTxStatus {
   DONE,
 }
 
-interface ScheduledTx {
-  target: string;
-  value: BigNumber;
-  data: string;
-  predecessor: string;
-  salt: string;
-  delay: BigNumber;
-  forced?: boolean;
+enum TxProposer {
+  DEV = "developers",
+  FARMERS_UNION = "Farmers Union",
+  UNKNOWN = "Unknown",
 }
 
-interface BatchScheduledTx {
-  targets: string[];
-  values: BigNumber[];
-  datas: string[];
+interface ScheduledTx {
+  target: string | string[];
+  value: BigNumber | BigNumber[];
+  data: string | string[];
   predecessor: string;
   salt: string;
   delay: BigNumber;
+  proposer: TxProposer;
   forced?: boolean;
 }
 
@@ -59,9 +53,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
-  const [scheduledTx, setScheduledTx] = useState<
-    ScheduledTx | BatchScheduledTx
-  >();
+  const [scheduledTx, setScheduledTx] = useState<ScheduledTx>();
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
   const [hasExecutorRole, setHasExecutorRole] = useState<boolean>(false);
   const [timestamp, setTimestamp] = useState<number>(0);
@@ -80,74 +72,40 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           setTimestamp(block.timestamp);
         })
         .catch(handleException);
-      try {
-        let decoded;
+      if (tx.to) {
+        const txDetails = decodeTxDetails(contracts, tx.to, tx.data, tx.value);
+        const { result } = txDetails;
+        let proposer: TxProposer | undefined;
+        let forced: boolean | undefined;
         if (tx.to === timeLockGovernance.address) {
-          const decoded = timeLockGovernance.interface.decodeFunctionData(
-            timeLockGovernance.interface.functions[
-              "schedule(address,uint256,bytes,bytes32,bytes32,uint256)"
-            ],
-            tx.data
-          );
-          setScheduledTx({
-            target: decoded.target,
-            value: decoded.value,
-            data: decoded.data,
-            predecessor: decoded.predecessor,
-            salt: decoded.salt,
-            delay: decoded.delay,
-          });
+          proposer = TxProposer.DEV;
+          if (
+            tx.data.startsWith(
+              timeLockGovernance.interface.getSighash(
+                timeLockGovernance.interface.functions[
+                  "forceSchedule(address,uint256,bytes,bytes32,bytes32,uint256)"
+                ]
+              )
+            )
+          ) {
+            forced = true;
+          }
         } else if (tx.to === farmersUnion.address) {
-          const decoded = farmersUnion.interface.decodeFunctionData(
-            farmersUnion.interface.functions[
-              "schedule(address,uint256,bytes,bytes32,bytes32)"
-            ],
-            tx.data
-          );
-          setScheduledTx({
-            target: decoded.target,
-            value: decoded.value,
-            data: decoded.data,
-            predecessor: decoded.predecessor,
-            salt: decoded.salt,
-            delay: BigNumber.from(86400),
-          });
+          proposer = TxProposer.FARMERS_UNION;
+        } else {
+          proposer = TxProposer.UNKNOWN;
         }
-      } catch (err) {}
-      try {
-        const decoded = timeLockGovernance.interface.decodeFunctionData(
-          timeLockGovernance.interface.functions[
-            "forceSchedule(address,uint256,bytes,bytes32,bytes32,uint256)"
-          ],
-          tx.data
-        );
         setScheduledTx({
-          target: decoded.target,
-          value: decoded.value,
-          data: decoded.data,
-          predecessor: decoded.predecessor,
-          salt: decoded.salt,
-          delay: decoded.delay,
-          forced: true,
+          target: result.target,
+          value: result.value,
+          data: result.data,
+          predecessor: result.predecessor,
+          salt: result.salt,
+          delay: result.delay || 86400,
+          forced: forced,
+          proposer,
         });
-      } catch (err) {}
-      try {
-        const decoded = timeLockGovernance.interface.decodeFunctionData(
-          timeLockGovernance.interface.functions[
-            "scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)"
-          ],
-          tx.data
-        );
-        // TODO handle batchScheduled arg "values"
-        setScheduledTx({
-          targets: decoded.targets,
-          values: decoded["values()"],
-          datas: decoded.datas,
-          predecessor: decoded.predecessor,
-          salt: decoded.salt,
-          delay: decoded.delay,
-        });
-      } catch (err) {}
+      }
       return () => {
         stale = true;
         setScheduledTx(undefined);
@@ -157,22 +115,25 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
 
   useEffect(() => {
     if (!!contracts && !!scheduledTx) {
-      const _tx: ScheduledTx | undefined = (scheduledTx as ScheduledTx).target
-        ? (scheduledTx as ScheduledTx)
-        : undefined;
-      const _batchTx:
-        | BatchScheduledTx
-        | undefined = (scheduledTx as BatchScheduledTx).targets
-        ? (scheduledTx as BatchScheduledTx)
-        : undefined;
-      if (_tx) {
-        setDecodedTxData([decodeTxDetails(contracts, _tx.target, _tx.data)]);
-      } else if (_batchTx) {
+      const { target, data, value } = scheduledTx;
+      if (
+        Array.isArray(target) &&
+        Array.isArray(data) &&
+        Array.isArray(value)
+      ) {
         setDecodedTxData(
-          _batchTx.targets.map((target: string, i: number) =>
-            decodeTxDetails(contracts, target, _batchTx.datas[i])
+          target.map((_target: string, i: number) =>
+            decodeTxDetails(contracts, _target, data[i], value[i])
           )
         );
+      } else if (
+        !Array.isArray(target) &&
+        !Array.isArray(data) &&
+        !Array.isArray(value)
+      ) {
+        setDecodedTxData([decodeTxDetails(contracts, target, data, value)]);
+      } else {
+        throw Error("decoding error");
       }
     }
   }, [contracts, scheduledTx]);
@@ -196,31 +157,28 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         alert("Already executed");
         break;
       case TimelockTxStatus.READY:
-        if ("target" in scheduledTx) {
+        const { target, value, data, predecessor, salt } = scheduledTx;
+        if (
+          !Array.isArray(target) &&
+          !Array.isArray(value) &&
+          !Array.isArray(data)
+        ) {
           timeLockGovernance
             .connect(signer)
-            .execute(
-              scheduledTx.target,
-              scheduledTx.value,
-              scheduledTx.data,
-              scheduledTx.predecessor,
-              scheduledTx.salt
-            )
+            .execute(target, value, data, predecessor, salt)
             .then((tx) => {
               setLastTx(tx);
               txWait(tx);
             })
             .catch(handleException);
-        } else {
+        } else if (
+          Array.isArray(target) &&
+          Array.isArray(value) &&
+          Array.isArray(data)
+        ) {
           timeLockGovernance
             .connect(signer)
-            .executeBatch(
-              scheduledTx.targets,
-              scheduledTx.values,
-              scheduledTx.datas,
-              scheduledTx.predecessor,
-              scheduledTx.salt
-            )
+            .executeBatch(target, value, data, predecessor, salt)
             .then((tx) => {
               setLastTx(tx);
               txWait(tx);
@@ -281,20 +239,6 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     timestamp +
     (scheduledTx?.delay.toNumber() || 0) -
     Math.floor(new Date().getTime() / 1000);
-  let target: string | string[] | undefined;
-  let value: BigNumber | BigNumber[] | undefined;
-  let data: string | string[] | undefined;
-  let predecessor: string | undefined;
-  let salt: string | undefined;
-  let delay: BigNumber | undefined;
-  if (scheduledTx) {
-    target = "target" in scheduledTx ? scheduledTx.target : scheduledTx.targets;
-    value = "value" in scheduledTx ? scheduledTx.value : scheduledTx.values;
-    data = "data" in scheduledTx ? scheduledTx.data : scheduledTx.datas;
-    predecessor = scheduledTx.predecessor;
-    salt = scheduledTx.salt;
-    delay = scheduledTx.delay;
-  }
   return (
     <Card>
       <Card.Header>
@@ -317,8 +261,8 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
               {tx.hash?.toString()}
             </a>
           </li>
-          <li>predecessor: {predecessor}</li>
-          <li>salt: {salt?.toString()}</li>
+          <li>predecessor: {scheduledTx?.predecessor}</li>
+          <li>salt: {scheduledTx?.salt.toString()}</li>
         </ul>
         <Card.Text>Transaction:</Card.Text>
         <Accordion>
@@ -333,11 +277,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
                 <Card.Body>
                   Contract: {decoded.address}
                   <br />
-                  Value:{" "}
-                  {formatEther(
-                    Array.isArray(tx.value) ? tx.value[i] : tx.value
-                  )}{" "}
-                  ETH
+                  Value: {formatEther(decoded.value)} ETH
                   <br />
                   {Object.getOwnPropertyNames(decoded.args).length > 0 && (
                     <>
@@ -388,19 +328,4 @@ function txWait(tx: ContractTransaction) {
 function handleException(reason: any) {
   // TODO UI update w/stale
   alert(`Failed: ${reason.data.message}`);
-}
-
-function parseValueToSolidityForm(
-  value: BigNumber | BigNumber[] | undefined,
-  i: number
-): string {
-  if (!value) return "";
-  let v;
-  if (Array.isArray(value)) {
-    v = value[i].toString();
-  } else {
-    v = value.toString();
-  }
-  if (v === "0") return "";
-  else return `{value: ${v}}`;
 }

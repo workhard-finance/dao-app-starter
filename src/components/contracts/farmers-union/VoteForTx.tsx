@@ -19,20 +19,9 @@ interface Proposal {
 
 export interface ProposedTx {
   txHash: string;
-  target: string;
-  value: BigNumber;
-  data: string;
-  predecessor: string;
-  salt: string;
-  start: BigNumber;
-  end: BigNumber;
-}
-
-export interface ProposedBatchTx {
-  txHash: string;
-  target: string[];
-  value: BigNumber[];
-  data: string[];
+  target: string | string[];
+  value: BigNumber | BigNumber[];
+  data: string | string[];
   predecessor: string;
   salt: string;
   start: BigNumber;
@@ -46,7 +35,7 @@ export enum VoteForTxStatus {
 }
 
 export interface VoteForTxProps {
-  tx: ProposedTx | ProposedBatchTx;
+  tx: ProposedTx;
   status: VoteForTxStatus;
   myVotes?: BigNumber;
 }
@@ -106,18 +95,23 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
     if (!contracts || !proposal) {
       return;
     }
-    if (Array.isArray(tx.target) && Array.isArray(tx.data)) {
+    const { target, data, value } = tx;
+    if (Array.isArray(target) && Array.isArray(data) && Array.isArray(value)) {
       setDecodedTxData(
-        tx.target.reduce(
-          (arr, target, i) => [
+        target.reduce(
+          (arr, _target, i) => [
             ...arr,
-            decodeTxDetails(contracts, target, tx.data[i]),
+            decodeTxDetails(contracts, _target, data[i], value[i]),
           ],
           [] as DecodedTxData[]
         )
       );
-    } else if (!Array.isArray(tx.target) && !Array.isArray(tx.data)) {
-      setDecodedTxData([decodeTxDetails(contracts, tx.target, tx.data)]);
+    } else if (
+      !Array.isArray(target) &&
+      !Array.isArray(data) &&
+      !Array.isArray(value)
+    ) {
+      setDecodedTxData([decodeTxDetails(contracts, target, data, value)]);
     }
   }, [contracts, proposal]);
 

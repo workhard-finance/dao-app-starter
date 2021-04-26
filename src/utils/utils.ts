@@ -1,8 +1,8 @@
-import { Interface, LogDescription } from "@ethersproject/abi";
+import { Interface, LogDescription, Result } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
 import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { formatEther, parseEther } from "@ethersproject/units";
+import { formatEther } from "@ethersproject/units";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
 import { Contract } from "ethers";
 import { WorkhardContracts } from "../providers/WorkhardContractProvider";
@@ -81,24 +81,32 @@ export interface DecodedTxData {
   contractName: string;
   methodName: string;
   args: { [key: string]: any };
+  value: BigNumber;
+  result: Result;
 }
 
 export function decodeTxDetails(
   contracts: WorkhardContracts,
   target: string,
-  data: string
+  data: string,
+  value: BigNumber
 ): DecodedTxData {
-  const result = (Object.entries(contracts) as Array<[string, Contract]>).find(
+  const targetContract = (Object.entries(contracts) as Array<
+    [string, Contract]
+  >).find(
     ([_, contract]) => getAddress(target) === getAddress(contract.address)
   );
-  if (result) {
-    const [contractName, contract] = result;
+  if (targetContract) {
+    const [contractName, contract] = targetContract;
     const fragment = contract.interface.getFunction(data.slice(0, 10));
     const methodName = fragment.name;
-    const decoded = contract.interface.decodeFunctionData(fragment, data);
-    const argNames = Object.getOwnPropertyNames(decoded).filter((name) => {
+    const result: Result = contract.interface.decodeFunctionData(
+      fragment,
+      data
+    );
+    const argNames = Object.getOwnPropertyNames(result).filter((name) => {
       return ![
-        ...Array(decoded.length)
+        ...Array(result.length)
           .fill(0)
           .map((_, i) => `${i}`),
         "length",
@@ -106,7 +114,7 @@ export function decodeTxDetails(
     });
     const args: { [key: string]: any } = {};
     argNames.forEach((key) => {
-      args[key] = decoded[key];
+      args[key] = result[key];
     });
     return {
       address: target,
@@ -114,6 +122,8 @@ export function decodeTxDetails(
         contractName.slice(0, 1).toUpperCase() + contractName.slice(1),
       methodName,
       args,
+      value,
+      result,
     };
   } else {
     throw Error("Failed to find contract interface");

@@ -54,19 +54,12 @@ const Vote: React.FC = () => {
           null,
           null
         ),
-        fetchedBlock,
+        fetchedBlock + 1,
         blockNumber
       )
       .then((events) => {
         if (blockNumber) setFetchedBlock(blockNumber);
-        const _txs = [...proposedTxs, ...events.map((event) => event.args)];
-        const txHashes = new Set(_txs.map((_tx) => _tx.txHash)).keys();
-        setProposedTxs(
-          _txs.filter(
-            (_tx) =>
-              Array.from(txHashes).find((tx) => tx === _tx.txHash) !== undefined
-          )
-        );
+        setProposedTxs([...proposedTxs, ...events.map((event) => event.args)]);
       });
     library
       .getBlock(blockNumber)
