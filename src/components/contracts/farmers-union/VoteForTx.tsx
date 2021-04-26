@@ -281,45 +281,6 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
     </Card>
   );
 
-  // async function paginatedProposals(
-  //   page: number,
-  //   size: number = 10
-  // ): Promise<Proposal[]> {
-  //   let result: Proposal[] = [] as any;
-  //   if (!contracts) {
-  //     return result;
-  //   }
-  //   // Promise.all()
-  //   const farmersUnion = contracts.farmersUnion;
-  //   for (let i = size * page; i < size * (page + 1); ++i) {
-  //     try {
-  //       // result.push(await getProposal(i, farmersUnion));
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   }
-  //   return result.filter((p) => !p.executed);
-  // }
-
-  // async function nextPage() {
-  //   const results = await paginatedProposals(page + 1);
-  //   if (results?.length == 0) {
-  //     alert("this is last page");
-  //     return;
-  //   }
-  //   setProposals(results);
-  //   setPage(page + 1);
-  // }
-
-  // async function prevPage() {
-  //   if (page == 0) {
-  //     alert("this is first page");
-  //     return;
-  //   }
-  //   setProposals(await paginatedProposals(page - 1));
-  //   setPage(page - 1);
-  // }
-
   function frac(a?: BigNumber, b?: BigNumber): number {
     if (!a || !b) {
       return 0;
