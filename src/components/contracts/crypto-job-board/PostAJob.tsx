@@ -37,31 +37,28 @@ export const PostAJobBox: React.FC = () => {
       .createProject(title, description, "")
       .then((tx) => {
         setLastTx(tx);
+        tx.wait()
+          .then((receipt) => {
+            const parsed = parseLog(
+              cryptoJobBoard,
+              receipt.logs,
+              "ProjectPosted(uint256)"
+            );
+            const log = parsed[0];
+            alert(
+              `You created a new project. The NFT id is ${log.args.projId}`
+            );
+            setLastTx(undefined);
+            setTitle("");
+            setDescription("");
+          })
+          .catch((rejected) => {
+            setLastTx(undefined);
+            alert(`rejected: ${rejected}`);
+          });
       })
       .catch((e) => alert(`tx response error ${e.message}`));
   };
-
-  useEffect(() => {
-    if (contracts && lastTx) {
-      lastTx
-        .wait()
-        .then((receipt) => {
-          const parsed = parseLog(
-            contracts.cryptoJobBoard,
-            receipt.logs,
-            "ProjectPosted(uint256)"
-          );
-          const log = parsed[0];
-          alert(`You created a new project. The NFT id is ${log.args.projId}`);
-          setLastTx(undefined);
-          setTitle("");
-          setDescription("");
-        })
-        .catch((rejected) => {
-          alert(`rejected: ${rejected}`);
-        });
-    }
-  }, [contracts, lastTx]);
 
   return (
     <Card>
