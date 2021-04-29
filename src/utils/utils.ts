@@ -3,8 +3,10 @@ import { Log } from "@ethersproject/abstract-provider";
 import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther } from "@ethersproject/units";
+import { IERC20__factory } from "@workhard/protocol";
 import devDeploy from "@workhard/protocol/deployed.dev.json";
-import { Contract } from "ethers";
+import { constants, Contract, ContractTransaction, Signer } from "ethers";
+import { Dispatch, SetStateAction } from "react";
 import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
@@ -146,4 +148,32 @@ export function flatten(val: ContractValue | ContractValue[]): string {
       return val.toString();
     }
   }
+}
+
+export function approveAndRun(
+  signer: Signer,
+  erc20: string,
+  approve: string,
+  setApproveTx: Dispatch<SetStateAction<ContractTransaction | undefined>>,
+  setApproved: Dispatch<SetStateAction<boolean>>,
+  run: () => void
+) {
+  IERC20__factory.connect(erc20, signer)
+    .approve(approve, constants.MaxUint256)
+    .then((tx) => {
+      setApproveTx(tx);
+      tx.wait()
+        .then((_) => {
+          setApproveTx(undefined);
+          setApproved(true);
+          if (run) run();
+        })
+        .catch((rejected) => {
+          setApproveTx(undefined);
+          alert(`Rejected with ${rejected}`);
+        });
+    })
+    .catch(() => {
+      setApproved(false);
+    });
 }

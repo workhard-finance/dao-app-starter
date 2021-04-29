@@ -1,50 +1,51 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, ContractTransaction } from "ethers";
 import { Card, Button, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { OverlayTooltip } from "../../OverlayTooltip";
+import { ConditionalButton } from "../../ConditionalButton";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { approveAndRun } from "../../../utils/utils";
 
 export interface BuyCommitmentProps {}
 
 export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
   const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitmentBalance, setCommitmentBalance] = useState<BigNumber>();
-  const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [approved, setApproved] = useState(false);
   const [spendingDai, setSpendingDai] = useState<string>();
-  const [lastTx, setLastTx] = useState<string>();
+  const [approveTx, setApproveTx] = useState<ContractTransaction>();
+  const [buyTx, setBuyTx] = useState<ContractTransaction>();
 
   const getMaxSpending = () => formatEther(daiBalance || "0");
 
-  const handleSubmit: FormEventHandler = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!account || !contracts) {
+  const approveAndBuy = () => {
+    if (!account || !contracts || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    if (!approved) {
-      contracts.baseCurrency
-        .connect(signer)
-        .approve(contracts.commitmentFund.address, constants.MaxUint256)
-        .then((tx) => {
-          tx.wait()
-            .then((_) => {
-              setTokenAllowance(constants.MaxUint256);
-              setApproved(true);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {
-          setApproved(false);
-        });
+    approveAndRun(
+      signer,
+      contracts.baseCurrency.address,
+      contracts.cryptoJobBoard.address,
+      setApproveTx,
+      setApproved,
+      buyCommitment
+    );
+  };
+
+  const buyCommitment = () => {
+    if (!account || !contracts || !library) {
+      alert("Not connected");
       return;
     }
+    const signer = library.getSigner(account);
     const commitmentFund = contracts?.commitmentFund;
     const buyAmountInWei = parseEther(spendingDai || "0").div(2);
     if (!daiBalance) {
@@ -58,22 +59,18 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
       .connect(signer)
       .payInsteadOfWorking(buyAmountInWei)
       .then((tx) => {
+        setBuyTx(tx);
         tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
+          .then((_receipt) => {
+            setBuyTx(undefined);
+            setSpendingDai("");
           })
           .catch((rejected) => {
-            alert(`Rejected: ${rejected}.`);
+            setBuyTx(undefined);
+            alert(`rejected: ${rejected}`);
           });
-        // TODO wait spinner
-        // TODO UI update w/stale
-      })
-      .catch((reason) => {
-        // TODO UI update w/stale
-        alert(`Failed: ${reason}`);
       });
   };
-
   useEffect(() => {
     if (!!account && !!contracts) {
       let stale = false;
@@ -99,21 +96,17 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
         .allowance(account, contracts.commitmentFund.address)
         .then((allowance) => {
           if (!stale) {
-            setTokenAllowance(allowance);
             if (allowance.gt(spendingDai || 0)) setApproved(true);
             else setApproved(false);
           }
-        })
-        .catch(() => {
-          if (!stale) setTokenAllowance(undefined);
         });
       return () => {
         stale = true;
         setDaiBalance(undefined);
-        setTokenAllowance(undefined);
       };
     }
-  }, [account, contracts, lastTx]);
+  }, [account, contracts, blockNumber]);
+
   return (
     <Card>
       <Card.Header as="h5">
@@ -135,7 +128,7 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
           {formatEther(commitmentBalance || "0")}
         </Card.Text>
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-        <Form onSubmit={handleSubmit}>
+        <Form>
           <Form.Group controlId="buy">
             <Card.Title>Buy</Card.Title>
             {/* <Form.Label>Staking</Form.Label> */}
@@ -163,9 +156,21 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
             )} $COMMITMENT`}
           </Card.Text>
           <br />
-          <Button variant="primary" type="submit">
-            {approved ? "Get $COMMITMENT" : "Approve"}
-          </Button>
+          <ConditionalButton
+            variant="primary"
+            onClick={approved ? buyCommitment : approveAndBuy}
+            enabledWhen={approveTx === undefined && buyTx === undefined}
+            whyDisabled={approved ? "Approving contract" : "Buying"}
+            children={
+              approveTx
+                ? "Approving..."
+                : approved
+                ? buyTx
+                  ? "Buying..."
+                  : "Buy"
+                : "Approve"
+            }
+          />
         </Form>
       </Card.Body>
     </Card>

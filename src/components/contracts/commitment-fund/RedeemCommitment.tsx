@@ -1,50 +1,51 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, ContractTransaction } from "ethers";
 import { Card, Button, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { OverlayTooltip } from "../../OverlayTooltip";
+import { approveAndRun } from "../../../utils/utils";
+import { ConditionalButton } from "../../ConditionalButton";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
 export interface RedeemCommitmentProps {}
 
 export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
   const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitmentBalance, setCommitmentBalance] = useState<BigNumber>();
-  const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [approved, setApproved] = useState(false);
   const [redeemAmount, setRedeemAmount] = useState<string>();
-  const [lastTx, setLastTx] = useState<string>();
+  const [approveTx, setApproveTx] = useState<ContractTransaction>();
+  const [redeemTx, setRedeemTx] = useState<ContractTransaction>();
 
   const getMaxRedeem = () => formatEther(commitmentBalance || "0");
 
-  const handleSubmit: FormEventHandler = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const approveAndRedeem = () => {
+    if (!account || !contracts || !library) {
+      alert("Not connected");
+      return;
+    }
+    const signer = library.getSigner(account);
+    approveAndRun(
+      signer,
+      contracts.commitmentToken.address,
+      contracts.commitmentFund.address,
+      setApproveTx,
+      setApproved,
+      redeem
+    );
+  };
+
+  const redeem = () => {
     if (!account || !contracts) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    if (!approved) {
-      contracts.commitmentToken
-        .connect(signer)
-        .approve(contracts.commitmentFund.address, constants.MaxUint256)
-        .then((tx) => {
-          tx.wait()
-            .then((_) => {
-              setTokenAllowance(constants.MaxUint256);
-              setApproved(true);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {
-          setApproved(false);
-        });
-      return;
-    }
     const commitmentFund = contracts?.commitmentFund;
     const redeemAmountInWei = parseEther(redeemAmount || "0");
     if (!daiBalance) {
@@ -58,19 +59,16 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
       .connect(signer)
       .redeem(redeemAmountInWei)
       .then((tx) => {
+        setRedeemTx(tx);
         tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
+          .then((_receipt) => {
+            setRedeemTx(undefined);
+            setRedeemAmount("");
           })
           .catch((rejected) => {
+            setRedeemTx(undefined);
             alert(`Rejected: ${rejected}.`);
           });
-        // TODO wait spinner
-        // TODO UI update w/stale
-      })
-      .catch((reason) => {
-        // TODO UI update w/stale
-        alert(`Failed: ${reason}`);
       });
   };
 
@@ -99,21 +97,16 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
         .allowance(account, contracts.commitmentFund.address)
         .then((allowance) => {
           if (!stale) {
-            setTokenAllowance(allowance);
             if (allowance.gt(redeemAmount || 0)) setApproved(true);
             else setApproved(false);
           }
-        })
-        .catch(() => {
-          if (!stale) setTokenAllowance(undefined);
         });
       return () => {
         stale = true;
         setDaiBalance(undefined);
-        setTokenAllowance(undefined);
       };
     }
-  }, [account, contracts, lastTx]);
+  }, [account, contracts, blockNumber]);
   return (
     <Card>
       <Card.Header as="h5">Redeem $COMMITMENT for $DAI</Card.Header>
@@ -132,7 +125,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
           {formatEther(commitmentBalance || "0")}
         </Card.Text>
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
-        <Form onSubmit={handleSubmit}>
+        <Form>
           <Form.Group controlId="buy">
             <Card.Title>Redeem</Card.Title>
             {/* <Form.Label>Staking</Form.Label> */}
@@ -158,9 +151,21 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
             {`= ${formatEther(parseEther(redeemAmount || "0"))} $DAI`}
           </Card.Text>
           <br />
-          <Button variant="primary" type="submit">
-            {approved ? "Redeem for $DAI" : "Approve"}
-          </Button>
+          <ConditionalButton
+            variant="primary"
+            onClick={approved ? redeem : approveAndRedeem}
+            enabledWhen={approveTx === undefined && redeemTx === undefined}
+            whyDisabled={approved ? "Approving contract" : "Redeeming..."}
+            children={
+              approveTx
+                ? "Approving..."
+                : approved
+                ? redeemTx
+                  ? "Redeeming..."
+                  : "Redeem"
+                : "Approve"
+            }
+          />
         </Form>
       </Card.Body>
     </Card>
