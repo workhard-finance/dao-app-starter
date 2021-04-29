@@ -15,14 +15,7 @@ const NavBar: React.FC<NavBarProps> = ({ menus }) => {
     <Navbar expand="lg" className="navbar-light bg-light">
       <NavBarBrand />
       <Navbar.Collapse id="basic-navbar-nav">
-        <Nav
-          // className="mr-auto"
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "end",
-          }}
-        >
+        <Nav>
           {menus.map((menu) => (
             <Nav.Link
               as={Link}
@@ -34,9 +27,11 @@ const NavBar: React.FC<NavBarProps> = ({ menus }) => {
                   history.location.pathname === menu.url
                     ? "underline"
                     : undefined,
+                textAlign: "center",
               }}
             >
-              <menu.Icon />
+              <menu.Icon style={{ height: "2rem" }} />
+              <br />
               {menu.name}
             </Nav.Link>
           ))}
