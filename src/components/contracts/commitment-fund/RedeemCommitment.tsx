@@ -126,7 +126,7 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
         </Card.Text>
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
         <Form>
-          <Form.Group controlId="buy">
+          <Form.Group>
             <Card.Title>Redeem</Card.Title>
             {/* <Form.Label>Staking</Form.Label> */}
             <InputGroup className="mb-2">
@@ -134,7 +134,6 @@ export const RedeemCommitment: React.FC<RedeemCommitmentProps> = ({}) => {
                 <InputGroup.Text>$COMMITMENT</InputGroup.Text>
               </InputGroup.Prepend>
               <Form.Control
-                id="base-currency-amount"
                 value={redeemAmount}
                 onChange={({ target: { value } }) => setRedeemAmount(value)}
                 placeholder={getMaxRedeem()}

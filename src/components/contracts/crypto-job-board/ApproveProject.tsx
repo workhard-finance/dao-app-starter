@@ -168,7 +168,7 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
   };
   return (
     <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="time-lock">
+      <Form.Group>
         <Form.Label>
           Approve project by the timelocked admin (will be replaced with
           FarmersUnion.sol soon)

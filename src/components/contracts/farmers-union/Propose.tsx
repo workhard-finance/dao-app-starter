@@ -32,19 +32,15 @@ export const Propose: React.FC = ({}) => {
     }
   }, [account, contracts]);
   return (
-    <Tab.Container id="left-tabs-example" defaultActiveKey="manual">
+    <Tab.Container defaultActiveKey="manual">
       <Row>
         <Col sm={4}>
           <Nav variant="pills" className="flex-column">
             <h4>Farmers Union</h4>
             {["CryptoJobBoard", "VisionFarm", "VisionTokenEmitter"].map(
               (contractName) => (
-                <Dropdown as={Nav.Item}>
-                  <Dropdown.Toggle
-                    variant="success"
-                    id={`dropdown-farmersunion-${contractName}`}
-                    as={Nav.Link}
-                  >
+                <Dropdown as={Nav.Item} key={`farmers-union-${contractName}`}>
+                  <Dropdown.Toggle variant="success" as={Nav.Link}>
                     {contractName}
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
@@ -53,6 +49,7 @@ export const Propose: React.FC = ({}) => {
                       .map((prop) => {
                         return (
                           <Dropdown.Item
+                            key={`${prop.contractName}.${prop.methodName}`}
                             eventKey={`${prop.contractName}.${prop.methodName}`}
                           >
                             {`${prop.methodName}`}
@@ -64,11 +61,7 @@ export const Propose: React.FC = ({}) => {
               )
             )}
             <Dropdown as={Nav.Item}>
-              <Dropdown.Toggle
-                variant="success"
-                id="dropdown-farmersunion-manual"
-                as={Nav.Link}
-              >
+              <Dropdown.Toggle variant="success" as={Nav.Link}>
                 Manual
               </Dropdown.Toggle>
               <Dropdown.Menu>
@@ -86,12 +79,8 @@ export const Propose: React.FC = ({}) => {
                 <h4>Timelock</h4>
                 {["CryptoJobBoard", "VisionFarm", "VisionTokenEmitter"].map(
                   (contractName) => (
-                    <Dropdown as={Nav.Item}>
-                      <Dropdown.Toggle
-                        variant="success"
-                        id={`dropdown-timelock-${contractName}`}
-                        as={Nav.Link}
-                      >
+                    <Dropdown as={Nav.Item} key={`multisig-${contractName}`}>
+                      <Dropdown.Toggle variant="success" as={Nav.Link}>
                         {contractName}
                       </Dropdown.Toggle>
                       <Dropdown.Menu>
@@ -102,6 +91,7 @@ export const Propose: React.FC = ({}) => {
                           .map((prop) => {
                             return (
                               <Dropdown.Item
+                                key={`timelock-${prop.contractName}.${prop.methodName}`}
                                 eventKey={`timelock-${prop.contractName}.${prop.methodName}`}
                               >
                                 {`${prop.methodName}`}
@@ -126,7 +116,10 @@ export const Propose: React.FC = ({}) => {
             </Tab.Pane>
             {presets?.map((prop) => {
               return (
-                <Tab.Pane eventKey={`${prop.contractName}.${prop.methodName}`}>
+                <Tab.Pane
+                  key={`${prop.contractName}.${prop.methodName}`}
+                  eventKey={`${prop.contractName}.${prop.methodName}`}
+                >
                   <PresetProposal
                     paramArray={prop.paramArray}
                     methodName={prop.methodName}
@@ -139,6 +132,7 @@ export const Propose: React.FC = ({}) => {
             {presets?.map((prop) => {
               return (
                 <Tab.Pane
+                  key={`timelock-${prop.contractName}.${prop.methodName}`}
                   eventKey={`timelock-${prop.contractName}.${prop.methodName}`}
                 >
                   <TimelockPresetProposal

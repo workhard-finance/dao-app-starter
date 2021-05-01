@@ -31,7 +31,7 @@ const Farm = () => {
         <a href="https://app.uniswap.org">trading</a> or{" "}
         <Link to="/mine">mining</Link>!
       </Alert>
-      <Tabs defaultActiveKey="my-farmers" id="uncontrolled-tab-example">
+      <Tabs defaultActiveKey="my-farmers">
         <Tab
           eventKey="my-farmers"
           title="My Farmers"

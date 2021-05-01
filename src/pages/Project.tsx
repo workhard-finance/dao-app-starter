@@ -106,7 +106,7 @@ const Project: React.FC = () => {
         </Card.Body>
       </Card>
       <br />
-      <Tab.Container id="left-tabs-example" defaultActiveKey="pay">
+      <Tab.Container defaultActiveKey="pay">
         <Row>
           <Col sm={3}>
             <Nav variant="pills" className="flex-column">

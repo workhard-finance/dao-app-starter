@@ -157,7 +157,7 @@ const Mine = () => {
           return undefined;
         else
           return (
-            <>
+            <div key={`mine-${addr}-${idx}`}>
               <br />
               <StakeMiningPool
                 poolIdx={idx}
@@ -167,7 +167,7 @@ const Mine = () => {
                 visionPrice={visionPrice || 0}
                 collapsible={true}
               />
-            </>
+            </div>
           );
       })}
     </Page>

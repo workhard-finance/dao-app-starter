@@ -191,7 +191,7 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
 
   return (
     <Form>
-      <Form.Group controlId="">
+      <Form.Group>
         <Card.Title>
           <span
             onClick={() => {
@@ -223,7 +223,6 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
 
         <InputGroup className="mb-2">
           <Form.Control
-            id="vision-amount"
             value={amount}
             onChange={({ target: { value } }) => setAmount(value)}
             placeholder={getMaxAmount()}
@@ -248,12 +247,11 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
         )}{" "}
         of your $VISION token is staked.
       </Card.Text>
-      <Form.Group controlId="formBasicEmail">
+      <Form.Group>
         <Card.Title>Lock</Card.Title>
         {/* <Form.Label>Lock</Form.Label> */}
         <InputGroup className="mb-2">
           <Form.Control
-            id="inlineFormInputGroup"
             placeholder={`min: ${
               getLockedPeriod() + 1
             } epoch(s) ~= 4 weeks / max: 50 epoch(s) ~= 4 years`}

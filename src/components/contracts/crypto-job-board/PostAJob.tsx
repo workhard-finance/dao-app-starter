@@ -65,7 +65,7 @@ export const PostAJobBox: React.FC = () => {
       <Card.Header as="h5">Post a crypto job</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="NewProjectTitle">
+          <Form.Group>
             <Form.Label>Project title</Form.Label>
             <Form.Control
               type="text"
@@ -74,7 +74,7 @@ export const PostAJobBox: React.FC = () => {
               value={title}
             />
           </Form.Group>
-          <Form.Group controlId="NewProjectTitle">
+          <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control
               type="text"

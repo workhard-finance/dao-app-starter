@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Page from "../layouts/Page";
-import {
-  Alert,
-  Button,
-  Card,
-  CardColumns,
-  CardDeck,
-  Col,
-  Row,
-  Tab,
-  Tabs,
-} from "react-bootstrap";
+import { Alert, Button, Card, Col, Row, Tab, Tabs } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../providers/BlockNumberProvider";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
@@ -86,16 +76,16 @@ const Market: React.FC = () => {
       <br />
       <Tabs defaultActiveKey="featured">
         <Tab eventKey="featured" title="Featured" style={{ marginTop: "1rem" }}>
-          <CardDeck>
+          <Row>
             {allProducts
               .filter((address) => featured.includes(address))
               .map((address) => (
-                <>
+                <Col key={`featured-${address}`} md={4}>
                   <Product address={address} />
                   <br />
-                </>
+                </Col>
               ))}
-          </CardDeck>
+          </Row>
         </Tab>
         <Tab eventKey="all" title="All" style={{ marginTop: "1rem" }}>
           <Alert variant="warning">
@@ -104,7 +94,7 @@ const Market: React.FC = () => {
           </Alert>
           <Row>
             {allProducts.map((address) => (
-              <Col md={4}>
+              <Col key={`all-${address}`} md={4}>
                 <Product address={address} />
                 <br />
               </Col>

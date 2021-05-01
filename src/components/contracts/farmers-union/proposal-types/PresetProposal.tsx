@@ -132,29 +132,25 @@ export const PresetProposal: React.FC<Preset> = ({
       <Card.Header as="h5">preset proposal: {methodName}</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
-          {paramArray.map((arg) => {
-            return (
-              <Form.Group>
-                <Form.Label>{arg.name}</Form.Label>
-                <Form.Control
-                  id={arg.name}
-                  value={args[arg.name]}
-                  onChange={({ target: { value } }) =>
-                    setArgs({
-                      ...args,
-                      [arg.name]: value,
-                    })
-                  }
-                  placeholder={arg.name}
-                />
-              </Form.Group>
-            );
-          })}
+          {paramArray.map((arg, i) => (
+            <Form.Group key={`preset-form-input-${i}`}>
+              <Form.Label>{arg.name}</Form.Label>
+              <Form.Control
+                value={args[arg.name]}
+                onChange={({ target: { value } }) =>
+                  setArgs({
+                    ...args,
+                    [arg.name]: value,
+                  })
+                }
+                placeholder={arg.name}
+              />
+            </Form.Group>
+          ))}
 
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
             <Form.Control
-              id="propose-tx-predecessor"
               value={predecessor}
               onChange={({ target: { value } }) => setPredecessor(value)}
               defaultValue="0"
@@ -164,7 +160,6 @@ export const PresetProposal: React.FC<Preset> = ({
             <Form.Label>Salt</Form.Label>
             <InputGroup className="mb-2">
               <Form.Control
-                id="propose-tx-salt"
                 value={salt}
                 onChange={({ target: { value } }) => setSalt(value)}
                 defaultValue={BigNumber.from(randomBytes(32)).toHexString()}
@@ -184,7 +179,6 @@ export const PresetProposal: React.FC<Preset> = ({
               {startsIn || 0} seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-starts-in"
               type="number"
               value={startsIn}
               min={BigNumber.from(minimumPending || 0).toNumber()}
@@ -200,7 +194,6 @@ export const PresetProposal: React.FC<Preset> = ({
               {votingPeriod || 0} seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-voting-period"
               type="number"
               value={votingPeriod}
               min={BigNumber.from(minimumVotingPeriod || 0).toNumber()}

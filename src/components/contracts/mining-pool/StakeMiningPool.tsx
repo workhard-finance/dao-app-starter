@@ -274,7 +274,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       <hr />
       <Card.Title>Staking ${tokenDetails?.name || tokenName}</Card.Title>
       <Form>
-        <Form.Group controlId="staking">
+        <Form.Group>
           <InputGroup className="mb-2">
             <InputGroup.Prepend>
               <InputGroup.Text>
@@ -306,7 +306,6 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
               </InputGroup.Text>
             </InputGroup.Prepend>
             <Form.Control
-              id="staking-amount"
               value={amount}
               onChange={({ target: { value } }) => setAmount(value)}
               placeholder={getMaxAmount()}

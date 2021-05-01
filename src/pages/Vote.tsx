@@ -91,43 +91,43 @@ const Vote: React.FC = () => {
               (proposedTx) =>
                 proposedTx.start.lt(timestamp) && proposedTx.end.gt(timestamp)
             )
-            .map((proposedTx) => (
-              <>
+            .map((proposedTx, i) => (
+              <div key={`voting-${i}`}>
                 <VoteForTx
                   tx={proposedTx}
                   myVotes={myVotes}
                   status={VoteForTxStatus.Voting}
                 />
                 <br />
-              </>
+              </div>
             ))}
         </Tab>
         <Tab eventKey="ended" title="Ended" style={{ marginTop: "1rem" }}>
           {proposedTxs
             .filter((proposedTx) => proposedTx.end.lt(timestamp))
-            .map((proposedTx) => (
-              <>
+            .map((proposedTx, i) => (
+              <div key={`ended-${i}`}>
                 <VoteForTx
                   tx={proposedTx}
                   myVotes={myVotes}
                   status={VoteForTxStatus.Ended}
                 />
                 <br />
-              </>
+              </div>
             ))}
         </Tab>
         <Tab eventKey="pending" title="Pending" style={{ marginTop: "1rem" }}>
           {proposedTxs
             .filter((proposedTx) => proposedTx.start.gt(timestamp))
-            .map((proposedTx) => (
-              <>
+            .map((proposedTx, i) => (
+              <div key={`pending-${i}`}>
                 <VoteForTx
                   tx={proposedTx}
                   myVotes={myVotes}
                   status={VoteForTxStatus.Pending}
                 />
                 <br />
-              </>
+              </div>
             ))}
         </Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>

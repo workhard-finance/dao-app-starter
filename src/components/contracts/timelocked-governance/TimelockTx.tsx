@@ -247,27 +247,31 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
       <Card.Body>
         <Card.Text>Schedule:</Card.Text>
         <ul>
-          <li>
+          <li key={`${index}-${id}-scheduled-at`}>
             Scheduled at: {new Date(timestamp * 1000).toLocaleString()}( block
             number: {blockNumber})
           </li>
-          <li>
+          <li key={`${index}-${id}-remaining`}>
             Remaining: {remaining} seconds (= ~{(remaining / 86400).toFixed(1)}{" "}
             days)
           </li>
-          <li>
+          <li key={`${index}-${id}-tx-hash`}>
             txHash:{" "}
             <a target="_blank" href={`https://etherscan.io/tx/${tx.hash}`}>
               {tx.hash?.toString()}
             </a>
           </li>
-          <li>predecessor: {scheduledTx?.predecessor}</li>
-          <li>salt: {scheduledTx?.salt.toString()}</li>
+          <li key={`${index}-${id}-predecessor`}>
+            predecessor: {scheduledTx?.predecessor}
+          </li>
+          <li key={`${index}-${id}-salt`}>
+            salt: {scheduledTx?.salt.toString()}
+          </li>
         </ul>
         <Card.Text>Transaction:</Card.Text>
         <Accordion>
           {decodedTxData?.map((decoded, i) => (
-            <Card>
+            <Card key={`timelock-tx-${i}`}>
               <Card.Header>
                 <Accordion.Toggle as={Button} variant="link" eventKey={`${i}`}>
                   {decoded.contractName} - {decoded.methodName}
@@ -284,7 +288,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
                       Params
                       <ul>
                         {Object.getOwnPropertyNames(decoded.args).map((key) => (
-                          <li>
+                          <li key={key}>
                             <strong>{key}</strong>: {flatten(decoded.args[key])}
                           </li>
                         ))}

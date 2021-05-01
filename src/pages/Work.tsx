@@ -74,25 +74,23 @@ const Work: React.FC = () => {
         <p className="mb-0">
           All men must work, even the rich, because to work was the will of God
         </p>
-        {/* <footer className="blockquote-footer">John Calvin</footer> */}
+        {/* <footer className="blockquote-footer">John Calvin</footer>
+         */}
       </blockquote>
-      {/* <Alert variant={"warning"}>
-        All men must work, even the rich, because to work was the will of God
-      </Alert> */}
       <hr />
       <h1>Crypto Job Board</h1>
       <p>Work for projects and earn $COMMITMENT tokens.</p>
-      <Tabs defaultActiveKey="activeProjects" id="uncontrolled-tab-example">
+      <Tabs defaultActiveKey="activeProjects">
         <Tab
           eventKey="activeProjects"
           title="Active projects"
           style={{ marginTop: "1rem" }}
         >
           {activeProjects.map((id) => (
-            <>
+            <div key={id}>
               <ProjectBox projId={id} active={true} />
               <br />
-            </>
+            </div>
           ))}
         </Tab>
         <Tab
@@ -101,10 +99,10 @@ const Work: React.FC = () => {
           style={{ marginTop: "1rem" }}
         >
           {inactiveProjects.map((id) => (
-            <>
+            <div key={id}>
               <ProjectBox projId={id} active={false} />
               <br />
-            </>
+            </div>
           ))}
         </Tab>
         <Tab eventKey="post" title="Post a job" style={{ marginTop: "1rem" }}>

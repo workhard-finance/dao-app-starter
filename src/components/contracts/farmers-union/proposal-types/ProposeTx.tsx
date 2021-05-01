@@ -123,7 +123,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control
-              id="propose-tx-details"
               value={proposalDetails}
               onChange={({ target: { value } }) => setProposalDetails(value)}
               placeholder="Describe your proposal"
@@ -132,7 +131,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
           <Form.Group>
             <Form.Label>To</Form.Label>
             <Form.Control
-              id="propose-tx-to"
               value={msgTo}
               onChange={({ target: { value } }) => setMsgTo(value)}
               placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF01"
@@ -141,7 +139,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
           <Form.Group>
             <Form.Label>Data</Form.Label>
             <Form.Control
-              id="propose-tx-data"
               value={msgData}
               onChange={({ target: { value } }) => setMsgData(value)}
               placeholder="0x"
@@ -150,7 +147,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
             <Form.Control
-              id="propose-tx-predecessor"
               value={msgData}
               onChange={({ target: { value } }) => setPredecessor(value)}
               defaultValue="0"
@@ -159,7 +155,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
           <Form.Group>
             <Form.Label>Value</Form.Label>
             <Form.Control
-              id="propose-tx-value"
               value={msgValue}
               onChange={({ target: { value } }) => setMsgValue(value)}
               defaultValue="0"
@@ -169,7 +164,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
             <Form.Label>Salt</Form.Label>
             <InputGroup className="mb-2">
               <Form.Control
-                id="propose-tx-salt"
                 value={salt}
                 onChange={({ target: { value } }) => setSalt(value)}
                 defaultValue={BigNumber.from(randomBytes(32)).toString()}
@@ -189,7 +183,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
               {startsIn || 0} seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-starts-in"
               type="number"
               value={startsIn}
               min={BigNumber.from(minimumPending || 0).toNumber()}
@@ -205,7 +198,6 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
               {votingPeriod || 0} seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-voting-period"
               type="number"
               value={votingPeriod}
               min={BigNumber.from(minimumVotingPeriod || 0).toNumber()}

@@ -145,7 +145,7 @@ const Manufacture: React.FC = () => {
           <Card>
             <Card.Body>
               <Form>
-                <Form.Group controlId="name">
+                <Form.Group>
                   <Form.Label>Product Name</Form.Label>
                   <Form.Control
                     type="text"
@@ -154,7 +154,7 @@ const Manufacture: React.FC = () => {
                     value={name}
                   />
                 </Form.Group>
-                <Form.Group controlId="symbol">
+                <Form.Group>
                   <Form.Label>Product Symbol</Form.Label>
                   <Form.Control
                     type="text"
@@ -163,7 +163,7 @@ const Manufacture: React.FC = () => {
                     value={symbol}
                   />
                 </Form.Group>
-                <Form.Group controlId="uri">
+                <Form.Group>
                   <Form.Label>URI</Form.Label>
                   <Form.File
                     onChange={(e: { target: HTMLInputElement }) => {
@@ -182,7 +182,7 @@ const Manufacture: React.FC = () => {
                       : `You are uploading a file to the decentralized permanent file storage IPFS. Please be aware of that uploading a file is almost irreversible.`}
                   </Form.Text>
                 </Form.Group>
-                <Form.Group controlId="name">
+                <Form.Group>
                   <Form.Label>Description</Form.Label>
                   <Form.Control
                     type="text"
@@ -196,7 +196,7 @@ const Manufacture: React.FC = () => {
                       : `You are uploading a file to the decentralized permanent file storage IPFS. Please be aware of that uploading a file is almost irreversible.`}
                   </Form.Text>
                 </Form.Group>
-                <Form.Group controlId="price">
+                <Form.Group>
                   <Form.Label>Price</Form.Label>
                   <Form.Control
                     type="number"
@@ -209,7 +209,7 @@ const Manufacture: React.FC = () => {
                     step={10}
                   />
                 </Form.Group>
-                <Form.Group controlId="profit-rate">
+                <Form.Group>
                   <Form.Label>Profit Rate</Form.Label>
                   <Form.Control
                     type="range"
@@ -226,7 +226,7 @@ const Manufacture: React.FC = () => {
                     commitment fund, and {profitRate}% goes to the manufacturer.
                   </Form.Text>
                 </Form.Group>
-                <Form.Group controlId="initial-supply">
+                <Form.Group>
                   <Form.Label>Initial Supply</Form.Label>
                   <Form.Control
                     type="number"

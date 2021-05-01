@@ -220,13 +220,12 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       <hr />
       <Card.Title>Burning ${tokenDetails?.name || tokenName}</Card.Title>
       <Form>
-        <Form.Group controlId="staking">
+        <Form.Group>
           <InputGroup className="mb-2">
             <InputGroup.Prepend>
               <InputGroup.Text>Burn</InputGroup.Text>
             </InputGroup.Prepend>
             <Form.Control
-              id="burn-amount"
               value={amount}
               onChange={({ target: { value } }) => setAmount(value)}
               placeholder={getMaxAmount()}

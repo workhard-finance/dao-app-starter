@@ -1,5 +1,4 @@
-import { randomBytes } from "@ethersproject/random";
-import { utils } from "ethers";
+import { hexlify, randomBytes } from "ethers/lib/utils";
 import React from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
@@ -17,10 +16,7 @@ export const OverlayTooltip: React.FC<OverlayTooltipProps> = ({
 }) => (
   <OverlayTrigger
     overlay={
-      <Tooltip
-        style={tooltipStyle}
-        id={`tooltip-${utils.hexlify(randomBytes(8))}`}
-      >
+      <Tooltip style={tooltipStyle} id={`tooltip-${hexlify(randomBytes(8))}`}>
         {tip}
       </Tooltip>
     }

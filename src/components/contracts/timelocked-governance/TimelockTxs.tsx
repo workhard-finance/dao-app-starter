@@ -83,10 +83,10 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
         .sort((a, b) => b.blockNumber - a.blockNumber)
         .map((tx, index) => {
           return (
-            <>
+            <div key={`timelock-tx-${index}`}>
               <br />
               <TimelockTx {...tx} index={Object.values(txs).length - index} />
-            </>
+            </div>
           );
         })}
     </>

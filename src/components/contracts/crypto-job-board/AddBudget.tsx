@@ -129,7 +129,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   };
   return (
     <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="add-budget-token">
+      <Form.Group>
         <Form.Label>Token</Form.Label>
         <Form.Control
           as="select"
@@ -143,7 +143,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           ))}
         </Form.Control>
       </Form.Group>
-      <Form.Group controlId="add-budget-amount">
+      <Form.Group>
         <Form.Label>
           Amount - (balance: {balance ? formatEther(balance.toString()) : "?"})
         </Form.Label>

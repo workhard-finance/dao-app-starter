@@ -1,6 +1,6 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, constants, ContractTransaction } from "ethers";
-import { Card, Button, Form, InputGroup } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { BigNumber, ContractTransaction } from "ethers";
+import { Card, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -129,7 +129,7 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
         </Card.Text>
         {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
         <Form>
-          <Form.Group controlId="buy">
+          <Form.Group>
             <Card.Title>Buy</Card.Title>
             {/* <Form.Label>Staking</Form.Label> */}
             <InputGroup className="mb-2">
@@ -137,7 +137,6 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
                 <InputGroup.Text>$DAI</InputGroup.Text>
               </InputGroup.Prepend>
               <Form.Control
-                id="base-currency-amount"
                 value={spendingDai}
                 onChange={({ target: { value } }) => setSpendingDai(value)}
                 placeholder={getMaxSpending()}

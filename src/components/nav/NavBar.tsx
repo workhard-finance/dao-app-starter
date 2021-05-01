@@ -14,10 +14,11 @@ const NavBar: React.FC<NavBarProps> = ({ menus }) => {
   return (
     <Navbar expand="lg" className="navbar-light bg-light">
       <NavBarBrand />
-      <Navbar.Collapse id="basic-navbar-nav">
+      <Navbar.Collapse>
         <Nav>
           {menus.map((menu) => (
             <Nav.Link
+              key={menu.url}
               as={Link}
               to={menu.url}
               style={{

@@ -1,21 +1,12 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, constants } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  InputGroup,
-  ProgressBar,
-  ListGroup,
-  Col,
-} from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { BigNumber } from "ethers";
+import { Card, Button, Form, ListGroup, Col } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, getAddress } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { bigNumToFixed, getVariantForProgressBar } from "../../../utils/utils";
+import { bigNumToFixed } from "../../../utils/utils";
 import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
-import { ConditionalButton } from "../../ConditionalButton";
 import {
   CoingeckoTokenDetails,
   getPriceFromCoingecko,
@@ -197,7 +188,7 @@ export const Epoch: React.FC<EpochProps> = ({
           <ListGroup className="list-group-flush">
             {details.length === tokens.length &&
               details.map((detail, i) => (
-                <ListGroup.Item>
+                <ListGroup.Item key={`epoch-${epoch}-${i}`}>
                   <Col>
                     <Form.Check
                       onChange={(_) => {

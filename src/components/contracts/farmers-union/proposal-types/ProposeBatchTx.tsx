@@ -159,7 +159,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
                 <Form.Group>
                   <Form.Label>To</Form.Label>
                   <Form.Control
-                    id="propose-tx-to"
                     value={proposalProperties[index].msgTo}
                     onChange={({ target: { value } }) =>
                       setProposalProperties((prevState) => {
@@ -178,7 +177,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
                 <Form.Group>
                   <Form.Label>Data</Form.Label>
                   <Form.Control
-                    id="propose-tx-data"
                     value={proposalProperties[index].msgData}
                     onChange={({ target: { value } }) =>
                       setProposalProperties((prevState) => {
@@ -198,7 +196,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
                 <Form.Group>
                   <Form.Label>Value</Form.Label>
                   <Form.Control
-                    id="propose-tx-value"
                     value={proposalProperties[index].msgValue}
                     onChange={({ target: { value } }) =>
                       setProposalProperties((prevState) => {
@@ -224,7 +221,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control
-              id="propose-tx-details"
               value={proposalDetails}
               onChange={({ target: { value } }) => setProposalDetails(value)}
               placeholder="Describe your proposal"
@@ -234,7 +230,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
             <Form.Control
-              id="propose-tx-predecessor"
               value={predecessor}
               onChange={({ target: { value } }) => setPredecessor(value)}
               defaultValue="0"
@@ -245,7 +240,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
             <Form.Label>Salt</Form.Label>
             <InputGroup className="mb-2">
               <Form.Control
-                id="propose-tx-salt"
                 value={salt}
                 onChange={({ target: { value } }) => setSalt(value)}
                 defaultValue={BigNumber.from(randomBytes(32)).toString()}
@@ -265,7 +259,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
               {startsIn || 0} seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-starts-in"
               type="number"
               value={startsIn}
               min={BigNumber.from(minimumPending || 0).toNumber()}
@@ -281,7 +274,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
               {votingPeriod || 0} seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-voting-period"
               type="number"
               value={votingPeriod}
               min={BigNumber.from(minimumVotingPeriod || 0).toNumber()}

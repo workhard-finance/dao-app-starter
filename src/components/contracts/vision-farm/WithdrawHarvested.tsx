@@ -113,7 +113,7 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
         <ListGroup className="list-group-flush">
           {isSynced() &&
             tokens.map((token, i) => (
-              <ListGroup.Item>
+              <ListGroup.Item key={`withdraw-${token}-${i}`}>
                 <Col>
                   <Form.Check
                     label={`$${details[i]?.symbol || "?"}: ${formatEther(

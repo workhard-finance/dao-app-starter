@@ -80,29 +80,25 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
       <Card.Header as="h5">preset proposal(timelock): {methodName}</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
-          {paramArray.map((arg) => {
-            return (
-              <Form.Group>
-                <Form.Label>{arg.name}</Form.Label>
-                <Form.Control
-                  id={arg.name}
-                  value={args[arg.name]}
-                  onChange={({ target: { value } }) =>
-                    setArgs({
-                      ...args,
-                      [arg.name]: value,
-                    })
-                  }
-                  placeholder={arg.name}
-                />
-              </Form.Group>
-            );
-          })}
+          {paramArray.map((arg, i) => (
+            <Form.Group key={`preset-form-input-${i}`}>
+              <Form.Label>{arg.name}</Form.Label>
+              <Form.Control
+                value={args[arg.name]}
+                onChange={({ target: { value } }) =>
+                  setArgs({
+                    ...args,
+                    [arg.name]: value,
+                  })
+                }
+                placeholder={arg.name}
+              />
+            </Form.Group>
+          ))}
 
           <Form.Group>
             <Form.Label>Predecessor</Form.Label>
             <Form.Control
-              id="propose-tx-predecessor"
               value={predecessor}
               onChange={({ target: { value } }) => setPredecessor(value)}
             />
@@ -111,7 +107,6 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
             <Form.Label>Salt</Form.Label>
             <InputGroup className="mb-2">
               <Form.Control
-                id="propose-tx-salt"
                 value={salt}
                 onChange={({ target: { value } }) => setSalt(value)}
               />
@@ -130,7 +125,6 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
               seconds)
             </Form.Label>
             <Form.Control
-              id="propose-tx-delay"
               type="number"
               value={delay}
               min={BigNumber.from(minDelay || 0).toNumber()}
