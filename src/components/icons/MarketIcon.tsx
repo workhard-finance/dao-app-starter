@@ -1,10 +1,10 @@
 import React from "react";
-import work from "../../svgs/work.svg";
+import market from "../../svgs/market.svg";
 
-const WorkIcon = (
+const MarketIcon = (
   props: JSX.IntrinsicAttributes &
     React.ClassAttributes<HTMLImageElement> &
     React.ImgHTMLAttributes<HTMLImageElement>
-) => <img {...props} src={work} alt="work" />;
+) => <img {...props} src={market} alt="market" />;
 
-export default WorkIcon;
+export default MarketIcon;

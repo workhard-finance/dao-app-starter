@@ -32,6 +32,8 @@ import {
   VisionToken,
   CommitmentToken__factory,
   VisionToken__factory,
+  Marketplace,
+  Marketplace__factory,
 } from "@workhard/protocol";
 
 // let deployedContracts: Deployed = deployed;
@@ -55,6 +57,7 @@ export interface WorkhardContracts {
   commitmentToken: CommitmentToken;
   visionToken: VisionToken;
   visionLP: ERC20;
+  marketplace: Marketplace;
 }
 
 export const WorkhardContractCtx = React.createContext<
@@ -87,7 +90,8 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       !contracts.CommitmentToken ||
       !contracts.VisionToken ||
       !contracts.VisionTokenEmitter ||
-      !contracts.VisionLP
+      !contracts.VisionLP ||
+      !contracts.Marketplace
     ) {
       return undefined;
     }
@@ -138,6 +142,10 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       library
     );
     const visionLP = ERC20__factory.connect(contracts.VisionLP, library);
+    const marketplace = Marketplace__factory.connect(
+      contracts.Marketplace,
+      library
+    );
     const context: WorkhardContracts = {
       project,
       cryptoJobBoard,
@@ -152,6 +160,7 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       commitmentToken,
       visionToken,
       visionLP,
+      marketplace,
     };
     return context;
   };

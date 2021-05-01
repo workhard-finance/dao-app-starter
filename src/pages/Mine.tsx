@@ -71,7 +71,7 @@ const Mine = () => {
             getAddress(v) === getAddress(contracts.commitmentMining.address)
         )
       );
-      contracts.visionTokenEmitter.getEmission().then(setEmission);
+      contracts.visionTokenEmitter.emission().then(setEmission);
       getPriceFromCoingecko(contracts.visionToken.address).then(setVisionPrice);
       return () => {
         stale = true;

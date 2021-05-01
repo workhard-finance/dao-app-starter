@@ -1,21 +1,29 @@
 import { randomBytes } from "@ethersproject/random";
-import { randomInt } from "crypto";
+import { utils } from "ethers";
 import React from "react";
-import { OverlayTriggerProps } from "react-bootstrap";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export interface OverlayTooltipProps {
-  tip: string;
+  tip: React.ReactElement | string;
+  tooltipStyle?: React.CSSProperties;
   text?: string;
 }
 
 export const OverlayTooltip: React.FC<OverlayTooltipProps> = ({
   tip,
+  tooltipStyle,
   children,
   text,
 }) => (
   <OverlayTrigger
-    overlay={<Tooltip id={`tooltip`}>{tip}</Tooltip>}
+    overlay={
+      <Tooltip
+        style={tooltipStyle}
+        id={`tooltip-${utils.hexlify(randomBytes(8))}`}
+      >
+        {tip}
+      </Tooltip>
+    }
     children={text ? <span>{text}</span> : <span>{children}</span>}
   />
 );

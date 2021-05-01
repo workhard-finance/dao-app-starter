@@ -3,6 +3,7 @@ import { Container, Row } from "react-bootstrap";
 import FarmIcon from "../components/icons/FarmIcon";
 import WorkIcon from "../components/icons/WorkIcon";
 import VoteIcon from "../components/icons/VoteIcon";
+import MarketIcon from "../components/icons/MarketIcon";
 import MineIcon from "../components/icons/MineIcon";
 import DocsIcon from "../components/icons/DocsIcon";
 import NavBar from "../components/nav/NavBar";
@@ -36,9 +37,9 @@ const Page = (props: React.ComponentProps<any>) => {
       url: "/vote",
     },
     {
-      Icon: DocsIcon,
-      name: "Docs",
-      url: "/docs",
+      Icon: MarketIcon,
+      name: "Market",
+      url: "/market",
     },
   ];
   return (

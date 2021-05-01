@@ -117,10 +117,10 @@ const Work: React.FC = () => {
         >
           <Row>
             <Col>
-              <RedeemCommitment />
+              <BuyCommitment />
             </Col>
             <Col>
-              <BuyCommitment />
+              <RedeemCommitment />
             </Col>
           </Row>
           <br />

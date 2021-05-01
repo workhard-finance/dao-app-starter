@@ -77,7 +77,14 @@ const Vote: React.FC = () => {
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
       <h1>Farmers Union</h1>
-      <Tabs defaultActiveKey="voting" id="uncontrolled-tab-example">
+      <Tabs defaultActiveKey="timelock">
+        <Tab
+          eventKey="timelock"
+          title="Transactions"
+          style={{ marginTop: "1rem" }}
+        >
+          <TimelockTxs />
+        </Tab>
         <Tab eventKey="voting" title="Voting" style={{ marginTop: "1rem" }}>
           {proposedTxs
             .filter(
@@ -125,9 +132,6 @@ const Vote: React.FC = () => {
         </Tab>
         <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
           <Propose />
-        </Tab>
-        <Tab eventKey="timelock" title="Timelock" style={{ marginTop: "1rem" }}>
-          <TimelockTxs />
         </Tab>
       </Tabs>
     </Page>
