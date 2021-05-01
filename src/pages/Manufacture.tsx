@@ -297,10 +297,7 @@ const Manufacture: React.FC = () => {
             price={BigNumber.from(price)}
             profitRate={BigNumber.from(profitRate)}
             stock={BigNumber.from(initialSupply)}
-            uri={
-              baseURI ||
-              "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
-            }
+            uri={baseURI || "QmNmA284uLXBPHtRrdBLwFq6D6jpqKjbj26qCRuD25C6DC"}
             maxSupply={
               limitedEdition ? BigNumber.from(initialSupply) : BigNumber.from(0)
             }
