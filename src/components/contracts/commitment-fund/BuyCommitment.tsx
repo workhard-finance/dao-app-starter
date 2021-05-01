@@ -33,7 +33,7 @@ export const BuyCommitment: React.FC<BuyCommitmentProps> = ({}) => {
     approveAndRun(
       signer,
       contracts.baseCurrency.address,
-      contracts.cryptoJobBoard.address,
+      contracts.commitmentFund.address,
       setApproveTx,
       setApproved,
       buyCommitment
