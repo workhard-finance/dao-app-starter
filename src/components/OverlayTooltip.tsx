@@ -16,6 +16,6 @@ export const OverlayTooltip: React.FC<OverlayTooltipProps> = ({
 }) => (
   <OverlayTrigger
     overlay={<Tooltip id={`tooltip`}>{tip}</Tooltip>}
-    children={text ? <span>{text}</span> : <>{children}</>}
+    children={text ? <span>{text}</span> : <span>{children}</span>}
   />
 );
