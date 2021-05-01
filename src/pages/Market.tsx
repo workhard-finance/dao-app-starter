@@ -73,13 +73,13 @@ const Market: React.FC = () => {
             My Balance: 4012 $COMMITMENT
           </Card.Text>
           <OverlayTooltip tip="Go to crypto job board and work to get $COMMITMENT">
-            <Button variant="success">Work</Button>{" "}
+            <Button variant="outline-success">Work</Button>{" "}
           </OverlayTooltip>
           <OverlayTooltip tip="Go to Uniswap to trade $COMMITMENT">
-            <Button variant="info">Trade</Button>{" "}
+            <Button variant="outline-info">Trade</Button>{" "}
           </OverlayTooltip>
           <OverlayTooltip tip="If $COMMITMENT is too expensive in Uniswap, you can simply purchase them per $2">
-            <Button variant="warning">Buy</Button>
+            <Button variant="outline-warning">Buy</Button>
           </OverlayTooltip>
         </Card.Body>
       </Card>
