@@ -26,6 +26,7 @@
     "bootswatch": "^4.6.0",
     "deepmerge": "^4.2.2",
     "ethers": "^5.0.26",
+    "ipfs-core": "^0.5.4",
     "mdx.macro": "^0.2.9",
     "node-fetch": "^2.6.1",
     "node-sass": "4.14.1",
