@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Page from "../layouts/Page";
 
-import { Row, Col, Tab, Nav, Card, Button, Form } from "react-bootstrap";
-import ReactHtmlParser from "react-html-parser";
+import { Row, Col, Card, Button, Form } from "react-bootstrap";
 import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
 import { BigNumber, ContractTransaction } from "ethers";
-import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
-import { getAddress, parseEther } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
-import { wrapUrl } from "../utils/utils";
-import { ExecuteBudget } from "../components/contracts/crypto-job-board/ExecuteBudget";
 import { ConditionalButton } from "../components/ConditionalButton";
 import { ProductView } from "../components/contracts/product/ProductView";
 import { useIPFS } from "../providers/IPFSProvider";
@@ -45,10 +41,42 @@ const Manufacture: React.FC = () => {
       Promise.all([ipfs.add(file), ipfs.add({ content: description })]).then(
         ([baseURIResult, descResult]) => {
           alert(`Successfully uploaded to the decentralized file storage.`);
-          setBaseURI(baseURIResult.cid.toString());
-          setDescriptionURI(descResult.cid.toString());
-          setUploaded(true);
-          setUploading(undefined);
+          const _baseURI = baseURIResult.cid.toString();
+          const _descURI = descResult.cid.toString();
+          setBaseURI(_baseURI);
+          setDescriptionURI(_descURI);
+          const permaPin = window.confirm(
+            "We recommend you store the data permanently on Arweave too. Shall we do that?"
+          );
+          if (permaPin) {
+            Promise.all([
+              fetch(`https://ipfs2arweave.com/permapin/${_baseURI}`),
+              fetch(`https://ipfs2arweave.com/permapin/${_descURI}`),
+            ]).then(([res1, res2]) => {
+              if (res1.ok && res2.ok) {
+                Promise.all([res1.json(), res2.json()]).then(
+                  ([baseURIArweaveResult, descArweaveResult]) => {
+                    alert(
+                      `Successfully stored them permanently. The arweave ids for baseURI & description are: ${baseURIArweaveResult.arweaveId} & ${descArweaveResult.arweaveId}`
+                    );
+                    setUploaded(true);
+                    setUploading(undefined);
+                  }
+                );
+              } else {
+                alert(
+                  "Failed to store them permanently. Please consider to Pinnata by yourself or get in touch with the team via Discord."
+                );
+                res1.json().then(console.error);
+                res2.json().then(console.error);
+                setUploaded(false);
+                setUploading(undefined);
+              }
+            });
+          } else {
+            setUploaded(true);
+            setUploading(undefined);
+          }
         }
       );
     } else {
