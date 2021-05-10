@@ -34,7 +34,6 @@ const JobBoard: React.FC = () => {
               .forEach((_, index) => {
                 project.tokenByIndex(index).then((projId) => {
                   jobBoard.approvedProjects(projId).then((approved) => {
-                    console.log("approved", projId, approved);
                     if (approved) {
                       activeProjects.push(projId);
                       setActiveProjects([...new Set(activeProjects)]);
