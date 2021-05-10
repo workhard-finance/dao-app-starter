@@ -2,8 +2,7 @@ import React from "react";
 import Page from "../layouts/Page";
 import { Alert, Image, Tab, Tabs } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { MyFarm } from "../components/contracts/vision-farm/MyFarm";
-import { Farms } from "../components/contracts/vision-farm/Farms";
+import { MyLock } from "../components/contracts/dividend-pool/MyLock";
 
 // move this func to utils
 const getVariant = (percent: number) => {
@@ -31,18 +30,7 @@ const Farm = () => {
         <a href="https://app.uniswap.org">trading</a> or{" "}
         <Link to="/mine">mining</Link>!
       </Alert>
-      <Tabs defaultActiveKey="my-farmers">
-        <Tab
-          eventKey="my-farmers"
-          title="My Farmers"
-          style={{ marginTop: "1rem" }}
-        >
-          <MyFarm />
-        </Tab>
-        <Tab eventKey="farms" title="Farms" style={{ marginTop: "1rem" }}>
-          <Farms />
-        </Tab>
-      </Tabs>
+      <MyLock />
     </Page>
   );
 };

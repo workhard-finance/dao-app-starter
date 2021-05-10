@@ -74,7 +74,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress);
-      contracts.visionTokenEmitter.getPoolWeight(poolIdx).then(setWeight);
+      contracts.visionEmitter.getPoolWeight(poolIdx).then(setWeight);
       return () => {
         stale = true;
         setTokenAddress(undefined);

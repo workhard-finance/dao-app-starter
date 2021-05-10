@@ -71,7 +71,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress);
-      contracts.visionTokenEmitter.getPoolWeight(poolIdx).then(setWeight);
+      contracts.visionEmitter.getPoolWeight(poolIdx).then(setWeight);
       return () => {
         stale = true;
         setTokenAddress(undefined);
@@ -268,7 +268,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
           ARR
           <OverlayTooltip
             tip={
-              "Annual Revenue Run Rate = (earned vision - burned commitment) * 12 months / burned commitment"
+              "Annual Revenue Run Rate = (earned vision - burned commit) * 12 months / burned commit"
             }
             text="❔"
           />

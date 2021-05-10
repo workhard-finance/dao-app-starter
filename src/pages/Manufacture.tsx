@@ -8,8 +8,9 @@ import { useWeb3React } from "@web3-react/core";
 import { parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
 import { ConditionalButton } from "../components/ConditionalButton";
-import { ProductView } from "../components/contracts/product/ProductView";
+import { ProductView } from "../components/contracts/marketplace/product/ProductView";
 import { useIPFS } from "../providers/IPFSProvider";
+import { permaPinToArweave } from "../utils/utils";
 
 const Manufacture: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -17,117 +18,98 @@ const Manufacture: React.FC = () => {
   const contracts = useWorkhardContracts();
   const { ipfs } = useIPFS();
 
+  const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
   const [file, setFile] = useState<File>();
-  const [descriptionURI, setDescriptionURI] = useState<string>();
-  const [baseURI, setBaseURI] = useState<string>();
+  const [imageURI, setImageURI] = useState<string>();
+  const [uri, setURI] = useState<string>();
   const [price, setPrice] = useState<number>(100);
   const [profitRate, setProfitRate] = useState<number>(0);
-  const [initialSupply, setInitialSupply] = useState<number>(10);
+  const [maxSupply, setMaxSupply] = useState<number>(10);
   const [limitedEdition, setLimitedEdition] = useState<boolean>(false);
-  const [name, setName] = useState<string>();
-  const [symbol, setSymbol] = useState<string>();
   const [uploaded, setUploaded] = useState<boolean>();
   const [uploading, setUploading] = useState<boolean>();
   const [launchTx, setLaunchTx] = useState<ContractTransaction>();
 
-  function upload() {
+  const uploadImageToIPFS = async (file: File): Promise<string> => {
     if (!ipfs) {
-      alert("IPFS is not connected.");
+      throw "IPFS is not connected.";
+    }
+    const result = await ipfs.add(file);
+    const cid = result.toString();
+    setImageURI(cid);
+    await permaPinToArweave(cid);
+    return cid;
+  };
+
+  const uploadMetadataToIPFS = async (
+    name: string,
+    description: string,
+    image: string
+  ): Promise<string> => {
+    if (!ipfs) {
+      throw "IPFS is not connected.";
+    }
+    const obj = { name, description, image };
+    const cid = await ipfs.add(JSON.stringify(obj));
+    await permaPinToArweave(cid.toString());
+    return cid.toString();
+  };
+
+  function upload() {
+    if (name == undefined || description == undefined || file == undefined) {
+      alert("Fill out the form.");
       return;
     }
-    if (file && description) {
-      setUploading(true);
-      Promise.all([ipfs.add(file), ipfs.add({ content: description })]).then(
-        ([baseURIResult, descResult]) => {
-          alert(`Successfully uploaded to the decentralized file storage.`);
-          const _baseURI = baseURIResult.cid.toString();
-          const _descURI = descResult.cid.toString();
-          setBaseURI(_baseURI);
-          setDescriptionURI(_descURI);
-          const permaPin = window.confirm(
-            "We recommend you store the data permanently on Arweave too. Shall we do that?"
-          );
-          if (permaPin) {
-            Promise.all([
-              fetch(`https://ipfs2arweave.com/permapin/${_baseURI}`),
-              fetch(`https://ipfs2arweave.com/permapin/${_descURI}`),
-            ]).then(([res1, res2]) => {
-              if (res1.ok && res2.ok) {
-                Promise.all([res1.json(), res2.json()]).then(
-                  ([baseURIArweaveResult, descArweaveResult]) => {
-                    alert(
-                      `Successfully stored them permanently. The arweave ids for baseURI & description are: ${baseURIArweaveResult.arweaveId} & ${descArweaveResult.arweaveId}`
-                    );
-                    setUploaded(true);
-                    setUploading(undefined);
-                  }
-                );
-              } else {
-                alert(
-                  "Failed to store them permanently. Please consider to Pinnata by yourself or get in touch with the team via Discord."
-                );
-                res1.json().then(console.error);
-                res2.json().then(console.error);
-                setUploaded(false);
-                setUploading(undefined);
-              }
-            });
-          } else {
+    setUploading(true);
+    uploadImageToIPFS(file)
+      .then((imageURI) => {
+        uploadMetadataToIPFS(name, description, imageURI)
+          .then((uri) => {
             setUploaded(true);
             setUploading(undefined);
-          }
-        }
-      );
-    } else {
-      alert("Select file & write description.");
-    }
+            setURI(uri);
+          })
+          .catch((_) => {
+            setUploaded(false);
+            setUploading(undefined);
+          });
+      })
+      .catch((_) => {
+        setUploaded(false);
+        setUploading(undefined);
+      });
   }
 
-  function launch() {
+  function submitTx() {
     if (!contracts) {
       alert("Web3 is not connected.");
       return;
     }
-    if (
-      name == undefined ||
-      symbol == undefined ||
-      baseURI == undefined ||
-      descriptionURI == undefined ||
-      price == undefined ||
-      profitRate == undefined ||
-      initialSupply == undefined
-    ) {
+    if (uri == undefined || price == undefined || profitRate == undefined) {
       alert("Fill out the form.");
       return;
     }
     let submission: Promise<ContractTransaction>;
+    const marketplace = contracts?.marketplace;
+    if (!marketplace) {
+      alert("Not connected");
+      return;
+    }
     const signer = library.getSigner(account);
     if (limitedEdition) {
-      submission = contracts.marketplace
+      submission = marketplace
         .connect(signer)
-        .launchNewProductWithMaxSupply(
-          name,
-          symbol,
-          baseURI,
-          descriptionURI,
+        .manufactureLimitedEdition(
+          uri,
           profitRate * 100,
           parseEther(price.toString()),
-          initialSupply,
-          initialSupply
+          maxSupply
         );
     } else {
-      submission = contracts.marketplace
+      submission = marketplace
         .connect(signer)
-        .launchNewProduct(
-          name,
-          symbol,
-          baseURI,
-          descriptionURI,
-          profitRate * 100,
-          parseEther(price.toString()),
-          initialSupply
-        );
+        .manufacture(uri, profitRate * 100, parseEther(price.toString()));
     }
     submission.then((tx) => {
       setLaunchTx(tx);
@@ -135,14 +117,12 @@ const Manufacture: React.FC = () => {
         .then((_receipt) => {
           setLaunchTx(undefined);
           setName(undefined);
-          setSymbol(undefined);
           setFile(undefined);
-          setBaseURI(undefined);
           setDescription(undefined);
-          setDescriptionURI(undefined);
+          setURI(undefined);
           setProfitRate(0);
           setPrice(10);
-          setInitialSupply(10);
+          setMaxSupply(10);
           setLimitedEdition(false);
         })
         .catch((rejected) => {
@@ -183,16 +163,7 @@ const Manufacture: React.FC = () => {
                   />
                 </Form.Group>
                 <Form.Group>
-                  <Form.Label>Product Symbol</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="eg) WDT"
-                    onChange={({ target: { value } }) => setSymbol(value)}
-                    value={symbol}
-                  />
-                </Form.Group>
-                <Form.Group>
-                  <Form.Label>URI</Form.Label>
+                  <Form.Label>Image</Form.Label>
                   <Form.File
                     onChange={(e: { target: HTMLInputElement }) => {
                       if (!ipfs) {
@@ -203,12 +174,6 @@ const Manufacture: React.FC = () => {
                       }
                     }}
                   />
-                  <Form.Text></Form.Text>
-                  <Form.Text>
-                    {baseURI
-                      ? `IPFS cid: ${baseURI}`
-                      : `You are uploading a file to the decentralized permanent file storage IPFS. Please be aware of that uploading a file is almost irreversible.`}
-                  </Form.Text>
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Description</Form.Label>
@@ -219,8 +184,8 @@ const Manufacture: React.FC = () => {
                     value={description}
                   />
                   <Form.Text>
-                    {descriptionURI
-                      ? `IPFS cid: ${descriptionURI}`
+                    {uri
+                      ? `IPFS cid: ${uri}`
                       : `You are uploading a file to the decentralized permanent file storage IPFS. Please be aware of that uploading a file is almost irreversible.`}
                   </Form.Text>
                 </Form.Group>
@@ -251,7 +216,7 @@ const Manufacture: React.FC = () => {
                   />
                   <Form.Text>
                     {100 - profitRate}% of the post tax revenue goes to the
-                    commitment fund, and {profitRate}% goes to the manufacturer.
+                    stable reserve, and {profitRate}% goes to the manufacturer.
                   </Form.Text>
                 </Form.Group>
                 <Form.Group>
@@ -259,9 +224,9 @@ const Manufacture: React.FC = () => {
                   <Form.Control
                     type="number"
                     onChange={({ target: { value } }) =>
-                      setInitialSupply(parseInt(value))
+                      setMaxSupply(parseInt(value))
                     }
-                    value={initialSupply}
+                    value={maxSupply}
                     min={1}
                     step={1}
                   />
@@ -299,7 +264,7 @@ const Manufacture: React.FC = () => {
                 {uploaded && (
                   <ConditionalButton
                     variant="secondary"
-                    onClick={launch}
+                    onClick={submitTx}
                     enabledWhen={launchTx === undefined}
                     whyDisabled={"Transaction is in pending."}
                     children={launchTx ? "Manufacturing..." : "Manufacture"}
@@ -312,23 +277,19 @@ const Manufacture: React.FC = () => {
         <Col md={4}>
           <h4>Preview</h4>
           <ProductView
-            address={"TBD"}
-            manufacturer={account || ""}
-            name={name || "Your token name"}
-            symbol={symbol || "SYM"}
-            description={
-              descriptionURI ||
-              description ||
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-            }
-            sold={BigNumber.from(0)}
-            price={BigNumber.from(price)}
-            profitRate={BigNumber.from(profitRate)}
-            stock={BigNumber.from(initialSupply)}
-            uri={baseURI || "QmNmA284uLXBPHtRrdBLwFq6D6jpqKjbj26qCRuD25C6DC"}
-            maxSupply={
-              limitedEdition ? BigNumber.from(initialSupply) : BigNumber.from(0)
-            }
+            product={{
+              manufacturer: account || "",
+              price: parseEther(price.toString()),
+              profitRate: parseEther(profitRate.toString()),
+              totalSupply: BigNumber.from(0),
+              maxSupply: parseEther(maxSupply.toString()),
+              uri: uri || "",
+            }}
+            preview={{
+              name: name || "NAME",
+              description: description || "Your product description",
+              image: imageURI || "",
+            }}
           />
         </Col>
       </Row>

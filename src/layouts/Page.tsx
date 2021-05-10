@@ -1,9 +1,8 @@
 import React, { useContext } from "react";
 import { Container, Row } from "react-bootstrap";
-import FarmIcon from "../components/icons/FarmIcon";
 import WorkIcon from "../components/icons/WorkIcon";
-import VoteIcon from "../components/icons/VoteIcon";
-import MarketIcon from "../components/icons/MarketIcon";
+import GovIcon from "../components/icons/GovIcon";
+import StoreIcon from "../components/icons/StoreIcon";
 import MineIcon from "../components/icons/MineIcon";
 import DocsIcon from "../components/icons/DocsIcon";
 import NavBar from "../components/nav/NavBar";
@@ -27,19 +26,19 @@ const Page = (props: React.ComponentProps<any>) => {
       url: "/mine",
     },
     {
-      Icon: FarmIcon,
-      name: "Farm",
-      url: "/farm",
+      Icon: GovIcon,
+      name: "Gov",
+      url: "/gov",
     },
     {
-      Icon: VoteIcon,
-      name: "Vote",
-      url: "/vote",
+      Icon: StoreIcon,
+      name: "NFTs",
+      url: "/store",
     },
     {
-      Icon: MarketIcon,
-      name: "Market",
-      url: "/market",
+      Icon: DocsIcon,
+      name: "About",
+      url: "/about",
     },
   ];
   return (

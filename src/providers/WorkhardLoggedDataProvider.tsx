@@ -20,11 +20,11 @@ export const WorkhardLoggedDataProvider = ({ children }: { children: any }) => {
   const [projects, setProjects] = useState<string[]>([]);
   const contracts = useWorkhardContracts();
   if (contracts) {
-    const { cryptoJobBoard } = contracts;
-    cryptoJobBoard
-      .queryFilter(cryptoJobBoard.filters.ProjectPosted(null))
+    const { jobBoard } = contracts;
+    jobBoard
+      .queryFilter(jobBoard.filters.ProjectPosted(null))
       .then((result) => console.log("filtered result", result));
-    cryptoJobBoard.on("ProjectPosted(uint256)", (event: BigNumber) => {
+    jobBoard.on("ProjectPosted(uint256)", (event: BigNumber) => {
       if (!projects.find((p) => event.toString() === p))
         projects.push(event.toString());
       setProjects(projects);

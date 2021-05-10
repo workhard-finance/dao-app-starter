@@ -16,7 +16,7 @@ const Home = () => {
         </h1>
         <p>
           WORK HARD finance provides a "work booster" by $VISION token and
-          $COMMITMENT token. Lorem ipsum dolor sit amet, consectetur adipiscing
+          $COMMIT token. Lorem ipsum dolor sit amet, consectetur adipiscing
           elit, sed do eiusmod tempor incididunt ut labore et dolore magna
           aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
           laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor

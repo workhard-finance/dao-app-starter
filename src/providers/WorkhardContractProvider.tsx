@@ -10,30 +10,34 @@ import devDeploy from "@workhard/protocol/deployed.dev.json";
 import {
   BurnMining,
   BurnMining__factory,
-  CommitmentFund,
-  CommitmentFund__factory,
-  FarmersUnion,
-  FarmersUnion__factory,
+  StableReserve,
+  StableReserve__factory,
   Project,
-  CryptoJobBoard,
-  CryptoJobBoard__factory,
   Project__factory,
   StakeMining,
   StakeMining__factory,
-  VisionFarm,
-  VisionFarm__factory,
-  VisionTokenEmitter,
-  VisionTokenEmitter__factory,
   TimelockedGovernance,
   TimelockedGovernance__factory,
   ERC20Mock as ERC20,
   ERC20Mock__factory as ERC20__factory,
-  CommitmentToken,
-  VisionToken,
-  CommitmentToken__factory,
-  VisionToken__factory,
   Marketplace,
   Marketplace__factory,
+  JobBoard,
+  DividendPool,
+  VisionEmitter,
+  WorkersUnion,
+  COMMIT,
+  VISION,
+  RIGHT,
+  JobBoard__factory,
+  DividendPool__factory,
+  VisionEmitter__factory,
+  WorkersUnion__factory,
+  VotingEscrowLock,
+  VotingEscrowLock__factory,
+  COMMIT__factory,
+  VISION__factory,
+  RIGHT__factory,
 } from "@workhard/protocol";
 
 // let deployedContracts: Deployed = deployed;
@@ -45,17 +49,19 @@ let deployedContracts: Deployed = devDeploy;
 
 export interface WorkhardContracts {
   project: Project;
-  cryptoJobBoard: CryptoJobBoard;
-  commitmentFund: CommitmentFund;
-  visionFarm: VisionFarm;
+  jobBoard: JobBoard;
+  stableReserve: StableReserve;
+  dividendPool: DividendPool;
   liquidityMining: StakeMining;
-  commitmentMining: BurnMining;
-  visionTokenEmitter: VisionTokenEmitter;
-  farmersUnion: FarmersUnion;
+  commitMining: BurnMining;
+  visionEmitter: VisionEmitter;
+  workersUnion: WorkersUnion;
   timelockedGovernance: TimelockedGovernance;
   baseCurrency: ERC20;
-  commitmentToken: CommitmentToken;
-  visionToken: VisionToken;
+  commit: COMMIT;
+  vision: VISION;
+  right: RIGHT;
+  veLocker: VotingEscrowLock;
   visionLP: ERC20;
   marketplace: Marketplace;
 }
@@ -79,53 +85,52 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     if (
       !contracts ||
       !contracts.Project ||
-      !contracts.CryptoJobBoard ||
-      !contracts.CommitmentFund ||
-      !contracts.VisionFarm ||
+      !contracts.JobBoard ||
+      !contracts.DividendPool ||
       !contracts.LiquidityMining ||
-      !contracts.CommitmentMining ||
-      !contracts.FarmersUnion ||
+      !contracts.CommitMining ||
+      !contracts.WorkersUnion ||
       !contracts.TimelockedGovernance ||
       !contracts.BaseCurrency ||
-      !contracts.CommitmentToken ||
-      !contracts.VisionToken ||
-      !contracts.VisionTokenEmitter ||
+      !contracts.COMMIT ||
+      !contracts.VISION ||
+      !contracts.RIGHT ||
+      !contracts.VisionEmitter ||
       !contracts.VisionLP ||
+      !contracts.StableReserve ||
+      !contracts.VotingEscrowLock ||
       !contracts.Marketplace
     ) {
       return undefined;
     }
 
     const project = Project__factory.connect(contracts.Project, library);
-    const cryptoJobBoard = CryptoJobBoard__factory.connect(
-      contracts.CryptoJobBoard,
+    const jobBoard = JobBoard__factory.connect(contracts.JobBoard, library);
+    const stableReserve = StableReserve__factory.connect(
+      contracts.StableReserve,
       library
     );
-    const commitmentFund = CommitmentFund__factory.connect(
-      contracts.CommitmentFund,
-      library
-    );
-    const visionFarm = VisionFarm__factory.connect(
-      contracts.VisionFarm,
+    const dividendPool = DividendPool__factory.connect(
+      contracts.DividendPool,
       library
     );
     const liquidityMining = StakeMining__factory.connect(
       contracts.LiquidityMining,
       library
     );
-    const commitmentMining = BurnMining__factory.connect(
-      contracts.CommitmentMining,
+    const commitMining = BurnMining__factory.connect(
+      contracts.CommitMining,
       library
     );
-    const visionTokenEmitter = VisionTokenEmitter__factory.connect(
-      contracts.VisionTokenEmitter,
+    const visionEmitter = VisionEmitter__factory.connect(
+      contracts.VisionEmitter,
       library
     );
-    const farmersUnion = FarmersUnion__factory.connect(
-      contracts.FarmersUnion,
+    const workersUnion = WorkersUnion__factory.connect(
+      contracts.WorkersUnion,
       library
     );
-    const timeLockGovernance = TimelockedGovernance__factory.connect(
+    const timelockedGovernance = TimelockedGovernance__factory.connect(
       contracts.TimelockedGovernance,
       library
     );
@@ -133,12 +138,11 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       contracts.BaseCurrency,
       library
     );
-    const commitmentToken = CommitmentToken__factory.connect(
-      contracts.CommitmentToken,
-      library
-    );
-    const visionToken = VisionToken__factory.connect(
-      contracts.VisionToken,
+    const commit = COMMIT__factory.connect(contracts.COMMIT, library);
+    const vision = VISION__factory.connect(contracts.VISION, library);
+    const right = RIGHT__factory.connect(contracts.RIGHT, library);
+    const veLocker = VotingEscrowLock__factory.connect(
+      contracts.VotingEscrowLock,
       library
     );
     const visionLP = ERC20__factory.connect(contracts.VisionLP, library);
@@ -148,19 +152,21 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
     );
     const context: WorkhardContracts = {
       project,
-      cryptoJobBoard,
-      visionFarm,
+      jobBoard,
+      dividendPool,
       liquidityMining,
-      commitmentMining,
-      visionTokenEmitter,
-      commitmentFund,
-      farmersUnion,
-      timelockedGovernance: timeLockGovernance,
+      commitMining,
+      visionEmitter,
+      stableReserve,
+      workersUnion,
+      timelockedGovernance,
       baseCurrency,
-      commitmentToken,
-      visionToken,
+      commit,
+      vision,
+      right,
       visionLP,
       marketplace,
+      veLocker,
     };
     return context;
   };

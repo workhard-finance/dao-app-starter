@@ -8,13 +8,13 @@ import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
 import { getAddress } from "ethers/lib/utils";
-import { Compensate } from "../components/contracts/commitment-fund/Compensate";
-import { AddBudget } from "../components/contracts/crypto-job-board/AddBudget";
+import { Compensate } from "../components/contracts/job-board/Compensate";
+import { AddBudget } from "../components/contracts/job-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import { wrapUrl } from "../utils/utils";
-import { ApproveProject } from "../components/contracts/crypto-job-board/ApproveProject";
-import { CloseProject } from "../components/contracts/crypto-job-board/CloseProject";
-import { ExecuteBudget } from "../components/contracts/crypto-job-board/ExecuteBudget";
+import { ApproveProject } from "../components/contracts/job-board/ApproveProject";
+import { CloseProject } from "../components/contracts/job-board/CloseProject";
+import { ExecuteBudget } from "../components/contracts/job-board/ExecuteBudget";
 
 const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -39,7 +39,7 @@ const Project: React.FC = () => {
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
       let stale = false;
-      const { project, commitmentFund, cryptoJobBoard } = contracts;
+      const { project, stableReserve, jobBoard } = contracts;
       project
         .titles(id)
         .then((t: string) => {
@@ -67,7 +67,7 @@ const Project: React.FC = () => {
         .catch(() => {
           if (!stale) setExist(false);
         });
-      commitmentFund
+      stableReserve
         .projectFund(id)
         .then((fund: BigNumber) => {
           if (!stale) setFund(fund.toString());
@@ -75,11 +75,11 @@ const Project: React.FC = () => {
         .catch(() => {
           if (!stale) setFund("Unknown");
         });
-      cryptoJobBoard.getTotalBudgets(id).then((len: BigNumber) => {
+      jobBoard.getTotalBudgets(id).then((len: BigNumber) => {
         Promise.all(
           new Array(len.toNumber())
             .fill(0)
-            .map((_, i) => cryptoJobBoard.projectBudgets(id, i))
+            .map((_, i) => jobBoard.projectBudgets(id, i))
         ).then((_budgets) => {
           setBudgets(_budgets);
         });

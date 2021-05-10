@@ -177,3 +177,9 @@ export function approveAndRun(
       setApproved(false);
     });
 }
+
+export const permaPinToArweave = async (cid: string): Promise<string> => {
+  const res = await fetch(`https://ipfs2arweave.com/permapin/${cid}`);
+  const { arweaveId } = await res.json();
+  return arweaveId;
+};

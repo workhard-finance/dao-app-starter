@@ -29,7 +29,7 @@ enum TimelockTxStatus {
 
 enum TxProposer {
   DEV = "developers",
-  FARMERS_UNION = "Farmers Union",
+  WORKERS_UNION = "Workers Union",
   UNKNOWN = "Unknown",
 }
 
@@ -65,7 +65,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     if (!!contracts && !!library) {
       let stale = false;
       const timeLockGovernance = contracts.timelockedGovernance;
-      const farmersUnion = contracts.farmersUnion;
+      const workersUnion = contracts.workersUnion;
       library
         .getBlock(blockNumber)
         .then((block) => {
@@ -90,8 +90,8 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           ) {
             forced = true;
           }
-        } else if (tx.to === farmersUnion.address) {
-          proposer = TxProposer.FARMERS_UNION;
+        } else if (tx.to === workersUnion.address) {
+          proposer = TxProposer.WORKERS_UNION;
         } else {
           proposer = TxProposer.UNKNOWN;
         }
@@ -308,7 +308,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
             enabledWhen={
               hasExecutorRole && timelockTxStatus === TimelockTxStatus.READY
             }
-            whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to FarmersUnion."
+            whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to WorkersUnion."
             children={buttonText(timelockTxStatus)}
           />
         </Form>
