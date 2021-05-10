@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Button, Col, Image, Nav, Row, Tab, Tabs } from "react-bootstrap";
+import { Image, Tab, Tabs } from "react-bootstrap";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
-import { ProjectBox } from "../../components/contracts/job-board/ProjectBox";
-import { PostAJobBox } from "../../components/contracts/job-board/PostAJob";
-import { BuyCommit } from "../../components/contracts/stable-reserve/BuyCommit";
-import { RedeemCommit } from "../../components/contracts/stable-reserve/RedeemCommit";
 import JobBoard from "./JobBoard";
 import StableReserve from "./StableReserve";
 

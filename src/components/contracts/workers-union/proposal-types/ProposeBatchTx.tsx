@@ -1,10 +1,16 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, BigNumberish, ContractTransaction } from "ethers";
+import {
+  providers,
+  BigNumber,
+  BigNumberish,
+  ContractTransaction,
+} from "ethers";
 import { Button, Card, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
 import { randomBytes } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../../ConditionalButton";
+import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
 
 interface ProposeTx {
   msgTo: string;
@@ -13,8 +19,10 @@ interface ProposeTx {
 }
 
 export const ProposeBatchTx: React.FC = ({}) => {
-  const { account, library } = useWeb3React();
+  const { account, library } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
+  const { blockNumber } = useBlockNumber();
+  const [timestamp, setTimestamp] = useState<number>(0);
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>();
   const [salt, setSalt] = useState<string>();
@@ -48,7 +56,7 @@ export const ProposeBatchTx: React.FC = ({}) => {
   }>({});
 
   useEffect(() => {
-    if (!!account && !!contracts) {
+    if (!!account && !!contracts && !!library && !!blockNumber) {
       let stale = false;
       const workersUnion = contracts.workersUnion;
       workersUnion
@@ -78,8 +86,19 @@ export const ProposeBatchTx: React.FC = ({}) => {
             setMinimumVotesForProposal(undefined);
           }
         });
+
+      library
+        .getBlock(blockNumber)
+        .then((block) => setTimestamp(block.timestamp));
+    }
+  }, [account, contracts, lastTx, blockNumber]);
+
+  useEffect(() => {
+    if (!!account && !!contracts && !!timestamp) {
+      let stale = false;
+      const { workersUnion } = contracts;
       workersUnion
-        .getVotes(account)
+        .getVotesAt(account, timestamp)
         .then((votes: any) => {
           setMyVotes(votes);
         })
@@ -87,12 +106,12 @@ export const ProposeBatchTx: React.FC = ({}) => {
           if (!stale) setMyVotes(undefined);
         });
     }
-  }, [account, contracts, lastTx]);
+  }, [timestamp]);
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts) {
+    if (!account || !contracts || !library) {
       alert("Not connected");
       return;
     }

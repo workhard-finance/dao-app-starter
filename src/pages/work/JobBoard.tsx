@@ -12,11 +12,11 @@ const JobBoard: React.FC = () => {
   const contracts = useWorkhardContracts();
   // const { account, library, chainId } = useWeb3React();
 
-  const [activeProjects, setActiveProjects] = useState<string[]>(
-    [] as string[]
+  const [activeProjects, setActiveProjects] = useState<BigNumber[]>(
+    [] as BigNumber[]
   );
-  const [inactiveProjects, setInactiveProjects] = useState<string[]>(
-    [] as string[]
+  const [inactiveProjects, setInactiveProjects] = useState<BigNumber[]>(
+    [] as BigNumber[]
   );
 
   // TODO listen JobBoard events and add dependency to useEffect()
@@ -31,16 +31,18 @@ const JobBoard: React.FC = () => {
           if (!stale) {
             Array(n.toNumber())
               .fill(undefined)
-              .map((_, i) => i.toString())
-              .forEach((projId) => {
-                jobBoard.approvedProjects(projId).then((approved) => {
-                  if (approved) {
-                    activeProjects.push(projId);
-                    setActiveProjects([...new Set(activeProjects)]);
-                  } else {
-                    inactiveProjects.push(projId);
-                    setInactiveProjects([...new Set(inactiveProjects)]);
-                  }
+              .forEach((_, index) => {
+                project.tokenByIndex(index).then((projId) => {
+                  jobBoard.approvedProjects(projId).then((approved) => {
+                    console.log("approved", projId, approved);
+                    if (approved) {
+                      activeProjects.push(projId);
+                      setActiveProjects([...new Set(activeProjects)]);
+                    } else {
+                      inactiveProjects.push(projId);
+                      setInactiveProjects([...new Set(inactiveProjects)]);
+                    }
+                  });
                 });
               });
           }
@@ -84,7 +86,7 @@ const JobBoard: React.FC = () => {
           <Tab.Content>
             <Tab.Pane eventKey="activeProjects">
               {activeProjects.map((id) => (
-                <div key={id}>
+                <div key={id.toString()}>
                   <ProjectBox projId={id} active={true} />
                   <br />
                 </div>
@@ -92,7 +94,7 @@ const JobBoard: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane eventKey="inactiveProjects">
               {inactiveProjects.map((id) => (
-                <div key={id}>
+                <div key={id.toString()}>
                   <ProjectBox projId={id} active={false} />
                   <br />
                 </div>

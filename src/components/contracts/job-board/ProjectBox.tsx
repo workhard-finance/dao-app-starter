@@ -9,50 +9,43 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { Link } from "react-router-dom";
 import { wrapUrl } from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
+import { useIPFS } from "../../../providers/IPFSProvider";
 
 export interface ProjectProps {
   projId: BigNumberish;
   active: boolean;
 }
 
+export interface ProjectMetadata {
+  name: string;
+  description: string;
+  image: string;
+  url?: string;
+}
+
 export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
+  const { ipfs } = useIPFS();
   const contracts = useWorkhardContracts();
 
-  const [description, setDescription] = useState("");
-  const [title, setTitle] = useState("");
   const [fund, setFund] = useState<BigNumber>();
-  const [budgetOwner, setBudgetOwner] = useState("");
+  const [budgetOwner, setBudgetOwner] = useState<string>();
+  const [metadata, setMeatadata] = useState<ProjectMetadata>();
 
   useEffect(() => {
-    if (!!account && !!library && !!chainId && !!contracts) {
+    if (!!account && !!library && !!chainId && !!contracts && !!ipfs) {
       let stale = false;
-      const { project, stableReserve: stableReserve } = contracts;
-      project
-        .titles(projId)
-        .then((t: string) => {
-          if (!stale) setTitle(t);
-        })
-        .catch(() => {
-          if (!stale) setTitle("Unknown");
-        });
-      project
-        .jobDescription(projId)
-        .then((desc: string) => {
-          if (!stale) setDescription(desc);
-        })
-        .catch(() => {
-          if (!stale) setDescription("Unknown");
-        });
-      project
-        .ownerOf(projId)
-        .then((owner: string) => {
-          if (!stale) setBudgetOwner(getAddress(owner));
-        })
-        .catch(() => {
-          if (!stale) setBudgetOwner("");
-        });
-      stableReserve
+      const { project, jobBoard } = contracts;
+      project.ownerOf(projId).then(setBudgetOwner);
+      project.tokenURI(projId).then(async (uri) => {
+        let result = "";
+        for await (const chunk of ipfs.cat(uri.replace("ipfs://", ""))) {
+          result += chunk;
+        }
+        const metadata = JSON.parse(result) as ProjectMetadata;
+        setMeatadata(metadata);
+      });
+      jobBoard
         .projectFund(projId)
         .then((fund: BigNumber) => {
           if (!stale) setFund(fund);
@@ -63,8 +56,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
 
       return () => {
         stale = true;
-        setDescription("Disconnected");
-        setTitle("Disconnected");
+        setMeatadata(undefined);
         setFund(undefined);
       };
     }
@@ -72,14 +64,16 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
 
   return (
     <Card>
-      <Card.Header as="h5">{title}</Card.Header>
+      <Card.Header as="h5">{metadata?.name}</Card.Header>
       <Card.Body>
         <Card.Title>Fund</Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
           {formatEther(fund || 0)} $COMMIT {/*TODO compute in USD ($163710)*/}
         </Card.Text>
         <Card.Title>Details</Card.Title>
-        <Card.Text>{ReactHtmlParser(wrapUrl(description))}</Card.Text>
+        <Card.Text>
+          {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
+        </Card.Text>
         <Card.Title>Budget owner</Card.Title>
         <Card.Text>
           <a

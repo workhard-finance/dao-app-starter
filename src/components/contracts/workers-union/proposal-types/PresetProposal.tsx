@@ -2,6 +2,7 @@ import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
 import {
+  providers,
   BigNumber,
   BigNumberish,
   ContractTransaction,
@@ -11,14 +12,17 @@ import { Card, Form, InputGroup } from "react-bootstrap";
 import { randomBytes } from "ethers/lib/utils";
 import { ConditionalButton } from "../../../ConditionalButton";
 import { Param, Preset, convertType } from "../../../../utils/preset";
+import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
 
 export const PresetProposal: React.FC<Preset> = ({
   paramArray,
   methodName,
   contract,
 }) => {
-  const { account, library } = useWeb3React();
+  const { account, library } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
+  const { blockNumber } = useBlockNumber();
+  const [timestamp, setTimestamp] = useState<number>(0);
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>(constants.HashZero);
   const [salt, setSalt] = useState<string>(
@@ -49,7 +53,7 @@ export const PresetProposal: React.FC<Preset> = ({
   ] = useState<BigNumberish>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
+    if (!!account && !!contracts && !!library && !!blockNumber) {
       let stale = false;
       const workersUnion = contracts.workersUnion;
       workersUnion
@@ -79,8 +83,17 @@ export const PresetProposal: React.FC<Preset> = ({
             setMinimumVotesForProposal(undefined);
           }
         });
+      library
+        .getBlock(blockNumber)
+        .then((block) => setTimestamp(block.timestamp));
+    }
+  }, [account, contracts, lastTx]);
+  useEffect(() => {
+    if (!!account && !!contracts && !!timestamp) {
+      let stale = false;
+      const { workersUnion } = contracts;
       workersUnion
-        .getVotes(account)
+        .getVotesAt(account, timestamp)
         .then((votes: any) => {
           setMyVotes(votes);
         })
@@ -88,12 +101,11 @@ export const PresetProposal: React.FC<Preset> = ({
           if (!stale) setMyVotes(undefined);
         });
     }
-  }, [account, contracts, lastTx]);
-
+  }, [timestamp]);
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts || !contract) {
+    if (!account || !contracts || !contract || !library) {
       alert("Not connected");
       return;
     }

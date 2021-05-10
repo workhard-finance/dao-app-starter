@@ -17,6 +17,7 @@ export const PostAJobBox: React.FC = () => {
   const [title, setTitle] = useState<string>();
   const [lastTx, setLastTx] = useState<ContractTransaction>();
   const [url, setURL] = useState<string | undefined>(); // TODO
+  const [uri, setURI] = useState<string>(); // TODO
   const [uploaded, setUploaded] = useState<boolean>();
   const [uploading, setUploading] = useState<boolean>();
 
@@ -24,9 +25,9 @@ export const PostAJobBox: React.FC = () => {
     if (!ipfs) {
       throw "IPFS is not connected.";
     }
-    const cid = await ipfs.add(file);
-    await permaPinToArweave(cid.toString());
-    return cid.toString();
+    const result = await ipfs.add(file);
+    await permaPinToArweave(result.cid.toString());
+    return result.cid.toString();
   };
 
   const uploadMetadataToIPFS = async (
@@ -46,9 +47,9 @@ export const PostAJobBox: React.FC = () => {
           url,
         }
       : { name, description, image };
-    const cid = await ipfs.add(JSON.stringify(obj));
-    await permaPinToArweave(cid.toString());
-    return cid.toString();
+    const result = await ipfs.add(JSON.stringify(obj));
+    await permaPinToArweave(result.cid.toString());
+    return result.cid.toString();
   };
 
   const post = async () => {
@@ -59,10 +60,13 @@ export const PostAJobBox: React.FC = () => {
     setUploading(true);
     uploadImageToIPFS(file)
       .then((imageURI) => {
+        console.log("hi");
         uploadMetadataToIPFS(title, description, imageURI, url)
           .then((uri) => {
+            console.log("hello");
             setUploaded(true);
             setUploading(undefined);
+            setURI(uri);
             createProject(uri);
           })
           .catch((_) => {
@@ -117,7 +121,7 @@ export const PostAJobBox: React.FC = () => {
     <Card>
       <Card.Header as="h5">Post a crypto job</Card.Header>
       <Card.Body>
-        <Form onSubmit={post}>
+        <Form>
           <Form.Group>
             <Form.Label>Project title</Form.Label>
             <Form.Control
@@ -130,7 +134,8 @@ export const PostAJobBox: React.FC = () => {
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control
-              type="textarea"
+              type="text"
+              as="textarea"
               placeholder="describe the job here."
               onChange={({ target: { value } }) => setDescription(value)}
               value={description}
@@ -142,7 +147,7 @@ export const PostAJobBox: React.FC = () => {
               type="text"
               placeholder="eg) https://hackmd.io/samplejobpost"
               onChange={({ target: { value } }) => setURL(value)}
-              value={description}
+              value={url}
             />
           </Form.Group>
           <Form.Group>
@@ -158,10 +163,12 @@ export const PostAJobBox: React.FC = () => {
               }}
             />
           </Form.Group>
+          <Form.Text>{uri && `URI: ${uri}`}</Form.Text>
+          <br />
           {/** TODO: IPFS & NFT */}
           <ConditionalButton
             variant="primary"
-            type="submit"
+            onClick={post}
             enabledWhen={lastTx === undefined && !uploading}
             whyDisabled={
               uploading
