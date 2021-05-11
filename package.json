@@ -21,7 +21,7 @@
     "@web3-react/trezor-connector": "^6.1.6",
     "@web3-react/walletconnect-connector": "^6.1.6",
     "@web3-react/walletlink-connector": "^6.1.6",
-    "@workhard/protocol": "github:workhard-finance/protocol#1.0.0-rc.1",
+    "@workhard/protocol": "^1.0.0-rc.3",
     "bootstrap": "^4.6.0",
     "bootswatch": "^4.6.0",
     "deepmerge": "^4.2.2",

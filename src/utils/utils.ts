@@ -50,10 +50,10 @@ export const acceptableTokenList = [
     symbol: "DAI",
     address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
   },
-  {
-    symbol: "BASECURRENCY-TEST",
-    address: devDeploy.localhost.BaseCurrency,
-  },
+  // {
+  //   symbol: "BASECURRENCY-TEST",
+  //   address: devDeploy.localhost.BaseCurrency,
+  // },
 ];
 
 export const getTokenSymbol = (address: string): string | undefined => {
