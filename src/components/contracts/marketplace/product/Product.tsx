@@ -4,23 +4,31 @@ import { useWorkhardContracts } from "../../../../providers/WorkhardContractProv
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { approveAndRun } from "../../../../utils/utils";
 import { ContractTransaction } from "ethers";
-import { ProductData, ProductView, ProductViewProps } from "./ProductView";
+import {
+  ProductData,
+  ProductMetadata,
+  ProductView,
+  ProductViewProps,
+} from "./ProductView";
 import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
+import { useIPFS } from "../../../../providers/IPFSProvider";
+import { IPFS } from "ipfs-core/src";
 
 export interface ProductProps {
   tokenId: BigNumberish;
+  uri?: string;
 }
 
-export const Product: React.FC<ProductProps> = ({ tokenId }) => {
+export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [product, setProduct] = useState<ProductData>({
-    manufacturer: "",
-    totalSupply: BigNumber.from(0),
-    maxSupply: BigNumber.from(0),
+    manufacturer: account || "",
     price: BigNumber.from(0),
     profitRate: BigNumber.from(0),
+    totalSupply: BigNumber.from(0),
+    maxSupply: BigNumber.from(0),
     uri: "",
   });
   const [approved, setApproved] = useState(false);
@@ -39,18 +47,10 @@ export const Product: React.FC<ProductProps> = ({ tokenId }) => {
             else setApproved(false);
           }
         });
+      contracts.marketplace.products(tokenId).then(setProduct);
     }
   }, [account, contracts, blockNumber]);
-  useEffect(() => {
-    if (!!account && !!library && !!contracts) {
-      const marketplace = contracts.marketplace;
-      marketplace.uri(tokenId).then((uri) => {
-        marketplace.products(tokenId).then((_product) => {
-          setProduct(_product);
-        });
-      });
-    }
-  }, [account, contracts, buyTx]);
+
   const approveAndBuy = (amount: number) => {
     if (!account || !contracts || !library) {
       alert("Not connected");
@@ -59,7 +59,7 @@ export const Product: React.FC<ProductProps> = ({ tokenId }) => {
     const signer = library.getSigner(account);
     approveAndRun(
       signer,
-      contracts.stableReserve.address,
+      contracts.commit.address,
       contracts.marketplace.address,
       setApproveTx,
       setApproved,
@@ -91,6 +91,10 @@ export const Product: React.FC<ProductProps> = ({ tokenId }) => {
             setBuyTx(undefined);
             alert(`rejected: ${rejected}`);
           });
+      })
+      .catch((rejected) => {
+        setBuyTx(undefined);
+        alert(`rejected: ${rejected}`);
       });
   };
   return (

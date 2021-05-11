@@ -22,7 +22,9 @@ export const Manufacture: React.FC = () => {
   const [description, setDescription] = useState<string>();
   const [file, setFile] = useState<File>();
   const [imageURI, setImageURI] = useState<string>();
-  const [uri, setURI] = useState<string>();
+  const [imageArweaveId, setImageArweaveId] = useState<string>();
+  const [metadataURI, setMetadataURI] = useState<string>();
+  const [metadataArweaveId, setMetadataArweaveId] = useState<string>();
   const [price, setPrice] = useState<number>(100);
   const [profitRate, setProfitRate] = useState<number>(0);
   const [maxSupply, setMaxSupply] = useState<number>(10);
@@ -36,9 +38,10 @@ export const Manufacture: React.FC = () => {
       throw "IPFS is not connected.";
     }
     const result = await ipfs.add(file);
-    const cid = result.toString();
+    const cid = result.cid.toString();
     setImageURI(cid);
-    await permaPinToArweave(cid);
+    const arweaveId = await permaPinToArweave(cid);
+    setImageArweaveId(arweaveId);
     return cid;
   };
 
@@ -51,9 +54,11 @@ export const Manufacture: React.FC = () => {
       throw "IPFS is not connected.";
     }
     const obj = { name, description, image };
-    const cid = await ipfs.add(JSON.stringify(obj));
-    await permaPinToArweave(cid.toString());
-    return cid.toString();
+    const result = await ipfs.add(JSON.stringify(obj));
+    const cid = result.cid.toString();
+    const arweaveId = await permaPinToArweave(cid);
+    setMetadataArweaveId(arweaveId);
+    return cid;
   };
 
   function upload() {
@@ -68,7 +73,7 @@ export const Manufacture: React.FC = () => {
           .then((uri) => {
             setUploaded(true);
             setUploading(undefined);
-            setURI(uri);
+            setMetadataURI(uri);
           })
           .catch((_) => {
             setUploaded(false);
@@ -86,7 +91,11 @@ export const Manufacture: React.FC = () => {
       alert("Web3 is not connected.");
       return;
     }
-    if (uri == undefined || price == undefined || profitRate == undefined) {
+    if (
+      metadataURI == undefined ||
+      price == undefined ||
+      profitRate == undefined
+    ) {
       alert("Fill out the form.");
       return;
     }
@@ -101,7 +110,7 @@ export const Manufacture: React.FC = () => {
       submission = marketplace
         .connect(signer)
         .manufactureLimitedEdition(
-          uri,
+          metadataURI,
           profitRate * 100,
           parseEther(price.toString()),
           maxSupply
@@ -109,7 +118,11 @@ export const Manufacture: React.FC = () => {
     } else {
       submission = marketplace
         .connect(signer)
-        .manufacture(uri, profitRate * 100, parseEther(price.toString()));
+        .manufacture(
+          metadataURI,
+          profitRate * 100,
+          parseEther(price.toString())
+        );
     }
     submission.then((tx) => {
       setLaunchTx(tx);
@@ -119,7 +132,7 @@ export const Manufacture: React.FC = () => {
           setName(undefined);
           setFile(undefined);
           setDescription(undefined);
-          setURI(undefined);
+          setMetadataURI(undefined);
           setProfitRate(0);
           setPrice(10);
           setMaxSupply(10);
@@ -174,6 +187,15 @@ export const Manufacture: React.FC = () => {
                       }
                     }}
                   />
+                  <Form.Text>
+                    {imageURI && (
+                      <span>
+                        Image IPFS CID: {imageURI}
+                        <br />
+                        Arweave Id: {imageArweaveId}
+                      </span>
+                    )}
+                  </Form.Text>
                 </Form.Group>
                 <Form.Group>
                   <Form.Label>Description</Form.Label>
@@ -183,14 +205,9 @@ export const Manufacture: React.FC = () => {
                     onChange={({ target: { value } }) => setDescription(value)}
                     value={description}
                   />
-                  <Form.Text>
-                    {uri
-                      ? `IPFS cid: ${uri}`
-                      : `You are uploading a file to the decentralized permanent file storage IPFS. Please be aware of that uploading a file is almost irreversible.`}
-                  </Form.Text>
                 </Form.Group>
                 <Form.Group>
-                  <Form.Label>Price</Form.Label>
+                  <Form.Label>Price (in $COMMIT)</Form.Label>
                   <Form.Control
                     type="number"
                     onChange={({ target: { value } }) =>
@@ -220,18 +237,6 @@ export const Manufacture: React.FC = () => {
                   </Form.Text>
                 </Form.Group>
                 <Form.Group>
-                  <Form.Label>Initial Supply</Form.Label>
-                  <Form.Control
-                    type="number"
-                    onChange={({ target: { value } }) =>
-                      setMaxSupply(parseInt(value))
-                    }
-                    value={maxSupply}
-                    min={1}
-                    step={1}
-                  />
-                </Form.Group>
-                <Form.Group>
                   <Form.Label>Type</Form.Label>
                   <br />
                   <Form.Check
@@ -253,7 +258,33 @@ export const Manufacture: React.FC = () => {
                     label={"Limited Edition"}
                   />
                 </Form.Group>
+                {limitedEdition && (
+                  <Form.Group>
+                    <Form.Label>Max Supply</Form.Label>
+                    <Form.Control
+                      type="number"
+                      onChange={({ target: { value } }) =>
+                        setMaxSupply(parseInt(value))
+                      }
+                      value={maxSupply}
+                      min={1}
+                      step={1}
+                    />
+                  </Form.Group>
+                )}
                 {/** TODO: IPFS & NFT */}
+                <Form.Text>
+                  {metadataURI ? (
+                    <span>
+                      Metadata IPFS CID: {metadataURI}
+                      <br />
+                      Arweave Id: {metadataArweaveId}
+                    </span>
+                  ) : (
+                    `You are uploading a file to the decentralized permanent file storage IPFS. Please be aware of that uploading a file is almost irreversible.`
+                  )}
+                </Form.Text>
+                <br />
                 <Button variant="primary" onClick={upload}>
                   {uploading
                     ? "Uploading..."
@@ -280,15 +311,18 @@ export const Manufacture: React.FC = () => {
             product={{
               manufacturer: account || "",
               price: parseEther(price.toString()),
-              profitRate: parseEther(profitRate.toString()),
+              profitRate: BigNumber.from(profitRate),
               totalSupply: BigNumber.from(0),
-              maxSupply: parseEther(maxSupply.toString()),
-              uri: uri || "",
+              maxSupply: limitedEdition
+                ? BigNumber.from(maxSupply)
+                : BigNumber.from(0),
+              uri: metadataURI || "",
             }}
             preview={{
               name: name || "NAME",
               description: description || "Your product description",
-              image: imageURI || "",
+              image:
+                imageURI || "QmUob9cf3KuhESGg1x4cr1SGVxH1Tg5mXxpbhWXX7FrQ4n",
             }}
           />
         </Col>

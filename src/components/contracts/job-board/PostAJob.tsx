@@ -26,8 +26,9 @@ export const PostAJobBox: React.FC = () => {
       throw "IPFS is not connected.";
     }
     const result = await ipfs.add(file);
-    await permaPinToArweave(result.cid.toString());
-    return result.cid.toString();
+    const cid = result.cid.toString();
+    await permaPinToArweave(cid);
+    return cid;
   };
 
   const uploadMetadataToIPFS = async (
@@ -48,8 +49,9 @@ export const PostAJobBox: React.FC = () => {
         }
       : { name, description, image };
     const result = await ipfs.add(JSON.stringify(obj));
-    await permaPinToArweave(result.cid.toString());
-    return result.cid.toString();
+    const cid = result.cid.toString();
+    await permaPinToArweave(cid);
+    return cid;
   };
 
   const post = async () => {

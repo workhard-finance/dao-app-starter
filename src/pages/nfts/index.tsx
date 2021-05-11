@@ -43,6 +43,29 @@ const Store: React.FC = () => {
       .then((block) => setTimestamp(block.timestamp));
   }, [contracts, blockNumber]);
 
+  useEffect(() => {
+    if (!library || !contracts || !blockNumber) {
+      return;
+    }
+    const { marketplace } = contracts;
+    marketplace
+      .queryFilter(
+        marketplace.filters.NewProduct(null, null, null),
+        fetchedBlock + 1,
+        blockNumber
+      )
+      .then((events) => {
+        if (blockNumber) setFetchedBlock(blockNumber);
+        setAllProducts([
+          ...allProducts,
+          ...events.map((event) => event.args.id),
+        ]);
+      });
+    library
+      .getBlock(blockNumber)
+      .then((block) => setTimestamp(block.timestamp));
+  }, [contracts, blockNumber]);
+
   return (
     <Page>
       <Row>
@@ -62,15 +85,6 @@ const Store: React.FC = () => {
           <Card.Text style={{ fontSize: "2rem" }}>
             My Balance: 4012 $COMMIT
           </Card.Text>
-          <OverlayTooltip tip="Go to crypto job board and work to get $COMMIT">
-            <Button variant="outline-success">Work</Button>{" "}
-          </OverlayTooltip>
-          <OverlayTooltip tip="Go to Uniswap to trade $COMMIT">
-            <Button variant="outline-info">Trade</Button>{" "}
-          </OverlayTooltip>
-          <OverlayTooltip tip="If $COMMIT is too expensive in Uniswap, you can simply purchase them per $2">
-            <Button variant="outline-warning">Buy</Button>
-          </OverlayTooltip>
         </Card.Body>
       </Card>
       <br />

@@ -52,7 +52,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
   const _burnRate = 80 - _profitRate;
 
   useEffect(() => {
-    if (product.uri && ipfs) {
+    if (ipfs) {
       fetchMetadataFromIPFS(ipfs, product.uri).then(setMetadata);
     } else if (preview) {
       setMetadata({
@@ -61,7 +61,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
         image: preview.image,
       });
     }
-  }, [ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [ipfs, product.uri]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   const gateway = "ipfs.io";
   const stock = product.maxSupply.sub(product.totalSupply);
@@ -84,7 +84,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
             $COMMIT
           </a>
           <br />
-          Stock: {stock.toNumber()}
+          Stock: {product.maxSupply.eq(0) ? "Unlimited" : stock.toNumber()}
           <br />
           Manufacturer:{" "}
           <a
@@ -123,9 +123,9 @@ export const ProductView: React.FC<ProductViewProps> = ({
             <Form.Control
               type="number"
               onChange={({ target: { value } }) => setAmount(parseInt(value))}
-              value={stock.gt(0) ? amount : 0}
+              value={product.maxSupply.eq(0) || stock.gt(0) ? amount : 0}
               min={stock.gt(0) ? 1 : 0}
-              max={stock.toNumber()}
+              max={product.maxSupply.eq(0) ? undefined : stock.toNumber()}
               step={1}
             />
           </Col>
@@ -133,14 +133,16 @@ export const ProductView: React.FC<ProductViewProps> = ({
             <Button
               variant="primary"
               block
-              disabled={stock.eq(0)}
+              disabled={product.maxSupply.gt(0) && stock.eq(0)}
               onClick={() => {
                 if (amount && !!onClick) {
                   onClick(amount);
                 }
               }}
             >
-              {stock.gt(0) ? buttonText || "Buy" : "Sold out"}
+              {product.maxSupply.eq(0) || stock.gt(0)
+                ? buttonText || "Buy"
+                : "Sold out"}
             </Button>
           </Col>
         </Row>
@@ -170,9 +172,17 @@ export const ProductView: React.FC<ProductViewProps> = ({
 
 async function fetchMetadataFromIPFS(
   _ipfs: IPFS,
-  cid: string
+  _uri: string
 ): Promise<ProductMetadata> {
   let result = "";
+  const cid = _uri.replace("ipfs://", "");
+  if (cid === "")
+    return {
+      name: "Fetching...",
+      description: "Fetching...",
+      image: "QmPPRQC49kZPrMAZBw4he3DXDw4P4czrDZbFAhfnydKAQK",
+    };
+
   for await (const chunk of _ipfs.cat(cid)) {
     result += chunk;
   }
