@@ -10,23 +10,23 @@ const Footer = () => (
             <a href="#top">Back to top</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
-            <a href="https://blog.bootswatch.com/rss/">Discord</a>
+            <a href="https://discord.gg/eYCcusjXUr">Discord</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
-            <a href="https://twitter.com/bootswatch">Twitter</a>
+            <a href="https://twitter.com/workhardfinance">Twitter</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
-            <a href="https://github.com/thomaspark/bootswatch">GitHub</a>
+            <a href="https://github.com/workhard-finance">GitHub</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
-            <a href="https://blog.bootswatch.com/">Medium</a>
+            <a href="https://medium.com/@Cutshamache">Medium</a>
           </li>
         </ul>
         <br />
         <br />
         <p>
           Made by crypto nomads around the world. Code released under the{" "}
-          <a href="https://github.com/thomaspark/bootswatch/blob/master/LICENSE">
+          <a href="https://github.com/workhard-finance/protocol/blob/master/LICENSE">
             GPL v3 license.
           </a>
         </p>
