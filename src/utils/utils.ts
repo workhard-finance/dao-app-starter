@@ -4,7 +4,7 @@ import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther } from "@ethersproject/units";
 import { IERC20__factory } from "@workhard/protocol";
-import devDeploy from "@workhard/protocol/deployed.dev.json";
+import devDeploy from "@workhard/protocol/deployed.json";
 import { constants, Contract, ContractTransaction, Signer } from "ethers";
 import { Dispatch, SetStateAction } from "react";
 import { WorkhardContracts } from "../providers/WorkhardContractProvider";
