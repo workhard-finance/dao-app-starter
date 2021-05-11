@@ -1,10 +1,49 @@
-import React from "react";
-import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
-import { BuyCommit } from "../../../components/contracts/stable-reserve/BuyCommit";
+import { useWeb3React } from "@web3-react/core";
+import { BigNumber } from "ethers";
+import React, { useEffect, useState } from "react";
+import { Col, Nav, Row, Tab } from "react-bootstrap";
+import { CreateLock } from "../../../components/contracts/dividend-pool/CreateLock";
+import { MyLock } from "../../../components/contracts/dividend-pool/MyLock";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { Claim } from "./Claim";
 
 export const EscrowAndDividend: React.FC = () => {
+  const contracts = useWorkhardContracts();
+  const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
+  const [stakedAmount, setStakedAmount] = useState<BigNumber>();
+  const [lockIds, setLockIds] = useState<BigNumber[]>();
+
+  useEffect(() => {
+    if (!!account && !!contracts) {
+      const { veLocker } = contracts;
+      veLocker.balanceOf(account).then((locks) => {
+        Promise.all(
+          Array(locks.toNumber())
+            .fill(undefined)
+            .map((_, idx) => veLocker.tokenByIndex(idx))
+        ).then((lockIds) => setLockIds(lockIds));
+      });
+    }
+  }, [account, contracts, blockNumber]);
+  useEffect(() => {
+    if (!!account && !!contracts && !!lockIds) {
+      const { veLocker } = contracts;
+      Promise.all(lockIds.map((lockId) => veLocker.locks(lockId))).then(
+        (locks) => {
+          let totalLocked = locks.reduce(
+            (acc, lock) => acc.add(lock.amount),
+            BigNumber.from(0)
+          );
+          setStakedAmount(totalLocked);
+        }
+      );
+    }
+  }, [account, contracts, lockIds]);
+
   return (
-    <Tab.Container defaultActiveKey="balance">
+    <Tab.Container defaultActiveKey="locks">
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -12,7 +51,7 @@ export const EscrowAndDividend: React.FC = () => {
               <Nav.Link eventKey="locks">Voting Escrows</Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link eventKey="dividend-pool">Dividend Pool</Nav.Link>
+              <Nav.Link eventKey="claim">Claim Dividend</Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="faq">FAQ</Nav.Link>
@@ -22,9 +61,16 @@ export const EscrowAndDividend: React.FC = () => {
         <Col sm={9}>
           <Tab.Content>
             <Tab.Pane eventKey="locks">
-              <BuyCommit />
-              <br />
-              <Button variant={"info"} children="Trade $COMMIT on Uniswap" />
+              <CreateLock stakedAmount={stakedAmount} />
+              <hr />
+              <h3>Your Voting Escrows</h3>
+              {lockIds &&
+                lockIds.map((lockId, index) => (
+                  <MyLock index={index} lockId={lockId} />
+                ))}
+            </Tab.Pane>
+            <Tab.Pane eventKey="claim">
+              <Claim />
             </Tab.Pane>
           </Tab.Content>
         </Col>

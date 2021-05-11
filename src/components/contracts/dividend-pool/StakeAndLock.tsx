@@ -11,7 +11,7 @@ import { ConditionalButton } from "../../ConditionalButton";
 
 export interface StakeAndLockProps {}
 
-const MAX_LOCK_EPOCHS = 50;
+const MAX_LOCK_EPOCHS = 208;
 
 export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
   const { account, library } = useWeb3React();
@@ -21,13 +21,16 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
   const [stakedAmount, setStakedAmount] = useState<BigNumber>(
     BigNumber.from(0)
   );
+  const [lockedAmount, setLockedAmount] = useState<BigNumber>(
+    BigNumber.from(0)
+  );
   const [lockedUntil, setLockedUntil] = useState<number>(0);
   const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [started, setStarted] = useState<BigNumber>();
   const [stakeOrWithdraw, toggleStakeOrWithdraw] = useState<boolean>(true);
   const [approved, setApproved] = useState(false);
   const [amount, setAmount] = useState<string>();
-  const [lockPeriod, setLockPeriod] = useState<number>();
+  const [lockPeriod, setLockPeriod] = useState<number>(1);
   const [currentEpoch, setCurrentEpoch] = useState<BigNumber>();
   const [lastTx, setLastTx] = useState<string>();
 
@@ -166,111 +169,111 @@ export const StakeAndLock: React.FC<StakeAndLockProps> = ({}) => {
   }, [account, contracts, lastTx]);
 
   return (
-    <Form>
-      <Form.Group>
-        <Card.Title>
-          <span
-            onClick={() => {
-              toggleStakeOrWithdraw(true);
-              setAmount("");
-            }}
-            style={{
-              cursor: stakeOrWithdraw ? undefined : "pointer",
-              textDecoration: stakeOrWithdraw ? "underline" : undefined,
-            }}
-          >
-            Stake
-          </span>
-          /
-          <span
-            onClick={() => {
-              toggleStakeOrWithdraw(false);
-              setAmount("");
-            }}
-            style={{
-              cursor: stakeOrWithdraw ? "pointer" : undefined,
-              textDecoration: stakeOrWithdraw ? undefined : "underline",
-            }}
-          >
-            Unstake
-          </span>
-        </Card.Title>
-        {/* <Form.Label>Staking</Form.Label> */}
+    <Card>
+      <Card.Body>
+        <Form>
+          <Form.Group>
+            <Card.Title>
+              <span
+                onClick={() => {
+                  toggleStakeOrWithdraw(true);
+                  setAmount("");
+                }}
+                style={{
+                  cursor: stakeOrWithdraw ? undefined : "pointer",
+                  textDecoration: stakeOrWithdraw ? "underline" : undefined,
+                }}
+              >
+                Stake
+              </span>
+              /
+              <span
+                onClick={() => {
+                  toggleStakeOrWithdraw(false);
+                  setAmount("");
+                }}
+                style={{
+                  cursor: stakeOrWithdraw ? "pointer" : undefined,
+                  textDecoration: stakeOrWithdraw ? undefined : "underline",
+                }}
+              >
+                Unstake
+              </span>
+            </Card.Title>
+            {/* <Form.Label>Staking</Form.Label> */}
 
-        <InputGroup className="mb-2">
-          <Form.Control
-            value={amount}
-            onChange={({ target: { value } }) => setAmount(value)}
-            placeholder={getMaxAmount()}
+            <InputGroup className="mb-2">
+              <Form.Control
+                value={amount}
+                onChange={({ target: { value } }) => setAmount(value)}
+                placeholder={getMaxAmount()}
+              />
+              <InputGroup.Append
+                style={{ cursor: "pointer" }}
+                onClick={() => setAmount(getMaxAmount())}
+              >
+                <InputGroup.Text>MAX</InputGroup.Text>
+              </InputGroup.Append>
+            </InputGroup>
+          </Form.Group>
+          <ProgressBar
+            variant={getVariantForProgressBar(getStakePercent())}
+            animated
+            now={getStakePercent()}
           />
-          <InputGroup.Append
-            style={{ cursor: "pointer" }}
-            onClick={() => setAmount(getMaxAmount())}
-          >
-            <InputGroup.Text>MAX</InputGroup.Text>
-          </InputGroup.Append>
-        </InputGroup>
-      </Form.Group>
-      <ProgressBar
-        variant={getVariantForProgressBar(getStakePercent())}
-        animated
-        now={getStakePercent()}
-      />
-      <Card.Text>
-        {formatEther(stakedAmount || 0)} /{" "}
-        {formatEther(
-          (tokenBalance || BigNumber.from(0)).add(stakedAmount || 0)
-        )}{" "}
-        of your $VISION token is staked.
-      </Card.Text>
-      <Form.Group>
-        <Card.Title>Lock</Card.Title>
-        {/* <Form.Label>Lock</Form.Label> */}
-        <InputGroup className="mb-2">
-          <Form.Control
-            placeholder={`min: ${
-              getLockedPeriod() + 1
-            } epoch(s) ~= 4 weeks / max: 50 epoch(s) ~= 4 years`}
-            type="number"
-            min={getLockedPeriod() + 1}
-            max={MAX_LOCK_EPOCHS}
-            value={lockPeriod}
-            onChange={({ target: { value } }) => setLockPeriod(parseInt(value))}
+          <Card.Text>
+            {formatEther(stakedAmount || 0)} /{" "}
+            {formatEther(
+              (tokenBalance || BigNumber.from(0)).add(stakedAmount || 0)
+            )}{" "}
+            of your $VISION token is staked.
+          </Card.Text>
+          <Form.Group>
+            <Card.Title>Lock</Card.Title>
+            {/* <Form.Label>Lock</Form.Label> */}
+            <Form.Control
+              placeholder={`min: ${
+                getLockedPeriod() + 1
+              } epoch(s) ~= 4 weeks / max: 50 epoch(s) ~= 4 years`}
+              type="range"
+              min={getLockedPeriod() + 1}
+              max={MAX_LOCK_EPOCHS}
+              value={lockPeriod}
+              step={1}
+              onChange={({ target: { value } }) =>
+                setLockPeriod(parseInt(value))
+              }
+            />
+          </Form.Group>
+          <Form.Text>{lockPeriod} weeks / 4 years</Form.Text>
+          <ProgressBar
+            variant={getVariantForProgressBar(getLockedPercent())}
+            animated
+            now={getLockedPercent()}
           />
-          <InputGroup.Append
-            style={{ cursor: "pointer" }}
-            onClick={() => setLockPeriod(MAX_LOCK_EPOCHS)}
-          >
-            <InputGroup.Text>MAX</InputGroup.Text>
-          </InputGroup.Append>
-        </InputGroup>
-      </Form.Group>
-      <ProgressBar
-        variant={getVariantForProgressBar(getLockedPercent())}
-        animated
-        now={getLockedPercent()}
-      />
-      <Card.Text>
-        {getLockedPeriod()} / {MAX_LOCK_EPOCHS} epoch(s) locked.{" "}
-        {started &&
-          `You can withdraw
+          <Card.Text>
+            {getLockedPeriod()} / {MAX_LOCK_EPOCHS} epoch(s) locked.{" "}
+            {started &&
+              `You can withdraw
             ${new Date(
               started.add(getLockedPeriod() * 7 * 24 * 3600).toNumber() * 1000
             ).toUTCString()}`}
-        (depends on block.timestamp).
-      </Card.Text>
-      <Button variant="primary" onClick={approved ? createLock : approve}>
-        {approved
-          ? `Stake and lock ` + (lockPeriod ? `${lockPeriod} epoch(s)` : ``)
-          : "approve"}
-      </Button>{" "}
-      <ConditionalButton
-        onClick={withdraw}
-        variant="secondary"
-        enabledWhen={getLockedPeriod() == 0 && stakedAmount?.gt(0)}
-        whyDisabled={`Should wait ${getLockedPeriod()} week(s)`}
-        children="unstake"
-      />
-    </Form>
+            (depends on block.timestamp).
+          </Card.Text>
+          <Button variant="primary" onClick={approved ? createLock : approve}>
+            {approved
+              ? `Stake and lock ` + (lockPeriod ? `${lockPeriod} epoch(s)` : ``)
+              : "approve"}
+          </Button>{" "}
+          <ConditionalButton
+            onClick={withdraw}
+            variant="secondary"
+            enabledWhen={getLockedPeriod() == 0 && stakedAmount?.gt(0)}
+            whyDisabled={`Should wait ${getLockedPeriod()} week(s)`}
+            children="unstake"
+          />
+        </Form>
+      </Card.Body>
+    </Card>
   );
 };

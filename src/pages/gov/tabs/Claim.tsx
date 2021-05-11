@@ -1,36 +1,26 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, constants } from "ethers";
-import {
-  Card,
-  Button,
-  Form,
-  InputGroup,
-  ProgressBar,
-  ListGroup,
-  Col,
-} from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { BigNumber } from "ethers";
+import { Card, Form, ListGroup, Col } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { formatEther, getAddress, parseEther } from "ethers/lib/utils";
+import { formatEther, getAddress } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { getVariantForProgressBar } from "../../../utils/utils";
-import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
-import { ConditionalButton } from "../../ConditionalButton";
+import { ConditionalButton } from "../../../components/ConditionalButton";
 import {
   CoingeckoTokenDetails,
   getPriceFromCoingecko,
   getTokenDetailsFromCoingecko,
 } from "../../../utils/coingecko";
 
-export interface WithdrawHarvestedProps {}
+export interface ClaimProps {}
 
-export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
+export const Claim: React.FC<ClaimProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
 
   const [tokens, setTokens] = useState<string[]>([]);
-  const [tokensToWithdraw, setTokensToWithdraw] = useState<string[]>([]);
+  const [tokensToClaim, setTokensToWithdraw] = useState<string[]>([]);
   const [amounts, setAmounts] = useState<BigNumber[]>([]);
   const [prices, setPrices] = useState<(number | undefined)[]>([]);
   const [details, setDetails] = useState<(CoingeckoTokenDetails | undefined)[]>(
@@ -86,9 +76,7 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
     }
   };
 
-  const handleSubmit: FormEventHandler = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const claim = () => {
     if (!account || !contracts) {
       alert("Not connected");
       return;
@@ -96,7 +84,7 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
     const signer = library.getSigner(account);
     contracts.dividendPool
       .connect(signer)
-      .claimBatch(tokensToWithdraw)
+      .claimBatch(tokensToClaim)
       .then((tx) => {
         tx.wait().then((receipt) => {
           setLastTx(receipt.transactionHash);
@@ -107,45 +95,50 @@ export const WithdrawHarvested: React.FC<WithdrawHarvestedProps> = ({}) => {
 
   const isChecked = (addr: string): boolean => {
     return (
-      tokensToWithdraw?.find((t) => getAddress(t) === getAddress(addr)) !==
+      tokensToClaim?.find((t) => getAddress(t) === getAddress(addr)) !==
       undefined
     );
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Card.Title>Harvested</Card.Title>
-      <Card.Text style={{ fontSize: "3rem" }}>$ {totalInUSD}</Card.Text>
-      {tokens.length > 0 && (
-        <ListGroup className="list-group-flush">
-          {isSynced() &&
-            tokens.map((token, i) => (
-              <ListGroup.Item key={`withdraw-${token}-${i}`}>
-                <Col>
-                  <Form.Check
-                    label={`$${details[i]?.symbol || "?"}: ${formatEther(
-                      amounts[i]
-                    )} ($${valueInUSD(amounts[i], prices[i])})`}
-                    type="checkbox"
-                    onChange={(_) => {
-                      const _tokensToWithdraw = isChecked(token)
-                        ? tokensToWithdraw?.filter(
-                            (t) => getAddress(t) !== getAddress(token)
-                          )
-                        : [...(tokensToWithdraw || []), token];
-                      setTokensToWithdraw(_tokensToWithdraw);
-                    }}
-                    checked={isChecked(token)}
-                  />
-                </Col>
-              </ListGroup.Item>
-            ))}
-        </ListGroup>
-      )}
-      <br />
-      <Button variant="primary" type="submit">
-        Withdraw harvested crops
-      </Button>
-    </Form>
+    <Card>
+      <Card.Body>
+        <Card.Title>Total dividends</Card.Title>
+        <Card.Text style={{ fontSize: "3rem" }}>$ {totalInUSD}</Card.Text>
+        {tokens.length > 0 && (
+          <ListGroup className="list-group-flush">
+            {isSynced() &&
+              tokens.map((token, i) => (
+                <ListGroup.Item key={`withdraw-${token}-${i}`}>
+                  <Col>
+                    <Form.Check
+                      label={`$${details[i]?.symbol || "?"}: ${formatEther(
+                        amounts[i]
+                      )} ($${valueInUSD(amounts[i], prices[i])})`}
+                      type="checkbox"
+                      onChange={(_) => {
+                        const _tokensToClaim = isChecked(token)
+                          ? tokensToClaim?.filter(
+                              (t) => getAddress(t) !== getAddress(token)
+                            )
+                          : [...(tokensToClaim || []), token];
+                        setTokensToWithdraw(_tokensToClaim);
+                      }}
+                      checked={isChecked(token)}
+                    />
+                  </Col>
+                </ListGroup.Item>
+              ))}
+          </ListGroup>
+        )}
+        <br />
+        <ConditionalButton
+          enabledWhen={tokensToClaim.length !== 0}
+          whyDisabled={"You must choose at least 1 token to claim."}
+          onClick={claim}
+          children="Claim"
+        />
+      </Card.Body>
+    </Card>
   );
 };

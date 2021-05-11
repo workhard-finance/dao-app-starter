@@ -12,7 +12,7 @@ import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
 
 export interface ProjectProps {
-  projId: BigNumberish;
+  projId: BigNumber;
   active: boolean;
 }
 
@@ -66,6 +66,8 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
     <Card>
       <Card.Header as="h5">{metadata?.name}</Card.Header>
       <Card.Body>
+        <Card.Title>Project ID</Card.Title>
+        <Card.Text>{projId.toHexString()}</Card.Text>
         <Card.Title>Fund</Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
           {formatEther(fund || 0)} $COMMIT {/*TODO compute in USD ($163710)*/}

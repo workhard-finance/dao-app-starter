@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
 import { TimelockTxs } from "./tabs/TimelockTxs";
@@ -10,6 +10,7 @@ import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 
 const Gov: React.FC = () => {
   const contracts = useWorkhardContracts();
+
   return (
     <Page>
       <Image
