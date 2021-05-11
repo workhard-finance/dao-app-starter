@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 import Page from "../layouts/Page";
 import { importMDX } from "mdx.macro";
 
-const Content = lazy(() => importMDX("../docs/getting-started.mdx"));
+const Content = lazy(() => importMDX("../docs/about.mdx"));
 
 const Docs = () => {
   return (

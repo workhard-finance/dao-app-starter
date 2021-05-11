@@ -12,22 +12,23 @@ const Home = () => {
         />
         <hr />
         <h1>
-          Welcome to <strong>WORK HARD</strong> finance.
+          Welcome to <strong>Work Hard</strong> Finance.
         </h1>
         <p>
-          WORK HARD finance provides a "work booster" by $VISION token and
-          $COMMIT token. Lorem ipsum dolor sit amet, consectetur adipiscing
-          elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-          aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-          laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-          in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
+          Work Hard Finance (WHF) empowers contributors with the choice to be
+          compensated now, in stablecoins, or in the future via liquid stock
+          options. We introduce a novel “Commit Mining” framework for
+          organizations to fairly compensate its contributors by tokenizing any
+          revenue stream. It's a collision of recent innovations in programmable
+          money, open source development, and decentralized governance to
+          reimagine an alternate future of work.
         </p>
         <Button as={Link} to={`/work`} variant="primary">
           Go to work
         </Button>{" "}
-        <Button variant="secondary">Docs</Button>
+        <Button as={Link} to={`/mine`} variant="secondary">
+          Go to mine
+        </Button>{" "}
       </Container>
     </Page>
   );
