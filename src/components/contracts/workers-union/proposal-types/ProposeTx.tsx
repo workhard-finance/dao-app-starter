@@ -199,7 +199,7 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
               {startsIn || 0} seconds)
             </Form.Label>
             <Form.Control
-              type="number"
+              type="jumber"
               value={startsIn}
               min={BigNumber.from(minimumPending || 0).toNumber()}
               max={BigNumber.from(maximumPending || 0).toNumber()}

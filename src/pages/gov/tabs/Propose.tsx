@@ -132,8 +132,8 @@ export const Propose: React.FC = ({}) => {
             {presets?.map((prop) => {
               return (
                 <Tab.Pane
-                  key={`timelock-${prop.contractName}.${prop.methodName}`}
-                  eventKey={`timelock-${prop.contractName}.${prop.methodName}`}
+                  key={`multisig-${prop.contractName}.${prop.methodName}`}
+                  eventKey={`multisig-${prop.contractName}.${prop.methodName}`}
                 >
                   <TimelockPresetProposal
                     paramArray={prop.paramArray}

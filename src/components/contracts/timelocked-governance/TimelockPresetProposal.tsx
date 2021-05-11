@@ -27,7 +27,6 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
 
   /** Timelock permission */
   const [hasProposerRole, setHasProposerRole] = useState<boolean>();
-  const [minDelay, setMinDaly] = useState<number>();
 
   useEffect(() => {
     if (!!account && !!contracts) {
@@ -127,10 +126,10 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
             <Form.Control
               type="number"
               value={delay}
-              min={BigNumber.from(minDelay || 0).toNumber()}
+              min={BigNumber.from(delay || 0).toNumber()}
               step={86400}
               onChange={({ target: { value } }) => setDelay(parseInt(value))}
-              placeholder={(minDelay || 86400).toString()}
+              placeholder={(delay || 86400).toString()}
             />
           </Form.Group>
           <ConditionalButton

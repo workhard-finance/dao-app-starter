@@ -46,7 +46,7 @@ export const buildPresets = (
     return [
       {
         paramArray: [
-          { name: "projId", type: PARAM_TYPE.NUMBER },
+          { name: "projId", type: PARAM_TYPE.STRING },
           { name: "amount", type: PARAM_TYPE.ETHER },
         ],
         methodName: "grant",
@@ -75,13 +75,13 @@ export const buildPresets = (
         contractName: "JobBoard",
       },
       {
-        paramArray: [{ name: "projId", type: PARAM_TYPE.NUMBER }],
+        paramArray: [{ name: "projId", type: PARAM_TYPE.STRING }],
         methodName: "approveProject",
         contract: contracts.jobBoard,
         contractName: "JobBoard",
       },
       {
-        paramArray: [{ name: "projId", type: PARAM_TYPE.NUMBER }],
+        paramArray: [{ name: "projId", type: PARAM_TYPE.STRING }],
         methodName: "disapproveProject",
         contract: contracts.jobBoard,
         contractName: "JobBoard",

@@ -44,6 +44,7 @@ const Mine = () => {
 
   useEffect(() => {
     if (!!contracts && !!poolLength) {
+      console.log("pool length", poolLength);
       let stale = false;
       const { visionEmitter } = contracts;
       Promise.all(
