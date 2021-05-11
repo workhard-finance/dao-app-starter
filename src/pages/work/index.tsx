@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { BigNumber } from "ethers";
-import JobBoard from "./JobBoard";
+import { JobBoard } from "./tabs/JobBoard";
 import StableReserve from "./StableReserve";
 
 const Work: React.FC = () => {
@@ -75,7 +76,10 @@ const Work: React.FC = () => {
         <footer className="blockquote-footer">John Calvin</footer>
       </blockquote>
       <hr /> */}
-      <Tabs defaultActiveKey="job-board">
+      <Tabs defaultActiveKey="commit">
+        <Tab eventKey="commit" title="$COMMIT" style={{ marginTop: "1rem" }}>
+          <Erc20Balance address={contracts?.commit.address} />
+        </Tab>
         <Tab
           eventKey="job-board"
           title="Job Board"

@@ -1,19 +1,13 @@
 import React from "react";
-import { Button, Col, Nav, Row, Tab, Tabs } from "react-bootstrap";
-import { BuyCommit } from "../../components/contracts/stable-reserve/BuyCommit";
-import { RedeemCommit } from "../../components/contracts/stable-reserve/RedeemCommit";
-import { MyLock } from "../../components/contracts/dividend-pool/MyLock";
-import { RightBalance } from "../../components/contracts/ve-vision/RightBalance";
+import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
+import { BuyCommit } from "../../../components/contracts/stable-reserve/BuyCommit";
 
-const Right: React.FC = () => {
+export const EscrowAndDividend: React.FC = () => {
   return (
     <Tab.Container defaultActiveKey="balance">
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
-            <Nav.Item>
-              <Nav.Link eventKey="balance">Balance</Nav.Link>
-            </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="locks">Voting Escrows</Nav.Link>
             </Nav.Item>
@@ -27,9 +21,6 @@ const Right: React.FC = () => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane eventKey="balance">
-              <RightBalance />
-            </Tab.Pane>
             <Tab.Pane eventKey="locks">
               <BuyCommit />
               <br />
@@ -41,5 +32,3 @@ const Right: React.FC = () => {
     </Tab.Container>
   );
 };
-
-export default Right;

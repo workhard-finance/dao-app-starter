@@ -4,20 +4,19 @@ import Home from "./pages/Home";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Web3ReactProvider } from "@web3-react/core";
 import { getLibrary } from "./web3/provider";
-import Farm from "./pages/Farm";
 import "./App.css";
 import { WorkhardThemeProvider } from "./providers/WorkhardThemeProvider";
-import Mine from "./pages/Mine";
-import Work from "./pages/work/Work";
-import Gov from "./pages/gov/Gov";
+import Mine from "./pages/mine";
+import Work from "./pages/work";
+import Gov from "./pages/gov";
 import Docs from "./pages/Docs";
-import Store from "./pages/Store";
+import Store from "./pages/nfts";
 import { WorkhardContractsProvider } from "./providers/WorkhardContractProvider";
-import Project from "./pages/Project";
+import { Project } from "./pages/etc/Project";
 import { BlockNumberProvider } from "./providers/BlockNumberProvider";
-import Manufacture from "./pages/Manufacture";
+import { Manufacture } from "./pages/nfts/tabs/Manufacture";
+import { ProductPage } from "./pages/nfts/tabs/ProductPage";
 import { IPFSProvider } from "./providers/IPFSProvider";
-import ProductPage from "./pages/ProductPage";
 
 function App() {
   return (
@@ -32,7 +31,6 @@ function App() {
                   <Route path="/work" children={<Work />} />
                   <Route path="/mine" children={<Mine />} />
                   <Route path="/gov" children={<Gov />} />
-                  <Route path="/farm" children={<Farm />} />
                   <Route path="/store" children={<Store />} />
                   <Route path="/about" children={<Docs />} />
                   <Route path="/proj/:id" children={<Project />} />

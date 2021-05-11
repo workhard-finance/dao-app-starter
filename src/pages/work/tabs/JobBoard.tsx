@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import Page from "../../layouts/Page";
+import Page from "../../../layouts/Page";
 import { Button, Col, Image, Nav, Row, Tab, Tabs } from "react-bootstrap";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
-import { ProjectBox } from "../../components/contracts/job-board/ProjectBox";
-import { PostAJobBox } from "../../components/contracts/job-board/PostAJob";
-import { BuyCommit } from "../../components/contracts/stable-reserve/BuyCommit";
-import { RedeemCommit } from "../../components/contracts/stable-reserve/RedeemCommit";
+import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
+import { PostAJobBox } from "../../../components/contracts/job-board/PostAJob";
+import { BuyCommit } from "../../../components/contracts/stable-reserve/BuyCommit";
+import { RedeemCommit } from "../../../components/contracts/stable-reserve/RedeemCommit";
 
-const JobBoard: React.FC = () => {
+export const JobBoard: React.FC = () => {
   const contracts = useWorkhardContracts();
   // const { account, library, chainId } = useWeb3React();
 
@@ -35,11 +35,21 @@ const JobBoard: React.FC = () => {
                 project.tokenByIndex(index).then((projId) => {
                   jobBoard.approvedProjects(projId).then((approved) => {
                     if (approved) {
-                      activeProjects.push(projId);
-                      setActiveProjects([...new Set(activeProjects)]);
+                      if (!activeProjects.find((v) => v.eq(projId))) {
+                        activeProjects.push(projId);
+                        setActiveProjects(activeProjects);
+                        setInactiveProjects(
+                          inactiveProjects.filter((v) => !v.eq(projId))
+                        );
+                      }
                     } else {
-                      inactiveProjects.push(projId);
-                      setInactiveProjects([...new Set(inactiveProjects)]);
+                      if (!inactiveProjects.find((v) => v.eq(projId))) {
+                        inactiveProjects.push(projId);
+                        setInactiveProjects(inactiveProjects);
+                        setActiveProjects(
+                          activeProjects.filter((v) => !v.eq(projId))
+                        );
+                      }
                     }
                   });
                 });
@@ -124,5 +134,3 @@ const JobBoard: React.FC = () => {
     </Tab.Container>
   );
 };
-
-export default JobBoard;

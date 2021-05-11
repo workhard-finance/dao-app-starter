@@ -3,10 +3,13 @@ import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
 import { TimelockTxs } from "../../components/contracts/timelocked-governance/TimelockTxs";
 import { Propose } from "../../components/contracts/workers-union/Propose";
-import Vote from "./Vote";
-import Right from "./Right";
+import Vote from "./tabs/Vote";
+import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
+import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
+import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 
 const Gov: React.FC = () => {
+  const contracts = useWorkhardContracts();
   return (
     <Page>
       <Image
@@ -19,7 +22,18 @@ const Gov: React.FC = () => {
       </Alert> */}
       <Tabs defaultActiveKey="right">
         <Tab eventKey="right" title="$RIGHT" style={{ marginTop: "1rem" }}>
-          <Right />
+          <Erc20Balance
+            address={contracts?.right.address}
+            description={`= staked amount x locking period / max period`}
+            symbolAlt={`$veVISION(a.k.a. $RIGHT)`}
+          />
+        </Tab>
+        <Tab
+          eventKey="dividend"
+          title="Escrow & Dividend"
+          style={{ marginTop: "1rem" }}
+        >
+          <EscrowAndDividend />
         </Tab>
         <Tab
           eventKey="timelock"

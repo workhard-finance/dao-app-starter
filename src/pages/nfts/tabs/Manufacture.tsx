@@ -1,18 +1,18 @@
 import React, { useState } from "react";
-import Page from "../layouts/Page";
+import Page from "../../../layouts/Page";
 
 import { Row, Col, Card, Button, Form } from "react-bootstrap";
-import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { BigNumber, ContractTransaction } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import { parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
-import { ConditionalButton } from "../components/ConditionalButton";
-import { ProductView } from "../components/contracts/marketplace/product/ProductView";
-import { useIPFS } from "../providers/IPFSProvider";
-import { permaPinToArweave } from "../utils/utils";
+import { ConditionalButton } from "../../../components/ConditionalButton";
+import { ProductView } from "../../../components/contracts/marketplace/product/ProductView";
+import { useIPFS } from "../../../providers/IPFSProvider";
+import { permaPinToArweave } from "../../../utils/utils";
 
-const Manufacture: React.FC = () => {
+export const Manufacture: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
   const history = useHistory();
   const contracts = useWorkhardContracts();
@@ -296,5 +296,3 @@ const Manufacture: React.FC = () => {
     </Page>
   );
 };
-
-export default Manufacture;

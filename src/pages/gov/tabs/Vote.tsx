@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
-import Page from "../../layouts/Page";
+import Page from "../../../layouts/Page";
 import { Image, Row, Col, Nav, Tab, Tabs } from "react-bootstrap";
-import { TimelockTxs } from "../../components/contracts/timelocked-governance/TimelockTxs";
-import { Propose } from "../../components/contracts/workers-union/Propose";
+import { TimelockTxs } from "../../../components/contracts/timelocked-governance/TimelockTxs";
+import { Propose } from "../../../components/contracts/workers-union/Propose";
 import {
   VoteForTx,
   ProposedTx,
   VoteForTxStatus,
-} from "../../components/contracts/workers-union/VoteForTx";
+} from "../../../components/contracts/workers-union/VoteForTx";
 import { useWeb3React } from "@web3-react/core";
-import { useBlockNumber } from "../../providers/BlockNumberProvider";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { BigNumber, providers } from "ethers";
 
 const Vote: React.FC = () => {

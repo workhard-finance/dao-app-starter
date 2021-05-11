@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
-import Page from "../layouts/Page";
+import Page from "../../layouts/Page";
 
 import { Row, Col, Tab, Nav, Card, Button } from "react-bootstrap";
 import ReactHtmlParser from "react-html-parser";
-import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
 import { getAddress } from "ethers/lib/utils";
-import { Compensate } from "../components/contracts/job-board/Compensate";
-import { AddBudget } from "../components/contracts/job-board/AddBudget";
+import { Compensate } from "../../components/contracts/job-board/Compensate";
+import { AddBudget } from "../../components/contracts/job-board/AddBudget";
 import { useHistory } from "react-router-dom";
-import { wrapUrl } from "../utils/utils";
-import { ApproveProject } from "../components/contracts/job-board/ApproveProject";
-import { CloseProject } from "../components/contracts/job-board/CloseProject";
-import { ExecuteBudget } from "../components/contracts/job-board/ExecuteBudget";
+import { wrapUrl } from "../../utils/utils";
+import { ApproveProject } from "../../components/contracts/job-board/ApproveProject";
+import { CloseProject } from "../../components/contracts/job-board/CloseProject";
+import { ExecuteBudget } from "../../components/contracts/job-board/ExecuteBudget";
 
-const Project: React.FC = () => {
+export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
   const history = useHistory();
   const contracts = useWorkhardContracts();
@@ -185,5 +185,3 @@ const Project: React.FC = () => {
     </Page>
   );
 };
-
-export default Project;

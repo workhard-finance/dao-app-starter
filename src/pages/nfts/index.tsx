@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import Page from "../layouts/Page";
+import Page from "../../layouts/Page";
 import { Alert, Button, Card, Col, Row, Tab, Tabs } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { useBlockNumber } from "../providers/BlockNumberProvider";
-import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { useBlockNumber } from "../../providers/BlockNumberProvider";
+import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber, providers } from "ethers";
 import { Link } from "react-router-dom";
-import { OverlayTooltip } from "../components/OverlayTooltip";
-import { Product } from "../components/contracts/marketplace/product/Product";
+import { OverlayTooltip } from "../../components/OverlayTooltip";
+import { Product } from "../../components/contracts/marketplace/product/Product";
 
 const featured: BigNumber[] = [];
 const Store: React.FC = () => {

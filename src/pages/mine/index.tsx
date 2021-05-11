@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import Page from "../layouts/Page";
+import Page from "../../layouts/Page";
 import { Alert, Button, Col, Image, Row, Tab, Tabs } from "react-bootstrap";
-import { StakeMiningPool } from "../components/contracts/mining-pool/StakeMiningPool";
-import { useWorkhardContracts } from "../providers/WorkhardContractProvider";
+import { StakeMiningPool } from "../../components/contracts/mining-pool/StakeMiningPool";
+import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import { parseEther } from "@ethersproject/units";
-import { BurnMiningPool } from "../components/contracts/mining-pool/BurnMiningPool";
+import { BurnMiningPool } from "../../components/contracts/mining-pool/BurnMiningPool";
 import { getAddress } from "ethers/lib/utils";
-import { getPriceFromCoingecko } from "../utils/coingecko";
+import { getPriceFromCoingecko } from "../../utils/coingecko";
 import { ContractReceipt } from "@ethersproject/contracts";
+import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 
 const Mine = () => {
   const { account, library } = useWeb3React();
@@ -112,7 +113,10 @@ const Mine = () => {
           </Button>
         </Alert>
       )}
-      <Tabs defaultActiveKey="liquidity-mining">
+      <Tabs defaultActiveKey="vision">
+        <Tab eventKey="vision" title="$VISION" style={{ marginTop: "1rem" }}>
+          <Erc20Balance address={contracts?.vision.address} />
+        </Tab>
         <Tab
           eventKey="liquidity-mining"
           title="Liquidity Mining"
