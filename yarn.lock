@@ -4687,8 +4687,9 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@workhard/protocol@../protocol":
+"@workhard/protocol@github:workhard-finance/protocol#1.0.0-rc.1":
   version "1.0.0"
+  resolved "https://codeload.github.com/workhard-finance/protocol/tar.gz/1d696be1364cbc1bc2d66d2c74d013f4fdaa6615"
   dependencies:
     "@openzeppelin/contracts" "3.4.0-solc-0.7 "
     "@uniswap/v2-core" "^1.0.1"
