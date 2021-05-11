@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
-import { TimelockTx } from "./TimelockTx";
+import { TimelockTx } from "../../../components/contracts/timelocked-governance/TimelockTx";
 import { providers, Transaction } from "ethers";
 import { Alert } from "react-bootstrap";
 
@@ -75,8 +75,8 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
     <>
       <Alert variant="info">
         All governance transactions are timelock controlled transactions.
-        Transactions can be scheduled and executed by Farmers Union voting or
-        Dev's multisig wallet. Farmers Union can revoke the permission of Dev's
+        Transactions can be scheduled and executed by Workers Union voting or
+        Dev's multisig wallet. Workers Union can revoke the permission of Dev's
         multisig wallet from the timelock contract by voting.
       </Alert>
       {Object.values(txs)

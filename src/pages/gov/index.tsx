@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
-import { TimelockTxs } from "../../components/contracts/timelocked-governance/TimelockTxs";
-import { Propose } from "../../components/contracts/workers-union/Propose";
+import { TimelockTxs } from "./tabs/TimelockTxs";
+import { Propose } from "./tabs/Propose";
 import Vote from "./tabs/Vote";
 import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";

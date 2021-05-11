@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../../layouts/Page";
 import { Image, Row, Col, Nav, Tab, Tabs } from "react-bootstrap";
-import { TimelockTxs } from "../../../components/contracts/timelocked-governance/TimelockTxs";
-import { Propose } from "../../../components/contracts/workers-union/Propose";
+import { TimelockTxs } from "./TimelockTxs";
+import { Propose } from "./Propose";
 import {
   VoteForTx,
   ProposedTx,

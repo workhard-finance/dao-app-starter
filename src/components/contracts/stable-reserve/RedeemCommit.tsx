@@ -124,11 +124,9 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
           $DAI: {formatEther(daiBalance || "0")} / $COMMIT:{" "}
           {formatEther(commitBalance || "0")}
         </Card.Text>
-        {/* <Card.Title>Stake & lock to dispatch farmers</Card.Title> */}
         <Form>
           <Form.Group>
             <Card.Title>Redeem</Card.Title>
-            {/* <Form.Label>Staking</Form.Label> */}
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
                 <InputGroup.Text>$COMMIT</InputGroup.Text>
