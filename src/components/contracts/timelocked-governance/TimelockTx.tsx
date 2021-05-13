@@ -3,16 +3,18 @@ import {
   BigNumber,
   Contract,
   ContractTransaction,
+  PopulatedTransaction,
   providers,
   Signer,
   Transaction,
 } from "ethers";
-import { Accordion, Button, Card, Form } from "react-bootstrap";
+import { Accordion, Button, Card, Modal, Row, Col } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import { formatEther, solidityKeccak256 } from "ethers/lib/utils";
 import { DecodedTxData, decodeTxDetails, flatten } from "../../../utils/utils";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export interface TimelockTxProps {
   id: string;
@@ -61,6 +63,12 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     TimelockTxStatus.PENDING
   );
   const [lastTx, setLastTx] = useState<ContractTransaction>();
+  const [executionTx, setExecutionTx] = useState<PopulatedTransaction>();
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   useEffect(() => {
     if (!!contracts && !!library) {
       let stale = false;
@@ -105,6 +113,18 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           forced: forced,
           proposer,
         });
+        const fn = Array.isArray(result.target)
+          ? timeLockGovernance.populateTransaction.executeBatch
+          : timeLockGovernance.populateTransaction.execute;
+        fn(
+          result.target,
+          result.value,
+          result.data,
+          result.predecessor,
+          result.salt
+        ).then((populated) => {
+          setExecutionTx(populated);
+        });
       }
       return () => {
         stale = true;
@@ -138,9 +158,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     }
   }, [contracts, scheduledTx]);
 
-  const handleSubmit: FormEventHandler = async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const execute = async () => {
     if (!account || !contracts || !library || !scheduledTx) {
       alert("Not connected");
       return;
@@ -301,18 +319,45 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           ))}
         </Accordion>
         <br />
-        <Form onSubmit={handleSubmit}>
-          <ConditionalButton
-            variant="primary"
-            type="submit"
-            enabledWhen={
-              hasExecutorRole && timelockTxStatus === TimelockTxStatus.READY
-            }
-            whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to WorkersUnion."
-            children={buttonText(timelockTxStatus)}
-          />
-        </Form>
+        <ConditionalButton
+          variant="primary"
+          type="submit"
+          enabledWhen={
+            hasExecutorRole && timelockTxStatus === TimelockTxStatus.READY
+          }
+          onClick={execute}
+          whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to WorkersUnion."
+          children={buttonText(timelockTxStatus)}
+        />{" "}
+        <OverlayTooltip tip={`Data for Gnosis Safe Multisig Wallet.`}>
+          <Button variant="outline" onClick={handleShow}>
+            ABI?
+          </Button>
+        </OverlayTooltip>
       </Card.Body>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Here's the custom data for gnosis safe</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h5>Address:</h5>
+          <code style={{ color: "black", fontFamily: "Neucha" }}>
+            {executionTx?.to}
+          </code>
+          <br />
+          <br />
+          <h5>Value:</h5>
+          <code style={{ color: "black", fontFamily: "Neucha" }}>
+            {executionTx?.value || 0}
+          </code>
+          <br />
+          <br />
+          <h5>Data:</h5>
+          <code style={{ color: "black", fontFamily: "Neucha" }}>
+            {executionTx?.data}
+          </code>
+        </Modal.Body>
+      </Modal>
     </Card>
   );
 };
