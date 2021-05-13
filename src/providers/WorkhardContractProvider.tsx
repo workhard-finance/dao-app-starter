@@ -6,7 +6,7 @@ import {
   Deployed,
   getNetworkName,
 } from "@workhard/protocol/dist/deployed";
-import devDeploy from "@workhard/protocol/deployed.json";
+import deployed from "@workhard/protocol/deployed.json";
 import {
   BurnMining,
   BurnMining__factory,
@@ -40,12 +40,20 @@ import {
   RIGHT__factory,
 } from "@workhard/protocol";
 
-// let deployedContracts: Deployed = deployed;
-// if (process.env.REACT_APP_DEV_MODE) {
-//   deployedContracts = devDeploy;
-// }
-
-let deployedContracts: Deployed = devDeploy;
+let deployedContracts: Deployed = deployed;
+if (process.env.NODE_ENV === "development") {
+  try {
+    const devDeployed = require("../deployed.dev.json");
+    const { localhost, hardhat } = devDeployed;
+    deployedContracts = {
+      ...deployedContracts,
+      localhost,
+      hardhat,
+    };
+  } catch (_err) {
+    console.log("Failed to find deployed.dev.json");
+  }
+}
 
 export interface WorkhardContracts {
   project: Project;

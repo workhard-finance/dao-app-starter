@@ -27,7 +27,7 @@ yarn-error.log*
 
 .env
 
-src/deployed.json
+src/deployed.dev.json
 
 .idea
 package-lock.json
