@@ -44,12 +44,24 @@ let deployedContracts: Deployed = deployed;
 if (process.env.NODE_ENV === "development") {
   try {
     const devDeployed = require("../deployed.dev.json");
-    const { localhost, hardhat } = devDeployed;
+    const { mainnet, rinkeby, localhost, hardhat } = devDeployed;
     deployedContracts = {
       ...deployedContracts,
       localhost,
       hardhat,
     };
+    if (Object.keys(mainnet).length !== 0) {
+      deployedContracts = {
+        ...deployedContracts,
+        mainnet,
+      };
+    }
+    if (Object.keys(rinkeby).length !== 0) {
+      deployedContracts = {
+        ...deployedContracts,
+        rinkeby,
+      };
+    }
   } catch (_err) {
     console.log("Failed to find deployed.dev.json");
   }
@@ -74,9 +86,8 @@ export interface WorkhardContracts {
   marketplace: Marketplace;
 }
 
-export const WorkhardContractCtx = React.createContext<
-  WorkhardContracts | undefined
->(undefined);
+export const WorkhardContractCtx =
+  React.createContext<WorkhardContracts | undefined>(undefined);
 
 export function useWorkhardContracts() {
   const contracts = useContext(WorkhardContractCtx);
