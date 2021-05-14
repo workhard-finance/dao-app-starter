@@ -1,21 +1,27 @@
-import { useState, FormEventHandler, useEffect } from "react";
-import { Card, Button, Form } from "react-bootstrap";
+import { useState } from "react";
+import { Card, Form } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { parseLog, permaPinToArweave } from "../../../utils/utils";
-import { ContractTransaction } from "@ethersproject/contracts";
+import {
+  parseLog,
+  permaPinToArweave,
+  TxStatus,
+  handleTransaction,
+} from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
+import { useToasts } from "react-toast-notifications";
 
 export const PostAJobBox: React.FC = () => {
   const { account, library } = useWeb3React();
   const { ipfs } = useIPFS();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
 
   const [description, setDescription] = useState<string>();
   const [file, setFile] = useState<File>();
   const [title, setTitle] = useState<string>();
-  const [lastTx, setLastTx] = useState<ContractTransaction>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [url, setURL] = useState<string | undefined>(); // TODO
   const [uri, setURI] = useState<string>(); // TODO
   const [uploaded, setUploaded] = useState<boolean>();
@@ -89,34 +95,26 @@ export const PostAJobBox: React.FC = () => {
       return;
     }
     const signer = library.getSigner(account);
-    jobBoard
-      .connect(signer)
-      .createProject(uri)
-      .then((tx) => {
-        setLastTx(tx);
-        tx.wait()
-          .then((receipt) => {
-            const parsed = parseLog(
-              jobBoard,
-              receipt.logs,
-              "ProjectPosted(uint256)"
-            );
-            const log = parsed[0];
-            alert(
-              `You created a new project. The NFT id is ${log.args.projId}`
-            );
-            setLastTx(undefined);
-            setTitle("");
-            setURL("");
-            setDescription("");
-            setFile(undefined);
-          })
-          .catch((rejected) => {
-            setLastTx(undefined);
-            alert(`rejected: ${rejected}`);
-          });
-      })
-      .catch((e) => alert(`tx response error ${e.message}`));
+    handleTransaction(
+      jobBoard.connect(signer).createProject(uri),
+      setTxStatus,
+      addToast,
+      "Posted a new job",
+      (receipt) => {
+        const parsed = parseLog(
+          jobBoard,
+          receipt.logs,
+          "ProjectPosted(uint256)"
+        );
+        const log = parsed[0];
+        alert(`You created a new project. The NFT id is ${log.args.projId}`);
+        setTxStatus(undefined);
+        setTitle("");
+        setURL("");
+        setDescription("");
+        setFile(undefined);
+      }
+    );
   };
 
   return (
@@ -171,14 +169,14 @@ export const PostAJobBox: React.FC = () => {
           <ConditionalButton
             variant="primary"
             onClick={post}
-            enabledWhen={lastTx === undefined && !uploading}
+            enabledWhen={txStatus === undefined && !uploading}
             whyDisabled={
               uploading
                 ? "Uploading Metadata to IPFS"
                 : "Submitted transaction is in pending"
             }
             children={
-              lastTx
+              txStatus
                 ? "Pending"
                 : uploading
                 ? "Uploading..."

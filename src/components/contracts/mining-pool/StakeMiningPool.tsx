@@ -9,12 +9,19 @@ import {
   IERC20__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
-import { getVariantForProgressBar } from "../../../utils/utils";
+import {
+  errorHandler,
+  getVariantForProgressBar,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../utils/utils";
 import {
   CoingeckoTokenDetails,
   getPriceFromCoingecko,
   getTokenDetailsFromCoingecko,
 } from "../../../utils/coingecko";
+import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
 export enum StakeMiningPoolType {
@@ -44,6 +51,8 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
+
   const [collapsed, setCollapsed] = useState<boolean>(
     collapsible ? true : false
   );
@@ -57,7 +66,8 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
   const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [stakeOrWithdraw, toggleStakeOrWithdraw] = useState<boolean>(true);
   const [stakePercent, setStakePercent] = useState<number>();
-  const [approved, setApproved] = useState(false);
+  const [allowance, setAllowance] = useState<BigNumber>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [amount, setAmount] = useState<string>();
   const [mined, setMined] = useState<BigNumber>();
   const [lastTx, setLastTx] = useState<string>();
@@ -70,47 +80,43 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
-        .then(setTokenAddress);
-      contracts.visionEmitter.getPoolWeight(poolIdx).then(setWeight);
-      return () => {
-        stale = true;
-        setTokenAddress(undefined);
-      };
+        .then(setTokenAddress)
+        .catch(errorHandler(addToast));
+      contracts.visionEmitter
+        .getPoolWeight(poolIdx)
+        .then(setWeight)
+        .catch(errorHandler(addToast));
     }
   }, [account, contracts]);
 
   useEffect(() => {
     if (!!account && !!contracts && !!tokenAddress) {
-      let stale = false;
       const token = IERC20__factory.connect(tokenAddress, library);
-      token.balanceOf(account).then(setTokenBalance);
-      getPriceFromCoingecko(tokenAddress).then(setTokenPrice);
-      getTokenDetailsFromCoingecko(tokenAddress).then(setTokenDetails);
+      token
+        .balanceOf(account)
+        .then(setTokenBalance)
+        .catch(errorHandler(addToast));
+      getPriceFromCoingecko(tokenAddress)
+        .then(setTokenPrice)
+        .catch(errorHandler(addToast));
+      getTokenDetailsFromCoingecko(tokenAddress)
+        .then(setTokenDetails)
+        .catch(errorHandler(addToast));
       const pool = StakeMining__factory.connect(poolAddress, library);
-      pool.dispatchedMiners(account).then(setStakedAmount);
-      pool.totalMiners().then(setTotalStake);
-      pool.mined(account).then(setMined);
+      pool
+        .dispatchedMiners(account)
+        .then(setStakedAmount)
+        .catch(errorHandler(addToast));
+      pool.totalMiners().then(setTotalStake).catch(errorHandler(addToast));
+      pool.mined(account).then(setMined).catch(errorHandler(addToast));
       IERC20__factory.connect(tokenAddress, library)
         .allowance(account, poolAddress)
-        .then(setTokenAllowance);
-      return () => {
-        stale = true;
-        setTokenAddress(undefined);
-        setStakedAmount(undefined);
-        setTotalStake(undefined);
-        setMined(undefined);
-      };
+        .then(setTokenAllowance)
+        .catch(errorHandler(addToast));
     }
   }, [account, contracts, tokenAddress, lastTx, blockNumber]);
-
-  useEffect(() => {
-    const amountInWei = parseEther(amount || "0");
-    if (tokenAllowance?.gte(amountInWei)) setApproved(true);
-    else setApproved(false);
-  }, [tokenAllowance, amount]);
 
   useEffect(() => {
     if (stakedAmount && tokenBalance) {
@@ -139,26 +145,18 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       alert("Not connected");
       return;
     }
-    if (approved) {
+    if (isApproved(allowance, amount)) {
       alert("Already approved");
       return;
     }
     const signer = library.getSigner(account);
     const token = IERC20__factory.connect(tokenAddress, library);
-    token
-      .connect(signer)
-      .approve(poolAddress, constants.MaxUint256)
-      .then((tx: any) => {
-        tx.wait()
-          .then((_: any) => {
-            setTokenAllowance(constants.MaxUint256);
-            setApproved(true);
-          })
-          .catch(alert);
-      })
-      .catch(() => {
-        setApproved(false);
-      });
+    handleTransaction(
+      token.connect(signer).approve(poolAddress, constants.MaxUint256),
+      setTxStatus,
+      addToast,
+      `Approved MiningPool ${poolAddress}`
+    );
     return;
   };
 
@@ -167,7 +165,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       alert("Not connected");
       return;
     }
-    if (!approved) {
+    if (!isApproved(allowance, amount)) {
       alert("Not approved");
       return;
     }
@@ -181,17 +179,12 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       alert("Not enough amount.");
       return;
     }
-    stakeMining
-      .connect(signer)
-      .stake(amountToStakeInWei)
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch(alert);
-      })
-      .catch(alert);
+    handleTransaction(
+      stakeMining.connect(signer).stake(amountToStakeInWei),
+      setTxStatus,
+      addToast,
+      `Successfully staked!`
+    );
   };
 
   const withdraw = () => {
@@ -210,17 +203,12 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       alert("Not enough amount.");
       return;
     }
-    stakeMining
-      .connect(signer)
-      .withdraw(amountToWithdrawInWei)
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch(alert);
-      })
-      .catch(alert);
+    handleTransaction(
+      stakeMining.connect(signer).withdraw(amountToWithdrawInWei),
+      setTxStatus,
+      addToast,
+      `Successfully withdrew!`
+    );
   };
 
   const mine = () => {
@@ -234,18 +222,12 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
     }
     const signer = library.getSigner(account);
     const stakeMining = StakeMining__factory.connect(poolAddress, library);
-    // const stakingToken =
-    stakeMining
-      .connect(signer)
-      .mine()
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch(alert);
-      })
-      .catch(alert);
+    handleTransaction(
+      stakeMining.connect(signer).mine(),
+      setTxStatus,
+      addToast,
+      `Successfully mined!`
+    );
   };
 
   const exit = () => {
@@ -256,17 +238,12 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
     const signer = library.getSigner(account);
     const stakeMining = StakeMining__factory.connect(poolAddress, library);
     // const stakingToken =
-    stakeMining
-      .connect(signer)
-      .exit()
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch(alert);
-      })
-      .catch(alert);
+    handleTransaction(
+      stakeMining.connect(signer).exit(),
+      setTxStatus,
+      addToast,
+      `Successfully exited!`
+    );
   };
 
   const collapsedDetails = () => (
@@ -330,9 +307,19 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
         </Card.Text>
         <Button
           variant="primary"
-          onClick={stakeOrWithdraw ? (approved ? stake : approve) : withdraw}
+          onClick={
+            stakeOrWithdraw
+              ? isApproved(allowance, amount)
+                ? stake
+                : approve
+              : withdraw
+          }
         >
-          {stakeOrWithdraw ? (approved ? "Stake" : "Approve") : "Withdraw"}
+          {stakeOrWithdraw
+            ? isApproved(allowance, amount)
+              ? "Stake"
+              : "Approve"
+            : "Withdraw"}
         </Button>
       </Form>
       <hr />

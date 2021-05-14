@@ -9,6 +9,7 @@ export interface CloseProjectProps {
   budgetOwner: string;
 }
 
+// TODO
 export const CloseProject: React.FC<CloseProjectProps> = ({
   projId,
   budgetOwner,

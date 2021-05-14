@@ -6,6 +6,12 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
+import {
+  errorHandler,
+  handleTransaction,
+  TxStatus,
+} from "../../../utils/utils";
+import { useToasts } from "react-toast-notifications";
 
 export interface CompensateProps {
   projId: BigNumberish;
@@ -20,10 +26,11 @@ export const Compensate: React.FC<CompensateProps> = ({
 }) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
   const [payTo, setPayTo] = useState("");
   const [payAmount, setPayAmount] = useState<number>();
   const [balance, setBalance] = useState<BigNumberish>(fund);
-  const [lastTx, setLastTx] = useState<string>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -43,35 +50,24 @@ export const Compensate: React.FC<CompensateProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    jobBoard
-      .connect(signer)
-      .compensate(projId, payTo, payAmountInWei)
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch((rejected) => {
-            alert(`Rejected: ${rejected}.`);
-          });
-        // TODO wait spinner
-        // TODO UI update w/stale
-      })
-      .catch((reason) => {
-        // TODO UI update w/stale
-        alert(`Failed: ${reason}`);
-      });
+    handleTransaction(
+      jobBoard.connect(signer).compensate(projId, payTo, payAmountInWei),
+      setTxStatus,
+      addToast,
+      "Compensation complete!"
+    );
   };
 
   useEffect(() => {
     if (!!account && !!library && !!contracts) {
-      let stale = false;
       const { jobBoard } = contracts;
-      jobBoard.projectFund(projId).then((bal: BigNumber) => {
-        if (!stale) setBalance(bal);
-      });
+      jobBoard
+        .projectFund(projId)
+        .then(setBalance)
+        .catch(errorHandler(addToast));
     }
-  }, [lastTx]);
+  }, [txStatus]);
+
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group>

@@ -11,6 +11,12 @@ import { randomBytes } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../../ConditionalButton";
 import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
+import {
+  errorHandler,
+  handleTransaction,
+  TxStatus,
+} from "../../../../utils/utils";
+import { useToasts } from "react-toast-notifications";
 
 interface ProposeTx {
   msgTo: string;
@@ -22,6 +28,7 @@ export const ProposeBatchTx: React.FC = ({}) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
   const { blockNumber } = useBlockNumber();
+  const { addToast } = useToasts();
   const [timestamp, setTimestamp] = useState<number>(0);
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>();
@@ -29,7 +36,7 @@ export const ProposeBatchTx: React.FC = ({}) => {
   const [proposalDetails, setProposalDetails] = useState<string>();
   const [startsIn, setStartsIn] = useState<number>();
   const [votingPeriod, setVotingPeriod] = useState<number>();
-  const [lastTx, setLastTx] = useState<ContractTransaction>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   /** VotingRule */
   const [myVotes, setMyVotes] = useState<BigNumber>();
@@ -57,7 +64,6 @@ export const ProposeBatchTx: React.FC = ({}) => {
 
   useEffect(() => {
     if (!!account && !!contracts && !!library && !!blockNumber) {
-      let stale = false;
       const workersUnion = contracts.workersUnion;
       workersUnion
         .votingRule()
@@ -77,34 +83,20 @@ export const ProposeBatchTx: React.FC = ({}) => {
           setStartsIn(BigNumber.from(_minimumPending || 0).toNumber());
           setVotingPeriod(BigNumber.from(_minimumVotingPeriod || 0).toNumber());
         })
-        .catch(() => {
-          if (!stale) {
-            setMinimumPending(undefined);
-            setMaximumPending(undefined);
-            setMinimumVotingPeriod(undefined);
-            setMaximumVotingPeriod(undefined);
-            setMinimumVotesForProposal(undefined);
-          }
-        });
-
+        .catch(errorHandler(addToast));
       library
         .getBlock(blockNumber)
         .then((block) => setTimestamp(block.timestamp));
     }
-  }, [account, contracts, lastTx, blockNumber]);
+  }, [account, contracts, txStatus, blockNumber]);
 
   useEffect(() => {
     if (!!account && !!contracts && !!timestamp) {
-      let stale = false;
       const { workersUnion } = contracts;
       workersUnion
         .getVotesAt(account, timestamp)
-        .then((votes: any) => {
-          setMyVotes(votes);
-        })
-        .catch(() => {
-          if (!stale) setMyVotes(undefined);
-        });
+        .then(setMyVotes)
+        .catch(errorHandler(addToast));
     }
   }, [timestamp]);
 
@@ -123,9 +115,8 @@ export const ProposeBatchTx: React.FC = ({}) => {
     if (!votingPeriod) return alert("Voting Period is not set");
 
     const signer = library.getSigner(account);
-    contracts.workersUnion
-      .connect(signer)
-      .proposeBatchTx(
+    handleTransaction(
+      contracts.workersUnion.connect(signer).proposeBatchTx(
         Object.values(proposalProperties).map((prop) => prop.msgTo),
         Object.values(proposalProperties).map((prop) => prop.msgValue),
         Object.values(proposalProperties).map((prop) => prop.msgData),
@@ -133,10 +124,11 @@ export const ProposeBatchTx: React.FC = ({}) => {
         salt,
         startsIn,
         votingPeriod
-      )
-      .then((tx) => {
-        setLastTx(tx);
-      });
+      ),
+      setTxStatus,
+      addToast,
+      "Successfully proposed batch transaction."
+    );
   };
 
   const addPropose = () => {

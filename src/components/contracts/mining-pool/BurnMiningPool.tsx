@@ -9,7 +9,13 @@ import {
   IERC20__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
-import { getVariantForProgressBar } from "../../../utils/utils";
+import {
+  errorHandler,
+  getVariantForProgressBar,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../utils/utils";
 import {
   CoingeckoTokenDetails,
   getPriceFromCoingecko,
@@ -17,6 +23,7 @@ import {
 } from "../../../utils/coingecko";
 import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { useToasts } from "react-toast-notifications";
 
 export enum BurnMiningPoolType {
   STAKE_MINING_POOL,
@@ -45,6 +52,8 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
+
   const [collapsed, setCollapsed] = useState<boolean>(
     collapsible ? true : false
   );
@@ -55,60 +64,54 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   const [tokenPrice, setTokenPrice] = useState<number>();
   const [tokenDetails, setTokenDetails] = useState<CoingeckoTokenDetails>();
   const [weight, setWeight] = useState<BigNumber>();
-  const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
+  const [allowance, setAllowance] = useState<BigNumber>();
   const [burnPercent, setBurnPercent] = useState<number>();
-  const [approved, setApproved] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [mined, setMined] = useState<BigNumber>();
-  const [lastTx, setLastTx] = useState<string>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [annualRevenue, setAnnualRevenue] = useState<number>();
 
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
-        .then(setTokenAddress);
-      contracts.visionEmitter.getPoolWeight(poolIdx).then(setWeight);
-      return () => {
-        stale = true;
-        setTokenAddress(undefined);
-      };
+        .then(setTokenAddress)
+        .catch(errorHandler(addToast));
+      contracts.visionEmitter
+        .getPoolWeight(poolIdx)
+        .then(setWeight)
+        .catch(errorHandler(addToast));
     }
   }, [account, contracts]);
 
   useEffect(() => {
     if (!!account && !!contracts && !!tokenAddress) {
-      console.log("blocknum", blockNumber);
-      let stale = false;
       const token = IERC20__factory.connect(tokenAddress, library);
-      token.balanceOf(account).then(setTokenBalance);
-      getPriceFromCoingecko(tokenAddress).then(setTokenPrice);
-      getTokenDetailsFromCoingecko(tokenAddress).then(setTokenDetails);
+      token
+        .balanceOf(account)
+        .then(setTokenBalance)
+        .catch(errorHandler(addToast));
+      getPriceFromCoingecko(tokenAddress)
+        .then(setTokenPrice)
+        .catch(errorHandler(addToast));
+      getTokenDetailsFromCoingecko(tokenAddress)
+        .then(setTokenDetails)
+        .catch(errorHandler(addToast));
       const pool = BurnMining__factory.connect(poolAddress, library);
-      pool.dispatchedMiners(account).then(setBurnedAmount);
-      pool.totalMiners().then(setTotalBurn);
-      pool.mined(account).then(setMined);
+      pool
+        .dispatchedMiners(account)
+        .then(setBurnedAmount)
+        .catch(errorHandler(addToast));
+      pool.totalMiners().then(setTotalBurn).catch(errorHandler(addToast));
+      pool.mined(account).then(setMined).catch(errorHandler(addToast));
       IERC20__factory.connect(tokenAddress, library)
         .allowance(account, poolAddress)
-        .then(setTokenAllowance);
-      return () => {
-        stale = true;
-        setTokenAddress(undefined);
-        setBurnedAmount(undefined);
-        setTotalBurn(undefined);
-        setMined(undefined);
-      };
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
     }
-  }, [account, contracts, tokenAddress, lastTx, blockNumber]);
-
-  useEffect(() => {
-    const amountInWei = parseEther(amount || "0");
-    if (tokenAllowance?.gte(amountInWei)) setApproved(true);
-    else setApproved(false);
-  }, [tokenAllowance, amount]);
+  }, [account, contracts, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (burnedAmount && tokenBalance) {
@@ -140,26 +143,18 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       alert("Not connected");
       return;
     }
-    if (approved) {
+    if (isApproved(allowance, amount)) {
       alert("Already approved");
       return;
     }
     const signer = library.getSigner(account);
     const token = IERC20__factory.connect(tokenAddress, library);
-    token
-      .connect(signer)
-      .approve(poolAddress, constants.MaxUint256)
-      .then((tx) => {
-        tx.wait()
-          .then((_) => {
-            setTokenAllowance(constants.MaxUint256);
-            setApproved(true);
-          })
-          .catch(alert);
-      })
-      .catch(() => {
-        setApproved(false);
-      });
+    handleTransaction(
+      token.connect(signer).approve(poolAddress, constants.MaxUint256),
+      setTxStatus,
+      addToast,
+      `Approved MiningPool ${poolAddress}`
+    );
     return;
   };
 
@@ -168,7 +163,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       alert("Not connected");
       return;
     }
-    if (!approved) {
+    if (!isApproved(allowance, amount)) {
       alert("Not approved");
       return;
     }
@@ -182,17 +177,12 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       alert("Not enough amount.");
       return;
     }
-    burnMining
-      .connect(signer)
-      .burn(amountToBurnInWei)
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch(alert);
-      })
-      .catch(alert);
+    handleTransaction(
+      burnMining.connect(signer).burn(amountToBurnInWei),
+      setTxStatus,
+      addToast,
+      "Successfully burned!"
+    );
   };
 
   const exit = () => {
@@ -202,17 +192,13 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
     }
     const signer = library.getSigner(account);
     const burnMining = BurnMining__factory.connect(poolAddress, library);
-    burnMining
-      .connect(signer)
-      .exit()
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setLastTx(receipt.transactionHash);
-          })
-          .catch(alert);
-      })
-      .catch(alert);
+
+    handleTransaction(
+      burnMining.connect(signer).exit(),
+      setTxStatus,
+      addToast,
+      "Successfully exited!"
+    );
   };
 
   const collapsedDetails = () => (
@@ -247,8 +233,11 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
           Burned: {formatEther(burnedAmount || 0)} / Balance:{" "}
           {formatEther(tokenBalance || 0)}
         </Card.Text>
-        <Button variant="primary" onClick={approved ? burn : approve}>
-          {approved ? "Burn" : "Approve"}
+        <Button
+          variant="primary"
+          onClick={isApproved(allowance, amount) ? burn : approve}
+        >
+          {isApproved(allowance, amount) ? "Burn" : "Approve"}
         </Button>
       </Form>
       <hr />

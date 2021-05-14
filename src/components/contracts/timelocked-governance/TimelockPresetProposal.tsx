@@ -1,11 +1,17 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
-import { BigNumber, ContractTransaction, Contract, constants } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
 import { randomBytes, solidityKeccak256 } from "ethers/lib/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { convertType, Param, Preset } from "../../../utils/preset";
+import { useToasts } from "react-toast-notifications";
+import {
+  errorHandler,
+  handleTransaction,
+  TxStatus,
+} from "../../../utils/utils";
 
 export const TimelockPresetProposal: React.FC<Preset> = ({
   paramArray,
@@ -14,13 +20,14 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
 }) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>(constants.HashZero);
   const [salt, setSalt] = useState<string>(
     BigNumber.from(randomBytes(32)).toHexString()
   );
   const [delay, setDelay] = useState<number>(86400);
-  const [lastTx, setLastTx] = useState<ContractTransaction>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   /** arguments **/
   const [args, setArgs] = useState<{ [key: string]: string }>({});
@@ -30,24 +37,19 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       const { timelockedGovernance } = contracts;
       timelockedGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)
-        .catch(() => {
-          if (!stale) setHasProposerRole(undefined);
-        });
+        .catch(errorHandler(addToast));
       timelockedGovernance
         .getMinDelay()
         .then((_delay) => {
           setDelay(_delay.toNumber());
         })
-        .catch(() => {
-          if (!stale) setDelay(86400);
-        });
+        .catch(errorHandler(addToast));
     }
-  }, [account, contracts, lastTx]);
+  }, [account, contracts, txStatus]);
 
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
@@ -67,12 +69,14 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
     if (!data) return alert("data is not set");
     const signer = library.getSigner(account);
     console.log("mypredecessor", predecessor);
-    contracts.timelockedGovernance
-      .connect(signer)
-      .schedule(contract.address, 0, data, predecessor, salt, delay)
-      .then((tx) => {
-        setLastTx(tx);
-      });
+    handleTransaction(
+      contracts.timelockedGovernance
+        .connect(signer)
+        .schedule(contract.address, 0, data, predecessor, salt, delay),
+      setTxStatus,
+      addToast,
+      "Scheduled transaction"
+    );
   };
   return (
     <Card>

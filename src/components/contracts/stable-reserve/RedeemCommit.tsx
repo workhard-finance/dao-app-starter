@@ -5,22 +5,30 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { OverlayTooltip } from "../../OverlayTooltip";
-import { approveAndRun } from "../../../utils/utils";
+import {
+  approveAndRun,
+  errorHandler,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { useToasts } from "react-toast-notifications";
 
 export interface RedeemCommitProps {}
 
 export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
+  const { addToast } = useToasts();
   const contracts = useWorkhardContracts();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitBalance, setCommitBalance] = useState<BigNumber>();
-  const [approved, setApproved] = useState(false);
+  const [allowance, setAllowance] = useState<BigNumber>();
   const [redeemAmount, setRedeemAmount] = useState<string>();
-  const [approveTx, setApproveTx] = useState<ContractTransaction>();
-  const [redeemTx, setRedeemTx] = useState<ContractTransaction>();
+  const [approveTxStatus, setApproveTxStatus] = useState<TxStatus>();
+  const [redeemTxStatus, setRedeemTxStatus] = useState<TxStatus>();
 
   const getMaxRedeem = () => formatEther(commitBalance || "0");
 
@@ -30,18 +38,19 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
       return;
     }
     const signer = library.getSigner(account);
-    approveAndRun(
-      signer,
-      contracts.stableReserve.address,
-      contracts.stableReserve.address,
-      setApproveTx,
-      setApproved,
+    handleTransaction(
+      contracts.commit
+        .connect(signer)
+        .approve(contracts.stableReserve.address, constants.MaxUint256),
+      setApproveTxStatus,
+      addToast,
+      "Approved StableReserve.",
       redeem
     );
   };
 
   const redeem = () => {
-    if (!account || !contracts) {
+    if (!account || !contracts || !library) {
       alert("Not connected");
       return;
     }
@@ -55,56 +64,34 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
       alert("Not enough amount of commit balance");
       return;
     }
-    stableReserve
-      .connect(signer)
-      .redeem(redeemAmountInWei)
-      .then((tx) => {
-        setRedeemTx(tx);
-        tx.wait()
-          .then((_receipt) => {
-            setRedeemTx(undefined);
-            setRedeemAmount("");
-          })
-          .catch((rejected) => {
-            setRedeemTx(undefined);
-            alert(`Rejected: ${rejected}.`);
-          });
-      });
+
+    handleTransaction(
+      stableReserve.connect(signer).redeem(redeemAmountInWei),
+      setRedeemTxStatus,
+      addToast,
+      "Successfully bought $COMMIT",
+      () => {
+        setRedeemAmount("");
+      }
+    );
   };
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       const baseCurrency = contracts.baseCurrency;
       const commitToken = contracts.commit;
       baseCurrency
         .balanceOf(account)
-        .then((bal) => {
-          if (!stale) setDaiBalance(bal);
-        })
-        .catch(() => {
-          if (!stale) setDaiBalance(undefined);
-        });
+        .then(setDaiBalance)
+        .catch(errorHandler(addToast));
       commitToken
         .balanceOf(account)
-        .then((bal) => {
-          if (!stale) setCommitBalance(bal);
-        })
-        .catch(() => {
-          if (!stale) setCommitBalance(undefined);
-        });
+        .then(setCommitBalance)
+        .catch(errorHandler(addToast));
       commitToken
         .allowance(account, contracts.stableReserve.address)
-        .then((allowance) => {
-          if (!stale) {
-            if (allowance.gt(redeemAmount || 0)) setApproved(true);
-            else setApproved(false);
-          }
-        });
-      return () => {
-        stale = true;
-        setDaiBalance(undefined);
-      };
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
     }
   }, [account, contracts, blockNumber]);
   return (
@@ -150,14 +137,23 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
           <br />
           <ConditionalButton
             variant="primary"
-            onClick={approved ? redeem : approveAndRedeem}
-            enabledWhen={approveTx === undefined && redeemTx === undefined}
-            whyDisabled={approved ? "Approving contract" : "Redeeming..."}
+            onClick={
+              isApproved(allowance, redeemAmount) ? redeem : approveAndRedeem
+            }
+            enabledWhen={
+              isApproved(allowance, redeemAmount) === undefined &&
+              redeemTxStatus !== TxStatus.PENDING
+            }
+            whyDisabled={
+              isApproved(allowance, redeemAmount)
+                ? "Approving contract"
+                : "Redeeming..."
+            }
             children={
-              approveTx
+              approveTxStatus === TxStatus.PENDING
                 ? "Approving..."
-                : approved
-                ? redeemTx
+                : isApproved(allowance, redeemAmount)
+                ? redeemTxStatus === TxStatus.PENDING
                   ? "Redeeming..."
                   : "Redeem"
                 : "Approve"

@@ -2,17 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { approveAndRun } from "../../../../utils/utils";
-import { ContractTransaction } from "ethers";
 import {
-  ProductData,
-  ProductMetadata,
-  ProductView,
-  ProductViewProps,
-} from "./ProductView";
+  errorHandler,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../../utils/utils";
+import { constants, ContractTransaction } from "ethers";
+import { ProductData, ProductView } from "./ProductView";
 import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
 import { useIPFS } from "../../../../providers/IPFSProvider";
 import { IPFS } from "ipfs-core/src";
+import { useToasts } from "react-toast-notifications";
 
 export interface ProductProps {
   tokenId: BigNumberish;
@@ -23,6 +24,7 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
   const [product, setProduct] = useState<ProductData>({
     manufacturer: account || "",
     price: BigNumber.from(0),
@@ -31,43 +33,44 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
     maxSupply: BigNumber.from(0),
     uri: "",
   });
-  const [approved, setApproved] = useState(false);
+  const [allowance, setAllowance] = useState<BigNumber>();
+  const [approveTxStatus, setApproveTxStatus] = useState<TxStatus>();
   const [approveTx, setApproveTx] = useState<ContractTransaction>();
   const [buyTx, setBuyTx] = useState<ContractTransaction>();
+  const [amount, setAmount] = useState<number>();
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       const commit = contracts.commit;
       commit
         .allowance(account, contracts.marketplace.address)
-        .then((allowance) => {
-          if (!stale) {
-            if (allowance.gt(product?.price || 0)) setApproved(true);
-            else setApproved(false);
-          }
-        });
-      contracts.marketplace.products(tokenId).then(setProduct);
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
+      contracts.marketplace
+        .products(tokenId)
+        .then(setProduct)
+        .catch(errorHandler(addToast));
     }
   }, [account, contracts, blockNumber]);
 
-  const approveAndBuy = (amount: number) => {
+  const approveAndBuy = () => {
     if (!account || !contracts || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    approveAndRun(
-      signer,
-      contracts.commit.address,
-      contracts.marketplace.address,
-      setApproveTx,
-      setApproved,
-      buy(amount)
+    handleTransaction(
+      contracts.commit
+        .connect(signer)
+        .approve(contracts.marketplace.address, constants.MaxUint256),
+      setApproveTxStatus,
+      addToast,
+      "Approved Marketplace",
+      buy
     );
   };
 
-  const buy = (amount: number) => () => {
+  const buy = () => {
     if (!account || !contracts || !library) {
       alert("Not connected");
       return;
@@ -100,17 +103,18 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
   return (
     <ProductView
       product={product}
-      onClick={(amount) => {
-        if (approved) {
-          buy(amount)();
+      onAmountChange={setAmount}
+      onClick={() => {
+        if (isApproved(allowance, product.price.mul(amount || 0))) {
+          buy();
         } else {
-          approveAndBuy(amount);
+          approveAndBuy();
         }
       }}
       buttonText={
         approveTx
           ? "Approving..."
-          : approved
+          : isApproved(allowance, product.price.mul(amount || 0))
           ? buyTx
             ? "Buying..."
             : "Buy"

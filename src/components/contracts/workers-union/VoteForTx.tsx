@@ -5,9 +5,15 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { BigNumber, providers, Signer } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
-import { DecodedTxData, decodeTxDetails } from "../../../utils/utils";
+import {
+  DecodedTxData,
+  decodeTxDetails,
+  handleTransaction,
+  TxStatus,
+} from "../../../utils/utils";
 import { DecodedTxs } from "../../DecodedTxs";
 import { ConditionalButton } from "../../ConditionalButton";
+import { useToasts } from "react-toast-notifications";
 
 interface Proposal {
   proposer: string;
@@ -40,7 +46,7 @@ export interface VoteForTxProps {
   myVotes?: BigNumber;
 }
 
-enum TxState {
+enum TimelockTxStatus {
   NOT_SCHEDULED = "Not scheduled",
   PENDING = "Pending",
   READY = "Ready",
@@ -55,10 +61,11 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
   const [proposal, setProposal] = useState<Proposal>();
   const [scheduledTimestamp, setScheduledTimestamp] = useState<BigNumber>();
-  const [txState, setTxState] = useState<TxState>();
-  const [lastTx, setLastTx] = useState<string>();
+  const [timelockTxStatus, setTimelockTxStatus] = useState<TimelockTxStatus>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
 
   useEffect(() => {
@@ -77,15 +84,15 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       return;
     }
     if (scheduledTimestamp.eq(0)) {
-      setTxState(TxState.NOT_SCHEDULED);
+      setTimelockTxStatus(TimelockTxStatus.NOT_SCHEDULED);
     } else if (scheduledTimestamp.eq(1)) {
-      setTxState(TxState.DONE);
+      setTimelockTxStatus(TimelockTxStatus.DONE);
     } else {
       library.getBlock(blockNumber).then((block) => {
         if (scheduledTimestamp.gt(block.timestamp)) {
-          setTxState(TxState.PENDING);
+          setTimelockTxStatus(TimelockTxStatus.PENDING);
         } else {
-          setTxState(TxState.READY);
+          setTimelockTxStatus(TimelockTxStatus.READY);
         }
       });
     }
@@ -135,23 +142,27 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       !Array.isArray(tx.value) &&
       !Array.isArray(tx.data)
     ) {
-      workersUnion
-        .connect(signer)
-        .schedule(tx.target, tx.value, tx.data, tx.predecessor, tx.salt)
-        .then((res) => {
-          res.wait().then((receipt) => setLastTx(receipt.transactionHash));
-        });
+      handleTransaction(
+        workersUnion
+          .connect(signer)
+          .schedule(tx.target, tx.value, tx.data, tx.predecessor, tx.salt),
+        setTxStatus,
+        addToast,
+        "Successfully scheduled transaction."
+      );
     } else if (
       Array.isArray(tx.target) &&
       Array.isArray(tx.value) &&
       Array.isArray(tx.data)
     ) {
-      workersUnion
-        .connect(signer)
-        .scheduleBatch(tx.target, tx.value, tx.data, tx.predecessor, tx.salt)
-        .then((res) => {
-          res.wait().then((receipt) => setLastTx(receipt.transactionHash));
-        });
+      handleTransaction(
+        workersUnion
+          .connect(signer)
+          .scheduleBatch(tx.target, tx.value, tx.data, tx.predecessor, tx.salt),
+        setTxStatus,
+        addToast,
+        "Successfully scheduled batch transactions."
+      );
     } else {
       throw Error("unexpected type");
     }
@@ -168,23 +179,27 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       !Array.isArray(tx.value) &&
       !Array.isArray(tx.data)
     ) {
-      workersUnion
-        .connect(signer)
-        .execute(tx.target, tx.value, tx.data, tx.predecessor, tx.salt)
-        .then((res) => {
-          res.wait().then((receipt) => setLastTx(receipt.transactionHash));
-        });
+      handleTransaction(
+        workersUnion
+          .connect(signer)
+          .execute(tx.target, tx.value, tx.data, tx.predecessor, tx.salt),
+        setTxStatus,
+        addToast,
+        "Successfully executed transaction."
+      );
     } else if (
       Array.isArray(tx.target) &&
       Array.isArray(tx.value) &&
       Array.isArray(tx.data)
     ) {
-      workersUnion
-        .connect(signer)
-        .executeBatch(tx.target, tx.value, tx.data, tx.predecessor, tx.salt)
-        .then((res) => {
-          res.wait().then((receipt) => setLastTx(receipt.transactionHash));
-        });
+      handleTransaction(
+        workersUnion
+          .connect(signer)
+          .executeBatch(tx.target, tx.value, tx.data, tx.predecessor, tx.salt),
+        setTxStatus,
+        addToast,
+        "Successfully executed batch transactions."
+      );
     } else {
       throw Error("unexpected type");
     }
@@ -201,7 +216,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
             {" ~ "}
             {new Date(tx.end.mul(1000).toNumber()).toLocaleString()}
           </li>
-          <li>executed: {txState}</li>
+          <li>executed: {timelockTxStatus}</li>
         </ul>
         <Card.Text>Transaction:</Card.Text>
         {decodedTxData && <DecodedTxs txs={decodedTxData} values={tx.value} />}
@@ -252,12 +267,12 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
             <ConditionalButton
               variant="primary"
               enabledWhen={
-                txState === TxState.NOT_SCHEDULED &&
+                timelockTxStatus === TimelockTxStatus.NOT_SCHEDULED &&
                 proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
               }
               onClick={schedule}
               whyDisabled={
-                txState === TxState.NOT_SCHEDULED
+                timelockTxStatus === TimelockTxStatus.NOT_SCHEDULED
                   ? "Proposal is not passed"
                   : "Already scheduled"
               }
@@ -266,12 +281,14 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
             <ConditionalButton
               variant="secondary"
               enabledWhen={
-                txState === TxState.READY &&
+                timelockTxStatus === TimelockTxStatus.READY &&
                 proposal?.totalForVotes.gt(proposal?.totalAgainstVotes || 0)
               }
               onClick={execute}
               whyDisabled={
-                txState === TxState.DONE ? "Already executed" : "Pending."
+                timelockTxStatus === TimelockTxStatus.DONE
+                  ? "Already executed"
+                  : "Pending."
               }
               children={"Execute"}
             />

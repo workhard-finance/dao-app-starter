@@ -2,9 +2,7 @@ import React, { useEffect } from "react";
 import Page from "../layouts/Page";
 import { Button, Container, Image, Toast } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useToasts } from "react-toast-notifications";
 const Home = () => {
-  const { addToast } = useToasts();
   return (
     <Page>
       <Container className="jumbotron">

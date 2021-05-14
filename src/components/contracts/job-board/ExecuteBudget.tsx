@@ -4,8 +4,13 @@ import { Card, Form } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
+import { useToasts } from "react-toast-notifications";
 import { ConditionalButton } from "../../ConditionalButton";
-import { getTokenSymbol } from "../../../utils/utils";
+import {
+  getTokenSymbol,
+  handleTransaction,
+  TxStatus,
+} from "../../../utils/utils";
 
 export interface ExecuteBudgetProps {
   projId: BigNumberish;
@@ -27,36 +32,24 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
   const { account, library } = useWeb3React();
   const [executed, setExecuted] = useState<boolean>();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
-  const handleSubmit: FormEventHandler = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const executeBudget = () => {
     if (!account || !contracts) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
     const jobBoard = contracts.jobBoard;
-    jobBoard
-      .connect(signer)
-      .executeBudget(projId, budgetIndex, "0x")
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            setExecuted(true);
-            alert(`${receipt.transactionHash} submitted.`);
-          })
-          .catch((rejected) => {
-            alert(`Rejected: ${rejected}.`);
-          });
-        // TODO wait spinner
-        // TODO UI update w/stale
-      })
-      .catch((reason) => {
-        // TODO UI update w/stale
-        alert(`Failed: ${reason}`);
-      });
+    handleTransaction(
+      jobBoard.connect(signer).executeBudget(projId, budgetIndex, "0x"),
+      setTxStatus,
+      addToast,
+      "Budget executed."
+    );
   };
+
   return (
     <Card>
       <Card.Header as="h5"># {budgetIndex}</Card.Header>
@@ -67,15 +60,14 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
         <Card.Text>Amount: {formatEther(amount)}</Card.Text>
         <Card.Text>Executed: {transferred ? "True" : "False"}</Card.Text>
         {!transferred && !executed && (
-          <Form onSubmit={handleSubmit}>
-            <ConditionalButton
-              variant="primary"
-              type="submit"
-              enabledWhen={account === budgetOwner}
-              whyDisabled="Only budget owner can call this function"
-              children="Execute"
-            />
-          </Form>
+          <ConditionalButton
+            variant="primary"
+            type="submit"
+            enabledWhen={account === budgetOwner}
+            whyDisabled="Only budget owner can call this function"
+            children="Execute"
+            onClick={executeBudget}
+          />
         )}
       </Card.Body>
     </Card>

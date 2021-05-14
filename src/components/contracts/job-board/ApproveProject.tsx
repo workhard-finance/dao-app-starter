@@ -6,6 +6,12 @@ import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers/lib.esm";
 import { ConditionalButton } from "../../ConditionalButton";
 import { solidityKeccak256 } from "ethers/lib/utils";
+import { useToasts } from "react-toast-notifications";
+import {
+  errorHandler,
+  handleTransaction,
+  TxStatus,
+} from "../../../utils/utils";
 
 export interface ApproveProjectProps {
   projId: BigNumberish;
@@ -27,13 +33,14 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
 }) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [timelock, setTimelock] = useState<string>("86400");
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
   const [hasExecutorRole, setHasExecutorRole] = useState<boolean>(false);
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>(
     ApprovalStatus.NOT_SCHEDULED
   );
-  const [lastTx, setLastTx] = useState<ContractTransaction>();
 
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
@@ -61,37 +68,37 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
         alert("Already executed");
         break;
       case ApprovalStatus.NOT_SCHEDULED:
-        timeLockGovernance
-          .connect(signer)
-          .schedule(
-            contracts.jobBoard.address,
-            0,
-            data,
-            ethers.constants.HashZero,
-            ethers.constants.HashZero,
-            BigNumber.from(timelock)
-          )
-          .then((tx) => {
-            setLastTx(tx);
-            txWait(tx);
-          })
-          .catch(handleException);
+        handleTransaction(
+          timeLockGovernance
+            .connect(signer)
+            .schedule(
+              contracts.jobBoard.address,
+              0,
+              data,
+              ethers.constants.HashZero,
+              ethers.constants.HashZero,
+              BigNumber.from(timelock)
+            ),
+          setTxStatus,
+          addToast,
+          "Created VotingEscrowLock"
+        );
         break;
       case ApprovalStatus.READY:
-        timeLockGovernance
-          .connect(signer)
-          .execute(
-            contracts.jobBoard.address,
-            0,
-            data,
-            ethers.constants.HashZero,
-            ethers.constants.HashZero
-          )
-          .then((tx) => {
-            setLastTx(tx);
-            txWait(tx);
-          })
-          .catch(handleException);
+        handleTransaction(
+          timeLockGovernance
+            .connect(signer)
+            .execute(
+              contracts.jobBoard.address,
+              0,
+              data,
+              ethers.constants.HashZero,
+              ethers.constants.HashZero
+            ),
+          setTxStatus,
+          addToast,
+          "Created VotingEscrowLock"
+        );
         break;
       default:
         break;
@@ -100,17 +107,16 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       const timeLockGovernance = contracts.timelockedGovernance;
       const jobBoard = contracts.jobBoard;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)
-        .catch(handleException);
+        .catch(errorHandler(addToast));
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["EXECUTOR_ROLE"]), account)
         .then(setHasExecutorRole)
-        .catch(handleException);
+        .catch(errorHandler(addToast));
       jobBoard.populateTransaction.approveProject(projId).then(async (tx) => {
         if (tx.data) {
           const txId = await timeLockGovernance.hashOperation(
@@ -142,15 +148,8 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
           }
         }
       });
-      return () => {
-        stale = true;
-        setTimelock("86400");
-        setHasProposerRole(false);
-        setHasExecutorRole(false);
-        setApprovalStatus(ApprovalStatus.NOT_SCHEDULED);
-      };
     }
-  }, [account, contracts, projId, lastTx]);
+  }, [account, contracts, projId, txStatus]);
 
   const buttonText = (status: ApprovalStatus) => {
     switch (status) {
@@ -194,20 +193,3 @@ export const ApproveProject: React.FC<ApproveProjectProps> = ({
     </Form>
   );
 };
-
-function txWait(tx: ContractTransaction) {
-  tx.wait()
-    .then((receipt) => {
-      alert(`${receipt.transactionHash} submitted.`);
-    })
-    .catch((rejected) => {
-      alert(`Rejected: ${rejected}.`);
-    });
-  // TODO wait spinner
-  // TODO UI update w/stale
-}
-
-function handleException(reason: any) {
-  // TODO UI update w/stale
-  alert(`Failed: ${reason.data.message}`);
-}

@@ -4,8 +4,15 @@ import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { getVariantForProgressBar } from "../../../utils/utils";
+import {
+  errorHandler,
+  getVariantForProgressBar,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../utils/utils";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { useToasts } from "react-toast-notifications";
 
 export interface CreateLockProps {
   stakedAmount?: BigNumber;
@@ -16,12 +23,13 @@ const MAX_LOCK_EPOCHS = 208;
 export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
+  const { addToast } = useToasts();
   const contracts = useWorkhardContracts();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
-  const [approved, setApproved] = useState(false);
+  const [allowance, setAllowance] = useState<BigNumber>();
   const [amount, setAmount] = useState<string>();
   const [lockPeriod, setLockPeriod] = useState<number>(1);
-  const [lastTx, setLastTx] = useState<string>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
@@ -41,17 +49,14 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
         return;
       }
       const signer = library.getSigner(account);
-      contracts.veLocker
-        .connect(signer)
-        .createLock(amountInWei, lockPeriod || 0)
-        .then((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              setLastTx(receipt.transactionHash);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {});
+      handleTransaction(
+        contracts.veLocker
+          .connect(signer)
+          .createLock(amountInWei, lockPeriod || 0),
+        setTxStatus,
+        addToast,
+        "Created VotingEscrowLock"
+      );
       return;
     } else {
       alert("Not connected");
@@ -60,19 +65,14 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   const approve = () => {
     if (!!contracts && !!library && !!account) {
       const signer = library.getSigner(account);
-      contracts.vision
-        .connect(signer)
-        .approve(contracts.veLocker.address, constants.MaxUint256)
-        .then((tx) => {
-          tx.wait()
-            .then((_) => {
-              setApproved(true);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {
-          setApproved(false);
-        });
+      handleTransaction(
+        contracts.vision
+          .connect(signer)
+          .approve(contracts.veLocker.address, constants.MaxUint256),
+        setTxStatus,
+        addToast,
+        "Approved VotingEscrowLock contract."
+      );
       return;
     } else {
       alert("Not connected");
@@ -81,19 +81,17 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       const { vision, veLocker } = contracts;
-      vision.balanceOf(account).then(setTokenBalance);
-      vision.allowance(account, veLocker.address).then((allowance) => {
-        if (allowance.gt(parseEther(amount || "0"))) setApproved(true);
-        else setApproved(false);
-      });
-      return () => {
-        stale = true;
-        setTokenBalance(undefined);
-      };
+      vision
+        .balanceOf(account)
+        .then(setTokenBalance)
+        .catch(errorHandler(addToast));
+      vision
+        .allowance(account, veLocker.address)
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
     }
-  }, [account, contracts, lastTx, blockNumber]);
+  }, [account, contracts, txStatus, blockNumber]);
 
   return (
     <Card>
@@ -145,8 +143,11 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
               {lockPeriod} weeks({(lockPeriod / 52).toFixed(1)} years) / 4 years
             </Form.Text>
           </Form.Group>
-          <Button variant="primary" onClick={approved ? createLock : approve}>
-            {approved
+          <Button
+            variant="primary"
+            onClick={isApproved(allowance, amount) ? createLock : approve}
+          >
+            {isApproved(allowance, amount)
               ? `Stake and lock ` + (lockPeriod ? `${lockPeriod} epoch(s)` : ``)
               : "approve"}
           </Button>{" "}

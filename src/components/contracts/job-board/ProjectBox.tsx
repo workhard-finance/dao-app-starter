@@ -7,26 +7,26 @@ import { useWeb3React } from "@web3-react/core";
 import { getAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { Link } from "react-router-dom";
-import { wrapUrl } from "../../../utils/utils";
+import {
+  errorHandler,
+  fetchProjectMetadataFromIPFS,
+  ProjectMetadata,
+  wrapUrl,
+} from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
+import { useToasts } from "react-toast-notifications";
 
 export interface ProjectProps {
   projId: BigNumber;
   active: boolean;
 }
 
-export interface ProjectMetadata {
-  name: string;
-  description: string;
-  image: string;
-  url?: string;
-}
-
 export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
   const { ipfs } = useIPFS();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
 
   const [fund, setFund] = useState<BigNumber>();
   const [budgetOwner, setBudgetOwner] = useState<string>();
@@ -34,31 +34,18 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts && !!ipfs) {
-      let stale = false;
       const { project, jobBoard } = contracts;
-      project.ownerOf(projId).then(setBudgetOwner);
-      project.tokenURI(projId).then(async (uri) => {
-        let result = "";
-        for await (const chunk of ipfs.cat(uri.replace("ipfs://", ""))) {
-          result += chunk;
-        }
-        const metadata = JSON.parse(result) as ProjectMetadata;
-        setMeatadata(metadata);
-      });
-      jobBoard
-        .projectFund(projId)
-        .then((fund: BigNumber) => {
-          if (!stale) setFund(fund);
+      project
+        .ownerOf(projId)
+        .then(setBudgetOwner)
+        .catch(errorHandler(addToast));
+      project
+        .tokenURI(projId)
+        .then(async (uri) => {
+          setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
         })
-        .catch(() => {
-          if (!stale) setFund(undefined);
-        });
-
-      return () => {
-        stale = true;
-        setMeatadata(undefined);
-        setFund(undefined);
-      };
+        .catch(errorHandler(addToast));
+      jobBoard.projectFund(projId).then(setFund).catch(errorHandler(addToast));
     }
   }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
 

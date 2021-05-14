@@ -10,10 +10,18 @@ import {
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, isAddress, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { bigNumToFixed, getVariantForProgressBar } from "../../../utils/utils";
+import {
+  bigNumToFixed,
+  errorHandler,
+  getVariantForProgressBar,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../utils/utils";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
 import { ExtendedAccordionToggle } from "../../bootstrap-extend/ExtendedAccordionToggle";
+import { useToasts } from "react-toast-notifications";
 
 export interface MyLockProps {
   index: number;
@@ -26,22 +34,22 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
   // form
   const [amount, setAmount] = useState<string>();
   const [delegateTo, setDelegateTo] = useState<string>();
   const [lockPeriod, setLockPeriod] = useState<number>();
-  const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
+  const [allowance, setAllowance] = useState<BigNumber>();
   // lock
   const [lockedAmount, setLockedAmount] = useState<BigNumber>();
   const [lockedUntil, setLockedUntil] = useState<BigNumber>();
   const [lockedFrom, setLockedFrom] = useState<BigNumber>();
   const [timestamp, setTimestamp] = useState<number>();
   // lock
-  const [approved, setApproved] = useState(false);
   const [delegatee, setDelegatee] = useState<string>();
   const [currentEpoch, setCurrentEpoch] = useState<BigNumber>();
-  const [lastTx, setLastTx] = useState<string>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   useEffect(() => {
     if (!!account && !!contracts) {
@@ -52,13 +60,14 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
         setLockedFrom(lock.start);
       });
     }
-  }, [contracts, account, lastTx]);
+  }, [contracts, account, txStatus]);
 
   useEffect(() => {
     if (!!library && !!blockNumber) {
       library
         .getBlock(blockNumber)
-        .then((block) => setTimestamp(block.timestamp));
+        .then((block) => setTimestamp(block.timestamp))
+        .catch(errorHandler(addToast, "Failed to fetch timestamp"));
     }
   }, [library, blockNumber]);
 
@@ -100,17 +109,14 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
         return;
       }
       const signer = library.getSigner(account);
-      contracts.veLocker
-        .connect(signer)
-        .increaseAmount(lockId, parseEther(amount))
-        .then((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              setLastTx(receipt.transactionHash);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {});
+      handleTransaction(
+        contracts.veLocker
+          .connect(signer)
+          .increaseAmount(lockId, parseEther(amount)),
+        setTxStatus,
+        addToast,
+        "Successfully increased."
+      );
       return;
     } else {
       alert("Not connected");
@@ -132,17 +138,12 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
         return;
       }
       const signer = library.getSigner(account);
-      contracts.veLocker
-        .connect(signer)
-        .extendLock(lockId, _epochs)
-        .then((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              setLastTx(receipt.transactionHash);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {});
+      handleTransaction(
+        contracts.veLocker.connect(signer).extendLock(lockId, _epochs),
+        setTxStatus,
+        addToast,
+        "Successfully extended."
+      );
       return;
     } else {
       alert("Not connected");
@@ -152,20 +153,14 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const approve = () => {
     if (!!contracts && !!library && !!account) {
       const signer = library.getSigner(account);
-      contracts.vision
-        .connect(signer)
-        .approve(contracts.dividendPool.address, constants.MaxUint256)
-        .then((tx) => {
-          tx.wait()
-            .then((_) => {
-              setTokenAllowance(constants.MaxUint256);
-              setApproved(true);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {
-          setApproved(false);
-        });
+      handleTransaction(
+        contracts.vision
+          .connect(signer)
+          .approve(contracts.dividendPool.address, constants.MaxUint256),
+        setTxStatus,
+        addToast,
+        "Approved DividendPool"
+      );
       return;
     } else {
       alert("Not connected");
@@ -175,18 +170,15 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const delegate = () => {
     if (!!contracts && !!library && !!account && !!delegateTo) {
       const signer = library.getSigner(account);
-      contracts.veLocker
-        .connect(signer)
-        .delegate(lockId, delegateTo)
-        .then((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              setDelegateTo("");
-              setLastTx(receipt.transactionHash);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {});
+      handleTransaction(
+        contracts.veLocker.connect(signer).delegate(lockId, delegateTo),
+        setTxStatus,
+        addToast,
+        "Successfully delegated.",
+        () => {
+          setDelegateTo("");
+        }
+      );
       return;
     } else {
       alert("Not connected");
@@ -195,17 +187,12 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const withdraw = () => {
     if (!!contracts && !!library && !!account) {
       const signer = library.getSigner(account);
-      contracts.veLocker
-        .connect(signer)
-        .withdraw(lockId)
-        .then((tx) => {
-          tx.wait()
-            .then((receipt) => {
-              setLastTx(receipt.transactionHash);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {});
+      handleTransaction(
+        contracts.veLocker.connect(signer).withdraw(lockId),
+        setTxStatus,
+        addToast,
+        "Successfully withdrew."
+      );
       return;
     } else {
       alert("Not connected");
@@ -214,36 +201,22 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
       const { vision, dividendPool } = contracts;
-      vision.balanceOf(account).then(setTokenBalance);
-      dividendPool.getCurrentEpoch().then(setCurrentEpoch);
-      vision.allowance(account, dividendPool.address).then(setTokenAllowance);
-      return () => {
-        stale = true;
-        setTokenBalance(undefined);
-        setCurrentEpoch(undefined);
-      };
+      vision
+        .balanceOf(account)
+        .then(setTokenBalance)
+        .catch(errorHandler(addToast));
+      dividendPool
+        .getCurrentEpoch()
+        .then(setCurrentEpoch)
+        .catch(errorHandler(addToast));
+      vision
+        .allowance(account, dividendPool.address)
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
     }
-  }, [account, contracts, lastTx, blockNumber]);
+  }, [account, contracts, txStatus, blockNumber]);
 
-  useEffect(() => {
-    if (!!account && !!contracts) {
-      let stale = false;
-      contracts.vision
-        .allowance(account, contracts.dividendPool.address)
-        .then((allowance) => {
-          if (!stale) {
-            setTokenAllowance(allowance);
-            if (allowance.gt(amount || 0)) setApproved(true);
-            else setApproved(false);
-          }
-        })
-        .catch(() => {
-          if (!stale) setTokenAllowance(undefined);
-        });
-    }
-  }, [account, contracts, lastTx]);
   return (
     <Card>
       <Card.Header>
@@ -295,8 +268,12 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
               <ConditionalButton
                 whyDisabled="You staked the MAX!"
                 enabledWhen={tokenBalance?.gt(0)}
-                children={approved ? `Increase amount` : "approve"}
-                onClick={approved ? increaseAmount : approve}
+                children={
+                  isApproved(allowance, amount) ? `Increase amount` : "approve"
+                }
+                onClick={
+                  isApproved(allowance, amount) ? increaseAmount : approve
+                }
               />
             </Form.Group>
           </Accordion.Collapse>

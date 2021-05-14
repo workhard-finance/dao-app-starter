@@ -2,11 +2,19 @@ import { Interface, LogDescription, Result } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
 import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { formatEther } from "@ethersproject/units";
+import { formatEther, parseEther } from "@ethersproject/units";
 import { IERC20__factory } from "@workhard/protocol";
 import devDeploy from "@workhard/protocol/deployed.json";
-import { constants, Contract, ContractTransaction, Signer } from "ethers";
+import {
+  constants,
+  Contract,
+  ContractReceipt,
+  ContractTransaction,
+  Signer,
+} from "ethers";
+import IPFS from "ipfs-core/src/components";
 import { Dispatch, SetStateAction } from "react";
+import { AddToast } from "react-toast-notifications";
 import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
@@ -154,27 +162,27 @@ export function approveAndRun(
   signer: Signer,
   erc20: string,
   approve: string,
-  setApproveTx: Dispatch<SetStateAction<ContractTransaction | undefined>>,
-  setApproved: Dispatch<SetStateAction<boolean>>,
+  setApproveTxStatus: Dispatch<SetStateAction<TxStatus | undefined>>,
+  setAllowance: Dispatch<SetStateAction<BigNumber>>,
   run: () => void
 ) {
   IERC20__factory.connect(erc20, signer)
     .approve(approve, constants.MaxUint256)
     .then((tx) => {
-      setApproveTx(tx);
+      setApproveTxStatus(TxStatus.PENDING);
       tx.wait()
         .then((_) => {
-          setApproveTx(undefined);
-          setApproved(true);
+          setApproveTxStatus(TxStatus.CONFIRMED);
+          setAllowance(constants.MaxUint256);
           if (run) run();
         })
         .catch((rejected) => {
-          setApproveTx(undefined);
+          setApproveTxStatus(TxStatus.REVERTED);
           alert(`Rejected with ${rejected}`);
         });
     })
     .catch(() => {
-      setApproved(false);
+      setApproveTxStatus(undefined);
     });
 }
 
@@ -182,4 +190,79 @@ export const permaPinToArweave = async (cid: string): Promise<string> => {
   const res = await fetch(`https://ipfs2arweave.com/permapin/${cid}`);
   const { arweaveId } = await res.json();
   return arweaveId;
+};
+
+export const errorHandler = (
+  addToast: AddToast,
+  msg?: string,
+  fn?: (_err?: Error) => void
+) => (err: Error) => {
+  addToast({
+    vairant: "error",
+    content: msg ? `${msg}: ${err}` : `${err}`,
+  });
+  if (fn) {
+    fn(err);
+  }
+};
+
+export enum TxStatus {
+  PENDING,
+  REVERTED,
+  CONFIRMED,
+}
+export const handleTransaction = (
+  transaction: Promise<ContractTransaction>,
+  setTxStatus: React.Dispatch<React.SetStateAction<TxStatus | undefined>>,
+  addToast: AddToast,
+  msg: string,
+  callback?: (receipt: ContractReceipt) => void
+) => {
+  transaction
+    .then((tx) => {
+      setTxStatus(TxStatus.PENDING);
+      tx.wait()
+        .then((receipt) => {
+          setTxStatus(TxStatus.CONFIRMED);
+          addToast({
+            variant: "success",
+            content: msg,
+          });
+          if (callback) {
+            callback(receipt);
+          }
+        })
+        .catch((err) => {
+          setTxStatus(TxStatus.REVERTED);
+          errorHandler(addToast)(err);
+        });
+    })
+    .catch(errorHandler(addToast, "Cancelled"));
+};
+
+export const isApproved = (allowance?: BigNumber, amount?: BigNumberish) => {
+  if (typeof amount === "string") {
+    return allowance?.gte(parseEther(amount));
+  } else {
+    return allowance?.gte(amount || 0);
+  }
+};
+
+export interface ProjectMetadata {
+  name: string;
+  description: string;
+  image: string;
+  url?: string;
+}
+
+export const fetchProjectMetadataFromIPFS = async (
+  ipfs: IPFS,
+  uri: string
+): Promise<ProjectMetadata> => {
+  let result = "";
+  for await (const chunk of ipfs.cat(uri.replace("ipfs://", ""))) {
+    result += chunk;
+  }
+  const metadata = JSON.parse(result) as ProjectMetadata;
+  return metadata;
 };

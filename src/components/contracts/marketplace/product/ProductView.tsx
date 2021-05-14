@@ -27,7 +27,8 @@ export interface ProductData {
 
 export interface ProductViewProps {
   product: ProductData;
-  onClick?: (amount: number) => void;
+  onAmountChange?: (amount: number) => void;
+  onClick?: () => void;
   buttonText?: string;
   preview?: ProductMetadata;
 }
@@ -35,6 +36,7 @@ export interface ProductViewProps {
 export const ProductView: React.FC<ProductViewProps> = ({
   product,
   onClick,
+  onAmountChange,
   buttonText,
   preview,
 }) => {
@@ -50,6 +52,10 @@ export const ProductView: React.FC<ProductViewProps> = ({
     (100 * 80 * product.profitRate.toNumber()) / 10000
   );
   const _burnRate = 80 - _profitRate;
+
+  useEffect(() => {
+    if (onAmountChange) onAmountChange(amount);
+  }, [amount]);
 
   useEffect(() => {
     if (ipfs) {
@@ -134,11 +140,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
               variant="primary"
               block
               disabled={product.maxSupply.gt(0) && stock.eq(0)}
-              onClick={() => {
-                if (amount && !!onClick) {
-                  onClick(amount);
-                }
-              }}
+              onClick={onClick}
             >
               {product.maxSupply.eq(0) || stock.gt(0)
                 ? buttonText || "Buy"
@@ -155,11 +157,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
               variant="warning"
               block
               disabled={stock.eq(0)}
-              onClick={() => {
-                if (amount && !!onClick) {
-                  onClick(amount);
-                }
-              }}
+              onClick={onClick}
             >
               Go to Manufaturer menu
             </Button>

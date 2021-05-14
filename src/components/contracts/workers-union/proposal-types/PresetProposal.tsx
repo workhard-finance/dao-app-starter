@@ -13,6 +13,12 @@ import { randomBytes } from "ethers/lib/utils";
 import { ConditionalButton } from "../../../ConditionalButton";
 import { Param, Preset, convertType } from "../../../../utils/preset";
 import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
+import {
+  errorHandler,
+  handleTransaction,
+  TxStatus,
+} from "../../../../utils/utils";
+import { useToasts } from "react-toast-notifications";
 
 export const PresetProposal: React.FC<Preset> = ({
   paramArray,
@@ -21,6 +27,7 @@ export const PresetProposal: React.FC<Preset> = ({
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
   const { blockNumber } = useBlockNumber();
   const [timestamp, setTimestamp] = useState<number>(0);
   /** Proposal */
@@ -30,7 +37,7 @@ export const PresetProposal: React.FC<Preset> = ({
   );
   const [startsIn, setStartsIn] = useState<number>();
   const [votingPeriod, setVotingPeriod] = useState<number>();
-  const [lastTx, setLastTx] = useState<ContractTransaction>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   /** arguments **/
   const [args, setArgs] = useState<{ [key: string]: string }>({});
@@ -54,7 +61,6 @@ export const PresetProposal: React.FC<Preset> = ({
 
   useEffect(() => {
     if (!!account && !!contracts && !!library && !!blockNumber) {
-      let stale = false;
       const workersUnion = contracts.workersUnion;
       workersUnion
         .votingRule()
@@ -74,32 +80,20 @@ export const PresetProposal: React.FC<Preset> = ({
           setStartsIn(BigNumber.from(_minimumPending || 0).toNumber());
           setVotingPeriod(BigNumber.from(_minimumVotingPeriod || 0).toNumber());
         })
-        .catch(() => {
-          if (!stale) {
-            setMinimumPending(undefined);
-            setMaximumPending(undefined);
-            setMinimumVotingPeriod(undefined);
-            setMaximumVotingPeriod(undefined);
-            setMinimumVotesForProposal(undefined);
-          }
-        });
+        .catch(errorHandler(addToast));
       library
         .getBlock(blockNumber)
-        .then((block) => setTimestamp(block.timestamp));
+        .then((block) => setTimestamp(block.timestamp))
+        .catch(errorHandler(addToast));
     }
-  }, [account, contracts, lastTx]);
+  }, [account, contracts, txStatus]);
   useEffect(() => {
     if (!!account && !!contracts && !!timestamp) {
-      let stale = false;
       const { workersUnion } = contracts;
       workersUnion
         .getVotesAt(account, timestamp)
-        .then((votes: any) => {
-          setMyVotes(votes);
-        })
-        .catch(() => {
-          if (!stale) setMyVotes(undefined);
-        });
+        .then(setMyVotes)
+        .catch(errorHandler(addToast));
     }
   }, [timestamp]);
   const handleSubmit: FormEventHandler = async (event) => {
@@ -124,20 +118,22 @@ export const PresetProposal: React.FC<Preset> = ({
     if (!startsIn) return alert("Starts In is not set");
     if (!votingPeriod) return alert("Voting Period is not set");
     const signer = library.getSigner(account);
-    contracts.workersUnion
-      .connect(signer)
-      .proposeTx(
-        contract.address,
-        0,
-        data,
-        predecessor,
-        salt,
-        startsIn,
-        votingPeriod
-      )
-      .then((tx: any) => {
-        setLastTx(tx);
-      });
+    handleTransaction(
+      contracts.workersUnion
+        .connect(signer)
+        .proposeTx(
+          contract.address,
+          0,
+          data,
+          predecessor,
+          salt,
+          startsIn,
+          votingPeriod
+        ),
+      setTxStatus,
+      addToast,
+      "Successfully proposed."
+    );
   };
   return (
     <Card>

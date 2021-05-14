@@ -6,8 +6,15 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ERC20Mock__factory } from "@workhard/protocol";
-import { acceptableTokenList } from "../../../utils/utils";
+import {
+  acceptableTokenList,
+  errorHandler,
+  handleTransaction,
+  isApproved,
+  TxStatus,
+} from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
+import { useToasts } from "react-toast-notifications";
 
 export interface AddBudgetProps {
   projId: BigNumberish;
@@ -21,46 +28,28 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
 }) => {
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
+  const { addToast } = useToasts();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [token, setToken] = useState("");
   const [balance, setBalance] = useState<BigNumber>();
   const [amount, setAmount] = useState("0");
-  const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
-  const [approved, setApproved] = useState(false);
+  const [allowance, setAllowance] = useState<BigNumber>();
   const [projectApproved, setProjectApproved] = useState(false);
 
   useEffect(() => {
     if (!!account && !!contracts) {
-      let stale = false;
-      setApproved(false);
       const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
-      erc20
-        .balanceOf(account)
-        .then((bal) => {
-          if (!stale) setBalance(bal);
-        })
-        .catch(() => {
-          if (!stale) setBalance(undefined);
-        });
+      erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
       erc20
         .allowance(account, contracts.jobBoard.address)
-        .then((allowance) => {
-          if (!stale) {
-            setTokenAllowance(allowance);
-            if (allowance.gt(amount || 0)) setApproved(true);
-            else setApproved(false);
-          }
-        })
-        .catch(() => {
-          if (!stale) setTokenAllowance(undefined);
-        });
-      contracts.jobBoard.approvedProjects(projId).then(setProjectApproved);
-      return () => {
-        stale = true;
-        setBalance(undefined);
-        setTokenAllowance(undefined);
-      };
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
+      contracts.jobBoard
+        .approvedProjects(projId)
+        .then(setProjectApproved)
+        .catch(errorHandler(addToast));
     }
-  }, [account, token]);
+  }, [account, token, txStatus]);
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -70,22 +59,16 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    if (!approved) {
+    if (!isApproved(allowance, amount)) {
       const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
-      erc20
-        .connect(signer)
-        .approve(contracts.jobBoard.address, constants.MaxUint256)
-        .then((tx) => {
-          tx.wait()
-            .then((_) => {
-              setTokenAllowance(constants.MaxUint256);
-              setApproved(true);
-            })
-            .catch((rejected) => alert(`Rejected with ${rejected}`));
-        })
-        .catch(() => {
-          setBalance(undefined);
-        });
+      handleTransaction(
+        erc20
+          .connect(signer)
+          .approve(contracts.jobBoard.address, constants.MaxUint256),
+        setTxStatus,
+        addToast,
+        "Approved JobBoard to use $COMMIT"
+      );
       return;
     }
     const jobBoard = contracts?.jobBoard;
@@ -108,22 +91,12 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           .addAndExecuteBudget(projId, token, amountInWei, "0x")
       : jobBoard.connect(signer).addBudget(projId, token, amountInWei);
 
-    txPromise
-      .then((tx) => {
-        tx.wait()
-          .then((receipt) => {
-            alert(`${receipt.transactionHash} submitted.`);
-          })
-          .catch((rejected) => {
-            alert(`Rejected: ${rejected}.`);
-          });
-        // TODO wait spinner
-        // TODO UI update w/stale
-      })
-      .catch((reason) => {
-        // TODO UI update w/stale
-        alert(`Failed: ${reason}`);
-      });
+    handleTransaction(
+      txPromise,
+      setTxStatus,
+      addToast,
+      "Successfully scheduled transaction."
+    );
   };
   return (
     <Form onSubmit={handleSubmit}>
@@ -158,7 +131,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only the project owner can call this function.`}
         children={
-          approved
+          !isApproved(allowance, amount)
             ? projectApproved
               ? "Add and execute"
               : "Add"
