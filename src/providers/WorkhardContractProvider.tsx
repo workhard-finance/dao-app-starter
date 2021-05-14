@@ -86,8 +86,9 @@ export interface WorkhardContracts {
   marketplace: Marketplace;
 }
 
-export const WorkhardContractCtx =
-  React.createContext<WorkhardContracts | undefined>(undefined);
+export const WorkhardContractCtx = React.createContext<
+  WorkhardContracts | undefined
+>(undefined);
 
 export function useWorkhardContracts() {
   const contracts = useContext(WorkhardContractCtx);

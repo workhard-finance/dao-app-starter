@@ -17,33 +17,47 @@ import { BlockNumberProvider } from "./providers/BlockNumberProvider";
 import { Manufacture } from "./pages/nfts/tabs/Manufacture";
 import { ProductPage } from "./pages/nfts/tabs/ProductPage";
 import { IPFSProvider } from "./providers/IPFSProvider";
+import { ToastProvider } from "react-toast-notifications";
+import DefaultToast from "./components/Toast";
 
 function App() {
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
-      <IPFSProvider>
-        <BlockNumberProvider>
-          <WorkhardContractsProvider>
-            {/* <WorkhardLoggedDataProvider> */}
-            <WorkhardThemeProvider theme={themes.light}>
-              <Router>
-                <Switch>
-                  <Route path="/work" children={<Work />} />
-                  <Route path="/mine" children={<Mine />} />
-                  <Route path="/gov" children={<Gov />} />
-                  <Route path="/store" children={<Store />} />
-                  <Route path="/about" children={<Docs />} />
-                  <Route path="/proj/:id" children={<Project />} />
-                  <Route path="/product/:address" children={<ProductPage />} />
-                  <Route path="/manufacturer/new" children={<Manufacture />} />
-                  <Route path="/" children={<Home />} />
-                </Switch>
-              </Router>
-            </WorkhardThemeProvider>
-            {/* </WorkhardLoggedDataProvider> */}
-          </WorkhardContractsProvider>
-        </BlockNumberProvider>
-      </IPFSProvider>
+      <ToastProvider
+        components={{ Toast: DefaultToast }}
+        autoDismiss={true}
+        autoDismissTimeout={10000}
+      >
+        <IPFSProvider>
+          <BlockNumberProvider>
+            <WorkhardContractsProvider>
+              {/* <WorkhardLoggedDataProvider> */}
+              <WorkhardThemeProvider theme={themes.light}>
+                <Router>
+                  <Switch>
+                    <Route path="/work" children={<Work />} />
+                    <Route path="/mine" children={<Mine />} />
+                    <Route path="/gov" children={<Gov />} />
+                    <Route path="/store" children={<Store />} />
+                    <Route path="/about" children={<Docs />} />
+                    <Route path="/proj/:id" children={<Project />} />
+                    <Route
+                      path="/product/:address"
+                      children={<ProductPage />}
+                    />
+                    <Route
+                      path="/manufacturer/new"
+                      children={<Manufacture />}
+                    />
+                    <Route path="/" children={<Home />} />
+                  </Switch>
+                </Router>
+              </WorkhardThemeProvider>
+              {/* </WorkhardLoggedDataProvider> */}
+            </WorkhardContractsProvider>
+          </BlockNumberProvider>
+        </IPFSProvider>
+      </ToastProvider>
     </Web3ReactProvider>
   );
 }
