@@ -1,11 +1,11 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BigNumber, BigNumberish, constants } from "ethers";
 import { Form } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
-import { ERC20Mock__factory } from "@workhard/protocol";
+import { IERC20__factory } from "@workhard/protocol";
 import {
   acceptableTokenList,
   errorHandler,
@@ -26,19 +26,30 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   projId,
   budgetOwner,
 }) => {
-  const { account, library } = useWeb3React();
+  const { account, chainId, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
-  const [token, setToken] = useState("");
+  const [acceptableTokens, setAcceptableTokens] = useState<
+    { symbol: string; address: string }[]
+  >();
+  const [token, setToken] = useState<string>();
   const [balance, setBalance] = useState<BigNumber>();
   const [amount, setAmount] = useState("0");
   const [allowance, setAllowance] = useState<BigNumber>();
   const [projectApproved, setProjectApproved] = useState(false);
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
+    const list = acceptableTokenList(chainId);
+    setAcceptableTokens(list);
+    if (!token && list[0]) {
+      setToken(list[0].address);
+    }
+  }, [chainId]);
+
+  useEffect(() => {
+    if (!!account && !!contracts && !!token) {
+      const erc20 = IERC20__factory.connect(token, library);
       erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
       erc20
         .allowance(account, contracts.jobBoard.address)
@@ -51,16 +62,17 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
     }
   }, [account, token, txStatus]);
 
-  const handleSubmit: FormEventHandler = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const addBudget = () => {
     if (!account || !contracts) {
       alert("Not connected");
+      return;
+    } else if (!token) {
+      alert("Token is not selected");
       return;
     }
     const signer = library.getSigner(account);
     if (!isApproved(allowance, amount)) {
-      const erc20 = ERC20Mock__factory.connect(token, library); // todo use ERC20__factory instead
+      const erc20 = IERC20__factory.connect(token, library); // todo use ERC20__factory instead
       handleTransaction(
         erc20
           .connect(signer)
@@ -99,7 +111,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
     );
   };
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form>
       <Form.Group>
         <Form.Label>Token</Form.Label>
         <Form.Control
@@ -109,7 +121,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           value={token}
           onChange={({ target: { value } }) => setToken(value)}
         >
-          {acceptableTokenList.map((t) => (
+          {acceptableTokens?.map((t) => (
             <option value={t.address}>{`${t.symbol}: ${t.address}`}</option>
           ))}
         </Form.Control>
@@ -127,11 +139,11 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       </Form.Group>
       <ConditionalButton
         variant="primary"
-        type="submit"
         enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only the project owner can call this function.`}
+        onClick={addBudget}
         children={
-          !isApproved(allowance, amount)
+          isApproved(allowance, amount)
             ? projectApproved
               ? "Add and execute"
               : "Add"

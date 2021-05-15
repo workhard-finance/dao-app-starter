@@ -4,7 +4,8 @@ import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther, parseEther } from "@ethersproject/units";
 import { IERC20__factory } from "@workhard/protocol";
-import devDeploy from "@workhard/protocol/deployed.json";
+import deployed from "@workhard/protocol/deployed.json";
+import { getNetworkName, MyNetwork } from "@workhard/protocol/dist/deployed";
 import {
   constants,
   Contract,
@@ -53,19 +54,26 @@ export const wrapUrl = (text: string) => {
   return wrapped;
 };
 
-export const acceptableTokenList = [
-  {
-    symbol: "DAI",
-    address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-  },
-  // {
-  //   symbol: "BASECURRENCY-TEST",
-  //   address: devDeploy.localhost.BaseCurrency,
-  // },
-];
+export const acceptableTokenList = (chainId?: number) => {
+  if (!chainId) return [];
+  const contracts =
+    process.env.NODE_ENV === "development"
+      ? require("../deployed.dev.json")
+      : deployed;
+  return [
+    {
+      symbol: "Base Currency",
+      address: contracts[getNetworkName(chainId)].BaseCurrency as string,
+    },
+  ];
+};
 
-export const getTokenSymbol = (address: string): string | undefined => {
-  const token = acceptableTokenList.find(
+export const getTokenSymbol = (
+  address: string,
+  chainId?: number
+): string | undefined => {
+  if (!chainId) return undefined;
+  const token = acceptableTokenList(chainId).find(
     (a) => getAddress(a.address) === getAddress(address)
   );
   if (token) {

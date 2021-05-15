@@ -1,6 +1,6 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, BigNumberish, constants } from "ethers";
-import { Card, Form } from "react-bootstrap";
+import React, { useState } from "react";
+import { BigNumber, BigNumberish } from "ethers";
+import { Card } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { formatEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -29,11 +29,10 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
   amount,
   transferred,
 }) => {
-  const { account, library } = useWeb3React();
-  const [executed, setExecuted] = useState<boolean>();
+  const { account, chainId, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   const { addToast } = useToasts();
-  const [txStatus, setTxStatus] = useState<TxStatus>();
+  const [_, setTxStatus] = useState<TxStatus>();
 
   const executeBudget = () => {
     if (!account || !contracts) {
@@ -55,17 +54,17 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
       <Card.Header as="h5"># {budgetIndex}</Card.Header>
       <Card.Body>
         <Card.Text>
-          Currency: {getTokenSymbol(currency)}({currency})
+          Currency: {getTokenSymbol(currency, chainId)}({currency})
         </Card.Text>
         <Card.Text>Amount: {formatEther(amount)}</Card.Text>
         <Card.Text>Executed: {transferred ? "True" : "False"}</Card.Text>
-        {!transferred && !executed && (
+        {!transferred && (
           <ConditionalButton
             variant="primary"
             type="submit"
-            enabledWhen={account === budgetOwner}
+            enabledWhen={account === budgetOwner && !transferred}
             whyDisabled="Only budget owner can call this function"
-            children="Execute"
+            children={transferred ? "Already executed" : "Execute"}
             onClick={executeBudget}
           />
         )}

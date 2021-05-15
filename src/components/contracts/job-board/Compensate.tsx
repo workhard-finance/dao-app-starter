@@ -12,6 +12,7 @@ import {
   TxStatus,
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
 export interface CompensateProps {
   projId: BigNumberish;
@@ -25,6 +26,7 @@ export const Compensate: React.FC<CompensateProps> = ({
   fund,
 }) => {
   const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const { addToast } = useToasts();
   const [payTo, setPayTo] = useState("");
@@ -66,7 +68,7 @@ export const Compensate: React.FC<CompensateProps> = ({
         .then(setBalance)
         .catch(errorHandler(addToast));
     }
-  }, [txStatus]);
+  }, [txStatus, blockNumber]);
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -96,6 +98,7 @@ export const Compensate: React.FC<CompensateProps> = ({
         type="submit"
         enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only budget owner can call this function.`}
+        children={`Compensate`}
       />
     </Form>
   );

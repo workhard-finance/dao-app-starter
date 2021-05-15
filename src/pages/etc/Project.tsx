@@ -7,27 +7,31 @@ import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
-import { getAddress } from "ethers/lib/utils";
 import { Compensate } from "../../components/contracts/job-board/Compensate";
 import { AddBudget } from "../../components/contracts/job-board/AddBudget";
 import { useHistory } from "react-router-dom";
-import { wrapUrl } from "../../utils/utils";
-import { ApproveProject } from "../../components/contracts/job-board/ApproveProject";
-import { CloseProject } from "../../components/contracts/job-board/CloseProject";
+import {
+  errorHandler,
+  fetchProjectMetadataFromIPFS,
+  ProjectMetadata,
+  wrapUrl,
+} from "../../utils/utils";
 import { ExecuteBudget } from "../../components/contracts/job-board/ExecuteBudget";
+import { useIPFS } from "../../providers/IPFSProvider";
+import { useToasts } from "react-toast-notifications";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
   const history = useHistory();
   const contracts = useWorkhardContracts();
+  const { ipfs } = useIPFS();
+  const { addToast } = useToasts();
 
   const { id } = useParams<{ id: string }>();
-  const [description, setDescription] = useState("");
-  const [title, setTitle] = useState("");
-  const [fund, setFund] = useState("");
+  const [metadata, setMeatadata] = useState<ProjectMetadata>();
+  const [fund, setFund] = useState<BigNumber>();
   const [budgetOwner, setBudgetOwner] = useState("");
-  const [admin, toggleAdmin] = useState(false);
-  const [exist, setExist] = useState<boolean>();
+  const [exist, setExist] = useState<boolean>(true);
   const [budgets, setBudgets] = useState<
     Array<{
       currency: string;
@@ -35,62 +39,37 @@ export const Project: React.FC = () => {
       transferred: boolean;
     }>
   >(new Array(0));
+  useEffect(() => {
+    if (!!contracts && !!ipfs) {
+      const { project, jobBoard } = contracts;
+      project
+        .ownerOf(id)
+        .then(setBudgetOwner)
+        .catch(errorHandler(addToast, undefined, () => setExist(false)));
+      project
+        .tokenURI(id)
+        .then(async (uri) => {
+          setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
+        })
+        .catch(errorHandler(addToast));
+      jobBoard.projectFund(id).then(setFund).catch(errorHandler(addToast));
+    }
+  }, [contracts, ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!contracts) {
-      let stale = false;
-      const { project, stableReserve, jobBoard } = contracts;
-      project
-        .titles(id)
-        .then((t: string) => {
-          if (!stale) setTitle(t);
-        })
-        .catch(() => {
-          if (!stale) setTitle("Unknown");
-        });
-      project
-        .jobDescription(id)
-        .then((desc: string) => {
-          if (!stale) setDescription(desc);
-        })
-        .catch(() => {
-          if (!stale) setDescription("Unknown");
-        });
-      project
-        .ownerOf(id)
-        .then((owner: string) => {
-          if (!stale) {
-            setBudgetOwner(getAddress(owner));
-            setExist(true);
-          }
-        })
-        .catch(() => {
-          if (!stale) setExist(false);
-        });
-      stableReserve
-        .projectFund(id)
-        .then((fund: BigNumber) => {
-          if (!stale) setFund(fund.toString());
-        })
-        .catch(() => {
-          if (!stale) setFund("Unknown");
-        });
+      const { jobBoard } = contracts;
       jobBoard.getTotalBudgets(id).then((len: BigNumber) => {
         Promise.all(
           new Array(len.toNumber())
             .fill(0)
             .map((_, i) => jobBoard.projectBudgets(id, i))
-        ).then((_budgets) => {
-          setBudgets(_budgets);
-        });
+        )
+          .then((_budgets) => {
+            setBudgets(_budgets);
+          })
+          .catch(errorHandler(addToast));
       });
-
-      return () => {
-        stale = true;
-        setDescription("Disconnected");
-        setTitle("Disconnected");
-        setFund("Disconnected");
-      };
     }
   }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
 
@@ -100,9 +79,11 @@ export const Project: React.FC = () => {
       <Card>
         <Card.Body>
           <Card.Subtitle>Name</Card.Subtitle>
-          <Card.Text>{title}</Card.Text>
+          <Card.Text>{metadata?.name}</Card.Text>
           <Card.Subtitle>Description</Card.Subtitle>
-          <Card.Text>{ReactHtmlParser(wrapUrl(description))}</Card.Text>
+          <Card.Text>
+            {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
+          </Card.Text>
         </Card.Body>
       </Card>
       <br />
@@ -116,19 +97,24 @@ export const Project: React.FC = () => {
               <Nav.Item>
                 <Nav.Link eventKey="budget">Budget</Nav.Link>
               </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="etc">Etc</Nav.Link>
-              </Nav.Item>
             </Nav>
           </Col>
           <Col sm={9}>
             <Tab.Content>
               <Tab.Pane eventKey="pay">
-                <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} />
+                <Compensate
+                  projId={id}
+                  fund={fund || 0}
+                  budgetOwner={budgetOwner}
+                />
               </Tab.Pane>
               <Tab.Pane eventKey="budget">
                 <h2>Add budget</h2>
-                <AddBudget projId={id} fund={fund} budgetOwner={budgetOwner} />
+                <AddBudget
+                  projId={id}
+                  fund={fund || 0}
+                  budgetOwner={budgetOwner}
+                />
                 <hr />
                 <h2>History</h2>
                 {budgets
@@ -148,17 +134,6 @@ export const Project: React.FC = () => {
                     }
                   })
                   .reverse()}
-              </Tab.Pane>
-              <Tab.Pane eventKey="etc">
-                <>
-                  <ApproveProject
-                    projId={id}
-                    fund={fund}
-                    budgetOwner={budgetOwner}
-                  />
-                  <hr />
-                  <CloseProject projId={id} budgetOwner={budgetOwner} />
-                </>
               </Tab.Pane>
             </Tab.Content>
           </Col>

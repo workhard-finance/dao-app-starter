@@ -11,12 +11,15 @@ import {
   getPriceFromCoingecko,
   getTokenDetailsFromCoingecko,
 } from "../../../utils/coingecko";
+import { useToasts } from "react-toast-notifications";
+import { errorHandler } from "../../../utils/utils";
 
 export interface ClaimProps {}
 
 export const Claim: React.FC<ClaimProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
+  const { addToast } = useToasts();
   const contracts = useWorkhardContracts();
 
   const [tokens, setTokens] = useState<string[]>([]);
@@ -31,7 +34,10 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
 
   useEffect(() => {
     if (!!contracts && !!account) {
-      contracts.dividendPool.distributedTokens().then(setTokens);
+      contracts.dividendPool
+        .distributedTokens()
+        .then(setTokens)
+        .catch(errorHandler(addToast));
     }
   }, [account, contracts, lastTx]);
 
