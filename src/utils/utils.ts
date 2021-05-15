@@ -197,9 +197,15 @@ export const errorHandler = (
   msg?: string,
   fn?: (_err?: Error) => void
 ) => (err: Error) => {
+  let errMsg: string;
+  if ((err as any).data?.message) {
+    errMsg = (err as any).data?.message;
+  } else {
+    errMsg = err.message;
+  }
   addToast({
-    vairant: "error",
-    content: msg ? `${msg}: ${err}` : `${err}`,
+    variant: "danger",
+    content: msg ? `${msg}: ${errMsg}` : `${errMsg}`,
   });
   if (fn) {
     fn(err);
@@ -207,6 +213,7 @@ export const errorHandler = (
 };
 
 export enum TxStatus {
+  NOT_EXIST,
   PENDING,
   REVERTED,
   CONFIRMED,
@@ -240,11 +247,15 @@ export const handleTransaction = (
     .catch(errorHandler(addToast, "Cancelled"));
 };
 
-export const isApproved = (allowance?: BigNumber, amount?: BigNumberish) => {
+export const isApproved = (
+  allowance?: BigNumber,
+  amount?: BigNumberish
+): boolean => {
   if (typeof amount === "string") {
-    return allowance?.gte(parseEther(amount));
+    if (amount === "") return false;
+    return allowance?.gte(parseEther(amount)) || false;
   } else {
-    return allowance?.gte(amount || 0);
+    return allowance?.gte(amount || 0) || false;
   }
 };
 

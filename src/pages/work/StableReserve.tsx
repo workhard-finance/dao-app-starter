@@ -5,15 +5,15 @@ import { RedeemCommit } from "../../components/contracts/stable-reserve/RedeemCo
 
 const StableReserve: React.FC = () => {
   return (
-    <Tab.Container defaultActiveKey="redeem">
+    <Tab.Container defaultActiveKey="buy">
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
-              <Nav.Link eventKey="redeem">Redeem</Nav.Link>
+              <Nav.Link eventKey="buy">Buy $COMMIT</Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link eventKey="buy">Buy $COMMIT</Nav.Link>
+              <Nav.Link eventKey="redeem">Redeem</Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="faq">FAQ</Nav.Link>

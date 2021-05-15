@@ -1,5 +1,3 @@
-import { useWeb3React } from "@web3-react/core";
-import { providers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { create, IPFS } from "ipfs-core";
@@ -18,7 +16,6 @@ export const IPFSProvider = ({ children }: { children: any }) => {
 
   useEffect(() => {
     if (!ipfs) {
-      console.log("ipfs create");
       create()
         .then((ipfs) => {
           setIPFS(ipfs);

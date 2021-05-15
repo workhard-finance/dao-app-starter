@@ -19,8 +19,6 @@ const Vote: React.FC = () => {
   const contracts = useWorkhardContracts();
   const [proposedTxs, setProposedTxs] = useState<ProposedTx[]>([]);
   const [myVotes, setMyVotes] = useState<BigNumber>();
-  // const [page, setPage] = useState(0);
-  // const [projIdToVote, setProjIdToVote] = useState();
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
   const [timestamp, setTimestamp] = useState<number>(0);
   useEffect(() => {
@@ -92,15 +90,11 @@ const Vote: React.FC = () => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane
-              eventKey="voting"
-              title="Voting"
-              style={{ marginTop: "1rem" }}
-            >
+            <Tab.Pane eventKey="voting" style={{ marginTop: "1rem" }}>
               {proposedTxs
                 .filter(
                   (proposedTx) =>
-                    proposedTx.start.lt(timestamp) &&
+                    proposedTx.start.lte(timestamp) &&
                     proposedTx.end.gt(timestamp)
                 )
                 .map((proposedTx, i) => (
@@ -114,11 +108,7 @@ const Vote: React.FC = () => {
                   </div>
                 ))}
             </Tab.Pane>
-            <Tab.Pane
-              eventKey="ended"
-              title="Ended"
-              style={{ marginTop: "1rem" }}
-            >
+            <Tab.Pane eventKey="ended" style={{ marginTop: "1rem" }}>
               {proposedTxs
                 .filter((proposedTx) => proposedTx.end.lt(timestamp))
                 .map((proposedTx, i) => (
@@ -132,11 +122,7 @@ const Vote: React.FC = () => {
                   </div>
                 ))}
             </Tab.Pane>
-            <Tab.Pane
-              eventKey="pending"
-              title="Pending"
-              style={{ marginTop: "1rem" }}
-            >
+            <Tab.Pane eventKey="pending" style={{ marginTop: "1rem" }}>
               {proposedTxs
                 .filter((proposedTx) => proposedTx.start.gt(timestamp))
                 .map((proposedTx, i) => (

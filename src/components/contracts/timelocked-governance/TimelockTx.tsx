@@ -255,10 +255,8 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     }
   };
   // TODO: decode data to method name & args
-  const remaining =
-    timestamp +
-    (scheduledTx?.delay.toNumber() || 0) -
-    Math.floor(new Date().getTime() / 1000);
+  const delay = parseInt(scheduledTx?.delay.toString() || "0");
+  const remaining = timestamp + delay - Math.floor(new Date().getTime() / 1000);
   return (
     <Card>
       <Card.Header>

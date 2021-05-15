@@ -87,9 +87,7 @@ export const ProposeTx: React.FC<ProposeTxProps> = ({}) => {
       const { workersUnion } = contracts;
       workersUnion
         .getVotesAt(account, timestamp)
-        .then((votes: any) => {
-          setMyVotes(votes);
-        })
+        .then(setMyVotes)
         .catch(errorHandler(addToast));
     }
   }, [timestamp]);

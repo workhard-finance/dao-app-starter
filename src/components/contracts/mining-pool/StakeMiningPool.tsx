@@ -63,14 +63,12 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
   const [tokenPrice, setTokenPrice] = useState<number>();
   const [tokenDetails, setTokenDetails] = useState<CoingeckoTokenDetails>();
   const [weight, setWeight] = useState<BigNumber>();
-  const [tokenAllowance, setTokenAllowance] = useState<BigNumber>();
   const [stakeOrWithdraw, toggleStakeOrWithdraw] = useState<boolean>(true);
   const [stakePercent, setStakePercent] = useState<number>();
   const [allowance, setAllowance] = useState<BigNumber>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [amount, setAmount] = useState<string>();
   const [mined, setMined] = useState<BigNumber>();
-  const [lastTx, setLastTx] = useState<string>();
   const [apy, setAPY] = useState<number>();
 
   const getMaxAmount = () =>
@@ -113,10 +111,10 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       pool.mined(account).then(setMined).catch(errorHandler(addToast));
       IERC20__factory.connect(tokenAddress, library)
         .allowance(account, poolAddress)
-        .then(setTokenAllowance)
+        .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, tokenAddress, lastTx, blockNumber]);
+  }, [account, contracts, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (stakedAmount && tokenBalance) {
@@ -124,7 +122,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
       const percent = sum.eq(0) ? 0 : stakedAmount.mul(100).div(sum).toNumber();
       setStakePercent(percent);
     }
-  }, [stakedAmount, tokenBalance, lastTx]);
+  }, [stakedAmount, tokenBalance, txStatus]);
 
   useEffect(() => {
     if (weight && tokenPrice && totalStake) {
@@ -138,7 +136,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
     } else {
       setAPY(0);
     }
-  }, [weight, tokenPrice, totalStake, lastTx]);
+  }, [weight, tokenPrice, totalStake, txStatus]);
 
   const approve = () => {
     if (!account || !contracts || !tokenAddress) {
@@ -196,10 +194,10 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
     const stakeMining = StakeMining__factory.connect(poolAddress, library);
     // const stakingToken =
     const amountToWithdrawInWei = parseEther(amount || "0");
-    if (!tokenBalance) {
+    if (!stakedAmount) {
       alert("Fetching balance..");
       return;
-    } else if (tokenBalance && amountToWithdrawInWei.gt(tokenBalance)) {
+    } else if (stakedAmount && amountToWithdrawInWei.gt(stakedAmount)) {
       alert("Not enough amount.");
       return;
     }
@@ -233,6 +231,10 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
   const exit = () => {
     if (!account || !library) {
       alert("Not connected");
+      return;
+    }
+    if (!mined || mined.eq(0)) {
+      alert("No $VISION mined");
       return;
     }
     const signer = library.getSigner(account);
@@ -348,7 +350,7 @@ export const StakeMiningPool: React.FC<StakeMiningPoolProps> = ({
             {collapsed ? "▼ view more" : "▲ close details"}
           </Button>
         )}
-        {(!collapsible || collapsed) && collapsedDetails()}
+        {(!collapsible || !collapsed) && collapsedDetails()}
       </Card.Body>
     </Card>
   );

@@ -44,7 +44,6 @@ const Mine = () => {
 
   useEffect(() => {
     if (!!contracts && !!poolLength) {
-      console.log("pool length", poolLength);
       let stale = false;
       const { visionEmitter } = contracts;
       Promise.all(
@@ -172,7 +171,7 @@ const Mine = () => {
                   <br />
                   <StakeMiningPool
                     poolIdx={idx}
-                    title={"Liquidity Mining"}
+                    title={"Stake"}
                     poolAddress={addr}
                     tokenEmission={emission || BigNumber.from(0)}
                     visionPrice={visionPrice || 0}

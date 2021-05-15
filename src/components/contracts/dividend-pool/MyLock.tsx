@@ -266,8 +266,10 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
                 lock.
               </Form.Text>
               <ConditionalButton
-                whyDisabled="You staked the MAX!"
-                enabledWhen={tokenBalance?.gt(0)}
+                whyDisabled={
+                  getLockedPeriod() === 0 ? "Expired" : "You staked the MAX!"
+                }
+                enabledWhen={tokenBalance?.gt(0) && getLockedPeriod() !== 0}
                 children={
                   isApproved(allowance, amount) ? `Increase amount` : "approve"
                 }
@@ -302,8 +304,12 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
                 {extendablePeriod() / (86400 * 7)} weeks
               </Form.Text>
               <ConditionalButton
-                whyDisabled="You locked the MAX!"
-                enabledWhen={extendablePeriod() !== 0}
+                whyDisabled={
+                  extendablePeriod() === 0 ? "You locked the MAX!" : "Expired"
+                }
+                enabledWhen={
+                  extendablePeriod() !== 0 && getLockedPeriod() !== 0
+                }
                 children="Extend lock"
                 onClick={() => extendLock(lockPeriod)}
               />
@@ -343,8 +349,10 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
           <br />
           <Accordion.Collapse eventKey="4">
             <ConditionalButton
-              whyDisabled="Still locked"
-              enabledWhen={getLockedPeriod() === 0}
+              whyDisabled={
+                getLockedPeriod() === 0 ? "Already withdrawn" : "Still locked"
+              }
+              enabledWhen={getLockedPeriod() === 0 && lockedAmount?.gt(0)}
               children="Withdraw"
               onClick={withdraw}
             />

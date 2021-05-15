@@ -58,7 +58,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   tx,
   status,
 }) => {
-  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
+  const { account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const { addToast } = useToasts();
@@ -73,11 +73,9 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       return;
     }
     const { workersUnion, timelockedGovernance } = contracts;
-    workersUnion.callStatic.proposals(tx.txHash).then(setProposal);
-    timelockedGovernance.callStatic
-      .getTimestamp(tx.txHash)
-      .then(setScheduledTimestamp);
-  }, [contracts]);
+    workersUnion.proposals(tx.txHash).then(setProposal);
+    timelockedGovernance.getTimestamp(tx.txHash).then(setScheduledTimestamp);
+  }, [contracts, blockNumber]);
 
   useEffect(() => {
     if (!contracts || !library || !blockNumber || !scheduledTimestamp) {
@@ -96,7 +94,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         }
       });
     }
-  }, [contracts, blockNumber]);
+  }, [account, library, contracts, blockNumber, txStatus]);
 
   useEffect(() => {
     if (!contracts || !proposal) {

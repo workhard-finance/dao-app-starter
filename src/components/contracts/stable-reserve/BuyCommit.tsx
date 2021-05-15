@@ -143,8 +143,8 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
               isApproved(allowance, spendingDai) ? buyCommit : approveAndBuy
             }
             enabledWhen={
-              isApproved(allowance, spendingDai) &&
-              buyTxStatus !== TxStatus.PENDING
+              buyTxStatus !== TxStatus.PENDING &&
+              approveTxStatus !== TxStatus.PENDING
             }
             whyDisabled={
               isApproved(allowance, spendingDai)

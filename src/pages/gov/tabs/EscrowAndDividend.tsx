@@ -65,9 +65,14 @@ export const EscrowAndDividend: React.FC = () => {
               <hr />
               <h3>Your Voting Escrows</h3>
               {lockIds &&
-                lockIds.map((lockId, index) => (
-                  <MyLock index={index} lockId={lockId} />
-                ))}
+                lockIds
+                  .map((lockId, index) => (
+                    <>
+                      <MyLock index={index} lockId={lockId} />
+                      <br />
+                    </>
+                  ))
+                  .reverse()}
             </Tab.Pane>
             <Tab.Pane eventKey="claim">
               <Claim />

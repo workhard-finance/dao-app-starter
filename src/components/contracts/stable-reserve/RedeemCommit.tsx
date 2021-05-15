@@ -141,8 +141,8 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
               isApproved(allowance, redeemAmount) ? redeem : approveAndRedeem
             }
             enabledWhen={
-              isApproved(allowance, redeemAmount) === undefined &&
-              redeemTxStatus !== TxStatus.PENDING
+              redeemTxStatus !== TxStatus.PENDING &&
+              approveTxStatus !== TxStatus.PENDING
             }
             whyDisabled={
               isApproved(allowance, redeemAmount)

@@ -231,7 +231,9 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
         />
         <Card.Text>
           Burned: {formatEther(burnedAmount || 0)} / Balance:{" "}
-          {formatEther(tokenBalance || 0)}
+          {formatEther(
+            BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
+          )}
         </Card.Text>
         <Button
           variant="primary"
@@ -271,7 +273,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
             {collapsed ? "▼ view more" : "▲ close details"}
           </Button>
         )}
-        {(!collapsible || collapsed) && collapsedDetails()}
+        {(!collapsible || !collapsed) && collapsedDetails()}
       </Card.Body>
     </Card>
   );

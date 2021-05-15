@@ -68,7 +68,6 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
     const { data } = await contract.populateTransaction[methodName](...params);
     if (!data) return alert("data is not set");
     const signer = library.getSigner(account);
-    console.log("mypredecessor", predecessor);
     handleTransaction(
       contracts.timelockedGovernance
         .connect(signer)

@@ -113,7 +113,7 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
                   <Col>
                     <Form.Check
                       label={`$${details[i]?.symbol || "?"}: ${formatEther(
-                        amounts[i]
+                        amounts[i] || "0"
                       )} ($${valueInUSD(amounts[i], prices[i])})`}
                       type="checkbox"
                       onChange={(_) => {

@@ -26,7 +26,7 @@ function App() {
       <ToastProvider
         components={{ Toast: DefaultToast }}
         autoDismiss={true}
-        autoDismissTimeout={10000}
+        autoDismissTimeout={60000}
       >
         <IPFSProvider>
           <BlockNumberProvider>

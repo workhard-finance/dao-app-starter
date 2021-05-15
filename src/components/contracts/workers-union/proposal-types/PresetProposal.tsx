@@ -95,7 +95,7 @@ export const PresetProposal: React.FC<Preset> = ({
         .then(setMyVotes)
         .catch(errorHandler(addToast));
     }
-  }, [timestamp]);
+  }, [blockNumber, timestamp]);
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();

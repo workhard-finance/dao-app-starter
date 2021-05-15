@@ -68,10 +68,8 @@ export const PostAJobBox: React.FC = () => {
     setUploading(true);
     uploadImageToIPFS(file)
       .then((imageURI) => {
-        console.log("hi");
         uploadMetadataToIPFS(title, description, imageURI, url)
           .then((uri) => {
-            console.log("hello");
             setUploaded(true);
             setUploading(undefined);
             setURI(uri);
