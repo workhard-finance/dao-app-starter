@@ -251,11 +251,13 @@ export const isApproved = (
   allowance?: BigNumber,
   amount?: BigNumberish
 ): boolean => {
-  if (typeof amount === "string") {
-    if (amount === "") return false;
-    return allowance?.gte(parseEther(amount)) || false;
+  if (!amount) {
+    return true;
+  } else if (typeof amount === "string") {
+    if (amount === "") return true;
+    return (allowance || constants.Zero).gte(parseEther(amount));
   } else {
-    return allowance?.gte(amount || 0) || false;
+    return (allowance || constants.Zero).gte(amount || 0);
   }
 };
 

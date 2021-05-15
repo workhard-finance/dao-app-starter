@@ -20,6 +20,7 @@ export interface BuyCommitProps {}
 
 export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   const { account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
   const contracts = useWorkhardContracts();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
@@ -91,7 +92,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, approveTxStatus]);
+  }, [account, contracts, approveTxStatus, blockNumber]);
 
   return (
     <Card>
