@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber } from "ethers";
 import { formatEther } from "ethers/lib/utils";
 import ReactHtmlParser from "react-html-parser";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Row, Col, Image } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { getAddress } from "@ethersproject/address";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { Link } from "react-router-dom";
 import {
   errorHandler,
   fetchProjectMetadataFromIPFS,
   ProjectMetadata,
+  uriToURL,
   wrapUrl,
 } from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
@@ -53,34 +53,49 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
     <Card>
       <Card.Header as="h5">{metadata?.name}</Card.Header>
       <Card.Body>
-        <Card.Title>Project ID</Card.Title>
-        <Card.Text>{projId.toHexString()}</Card.Text>
-        <Card.Title>Fund</Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>
-          {formatEther(fund || 0)} $COMMIT {/*TODO compute in USD ($163710)*/}
-        </Card.Text>
-        <Card.Title>Details</Card.Title>
-        <Card.Text>
-          {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
-        </Card.Text>
-        <Card.Title>Budget owner</Card.Title>
-        <Card.Text>
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href={`https://etherscan.com/address/${budgetOwner}`}
-          >
-            {budgetOwner}
-          </a>
-        </Card.Text>
-        <ConditionalButton
-          as={budgetOwner === account ? Link : Button}
-          to={`/proj/${projId}`}
-          variant={"primary"}
-          enabledWhen={account === budgetOwner ? false : undefined}
-          whyDisabled={"Please log in with budget owner account."}
-          children={"Go to admin tool"}
-        />
+        <Row>
+          <Col md={8}>
+            <Card.Title>Project ID</Card.Title>
+            <Card.Text>{projId.toHexString()}</Card.Text>
+            <Card.Title>Fund</Card.Title>
+            <Card.Text style={{ fontSize: "3rem" }}>
+              {formatEther(fund || 0)} $COMMIT{" "}
+              {/*TODO compute in USD ($163710)*/}
+            </Card.Text>
+            <Card.Title>Details</Card.Title>
+            <Card.Text>
+              {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
+            </Card.Text>
+            <Card.Title>Budget owner</Card.Title>
+            <Card.Text>
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={`https://etherscan.com/address/${budgetOwner}`}
+              >
+                {budgetOwner}
+              </a>
+            </Card.Text>
+            <ConditionalButton
+              as={budgetOwner === account ? Link : Button}
+              to={`/proj/${projId}`}
+              variant={"primary"}
+              enabledWhen={account === budgetOwner ? false : undefined}
+              whyDisabled={"Please log in with budget owner account."}
+              children={"Go to admin tool"}
+            />
+          </Col>
+          <Col md={4}>
+            <Card>
+              <Image
+                src={uriToURL(
+                  metadata?.image ||
+                    "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1"
+                )}
+              />
+            </Card>
+          </Col>
+        </Row>
       </Card.Body>
     </Card>
   );

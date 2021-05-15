@@ -5,7 +5,7 @@ export const getPriceFromCoingecko = (
   const vsCurrency = currency || "USD";
   return new Promise<number | undefined>((resolve) => {
     if (process.env.NODE_ENV === "development") {
-      resolve(10);
+      resolve(undefined);
     } else {
       fetch(
         `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${address}&vs_currencies=${vsCurrency}`

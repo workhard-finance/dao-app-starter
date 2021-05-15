@@ -14,6 +14,7 @@ import {
 import { DecodedTxs } from "../../DecodedTxs";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 interface Proposal {
   proposer: string;
@@ -43,6 +44,7 @@ export enum VoteForTxStatus {
 export interface VoteForTxProps {
   tx: ProposedTx;
   status: VoteForTxStatus;
+  quorum: BigNumber;
   myVotes?: BigNumber;
 }
 
@@ -57,6 +59,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   myVotes,
   tx,
   status,
+  quorum,
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
@@ -219,7 +222,10 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         <Card.Text>Transaction:</Card.Text>
         {decodedTxData && <DecodedTxs txs={decodedTxData} values={tx.value} />}
         <br />
-        <Card.Text>Voting power:</Card.Text>
+        <Card.Text>
+          Voting power
+          <OverlayTooltip tip="Square root of $RIGHT balance." text="❔" />
+        </Card.Text>
         <Card.Text style={{ fontSize: "3rem" }}>
           {votesInGwei(myVotes)}
           <span style={{ fontSize: "1rem" }}> votes</span>
@@ -249,7 +255,8 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
             </ProgressBar>
             <Card.Text>
               {votesInGwei(proposal?.totalForVotes)} votes for /{" "}
-              {votesInGwei(proposal?.totalAgainstVotes)} votes against
+              {votesInGwei(proposal?.totalAgainstVotes)} votes against / Quorum:{" "}
+              {votesInGwei(quorum)}
             </Card.Text>
             <br />
             <Button variant="success" onClick={onVote(true)}>

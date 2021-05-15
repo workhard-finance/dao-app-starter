@@ -44,7 +44,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
     if (!!contracts && !!library && !!account) {
       if (!amount || !lockPeriod) return;
       const amountInWei = parseEther(amount);
-      if (amountInWei.lt(tokenBalance || 0)) {
+      if (amountInWei.gt(tokenBalance || 0)) {
         alert("Not enough balance");
         return;
       }
@@ -143,6 +143,18 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
               {lockPeriod} weeks({(lockPeriod / 52).toFixed(1)} years) / 4 years
             </Form.Text>
           </Form.Group>
+          <Form.Label>Expected</Form.Label>
+          <Card.Text style={{ fontSize: "3rem" }}>
+            ~={" "}
+            {parseFloat(
+              formatEther(
+                parseEther(amount || "0")
+                  .mul(lockPeriod)
+                  .div(MAX_LOCK_EPOCHS)
+              )
+            ).toFixed(0)}
+            <span style={{ fontSize: "1rem" }}> $RIGHT</span>
+          </Card.Text>
           <Button
             variant="primary"
             onClick={isApproved(allowance, amount) ? createLock : approve}

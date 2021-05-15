@@ -35,8 +35,9 @@ export interface BurnMiningPoolProps {
   title: string;
   tokenName?: string;
   poolAddress: string;
-  tokenEmission: BigNumber;
+  totalEmission: BigNumber;
   visionPrice: number;
+  emissionWeightSum: BigNumber;
   collapsible?: boolean;
 }
 
@@ -45,9 +46,10 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   title,
   tokenName,
   poolAddress,
-  tokenEmission,
+  totalEmission,
   visionPrice,
   collapsible,
+  emissionWeightSum,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -64,6 +66,9 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   const [tokenPrice, setTokenPrice] = useState<number>();
   const [tokenDetails, setTokenDetails] = useState<CoingeckoTokenDetails>();
   const [weight, setWeight] = useState<BigNumber>();
+  const [allocatedVISION, setAllocatedVISION] = useState<BigNumber>(
+    constants.Zero
+  );
   const [allowance, setAllowance] = useState<BigNumber>();
   const [burnPercent, setBurnPercent] = useState<number>();
   const [amount, setAmount] = useState<string>();
@@ -85,7 +90,15 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
         .catch(errorHandler(addToast));
     }
   }, [account, contracts]);
-
+  useEffect(() => {
+    if (weight) {
+      if (emissionWeightSum.eq(0)) {
+        setAllocatedVISION(BigNumber.from(0));
+      } else {
+        setAllocatedVISION(totalEmission.mul(weight).div(emissionWeightSum));
+      }
+    }
+  }, [weight]);
   useEffect(() => {
     if (!!account && !!contracts && !!tokenAddress) {
       const token = IERC20__factory.connect(tokenAddress, library);
@@ -124,7 +137,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   useEffect(() => {
     if (weight && tokenPrice && totalBurn) {
       const visionPerWeek = parseFloat(
-        formatEther(tokenEmission.mul(weight).div(10000))
+        formatEther(totalEmission.mul(weight).div(emissionWeightSum))
       );
       const totalBurnedToken = parseFloat(formatEther(totalBurn));
       setAnnualRevenue(
@@ -204,7 +217,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Burning ${tokenDetails?.name || tokenName}</Card.Title>
+      <Card.Title>Burn ${tokenDetails?.name || tokenName}</Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
@@ -265,6 +278,10 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
           />
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>{annualRevenue}%</Card.Text>
+        <Card.Text>
+          {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
+          this week.
+        </Card.Text>
         {collapsible && (
           <Button
             variant="outline-primary"
