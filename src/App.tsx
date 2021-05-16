@@ -39,7 +39,7 @@ function App() {
                     <Route path="/mine" children={<Mine />} />
                     <Route path="/gov" children={<Gov />} />
                     <Route path="/store" children={<Store />} />
-                    <Route path="/about" children={<Docs />} />
+                    <Route path="/res" children={<Docs />} />
                     <Route path="/proj/:id" children={<Project />} />
                     <Route
                       path="/product/:address"

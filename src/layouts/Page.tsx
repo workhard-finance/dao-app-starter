@@ -37,8 +37,8 @@ const Page = (props: React.ComponentProps<any>) => {
     },
     {
       Icon: DocsIcon,
-      name: "About",
-      url: "/about",
+      name: "Res",
+      url: "/res",
     },
   ];
   return (
