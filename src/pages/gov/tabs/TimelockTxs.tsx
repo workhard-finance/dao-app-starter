@@ -73,12 +73,16 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
   }, [library, emittedEvents]);
   return (
     <>
-      <Alert variant="info">
-        All governance transactions are timelock controlled transactions.
-        Transactions can be scheduled and executed by Workers Union voting or
-        Dev's multisig wallet. Workers Union can revoke the permission of Dev's
-        multisig wallet from the timelock contract by voting.
-      </Alert>
+      {Object.values(txs).length === 0 ? (
+        <p>Oops, cannot fetch the timelock transactions.</p>
+      ) : (
+        <Alert variant="info">
+          All governance transactions are timelock controlled transactions.
+          Transactions can be scheduled and executed by Workers Union voting or
+          Dev's multisig wallet. Workers Union can revoke the permission of
+          Dev's multisig wallet from the timelock contract by voting.
+        </Alert>
+      )}
       {Object.values(txs)
         .sort((a, b) => b.blockNumber - a.blockNumber)
         .map((tx, index) => {
