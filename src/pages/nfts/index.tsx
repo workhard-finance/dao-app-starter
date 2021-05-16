@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Alert, Button, Card, Col, Row, Tab, Tabs } from "react-bootstrap";
+import { Alert, Button, Col, Row, Tab, Tabs, Image } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber, providers } from "ethers";
 import { Link } from "react-router-dom";
-import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Product } from "../../components/contracts/marketplace/product/Product";
 
 const featured: BigNumber[] = [];
@@ -68,28 +67,16 @@ const Store: React.FC = () => {
 
   return (
     <Page>
-      <Row>
-        <Col md={4}>
-          <h1 style={{ display: "flex", justifyContent: "space-between" }}>
-            Store
-          </h1>
-        </Col>
-        <Col md={{ span: 4, offset: 4 }} style={{ textAlign: "end" }}>
-          <Button as={Link} to={`/manufacturer/new`} variant="outline-primary">
-            Be a manufacturer
-          </Button>
-        </Col>
-      </Row>
-      <Card>
-        <Card.Body>
-          <Card.Text style={{ fontSize: "2rem" }}>
-            My Balance: 4012 $COMMIT
-          </Card.Text>
-        </Card.Body>
-      </Card>
-      <br />
+      <Image
+        className="jumbotron"
+        src={process.env.PUBLIC_URL + "/images/nfts.jpg"}
+        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
+      />
       <Tabs defaultActiveKey="featured">
         <Tab eventKey="featured" title="Featured" style={{ marginTop: "1rem" }}>
+          {featured.length === 0 && (
+            <p>Coming soon :) We won't let you wait too long.</p>
+          )}
           <Row>
             {allProducts
               .filter((tokenId) => featured.includes(tokenId))
@@ -106,6 +93,9 @@ const Store: React.FC = () => {
             This is a permisionless marketplace. Please DYOR for each product
             registered here.
           </Alert>
+          {allProducts.length === 0 && (
+            <p>Coming soon :) We won't let you wait too long.</p>
+          )}
           <Row>
             {allProducts.map((tokenId) => (
               <Col key={`all-${tokenId}`} md={4}>
@@ -116,6 +106,10 @@ const Store: React.FC = () => {
           </Row>
         </Tab>
       </Tabs>
+      <hr />
+      <Button as={Link} to={`/manufacturer/new`} variant="outline-primary">
+        Be a manufacturer
+      </Button>
     </Page>
   );
 };

@@ -100,11 +100,11 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
 
   const increaseAmount = () => {
     if (!!contracts && !!library && !!account) {
-      if (!amount || getLockedPeriod() !== 0) {
+      if (!amount || getLockedPeriod() === 0) {
         alert("Expired");
         return;
       }
-      if (BigNumber.from(amount).lt(tokenBalance || 0)) {
+      if (BigNumber.from(amount).gt(tokenBalance || 0)) {
         alert("Not enough balance");
         return;
       }

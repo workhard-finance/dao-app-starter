@@ -92,7 +92,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
   return (
     <div {...props}>
       <Button
-        variant="outline-success"
+        variant={active ? "outline-success" : "success"}
         onClick={active ? handleShow : handleShow}
       >
         {active

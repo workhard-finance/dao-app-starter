@@ -19,6 +19,7 @@ const Mine = () => {
   const [poolLength, setPoolLength] = useState<BigNumber>();
   const [visionPrice, setVisionPrice] = useState<number>();
   const [emission, setEmission] = useState<BigNumber>();
+  const [emissionWeightSum, setEmissionWeightSum] = useState<BigNumber>();
   const [distributionEnabled, setDistributionEnabled] = useState<boolean>(
     false
   );
@@ -72,6 +73,9 @@ const Mine = () => {
         )
       );
       contracts.visionEmitter.emission().then(setEmission);
+      contracts.visionEmitter.emissionWeight().then((w) => {
+        setEmissionWeightSum(w.sum);
+      });
       getPriceFromCoingecko(contracts.vision.address).then(setVisionPrice);
       return () => {
         stale = true;
@@ -122,13 +126,14 @@ const Mine = () => {
           title="Liquidity Mining"
           style={{ marginTop: "1rem" }}
         >
-          {(pools && liquidityMiningIdx !== -1 && (
+          {(pools && liquidityMiningIdx !== -1 && emissionWeightSum && (
             <StakeMiningPool
               poolIdx={liquidityMiningIdx}
               title={"Liquidity Mining"}
               tokenName={"VISION/ETH LP"}
               poolAddress={pools[liquidityMiningIdx]}
-              tokenEmission={emission || BigNumber.from(0)}
+              totalEmission={emission || BigNumber.from(0)}
+              emissionWeightSum={emissionWeightSum}
               visionPrice={visionPrice || 0}
             />
           )) || <h1>Not Found</h1>}
@@ -138,13 +143,14 @@ const Mine = () => {
           title="Commit Mining"
           style={{ marginTop: "1rem" }}
         >
-          {(pools && commitMiningIdx !== -1 && (
+          {(pools && commitMiningIdx !== -1 && emissionWeightSum && (
             <BurnMiningPool
               poolIdx={commitMiningIdx}
               title={"Commit Mining"}
               tokenName={"COMMIT"}
               poolAddress={pools[commitMiningIdx]}
-              tokenEmission={emission || BigNumber.from(0)}
+              totalEmission={emission || BigNumber.from(0)}
+              emissionWeightSum={emissionWeightSum}
               visionPrice={visionPrice || 0}
             />
           )) || <h1>Not Found</h1>}
@@ -163,7 +169,11 @@ const Mine = () => {
             boost your protocol while hiring talents in the very crypto way.
           </p>
           {pools?.map((addr, idx) => {
-            if (idx === liquidityMiningIdx || idx === commitMiningIdx)
+            if (
+              idx === liquidityMiningIdx ||
+              idx === commitMiningIdx ||
+              !emissionWeightSum
+            )
               return undefined;
             else
               return (
@@ -173,7 +183,8 @@ const Mine = () => {
                     poolIdx={idx}
                     title={"Stake"}
                     poolAddress={addr}
-                    tokenEmission={emission || BigNumber.from(0)}
+                    totalEmission={emission || BigNumber.from(0)}
+                    emissionWeightSum={emissionWeightSum}
                     visionPrice={visionPrice || 0}
                     collapsible={true}
                   />

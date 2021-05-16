@@ -287,3 +287,9 @@ export const fetchProjectMetadataFromIPFS = async (
   const metadata = JSON.parse(result) as ProjectMetadata;
   return metadata;
 };
+
+export const uriToURL = (uri: string) => {
+  const gateway = "ipfs.io";
+  const url = `https://${gateway}/ipfs/${uri.replace("ipfs://", "")}`;
+  return url;
+};

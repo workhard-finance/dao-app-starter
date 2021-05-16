@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Form } from "react-bootstrap";
+import { Card, Form, Image, Row, Col } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import {
@@ -7,6 +7,7 @@ import {
   permaPinToArweave,
   TxStatus,
   handleTransaction,
+  uriToURL,
 } from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
@@ -22,8 +23,10 @@ export const PostAJobBox: React.FC = () => {
   const [file, setFile] = useState<File>();
   const [title, setTitle] = useState<string>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
-  const [url, setURL] = useState<string | undefined>(); // TODO
-  const [uri, setURI] = useState<string>(); // TODO
+  const [url, setURL] = useState<string | undefined>();
+  const [uri, setURI] = useState<string>();
+  const [imageURI, setImageURI] = useState<string>();
+  const [previewURL, setPrivewURL] = useState<string>();
   const [uploaded, setUploaded] = useState<boolean>();
   const [uploading, setUploading] = useState<boolean>();
 
@@ -70,6 +73,7 @@ export const PostAJobBox: React.FC = () => {
       .then((imageURI) => {
         uploadMetadataToIPFS(title, description, imageURI, url)
           .then((uri) => {
+            setImageURI(imageURI);
             setUploaded(true);
             setUploading(undefined);
             setURI(uri);
@@ -111,6 +115,7 @@ export const PostAJobBox: React.FC = () => {
         setURL("");
         setDescription("");
         setFile(undefined);
+        setImageURI(undefined);
       }
     );
   };
@@ -149,7 +154,7 @@ export const PostAJobBox: React.FC = () => {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Label>Image</Form.Label>
+            <Form.Label>Thumbnail(optional)</Form.Label>
             <Form.File
               onChange={(e: { target: HTMLInputElement }) => {
                 if (!ipfs) {
@@ -157,9 +162,33 @@ export const PostAJobBox: React.FC = () => {
                 } else if (e.target.files) {
                   const [fileToUpload] = e.target.files;
                   setFile(fileToUpload);
+                  let reader = new FileReader();
+                  reader.onloadend = () => {
+                    if (typeof reader.result === "string") {
+                      setPrivewURL(reader.result);
+                    }
+                  };
+                  reader.readAsDataURL(fileToUpload);
                 }
               }}
             />
+            <br />
+            <Row>
+              <Col md={4}>
+                <Card>
+                  <Image
+                    src={
+                      previewURL
+                        ? previewURL
+                        : uriToURL(
+                            imageURI ||
+                              "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1"
+                          )
+                    }
+                  />
+                </Card>
+              </Col>
+            </Row>
           </Form.Group>
           <Form.Text>{uri && `URI: ${uri}`}</Form.Text>
           <br />

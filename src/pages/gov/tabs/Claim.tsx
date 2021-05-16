@@ -13,6 +13,7 @@ import {
 } from "../../../utils/coingecko";
 import { useToasts } from "react-toast-notifications";
 import { errorHandler } from "../../../utils/utils";
+import { ERC20Mock__factory as IERC20__factory } from "@workhard/protocol";
 
 export interface ClaimProps {}
 
@@ -26,6 +27,7 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
   const [tokensToClaim, setTokensToWithdraw] = useState<string[]>([]);
   const [amounts, setAmounts] = useState<BigNumber[]>([]);
   const [prices, setPrices] = useState<(number | undefined)[]>([]);
+  const [symbols, setSymbols] = useState<string[]>();
   const [details, setDetails] = useState<(CoingeckoTokenDetails | undefined)[]>(
     []
   );
@@ -49,7 +51,15 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
         )
       ).then(setAmounts);
     }
-  }, [account, contracts, blockNumber, lastTx]);
+  }, [account, contracts, blockNumber, tokens, lastTx]);
+
+  useEffect(() => {
+    if (!!library && !!tokens) {
+      Promise.all(
+        tokens.map((token) => IERC20__factory.connect(token, library).symbol())
+      ).then(setSymbols);
+    }
+  }, [library, tokens]);
 
   useEffect(() => {
     Promise.all(tokens.map((token) => getPriceFromCoingecko(token))).then(
@@ -118,9 +128,12 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
                 <ListGroup.Item key={`withdraw-${token}-${i}`}>
                   <Col>
                     <Form.Check
-                      label={`$${details[i]?.symbol || "?"}: ${formatEther(
-                        amounts[i] || "0"
-                      )} ($${valueInUSD(amounts[i], prices[i])})`}
+                      label={`${
+                        symbols ? symbols[i] : details[i]?.symbol || "?"
+                      }: ${formatEther(amounts[i] || "0")} ($${valueInUSD(
+                        amounts[i],
+                        prices[i]
+                      )})`}
                       type="checkbox"
                       onChange={(_) => {
                         const _tokensToClaim = isChecked(token)
