@@ -12,6 +12,7 @@ import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { BigNumber, providers } from "ethers";
+import { altWhenEmptyList } from "../../../utils/utils";
 
 const Vote: React.FC = () => {
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
@@ -94,56 +95,65 @@ const Vote: React.FC = () => {
         <Col sm={9}>
           <Tab.Content>
             <Tab.Pane eventKey="voting" style={{ marginTop: "1rem" }}>
-              {(quorum &&
-                proposedTxs
-                  .filter(
-                    (proposedTx) =>
-                      proposedTx.start.lte(timestamp) &&
-                      proposedTx.end.gt(timestamp)
-                  )
-                  .map((proposedTx, i) => (
-                    <div key={`voting-${i}`}>
-                      <VoteForTx
-                        tx={proposedTx}
-                        myVotes={myVotes}
-                        status={VoteForTxStatus.Voting}
-                        quorum={quorum}
-                      />
-                      <br />
-                    </div>
-                  ))) || <p>No proposal is in voting.</p>}
+              {altWhenEmptyList(
+                <p>No proposal is in voting.</p>,
+                quorum &&
+                  proposedTxs
+                    .filter(
+                      (proposedTx) =>
+                        proposedTx.start.lte(timestamp) &&
+                        proposedTx.end.gt(timestamp)
+                    )
+                    .map((proposedTx, i) => (
+                      <div key={`voting-${i}`}>
+                        <VoteForTx
+                          tx={proposedTx}
+                          myVotes={myVotes}
+                          status={VoteForTxStatus.Voting}
+                          quorum={quorum}
+                        />
+                        <br />
+                      </div>
+                    ))
+              )}
             </Tab.Pane>
             <Tab.Pane eventKey="ended" style={{ marginTop: "1rem" }}>
-              {(quorum &&
-                proposedTxs
-                  .filter((proposedTx) => proposedTx.end.lt(timestamp))
-                  .map((proposedTx, i) => (
-                    <div key={`ended-${i}`}>
-                      <VoteForTx
-                        tx={proposedTx}
-                        myVotes={myVotes}
-                        status={VoteForTxStatus.Ended}
-                        quorum={quorum}
-                      />
-                      <br />
-                    </div>
-                  ))) || <p>No ended proposal exists.</p>}
+              {altWhenEmptyList(
+                <p>No ended proposal exists.</p>,
+                quorum &&
+                  proposedTxs
+                    .filter((proposedTx) => proposedTx.end.lt(timestamp))
+                    .map((proposedTx, i) => (
+                      <div key={`ended-${i}`}>
+                        <VoteForTx
+                          tx={proposedTx}
+                          myVotes={myVotes}
+                          status={VoteForTxStatus.Ended}
+                          quorum={quorum}
+                        />
+                        <br />
+                      </div>
+                    ))
+              )}
             </Tab.Pane>
             <Tab.Pane eventKey="pending" style={{ marginTop: "1rem" }}>
-              {(quorum &&
-                proposedTxs
-                  .filter((proposedTx) => proposedTx.start.gt(timestamp))
-                  .map((proposedTx, i) => (
-                    <div key={`pending-${i}`}>
-                      <VoteForTx
-                        tx={proposedTx}
-                        myVotes={myVotes}
-                        status={VoteForTxStatus.Pending}
-                        quorum={quorum}
-                      />
-                      <br />
-                    </div>
-                  ))) || <p>No pending proposal exists.</p>}
+              {altWhenEmptyList(
+                <p>No pending proposal exists.</p>,
+                quorum &&
+                  proposedTxs
+                    .filter((proposedTx) => proposedTx.start.gt(timestamp))
+                    .map((proposedTx, i) => (
+                      <div key={`pending-${i}`}>
+                        <VoteForTx
+                          tx={proposedTx}
+                          myVotes={myVotes}
+                          status={VoteForTxStatus.Pending}
+                          quorum={quorum}
+                        />
+                        <br />
+                      </div>
+                    ))
+              )}
             </Tab.Pane>
             <Tab.Pane eventKey="faq" style={{ marginTop: "1rem" }}>
               <h5>

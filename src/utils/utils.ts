@@ -16,6 +16,7 @@ import {
 import IPFS from "ipfs-core/src/components";
 import { Dispatch, SetStateAction } from "react";
 import { AddToast } from "react-toast-notifications";
+import { JsxElement } from "typescript";
 import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
@@ -292,4 +293,12 @@ export const uriToURL = (uri: string) => {
   const gateway = "ipfs.io";
   const url = `https://${gateway}/ipfs/${uri.replace("ipfs://", "")}`;
   return url;
+};
+
+export const altWhenEmptyList = (alt: JSX.Element, list?: any[]) => {
+  if (list) {
+    return list.length > 0 ? list : alt;
+  } else {
+    return alt;
+  }
 };

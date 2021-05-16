@@ -11,6 +11,7 @@ import { getAddress } from "ethers/lib/utils";
 import { getPriceFromCoingecko } from "../../utils/coingecko";
 import { ContractReceipt } from "@ethersproject/contracts";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
+import { altWhenEmptyList } from "../../utils/utils";
 
 const Mine = () => {
   const { account, library } = useWeb3React();
@@ -173,29 +174,32 @@ const Mine = () => {
           title="Airdrops"
           style={{ marginTop: "1rem" }}
         >
-          {pools?.map((addr, idx) => {
-            if (
-              idx === liquidityMiningIdx ||
-              idx === commitMiningIdx ||
-              !emissionWeightSum
-            )
-              return undefined;
-            else
-              return (
-                <div key={`mine-${addr}-${idx}`}>
-                  <br />
-                  <StakeMiningPool
-                    poolIdx={idx}
-                    title={"Stake"}
-                    poolAddress={addr}
-                    totalEmission={emission || BigNumber.from(0)}
-                    emissionWeightSum={emissionWeightSum}
-                    visionPrice={visionPrice || 0}
-                    collapsible={true}
-                  />
-                </div>
-              );
-          }) || <p>Partnerships are on the way 👀</p>}
+          {altWhenEmptyList(
+            <p>Partnerships are on the way 👀</p>,
+            pools?.map((addr, idx) => {
+              if (
+                idx === liquidityMiningIdx ||
+                idx === commitMiningIdx ||
+                !emissionWeightSum
+              )
+                return undefined;
+              else
+                return (
+                  <div key={`mine-${addr}-${idx}`}>
+                    <br />
+                    <StakeMiningPool
+                      poolIdx={idx}
+                      title={"Stake"}
+                      poolAddress={addr}
+                      totalEmission={emission || BigNumber.from(0)}
+                      emissionWeightSum={emissionWeightSum}
+                      visionPrice={visionPrice || 0}
+                      collapsible={true}
+                    />
+                  </div>
+                );
+            })
+          )}
         </Tab>
         <Tab eventKey="faq" title="FAQ" style={{ marginTop: "1rem" }}>
           <h5>
