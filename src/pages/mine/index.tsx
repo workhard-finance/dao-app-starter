@@ -119,7 +119,10 @@ const Mine = () => {
       )}
       <Tabs defaultActiveKey="vision">
         <Tab eventKey="vision" title="$VISION" style={{ marginTop: "1rem" }}>
-          <Erc20Balance address={contracts?.vision.address} />
+          <Erc20Balance
+            address={contracts?.vision.address}
+            symbolAlt={"VISION"}
+          />
         </Tab>
         <Tab
           eventKey="liquidity-mining"

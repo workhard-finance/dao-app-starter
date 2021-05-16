@@ -39,12 +39,12 @@ export const Erc20Balance: React.FC<Erc20BalanceProps> = ({
     <Card>
       <Card.Body>
         <Card.Title>
-          Your current ${symbol}
+          You have
           {description && <OverlayTooltip tip={description} text={`❔`} />}
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
           {bigNumToFixed(balance || 0)}
-          <span style={{ fontSize: "1rem" }}> {symbolAlt || `$${symbol}`}</span>
+          <span style={{ fontSize: "1rem" }}> {`$${symbolAlt || symbol}`}</span>
         </Card.Text>
       </Card.Body>
     </Card>

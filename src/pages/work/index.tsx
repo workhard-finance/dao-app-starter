@@ -78,7 +78,10 @@ const Work: React.FC = () => {
       <hr /> */}
       <Tabs defaultActiveKey="commit">
         <Tab eventKey="commit" title="$COMMIT" style={{ marginTop: "1rem" }}>
-          <Erc20Balance address={contracts?.commit.address} />
+          <Erc20Balance
+            address={contracts?.commit.address}
+            symbolAlt={"COMMIT"}
+          />
         </Tab>
         <Tab
           eventKey="job-board"

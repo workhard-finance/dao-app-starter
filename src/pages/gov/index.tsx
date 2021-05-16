@@ -26,7 +26,7 @@ const Gov: React.FC = () => {
           <Erc20Balance
             address={contracts?.right.address}
             description={`= staked amount x locking period / max period`}
-            symbolAlt={`$veVISION(a.k.a. $RIGHT)`}
+            symbolAlt={`RIGHT(a.k.a. veVISION)`}
           />
         </Tab>
         <Tab
