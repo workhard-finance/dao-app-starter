@@ -5,8 +5,9 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { formatEther } from "ethers/lib/utils";
 import { useIPFS } from "../../../../providers/IPFSProvider";
 import { Link } from "react-router-dom";
-import { IPFS } from "ipfs-core/src";
+import { CID, IPFS } from "ipfs-core/src";
 import { useWeb3React } from "@web3-react/core";
+import { uriToURL } from "../../../../utils/utils";
 
 export interface ProductMetadata {
   name: string;
@@ -43,11 +44,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
   const { account } = useWeb3React();
   const { ipfs } = useIPFS();
   const [amount, setAmount] = useState<number>(1);
-  const [metadata, setMetadata] = useState<ProductMetadata>({
-    name: "...fetching",
-    description: "...fetching",
-    image: "",
-  });
+  const [metadata, setMetadata] = useState<ProductMetadata>();
   const _profitRate = Math.floor(
     (100 * 80 * product.profitRate.toNumber()) / 10000
   );
@@ -76,10 +73,10 @@ export const ProductView: React.FC<ProductViewProps> = ({
     <Card>
       <Card.Img
         style={{ borderRadius: 0 }}
-        src={`https://${gateway}/ipfs/${metadata.image}`}
+        src={getImagePath(metadata, preview)}
       />
       <Card.Body>
-        <Card.Title>{metadata.name}</Card.Title>
+        <Card.Title>{metadata?.name || preview?.name || "..."}</Card.Title>
         <Card.Text>
           Price: {parseFloat(formatEther(product.price)).toFixed(2)}{" "}
           <a
@@ -171,15 +168,15 @@ export const ProductView: React.FC<ProductViewProps> = ({
 async function fetchMetadataFromIPFS(
   _ipfs: IPFS,
   _uri: string
-): Promise<ProductMetadata> {
+): Promise<ProductMetadata | undefined> {
   let result = "";
   const cid = _uri.replace("ipfs://", "");
-  if (cid === "")
-    return {
-      name: "Fetching...",
-      description: "Fetching...",
-      image: "QmPPRQC49kZPrMAZBw4he3DXDw4P4czrDZbFAhfnydKAQK",
-    };
+  if (cid === "") return undefined;
+  // return {
+  //   name: "Fetching...",
+  //   description: "Fetching...",
+  //   image: "QmPPRQC49kZPrMAZBw4he3DXDw4P4czrDZbFAhfnydKAQK",
+  // };
 
   for await (const chunk of _ipfs.cat(cid)) {
     result += chunk;
@@ -187,3 +184,19 @@ async function fetchMetadataFromIPFS(
   const metadata = JSON.parse(result);
   return metadata as ProductMetadata;
 }
+
+const getImagePath = (
+  metadata?: ProductMetadata,
+  preview?: ProductMetadata
+) => {
+  const path =
+    metadata?.image ||
+    preview?.image ||
+    "QmUob9cf3KuhESGg1x4cr1SGVxH1Tg5mXxpbhWXX7FrQ4n";
+  try {
+    const cid = new CID(path);
+    return uriToURL(path);
+  } catch (_) {
+    return path;
+  }
+};

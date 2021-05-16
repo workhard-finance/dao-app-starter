@@ -32,6 +32,7 @@ export const Manufacture: React.FC = () => {
   const [uploaded, setUploaded] = useState<boolean>();
   const [uploading, setUploading] = useState<boolean>();
   const [launchTx, setLaunchTx] = useState<ContractTransaction>();
+  const [previewURL, setPreviewURL] = useState<string>();
 
   const uploadImageToIPFS = async (file: File): Promise<string> => {
     if (!ipfs) {
@@ -184,6 +185,13 @@ export const Manufacture: React.FC = () => {
                       } else if (e.target.files) {
                         const [fileToUpload] = e.target.files;
                         setFile(fileToUpload);
+                        let reader = new FileReader();
+                        reader.onloadend = () => {
+                          if (typeof reader.result === "string") {
+                            setPreviewURL(reader.result);
+                          }
+                        };
+                        reader.readAsDataURL(fileToUpload);
                       }
                     }}
                   />
@@ -322,7 +330,9 @@ export const Manufacture: React.FC = () => {
               name: name || "NAME",
               description: description || "Your product description",
               image:
-                imageURI || "QmUob9cf3KuhESGg1x4cr1SGVxH1Tg5mXxpbhWXX7FrQ4n",
+                imageURI ||
+                previewURL ||
+                "QmUob9cf3KuhESGg1x4cr1SGVxH1Tg5mXxpbhWXX7FrQ4n",
             }}
           />
         </Col>

@@ -26,7 +26,7 @@ export const PostAJobBox: React.FC = () => {
   const [url, setURL] = useState<string | undefined>();
   const [uri, setURI] = useState<string>();
   const [imageURI, setImageURI] = useState<string>();
-  const [previewURL, setPrivewURL] = useState<string>();
+  const [previewURL, setPreviewURL] = useState<string>();
   const [uploaded, setUploaded] = useState<boolean>();
   const [uploading, setUploading] = useState<boolean>();
 
@@ -165,7 +165,7 @@ export const PostAJobBox: React.FC = () => {
                   let reader = new FileReader();
                   reader.onloadend = () => {
                     if (typeof reader.result === "string") {
-                      setPrivewURL(reader.result);
+                      setPreviewURL(reader.result);
                     }
                   };
                   reader.readAsDataURL(fileToUpload);
