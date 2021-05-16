@@ -94,7 +94,7 @@ const Vote: React.FC = () => {
         <Col sm={9}>
           <Tab.Content>
             <Tab.Pane eventKey="voting" style={{ marginTop: "1rem" }}>
-              {quorum &&
+              {(quorum &&
                 proposedTxs
                   .filter(
                     (proposedTx) =>
@@ -111,10 +111,10 @@ const Vote: React.FC = () => {
                       />
                       <br />
                     </div>
-                  ))}
+                  ))) || <p>No proposal is in voting.</p>}
             </Tab.Pane>
             <Tab.Pane eventKey="ended" style={{ marginTop: "1rem" }}>
-              {quorum &&
+              {(quorum &&
                 proposedTxs
                   .filter((proposedTx) => proposedTx.end.lt(timestamp))
                   .map((proposedTx, i) => (
@@ -127,10 +127,10 @@ const Vote: React.FC = () => {
                       />
                       <br />
                     </div>
-                  ))}
+                  ))) || <p>No ended proposal exists.</p>}
             </Tab.Pane>
             <Tab.Pane eventKey="pending" style={{ marginTop: "1rem" }}>
-              {quorum &&
+              {(quorum &&
                 proposedTxs
                   .filter((proposedTx) => proposedTx.start.gt(timestamp))
                   .map((proposedTx, i) => (
@@ -143,7 +143,81 @@ const Vote: React.FC = () => {
                       />
                       <br />
                     </div>
-                  ))}
+                  ))) || <p>No pending proposal exists.</p>}
+            </Tab.Pane>
+            <Tab.Pane eventKey="faq" style={{ marginTop: "1rem" }}>
+              <h5>
+                <strong>What can I propose via Workers' Union?</strong>
+              </h5>
+              <p>
+                You can propose any transaction from Workers' Union contract. So
+                you can consider Workers' Union as a huge multisig wallet that
+                works by voting. By the way, Workers' Union is the manager of
+                timelock governance that is governing Workers' Union itself,
+                VisionEmitter, DividendPool, Marketplace, JobBoard, and etc.
+                Therefore, in most cases, we will propose the governance
+                transaction to schedule and execute them. The governance
+                transactions are prepared in the proposal tab with the forms.
+              </p>
+              <h5>
+                <strong>
+                  Should we have voting every time we need update?
+                </strong>
+              </h5>
+              <p>
+                No we don't. To avoid the onchain voting as much as possible,
+                dev's multisig wallet is also one of the timelock contract'
+                proposer and executor. But we force scheduled the revoke of
+                multisig's permission from the timelock. So if the community
+                wants to remove multisig, we can simply run the revoke
+                transaction by voting!
+              </p>
+              <h5>
+                <strong>Okay.. then what's the governance structure?</strong>
+              </h5>
+              <p>
+                Timelock contract is the governor! It can change some
+                configurations of these contracts:
+                <ul>
+                  <li>
+                    VisionEmitter: decides the emission rates and weights.
+                  </li>
+                  <li>DividendPool: decides the allowed token list</li>
+                  <li>
+                    StableReserve: allow minter list that can reserve DAI and
+                    mint COMMIT
+                  </li>
+                  <li>JobBoard: approve / disapprove / tax rate</li>
+                  <li>Marketplace: tax rate</li>
+                </ul>
+                And the timelock transactions are scheduled and executed by
+                <ul>
+                  <li>Workers' Union</li>
+                  <li>Devs' Multisig(can be revoked by Workers' Union)</li>
+                </ul>
+                As we're trying to display whole governance transactions as
+                transparent as possible via the transaction tab, we hope we can
+                keep the multisig operations & snapshot voting instead of the
+                onchain voting.
+              </p>
+              <h5>
+                <strong>How much RIGHT do I need to start a new vote?</strong>
+              </h5>
+              <p>
+                You should have more than 1 $RIGHT to start a vote. Governance
+                will increase or decrease this value by voting.
+              </p>
+              <h5>
+                <strong>What is the quorum?</strong>
+              </h5>
+              <p>
+                To pass a proposal, Workers' Union needs square root of 100
+                RIGHT for its quorum.
+              </p>
+              <h5>
+                <strong>What happens if a proposal passed?</strong>
+              </h5>
+              <p>Once a proposal passed,</p>
             </Tab.Pane>
           </Tab.Content>
         </Col>
