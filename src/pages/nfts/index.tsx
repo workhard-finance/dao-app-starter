@@ -105,7 +105,6 @@ const Store: React.FC = () => {
             ))}
           </Row>
         </Tab>
-        <Tab eventKey="faq" title="FAQ" style={{ marginTop: "1rem" }}></Tab>
       </Tabs>
       <hr />
       <Button as={Link} to={`/manufacturer/new`} variant="outline-primary">
