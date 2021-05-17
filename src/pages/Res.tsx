@@ -4,7 +4,7 @@ import { importMDX } from "mdx.macro";
 
 const Content = lazy(() => importMDX("../docs/res.mdx"));
 
-const Docs = () => {
+const Res = () => {
   return (
     <Page>
       <Suspense fallback={<div>Loading...</div>}>
@@ -14,4 +14,4 @@ const Docs = () => {
   );
 };
 
-export default Docs;
+export default Res;

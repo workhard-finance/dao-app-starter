@@ -51,7 +51,6 @@ const Page = (props: React.ComponentProps<any>) => {
         <Container>{props.children}</Container>
       </Row>
       <br />
-      <hr style={{ borderTop: "1px solid rgba(0,0,0,0.5)" }} />
       <Footer />
     </Container>
   );

@@ -9,7 +9,7 @@ import { WorkhardThemeProvider } from "./providers/WorkhardThemeProvider";
 import Mine from "./pages/mine";
 import Work from "./pages/work";
 import Gov from "./pages/gov";
-import Docs from "./pages/Docs";
+import Res from "./pages/Res";
 import Fork from "./pages/Fork";
 import Store from "./pages/nfts";
 import { WorkhardContractsProvider } from "./providers/WorkhardContractProvider";
@@ -40,7 +40,7 @@ function App() {
                     <Route path="/mine" children={<Mine />} />
                     <Route path="/gov" children={<Gov />} />
                     <Route path="/store" children={<Store />} />
-                    <Route path="/res" children={<Docs />} />
+                    <Route path="/res" children={<Res />} />
                     <Route path="/fork" children={<Fork />} />
                     <Route path="/proj/:id" children={<Project />} />
                     <Route

@@ -13,10 +13,10 @@ import {
 import { Link } from "react-router-dom";
 const Fork = () => {
   return (
-    <Page>
+    <Page id="hi" style={{ minHeight: "90vh" }}>
       <Row>
         <Col md={{ span: 6, offset: 3 }}>
-          <Card>
+          <Card style={{ marginTop: "8vh", marginBottom: "8vh" }}>
             <Card.Body>
               <Card.Text>
                 Do you want to build your own team with Commit Mining Framework?

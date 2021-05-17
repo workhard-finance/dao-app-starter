@@ -1,10 +1,12 @@
 import React from "react";
 import { Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const Footer = () => (
-  <footer>
-    <Row>
-      <Col lg={12}>
+  <Row style={{ marginTop: "auto", position: "relative" }}>
+    <Col lg={12}>
+      <hr style={{ borderTop: "1px solid rgba(0,0,0,0.5)" }} />
+      <footer>
         <ul className="list-unstyled">
           <li className="float-lg-right">
             <a href="#top">Back to top</a>
@@ -21,6 +23,9 @@ const Footer = () => (
           <li className="float-lg-left" style={{ marginRight: 10 }}>
             <a href="https://medium.com/@Cutshamache">Medium</a>
           </li>
+          <li className="float-lg-left" style={{ marginRight: 10 }}>
+            <Link to={"/res"}>Resources</Link>
+          </li>
         </ul>
         <br />
         <br />
@@ -30,9 +35,9 @@ const Footer = () => (
             GPL v3 license.
           </a>
         </p>
-      </Col>
-    </Row>
-  </footer>
+      </footer>
+    </Col>
+  </Row>
 );
 
 export default Footer;
