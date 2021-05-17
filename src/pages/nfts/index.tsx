@@ -151,6 +151,15 @@ const Store: React.FC = () => {
             The token id is determined by the hash of the metadata uri and
             manufacturer's address.
           </p>
+          <h5>
+            <strong>Where does the deployed assets stored?</strong>
+          </h5>
+          <p>
+            It stores the image and metadata on the IPFS which is a
+            decentralized storage network that does not depend on any
+            centralized cloud services. And, as IPFS does not guarantee its
+            permanency, we are permanently pinning it using Arweave network.
+          </p>
         </Tab>
       </Tabs>
     </Page>
