@@ -10,12 +10,16 @@ import { PresetProposal } from "../../../components/contracts/workers-union/prop
 import { solidityKeccak256 } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { providers } from "ethers";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const Propose: React.FC = ({}) => {
   const { account } = useWeb3React<providers.Web3Provider>();
   const contracts = useWorkhardContracts();
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
   const [presets, setPresets] = useState<Preset[]>();
+  const history = useHistory();
+  const { subtab } = useParams<{ subtab?: string }>();
 
   useEffect(() => {
     if (!!account && !!contracts) {
@@ -28,7 +32,7 @@ export const Propose: React.FC = ({}) => {
   }, [account, contracts]);
 
   return (
-    <Tab.Container defaultActiveKey="manual">
+    <Tab.Container defaultActiveKey={subtab || "manual"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -38,7 +42,7 @@ export const Propose: React.FC = ({}) => {
             {presets ? (
               ["JobBoard", "DividendPool", "VisionEmitter"].map(
                 (contractName) => (
-                  <Dropdown as={Nav.Item} key={`workers-union-${contractName}`}>
+                  <Dropdown as={Nav.Item}>
                     <Dropdown.Toggle variant="success" as={Nav.Link}>
                       {contractName}
                     </Dropdown.Toggle>
@@ -50,8 +54,8 @@ export const Propose: React.FC = ({}) => {
                         .map((prop) => {
                           return (
                             <Dropdown.Item
-                              key={`workers-union-${prop.contractName}.${prop.methodName}`}
-                              eventKey={`workers-union-${prop.contractName}.${prop.methodName}`}
+                              key={`${prop.contractName}-${prop.methodName}`}
+                              eventKey={`${prop.contractName}-${prop.methodName}`}
                             >
                               {`${prop.methodName}`}
                             </Dropdown.Item>
@@ -73,7 +77,7 @@ export const Propose: React.FC = ({}) => {
                   <Dropdown.Item eventKey="manual">
                     Manual Transaction Proposal
                   </Dropdown.Item>
-                  <Dropdown.Item eventKey="maunal(batch)">
+                  <Dropdown.Item eventKey="manual-batch">
                     Manual Batch Transaction
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -82,7 +86,9 @@ export const Propose: React.FC = ({}) => {
             <hr />
             {hasProposerRole && (
               <>
-                <h4>Timelock</h4>
+                <h5>
+                  <strong>Multisig</strong>
+                </h5>
                 {presets ? (
                   ["JobBoard", "DividendPool", "VisionEmitter"].map(
                     (contractName) => (
@@ -98,8 +104,8 @@ export const Propose: React.FC = ({}) => {
                             .map((prop) => {
                               return (
                                 <Dropdown.Item
-                                  key={`multisig-${prop.contractName}.${prop.methodName}`}
-                                  eventKey={`multisig-${prop.contractName}.${prop.methodName}`}
+                                  key={`multisig-${prop.contractName}-${prop.methodName}`}
+                                  eventKey={`multisig-${prop.contractName}-${prop.methodName}`}
                                 >
                                   {`${prop.methodName}`}
                                 </Dropdown.Item>
@@ -118,17 +124,28 @@ export const Propose: React.FC = ({}) => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane eventKey="manual">
+            <Tab.Pane
+              eventKey="manual"
+              onEnter={() => history.push("/gov/propose/manual")}
+            >
               <ProposeTx />
             </Tab.Pane>
-            <Tab.Pane eventKey="maunal(batch)">
+            <Tab.Pane
+              eventKey="manual-batch"
+              onEnter={() => history.push("/gov/propose/manual-batch")}
+            >
               <ProposeBatchTx />
             </Tab.Pane>
             {presets?.map((prop) => {
               return (
                 <Tab.Pane
-                  key={`${prop.contractName}.${prop.methodName}`}
-                  eventKey={`${prop.contractName}.${prop.methodName}`}
+                  key={`${prop.contractName}-${prop.methodName}`}
+                  eventKey={`${prop.contractName}-${prop.methodName}`}
+                  onEnter={() =>
+                    history.push(
+                      `/gov/propose/${`${prop.contractName}-${prop.methodName}`}`
+                    )
+                  }
                 >
                   <PresetProposal
                     paramArray={prop.paramArray}
@@ -142,8 +159,13 @@ export const Propose: React.FC = ({}) => {
             {presets?.map((prop) => {
               return (
                 <Tab.Pane
-                  key={`multisig-${prop.contractName}.${prop.methodName}`}
-                  eventKey={`multisig-${prop.contractName}.${prop.methodName}`}
+                  key={`multisig-${prop.contractName}-${prop.methodName}`}
+                  eventKey={`multisig-${prop.contractName}-${prop.methodName}`}
+                  onEnter={() =>
+                    history.push(
+                      `/gov/propose/multisig-${`${prop.contractName}-${prop.methodName}`}`
+                    )
+                  }
                 >
                   <TimelockPresetProposal
                     paramArray={prop.paramArray}

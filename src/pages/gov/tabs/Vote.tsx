@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Page from "../../../layouts/Page";
-import { Image, Row, Col, Nav, Tab, Tabs } from "react-bootstrap";
-import { TimelockTxs } from "./TimelockTxs";
-import { Propose } from "./Propose";
+import { Row, Col, Nav, Tab } from "react-bootstrap";
 import {
   VoteForTx,
   ProposedTx,
@@ -13,6 +10,8 @@ import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { BigNumber, providers } from "ethers";
 import { altWhenEmptyList } from "../../../utils/utils";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const Vote: React.FC = () => {
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
@@ -23,6 +22,8 @@ const Vote: React.FC = () => {
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
   const [timestamp, setTimestamp] = useState<number>(0);
   const [quorum, setQuorum] = useState<BigNumber>();
+  const history = useHistory();
+  const { subtab } = useParams<{ subtab?: string }>();
 
   useEffect(() => {
     if (!library || !chainId || !contracts) {
@@ -74,7 +75,7 @@ const Vote: React.FC = () => {
   }, [contracts, blockNumber]);
 
   return (
-    <Tab.Container defaultActiveKey="voting">
+    <Tab.Container defaultActiveKey={subtab || "voting"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -94,7 +95,11 @@ const Vote: React.FC = () => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane eventKey="voting" style={{ marginTop: "1rem" }}>
+            <Tab.Pane
+              eventKey="voting"
+              style={{ marginTop: "1rem" }}
+              onEnter={() => history.push("/gov/vote/voting")}
+            >
               {altWhenEmptyList(
                 <p>No proposal is in voting.</p>,
                 quorum &&
@@ -117,7 +122,11 @@ const Vote: React.FC = () => {
                     ))
               )}
             </Tab.Pane>
-            <Tab.Pane eventKey="ended" style={{ marginTop: "1rem" }}>
+            <Tab.Pane
+              eventKey="ended"
+              style={{ marginTop: "1rem" }}
+              onEnter={() => history.push("/gov/vote/ended")}
+            >
               {altWhenEmptyList(
                 <p>No ended proposal exists.</p>,
                 quorum &&
@@ -136,7 +145,11 @@ const Vote: React.FC = () => {
                     ))
               )}
             </Tab.Pane>
-            <Tab.Pane eventKey="pending" style={{ marginTop: "1rem" }}>
+            <Tab.Pane
+              eventKey="pending"
+              style={{ marginTop: "1rem" }}
+              onEnter={() => history.push("/gov/vote/pending")}
+            >
               {altWhenEmptyList(
                 <p>No pending proposal exists.</p>,
                 quorum &&
@@ -155,7 +168,11 @@ const Vote: React.FC = () => {
                     ))
               )}
             </Tab.Pane>
-            <Tab.Pane eventKey="faq" style={{ marginTop: "1rem" }}>
+            <Tab.Pane
+              eventKey="faq"
+              style={{ marginTop: "1rem" }}
+              onEnter={() => history.push("/gov/vote/faq")}
+            >
               <h5>
                 <strong>What can I propose via Workers' Union?</strong>
               </h5>

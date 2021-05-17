@@ -36,10 +36,10 @@ function App() {
               <WorkhardThemeProvider theme={themes.light}>
                 <Router>
                   <Switch>
-                    <Route path="/work" children={<Work />} />
-                    <Route path="/mine" children={<Mine />} />
-                    <Route path="/gov" children={<Gov />} />
-                    <Route path="/store" children={<Store />} />
+                    <Route path="/work/:tab?/:subtab?" children={<Work />} />
+                    <Route path="/mine/:tab?" children={<Mine />} />
+                    <Route path="/gov/:tab?/:subtab?" children={<Gov />} />
+                    <Route path="/nfts/:tab?" children={<Store />} />
                     <Route path="/res" children={<Res />} />
                     <Route path="/fork" children={<Fork />} />
                     <Route path="/proj/:id" children={<Project />} />

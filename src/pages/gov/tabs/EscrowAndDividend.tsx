@@ -7,11 +7,15 @@ import { MyLock } from "../../../components/contracts/dividend-pool/MyLock";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { Claim } from "./Claim";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const EscrowAndDividend: React.FC = () => {
   const contracts = useWorkhardContracts();
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
+  const history = useHistory();
+  const { subtab } = useParams<{ subtab?: string }>();
   const [stakedAmount, setStakedAmount] = useState<BigNumber>();
   const [lockIds, setLockIds] = useState<BigNumber[]>();
 
@@ -43,7 +47,7 @@ export const EscrowAndDividend: React.FC = () => {
   }, [account, contracts, lockIds]);
 
   return (
-    <Tab.Container defaultActiveKey="locks">
+    <Tab.Container defaultActiveKey={subtab || "locks"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -60,7 +64,10 @@ export const EscrowAndDividend: React.FC = () => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane eventKey="locks">
+            <Tab.Pane
+              eventKey="locks"
+              onEnter={() => history.push("/gov/dividend/locks")}
+            >
               <CreateLock stakedAmount={stakedAmount} />
               <hr />
               <h3>Your Voting Escrows</h3>
@@ -77,10 +84,16 @@ export const EscrowAndDividend: React.FC = () => {
                   ))
                   .reverse()}
             </Tab.Pane>
-            <Tab.Pane eventKey="claim">
+            <Tab.Pane
+              eventKey="claim"
+              onEnter={() => history.push("/gov/dividend/claim")}
+            >
               <Claim />
             </Tab.Pane>
-            <Tab.Pane eventKey="faq">
+            <Tab.Pane
+              eventKey="faq"
+              onEnter={() => history.push("/gov/dividend/faq")}
+            >
               <h5>
                 <strong>What is Voting Escrow?</strong>
               </h5>

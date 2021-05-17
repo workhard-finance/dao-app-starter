@@ -2,10 +2,14 @@ import React from "react";
 import { Button, Col, Nav, Row, Tab, Tabs } from "react-bootstrap";
 import { BuyCommit } from "../../components/contracts/stable-reserve/BuyCommit";
 import { RedeemCommit } from "../../components/contracts/stable-reserve/RedeemCommit";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const StableReserve: React.FC = () => {
+  const { subtab } = useParams<{ subtab?: string }>();
+  const history = useHistory();
   return (
-    <Tab.Container defaultActiveKey="buy">
+    <Tab.Container defaultActiveKey={subtab || "buy"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -22,15 +26,24 @@ const StableReserve: React.FC = () => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane eventKey="redeem">
-              <RedeemCommit />
-            </Tab.Pane>
-            <Tab.Pane eventKey="buy">
+            <Tab.Pane
+              eventKey="buy"
+              onEnter={() => history.push("/work/reserve/buy")}
+            >
               <BuyCommit />
               <br />
               <Button variant={"info"} children="Trade $COMMIT on Uniswap" />
             </Tab.Pane>
-            <Tab.Pane eventKey="faq">
+            <Tab.Pane
+              eventKey="redeem"
+              onEnter={() => history.push("/work/reserve/redeem")}
+            >
+              <RedeemCommit />
+            </Tab.Pane>
+            <Tab.Pane
+              eventKey="faq"
+              onEnter={() => history.push("/work/reserve/faq")}
+            >
               <h5>
                 <strong>What can I do with $COMMIT?</strong>
               </h5>

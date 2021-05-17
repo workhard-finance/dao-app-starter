@@ -4,7 +4,6 @@ import WorkIcon from "../components/icons/WorkIcon";
 import GovIcon from "../components/icons/GovIcon";
 import StoreIcon from "../components/icons/StoreIcon";
 import MineIcon from "../components/icons/MineIcon";
-import DocsIcon from "../components/icons/DocsIcon";
 import DupIcon from "../components/icons/DupIcon";
 import NavBar from "../components/nav/NavBar";
 import Footer from "../components/Footer";
@@ -34,7 +33,7 @@ const Page = (props: React.ComponentProps<any>) => {
     {
       Icon: StoreIcon,
       name: "NFTs",
-      url: "/store",
+      url: "/nfts",
     },
     {
       Icon: DupIcon,

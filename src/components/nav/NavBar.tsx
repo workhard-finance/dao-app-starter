@@ -22,12 +22,12 @@ const NavBar: React.FC<NavBarProps> = ({ menus }) => {
               as={Link}
               to={menu.url}
               style={{
-                color:
-                  history.location.pathname === menu.url ? "green" : undefined,
-                textDecoration:
-                  history.location.pathname === menu.url
-                    ? "underline"
-                    : undefined,
+                color: history.location.pathname.startsWith(menu.url)
+                  ? "green"
+                  : undefined,
+                textDecoration: history.location.pathname.startsWith(menu.url)
+                  ? "underline"
+                  : undefined,
                 textAlign: "center",
               }}
             >

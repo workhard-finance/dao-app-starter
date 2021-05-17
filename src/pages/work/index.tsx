@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { BigNumber } from "ethers";
 import { JobBoard } from "./tabs/JobBoard";
 import StableReserve from "./StableReserve";
+import { useParams } from "react-router-dom";
 
 const Work: React.FC = () => {
+  const { tab } = useParams<{ tab?: string }>();
+  const history = useHistory();
   const contracts = useWorkhardContracts();
   // const { account, library, chainId } = useWeb3React();
 
@@ -76,25 +80,32 @@ const Work: React.FC = () => {
         <footer className="blockquote-footer">John Calvin</footer>
       </blockquote>
       <hr /> */}
-      <Tabs defaultActiveKey="commit">
-        <Tab eventKey="commit" title="$COMMIT" style={{ marginTop: "1rem" }}>
+      <Tabs defaultActiveKey={tab || "commit"}>
+        <Tab
+          eventKey="commit"
+          title="$COMMIT"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/work/commit")}
+        >
           <Erc20Balance
             address={contracts?.commit.address}
             symbolAlt={"COMMIT"}
           />
         </Tab>
         <Tab
-          eventKey="job-board"
+          eventKey="job"
           title="Job Board"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/work/job")}
         >
           <JobBoard />
           {/* <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} /> */}
         </Tab>
         <Tab
-          eventKey="stable-reserve"
+          eventKey="reserve"
           title="Stable Reserve"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/work/reserve")}
         >
           <StableReserve />
         </Tab>

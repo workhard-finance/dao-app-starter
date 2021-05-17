@@ -12,8 +12,12 @@ import { getPriceFromCoingecko } from "../../utils/coingecko";
 import { ContractReceipt } from "@ethersproject/contracts";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { altWhenEmptyList } from "../../utils/utils";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const Mine = () => {
+  const { tab } = useParams<{ tab?: string }>();
+  const history = useHistory();
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   const [pools, setPools] = useState<string[]>();
@@ -118,17 +122,23 @@ const Mine = () => {
           </Button>
         </Alert>
       )}
-      <Tabs defaultActiveKey="vision">
-        <Tab eventKey="vision" title="$VISION" style={{ marginTop: "1rem" }}>
+      <Tabs defaultActiveKey={tab || "vision"}>
+        <Tab
+          eventKey="vision"
+          title="$VISION"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/mine/vision")}
+        >
           <Erc20Balance
             address={contracts?.vision.address}
             symbolAlt={"VISION"}
           />
         </Tab>
         <Tab
-          eventKey="liquidity-mining"
+          eventKey="liquidity"
           title="Liquidity Mining"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/mine/liquidity")}
         >
           {(pools && liquidityMiningIdx !== -1 && emissionWeightSum && (
             <StakeMiningPool
@@ -148,9 +158,10 @@ const Mine = () => {
           )}
         </Tab>
         <Tab
-          eventKey="commit-mining"
+          eventKey="commit"
           title="Commit Mining"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/mine/commit")}
         >
           {(pools && commitMiningIdx !== -1 && emissionWeightSum && (
             <BurnMiningPool
@@ -170,9 +181,10 @@ const Mine = () => {
           )}
         </Tab>
         <Tab
-          eventKey="airdrop-mining"
+          eventKey="airdrops"
           title="Airdrops"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/mine/airdrops")}
         >
           {altWhenEmptyList(
             <p>Partnerships are on the way 👀</p>,
@@ -201,7 +213,12 @@ const Mine = () => {
             })
           )}
         </Tab>
-        <Tab eventKey="faq" title="FAQ" style={{ marginTop: "1rem" }}>
+        <Tab
+          eventKey="faq"
+          title="FAQ"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/mine/faq")}
+        >
           <h5>
             <strong>What can I do with VISION?</strong>
           </h5>

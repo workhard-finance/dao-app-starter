@@ -7,8 +7,12 @@ import Vote from "./tabs/Vote";
 import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const Gov: React.FC = () => {
+  const { tab } = useParams<{ tab?: string }>();
+  const history = useHistory();
   const contracts = useWorkhardContracts();
 
   return (
@@ -21,8 +25,13 @@ const Gov: React.FC = () => {
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
-      <Tabs defaultActiveKey="right">
-        <Tab eventKey="right" title="$RIGHT" style={{ marginTop: "1rem" }}>
+      <Tabs defaultActiveKey={tab || "right"}>
+        <Tab
+          eventKey="right"
+          title="$RIGHT"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/gov/right")}
+        >
           <Erc20Balance
             address={contracts?.right.address}
             description={`= staked amount x locking period / max period`}
@@ -33,6 +42,7 @@ const Gov: React.FC = () => {
           eventKey="dividend"
           title="Escrow & Dividend"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/gov/dividend")}
         >
           <EscrowAndDividend />
         </Tab>
@@ -40,13 +50,24 @@ const Gov: React.FC = () => {
           eventKey="timelock"
           title="Transactions"
           style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/gov/timelock")}
         >
           <TimelockTxs />
         </Tab>
-        <Tab eventKey="vote" title="Vote" style={{ marginTop: "1rem" }}>
+        <Tab
+          eventKey="vote"
+          title="Vote"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/gov/vote")}
+        >
           <Vote />
         </Tab>
-        <Tab eventKey="proposal" title="Proposal" style={{ marginTop: "1rem" }}>
+        <Tab
+          eventKey="proposal"
+          title="Proposal"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/gov/proposal")}
+        >
           <Propose />
         </Tab>
       </Tabs>

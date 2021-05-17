@@ -7,6 +7,8 @@ import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber, providers } from "ethers";
 import { Link } from "react-router-dom";
 import { Product } from "../../components/contracts/marketplace/product/Product";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const featured: BigNumber[] = [];
 const Store: React.FC = () => {
@@ -18,6 +20,8 @@ const Store: React.FC = () => {
   // const [projIdToVote, setProjIdToVote] = useState();
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
   const [timestamp, setTimestamp] = useState<number>(0);
+  const history = useHistory();
+  const { tab } = useParams<{ tab?: string }>();
 
   useEffect(() => {
     if (!library || !contracts || !blockNumber) {
@@ -72,8 +76,13 @@ const Store: React.FC = () => {
         src={process.env.PUBLIC_URL + "/images/nfts.jpg"}
         style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
       />
-      <Tabs defaultActiveKey="featured">
-        <Tab eventKey="featured" title="Featured" style={{ marginTop: "1rem" }}>
+      <Tabs defaultActiveKey={tab || "featured"}>
+        <Tab
+          eventKey="featured"
+          title="Featured"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/nfts/featured")}
+        >
           {featured.length === 0 && (
             <p>Coming soon :) We won't let you wait too long.</p>
           )}
@@ -88,7 +97,12 @@ const Store: React.FC = () => {
               ))}
           </Row>
         </Tab>
-        <Tab eventKey="all" title="All" style={{ marginTop: "1rem" }}>
+        <Tab
+          eventKey="all"
+          title="All"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/nfts/all")}
+        >
           {allProducts.length === 0 && (
             <p>Coming soon :) We won't let you wait too long.</p>
           )}
@@ -105,7 +119,12 @@ const Store: React.FC = () => {
             ))}
           </Row>
         </Tab>
-        <Tab eventKey="faq" title="FAQ" style={{ marginTop: "1rem" }}>
+        <Tab
+          eventKey="faq"
+          title="FAQ"
+          style={{ marginTop: "1rem" }}
+          onEnter={() => history.push("/nfts/faq")}
+        >
           <h5>
             <strong>How can I buy NFTs?</strong>
           </h5>

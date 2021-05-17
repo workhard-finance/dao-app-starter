@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
+import { Col, Nav, Row, Tab } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useHistory } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
 import { PostAJobBox } from "../../../components/contracts/job-board/PostAJob";
-import { BuyCommit } from "../../../components/contracts/stable-reserve/BuyCommit";
-import { RedeemCommit } from "../../../components/contracts/stable-reserve/RedeemCommit";
 
 export const JobBoard: React.FC = () => {
   const contracts = useWorkhardContracts();
+  const history = useHistory();
+  const { subtab } = useParams<{ subtab?: string }>();
   // const { account, library, chainId } = useWeb3React();
 
   const [activeProjects, setActiveProjects] = useState<BigNumber[]>(
@@ -70,17 +72,15 @@ export const JobBoard: React.FC = () => {
     }
   }, [contracts]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
-    <Tab.Container defaultActiveKey="activeProjects">
+    <Tab.Container defaultActiveKey={subtab || "active"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
-              <Nav.Link eventKey="activeProjects">Active projects</Nav.Link>
+              <Nav.Link eventKey="active">Active projects</Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link eventKey="inactiveProjects">
-                Inactive/pending projects
-              </Nav.Link>
+              <Nav.Link eventKey="pending">Inactive/pending projects</Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="post">Post a job</Nav.Link>
@@ -92,7 +92,10 @@ export const JobBoard: React.FC = () => {
         </Col>
         <Col sm={9}>
           <Tab.Content>
-            <Tab.Pane eventKey="activeProjects">
+            <Tab.Pane
+              eventKey="active"
+              onEnter={() => history.push("/work/job/active")}
+            >
               {activeProjects.length === 0 && (
                 <p>
                   No active project exists! Post a new one or approve the
@@ -106,7 +109,10 @@ export const JobBoard: React.FC = () => {
                 </div>
               ))}
             </Tab.Pane>
-            <Tab.Pane eventKey="inactiveProjects">
+            <Tab.Pane
+              eventKey="pending"
+              onEnter={() => history.push("/work/job/pending")}
+            >
               {inactiveProjects.length === 0 && <p>Empty!</p>}
               {inactiveProjects.map((id) => (
                 <div key={id.toString()}>
@@ -115,26 +121,16 @@ export const JobBoard: React.FC = () => {
                 </div>
               ))}
             </Tab.Pane>
-            <Tab.Pane eventKey="post">
+            <Tab.Pane
+              eventKey="post"
+              onEnter={() => history.push("/work/job/post")}
+            >
               <PostAJobBox />
             </Tab.Pane>
             <Tab.Pane
-              eventKey="commit-token"
-              title="$COMMIT"
-              style={{ marginTop: "1rem" }}
+              eventKey="faq"
+              onEnter={() => history.push("/work/job/faq")}
             >
-              <Row>
-                <Col>
-                  <BuyCommit />
-                </Col>
-                <Col>
-                  <RedeemCommit />
-                </Col>
-              </Row>
-              <br />
-              <Button variant={"info"} children="Trade $COMMIT on Uniswap" />
-            </Tab.Pane>
-            <Tab.Pane eventKey="faq">
               <h5>
                 <strong>How can I work?</strong>
               </h5>
