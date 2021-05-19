@@ -13,7 +13,7 @@ import {
 } from "../../../utils/coingecko";
 import { useToasts } from "react-toast-notifications";
 import { errorHandler } from "../../../utils/utils";
-import { ERC20Mock__factory as IERC20__factory } from "@workhard/protocol";
+import { ERC20__factory as IERC20__factory } from "@workhard/protocol";
 
 export interface ClaimProps {}
 

@@ -26,7 +26,7 @@ export const convertType = (type: PARAM_TYPE, value: string) => {
     case PARAM_TYPE.STRING:
       return value;
     case PARAM_TYPE.BOOLEAN:
-      return value == "true";
+      return value === "true";
     case PARAM_TYPE.ETHER:
       return parseEther(value);
     case PARAM_TYPE.NUMBER:
@@ -136,6 +136,12 @@ export const buildPresets = (contracts: WorkhardContracts): Preset[] => {
     {
       paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
       methodName: "setMinimumRate",
+      contract: contracts.visionEmitter,
+      contractName: "VisionEmitter",
+    },
+    {
+      paramArray: [{ name: "factory", type: PARAM_TYPE.STRING }],
+      methodName: "setFactory",
       contract: contracts.visionEmitter,
       contractName: "VisionEmitter",
     },

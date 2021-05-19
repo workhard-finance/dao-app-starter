@@ -5,7 +5,7 @@ import { useWorkhardContracts } from "../../../providers/WorkhardContractProvide
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
-  BurnMining__factory,
+  ERC20StakeMiningV1__factory,
   IERC20__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
@@ -21,16 +21,15 @@ import {
   getPriceFromCoingecko,
   getTokenDetailsFromCoingecko,
 } from "../../../utils/coingecko";
-import { OverlayTooltip } from "../../OverlayTooltip";
-import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useToasts } from "react-toast-notifications";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
-export enum BurnMiningPoolType {
+export enum ERC20StakeMiningV1Type {
   STAKE_MINING_POOL,
   BURN_MINING_POOL,
 }
 
-export interface BurnMiningPoolProps {
+export interface ERC20StakeMiningV1Props {
   poolIdx: number;
   title: string;
   tokenName?: string;
@@ -41,14 +40,14 @@ export interface BurnMiningPoolProps {
   collapsible?: boolean;
 }
 
-export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
+export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   poolIdx,
   title,
   tokenName,
   poolAddress,
-  totalEmission,
   visionPrice,
   collapsible,
+  totalEmission,
   emissionWeightSum,
 }) => {
   const { account, library } = useWeb3React();
@@ -61,22 +60,26 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   );
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
-  const [burnedAmount, setBurnedAmount] = useState<BigNumber>();
-  const [totalBurn, setTotalBurn] = useState<BigNumber>();
+  const [stakedAmount, setStakedAmount] = useState<BigNumber>();
+  const [totalStake, setTotalStake] = useState<BigNumber>();
   const [tokenPrice, setTokenPrice] = useState<number>();
   const [tokenDetails, setTokenDetails] = useState<CoingeckoTokenDetails>();
   const [weight, setWeight] = useState<BigNumber>();
   const [allocatedVISION, setAllocatedVISION] = useState<BigNumber>(
     constants.Zero
   );
+  const [stakeOrWithdraw, toggleStakeOrWithdraw] = useState<boolean>(true);
+  const [stakePercent, setStakePercent] = useState<number>();
   const [allowance, setAllowance] = useState<BigNumber>();
-  const [burnPercent, setBurnPercent] = useState<number>();
+  const [txStatus, setTxStatus] = useState<TxStatus>();
   const [amount, setAmount] = useState<string>();
   const [mined, setMined] = useState<BigNumber>();
-  const [txStatus, setTxStatus] = useState<TxStatus>();
-  const [annualRevenue, setAnnualRevenue] = useState<number>();
+  const [apy, setAPY] = useState<number>();
 
-  const getMaxAmount = () => formatEther(tokenBalance || "0");
+  const getMaxAmount = () =>
+    stakeOrWithdraw
+      ? formatEther(tokenBalance || "0")
+      : formatEther(stakedAmount || "0");
 
   useEffect(() => {
     if (!!account && !!contracts) {
@@ -90,6 +93,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
         .catch(errorHandler(addToast));
     }
   }, [account, contracts]);
+
   useEffect(() => {
     if (weight) {
       if (emissionWeightSum.eq(0)) {
@@ -112,12 +116,12 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       getTokenDetailsFromCoingecko(tokenAddress)
         .then(setTokenDetails)
         .catch(errorHandler(addToast));
-      const pool = BurnMining__factory.connect(poolAddress, library);
+      const pool = ERC20StakeMiningV1__factory.connect(poolAddress, library);
       pool
         .dispatchedMiners(account)
-        .then(setBurnedAmount)
+        .then(setStakedAmount)
         .catch(errorHandler(addToast));
-      pool.totalMiners().then(setTotalBurn).catch(errorHandler(addToast));
+      pool.totalMiners().then(setTotalStake).catch(errorHandler(addToast));
       pool.mined(account).then(setMined).catch(errorHandler(addToast));
       IERC20__factory.connect(tokenAddress, library)
         .allowance(account, poolAddress)
@@ -127,29 +131,26 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
   }, [account, contracts, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
-    if (burnedAmount && tokenBalance) {
-      const sum = burnedAmount.add(tokenBalance);
-      const percent = sum.eq(0) ? 0 : burnedAmount.mul(100).div(sum).toNumber();
-      setBurnPercent(percent);
+    if (stakedAmount && tokenBalance) {
+      const sum = stakedAmount.add(tokenBalance);
+      const percent = sum.eq(0) ? 0 : stakedAmount.mul(100).div(sum).toNumber();
+      setStakePercent(percent);
     }
-  }, [burnedAmount, tokenBalance]);
+  }, [stakedAmount, tokenBalance, txStatus]);
 
   useEffect(() => {
-    if (weight && tokenPrice && totalBurn) {
+    if (weight && tokenPrice && totalStake) {
       const visionPerWeek = parseFloat(
         formatEther(totalEmission.mul(weight).div(emissionWeightSum))
       );
-      const totalBurnedToken = parseFloat(formatEther(totalBurn));
-      setAnnualRevenue(
-        100 *
-          ((visionPerWeek * visionPrice * 52) /
-            (totalBurnedToken * tokenPrice) -
-            1)
+      const totalStakedToken = parseFloat(formatEther(totalStake));
+      setAPY(
+        (visionPerWeek * visionPrice * 52) / (totalStakedToken * tokenPrice)
       );
     } else {
-      setAnnualRevenue(NaN);
+      setAPY(NaN);
     }
-  }, [weight, tokenPrice, totalBurn]);
+  }, [weight, tokenPrice, totalStake, txStatus]);
 
   const approve = () => {
     if (!account || !contracts || !tokenAddress) {
@@ -171,7 +172,7 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
     return;
   };
 
-  const burn = () => {
+  const stake = () => {
     if (!account || !contracts) {
       alert("Not connected");
       return;
@@ -181,48 +182,133 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    const burnMining = BurnMining__factory.connect(poolAddress, library);
-    const amountToBurnInWei = parseEther(amount || "0");
+    const erc20StakeMiningV1 = ERC20StakeMiningV1__factory.connect(
+      poolAddress,
+      library
+    );
+    const amountToStakeInWei = parseEther(amount || "0");
     if (!tokenBalance) {
       alert("Fetching balance..");
       return;
-    } else if (tokenBalance && amountToBurnInWei.gt(tokenBalance)) {
+    } else if (tokenBalance && amountToStakeInWei.gt(tokenBalance)) {
       alert("Not enough amount.");
       return;
     }
     handleTransaction(
-      burnMining.connect(signer).burn(amountToBurnInWei),
+      erc20StakeMiningV1.connect(signer).stake(amountToStakeInWei),
       setTxStatus,
       addToast,
-      "Successfully burned!"
+      `Successfully staked!`
     );
   };
 
-  const exit = () => {
+  const withdraw = () => {
     if (!account || !contracts) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const burnMining = BurnMining__factory.connect(poolAddress, library);
-
+    const erc20StakeMiningV1 = ERC20StakeMiningV1__factory.connect(
+      poolAddress,
+      library
+    );
+    // const stakingToken =
+    const amountToWithdrawInWei = parseEther(amount || "0");
+    if (!stakedAmount) {
+      alert("Fetching balance..");
+      return;
+    } else if (stakedAmount && amountToWithdrawInWei.gt(stakedAmount)) {
+      alert("Not enough amount.");
+      return;
+    }
     handleTransaction(
-      burnMining.connect(signer).exit(),
+      erc20StakeMiningV1.connect(signer).withdraw(amountToWithdrawInWei),
       setTxStatus,
       addToast,
-      "Successfully exited!"
+      `Successfully withdrew!`
+    );
+  };
+
+  const mine = () => {
+    if (!account || !library) {
+      alert("Not connected");
+      return;
+    }
+    if (!mined || mined.eq(0)) {
+      alert("No $VISION mined");
+      return;
+    }
+    const signer = library.getSigner(account);
+    const erc20StakeMiningV1 = ERC20StakeMiningV1__factory.connect(
+      poolAddress,
+      library
+    );
+    handleTransaction(
+      erc20StakeMiningV1.connect(signer).mine(),
+      setTxStatus,
+      addToast,
+      `Successfully mined!`
+    );
+  };
+
+  const exit = () => {
+    if (!account || !library) {
+      alert("Not connected");
+      return;
+    }
+    if (!mined || mined.eq(0)) {
+      alert("No $VISION mined");
+      return;
+    }
+    const signer = library.getSigner(account);
+    const erc20StakeMiningV1 = ERC20StakeMiningV1__factory.connect(
+      poolAddress,
+      library
+    );
+    // const stakingToken =
+    handleTransaction(
+      erc20StakeMiningV1.connect(signer).exit(),
+      setTxStatus,
+      addToast,
+      `Successfully exited!`
     );
   };
 
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Burn ${tokenDetails?.name || tokenName}</Card.Title>
+      <Card.Title>Stake ${tokenDetails?.name || tokenName}</Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
             <InputGroup.Prepend>
-              <InputGroup.Text>Burn</InputGroup.Text>
+              <InputGroup.Text>
+                <span
+                  onClick={() => {
+                    toggleStakeOrWithdraw(true);
+                    setAmount("");
+                  }}
+                  style={{
+                    cursor: stakeOrWithdraw ? undefined : "pointer",
+                    textDecoration: stakeOrWithdraw ? "underline" : undefined,
+                  }}
+                >
+                  Stake
+                </span>
+                /
+                <span
+                  onClick={() => {
+                    toggleStakeOrWithdraw(false);
+                    setAmount("");
+                  }}
+                  style={{
+                    cursor: stakeOrWithdraw ? "pointer" : undefined,
+                    textDecoration: stakeOrWithdraw ? undefined : "underline",
+                  }}
+                >
+                  Withdraw
+                </span>
+              </InputGroup.Text>
             </InputGroup.Prepend>
             <Form.Control
               value={amount}
@@ -238,46 +324,50 @@ export const BurnMiningPool: React.FC<BurnMiningPoolProps> = ({
           </InputGroup>
         </Form.Group>
         <ProgressBar
-          variant={getVariantForProgressBar(burnPercent || 0)}
+          variant={getVariantForProgressBar(stakePercent || 0)}
           animated
-          now={burnPercent}
+          now={stakePercent}
         />
         <Card.Text>
-          Burned: {formatEther(burnedAmount || 0)} / Balance:{" "}
-          {formatEther(
-            BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
-          )}
+          {formatEther(stakedAmount || 0)} /
+          {formatEther(stakedAmount?.add(tokenBalance || 0) || 0)} of your{" "}
+          {tokenName || tokenDetails?.name} token is staked.
         </Card.Text>
         <Button
           variant="primary"
-          onClick={isApproved(allowance, amount) ? burn : approve}
+          onClick={
+            stakeOrWithdraw
+              ? isApproved(allowance, amount)
+                ? stake
+                : approve
+              : withdraw
+          }
         >
-          {isApproved(allowance, amount) ? "Burn" : "Approve"}
+          {stakeOrWithdraw
+            ? isApproved(allowance, amount)
+              ? "Stake"
+              : "Approve"
+            : "Withdraw"}
         </Button>
       </Form>
       <hr />
       <Card.Title>Mine</Card.Title>
       <Card.Text>You mined {formatEther(mined || "0")} $VISION</Card.Text>
+      <Button variant="primary" onClick={mine}>
+        Mine
+      </Button>{" "}
       <Button variant="primary" onClick={exit}>
-        Stop mining and withdraw rewards
+        Mine & Exit
       </Button>
     </>
   );
 
   return (
-    <Card border="danger">
+    <Card border="success">
       <Card.Header as="h5">{title}</Card.Header>
       <Card.Body>
-        <Card.Title>
-          ARR
-          <OverlayTooltip
-            tip={
-              "Annual Revenue Run Rate = (earned vision - burned commit) * 12 months / burned commit"
-            }
-            text="❔"
-          />
-        </Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>{annualRevenue}%</Card.Text>
+        <Card.Title>APY</Card.Title>
+        <Card.Text style={{ fontSize: "3rem" }}>{apy}%</Card.Text>
         <Card.Text>
           {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
           this week.

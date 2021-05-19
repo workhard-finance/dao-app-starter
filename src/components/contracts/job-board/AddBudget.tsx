@@ -98,9 +98,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       return;
     }
     const txPromise = projectApproved
-      ? jobBoard
-          .connect(signer)
-          .addAndExecuteBudget(projId, token, amountInWei, "0x")
+      ? jobBoard.connect(signer).addAndExecuteBudget(projId, token, amountInWei)
       : jobBoard.connect(signer).addBudget(projId, token, amountInWei);
 
     handleTransaction(

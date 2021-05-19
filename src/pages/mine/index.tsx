@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Alert, Button, Col, Image, Row, Tab, Tabs } from "react-bootstrap";
-import { StakeMiningPool } from "../../components/contracts/mining-pool/StakeMiningPool";
+import { ERC20StakeMiningV1 } from "../../components/contracts/mining-pool/ERC20StakeMiningV1";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import { parseEther } from "@ethersproject/units";
-import { BurnMiningPool } from "../../components/contracts/mining-pool/BurnMiningPool";
+import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20BurnMiningV1";
 import { getAddress } from "ethers/lib/utils";
 import { getPriceFromCoingecko } from "../../utils/coingecko";
 import { ContractReceipt } from "@ethersproject/contracts";
@@ -141,7 +141,7 @@ const Mine = () => {
           onEnter={() => history.push("/mine/liquidity")}
         >
           {(pools && liquidityMiningIdx !== -1 && emissionWeightSum && (
-            <StakeMiningPool
+            <ERC20StakeMiningV1
               poolIdx={liquidityMiningIdx}
               title={"Liquidity Mining"}
               tokenName={"VISION/ETH LP"}
@@ -164,7 +164,7 @@ const Mine = () => {
           onEnter={() => history.push("/mine/commit")}
         >
           {(pools && commitMiningIdx !== -1 && emissionWeightSum && (
-            <BurnMiningPool
+            <ERC20BurnMiningV1
               poolIdx={commitMiningIdx}
               title={"Commit Mining"}
               tokenName={"COMMIT"}
@@ -199,7 +199,7 @@ const Mine = () => {
                 return (
                   <div key={`mine-${addr}-${idx}`}>
                     <br />
-                    <StakeMiningPool
+                    <ERC20StakeMiningV1
                       poolIdx={idx}
                       title={"Stake"}
                       poolAddress={addr}

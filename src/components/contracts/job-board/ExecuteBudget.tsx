@@ -16,7 +16,6 @@ export interface ExecuteBudgetProps {
   projId: BigNumberish;
   budgetIndex: number;
   budgetOwner: string;
-  currency: string;
   amount: BigNumber;
   transferred: boolean;
 }
@@ -25,7 +24,6 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
   projId,
   budgetIndex,
   budgetOwner,
-  currency,
   amount,
   transferred,
 }) => {
@@ -42,7 +40,7 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
     const signer = library.getSigner(account);
     const jobBoard = contracts.jobBoard;
     handleTransaction(
-      jobBoard.connect(signer).executeBudget(projId, budgetIndex, "0x"),
+      jobBoard.connect(signer).executeBudget(projId, budgetIndex),
       setTxStatus,
       addToast,
       "Budget executed."
@@ -53,9 +51,6 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
     <Card>
       <Card.Header as="h5"># {budgetIndex}</Card.Header>
       <Card.Body>
-        <Card.Text>
-          Currency: {getTokenSymbol(currency, chainId)}({currency})
-        </Card.Text>
         <Card.Text>Amount: {formatEther(amount)}</Card.Text>
         <Card.Text>Executed: {transferred ? "True" : "False"}</Card.Text>
         {!transferred && (

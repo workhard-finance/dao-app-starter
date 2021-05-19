@@ -34,7 +34,6 @@ export const Project: React.FC = () => {
   const [exist, setExist] = useState<boolean>(true);
   const [budgets, setBudgets] = useState<
     Array<{
-      currency: string;
       amount: BigNumber;
       transferred: boolean;
     }>

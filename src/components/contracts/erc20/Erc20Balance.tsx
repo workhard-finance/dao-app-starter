@@ -5,7 +5,7 @@ import { useWeb3React } from "@web3-react/core";
 import { bigNumToFixed, errorHandler } from "../../../utils/utils";
 import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
-import { ERC20Mock__factory } from "@workhard/protocol";
+import { ERC20__factory } from "@workhard/protocol";
 import { useToasts } from "react-toast-notifications";
 
 export interface Erc20BalanceProps {
@@ -27,11 +27,11 @@ export const Erc20Balance: React.FC<Erc20BalanceProps> = ({
 
   useEffect(() => {
     if (!!account && !!library && !!address) {
-      ERC20Mock__factory.connect(address, library)
+      ERC20__factory.connect(address, library)
         .balanceOf(account)
         .then(setBalance)
         .catch(errorHandler(addToast));
-      ERC20Mock__factory.connect(address, library).symbol().then(setSymbol);
+      ERC20__factory.connect(address, library).symbol().then(setSymbol);
     }
   }, [account, address, library, blockNumber]);
 

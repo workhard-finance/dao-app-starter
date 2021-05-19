@@ -8,18 +8,18 @@ import {
 } from "@workhard/protocol/dist/deployed";
 import deployed from "@workhard/protocol/deployed.json";
 import {
-  BurnMining,
-  BurnMining__factory,
+  ERC20BurnMiningV1,
+  ERC20BurnMiningV1__factory,
   StableReserve,
   StableReserve__factory,
   Project,
   Project__factory,
-  StakeMining,
-  StakeMining__factory,
+  ERC20StakeMiningV1,
+  ERC20StakeMiningV1__factory,
   TimelockedGovernance,
   TimelockedGovernance__factory,
-  ERC20Mock as ERC20,
-  ERC20Mock__factory as ERC20__factory,
+  ERC20,
+  ERC20__factory,
   Marketplace,
   Marketplace__factory,
   JobBoard,
@@ -72,8 +72,8 @@ export interface WorkhardContracts {
   jobBoard: JobBoard;
   stableReserve: StableReserve;
   dividendPool: DividendPool;
-  liquidityMining: StakeMining;
-  commitMining: BurnMining;
+  liquidityMining: ERC20StakeMiningV1;
+  commitMining: ERC20BurnMiningV1;
   visionEmitter: VisionEmitter;
   workersUnion: WorkersUnion;
   timelockedGovernance: TimelockedGovernance;
@@ -134,11 +134,11 @@ export const WorkhardContractsProvider = ({ children }: { children: any }) => {
       contracts.DividendPool,
       library
     );
-    const liquidityMining = StakeMining__factory.connect(
+    const liquidityMining = ERC20StakeMiningV1__factory.connect(
       contracts.LiquidityMining,
       library
     );
-    const commitMining = BurnMining__factory.connect(
+    const commitMining = ERC20BurnMiningV1__factory.connect(
       contracts.CommitMining,
       library
     );
