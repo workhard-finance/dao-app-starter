@@ -81,7 +81,7 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
   }, [amounts, prices]);
 
   const isSynced = () => {
-    return tokens.length == prices.length && tokens.length == details.length;
+    return tokens.length === prices.length && tokens.length === details.length;
   };
 
   const valueInUSD = (amount?: BigNumber, price?: number) => {

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Container, Row } from "react-bootstrap";
 import WorkIcon from "../components/icons/WorkIcon";
 import GovIcon from "../components/icons/GovIcon";
@@ -7,13 +7,11 @@ import MineIcon from "../components/icons/MineIcon";
 import DupIcon from "../components/icons/DupIcon";
 import NavBar from "../components/nav/NavBar";
 import Footer from "../components/Footer";
-import { useWorkhardTheme } from "../providers/WorkhardThemeProvider";
-import { Menu, MenuContext } from "../contexts/menu";
+import { Menu } from "../contexts/menu";
 
 export type PageProps = React.ComponentProps<any>;
 
 const Page = (props: React.ComponentProps<any>) => {
-  const theme = useWorkhardTheme();
   const menus: Menu[] = [
     {
       Icon: WorkIcon,

@@ -13,7 +13,7 @@ import { useIPFS } from "../../../providers/IPFSProvider";
 import { permaPinToArweave } from "../../../utils/utils";
 
 export const Manufacture: React.FC = () => {
-  const { account, library, chainId } = useWeb3React();
+  const { account, library } = useWeb3React();
   const history = useHistory();
   const contracts = useWorkhardContracts();
   const { ipfs } = useIPFS();
@@ -63,7 +63,7 @@ export const Manufacture: React.FC = () => {
   };
 
   function upload() {
-    if (name == undefined || description == undefined || file == undefined) {
+    if (name === undefined || description === undefined || file === undefined) {
       alert("Fill out the form.");
       return;
     }
@@ -93,9 +93,9 @@ export const Manufacture: React.FC = () => {
       return;
     }
     if (
-      metadataURI == undefined ||
-      price == undefined ||
-      profitRate == undefined
+      metadataURI === undefined ||
+      price === undefined ||
+      profitRate === undefined
     ) {
       alert("Fill out the form.");
       return;

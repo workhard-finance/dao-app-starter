@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Alert, Button, Col, Image, Row, Tab, Tabs } from "react-bootstrap";
+import { Alert, Button, Image, Tab, Tabs } from "react-bootstrap";
 import { ERC20StakeMiningV1 } from "../../components/contracts/mining-pool/ERC20StakeMiningV1";
 import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
-import { parseEther } from "@ethersproject/units";
 import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20BurnMiningV1";
 import { getAddress } from "ethers/lib/utils";
 import { getPriceFromCoingecko } from "../../utils/coingecko";
-import { ContractReceipt } from "@ethersproject/contracts";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
-import { altWhenEmptyList } from "../../utils/utils";
+import {
+  altWhenEmptyList,
+  handleTransaction,
+  TxStatus,
+} from "../../utils/utils";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { useToasts } from "react-toast-notifications";
 
 const Mine = () => {
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
+  const { addToast } = useToasts();
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
   const [pools, setPools] = useState<string[]>();
@@ -28,45 +32,34 @@ const Mine = () => {
   const [distributionEnabled, setDistributionEnabled] = useState<boolean>(
     false
   );
+  const [txStatus, setTxStatus] = useState<TxStatus>();
 
   const [liquidityMiningIdx, setLiquidityMiningIdx] = useState<number>(-1);
   const [commitMiningIdx, setCommitMiningIdx] = useState<number>(-1);
-  const [lastTx, setLastTx] = useState<ContractReceipt>();
 
   useEffect(() => {
     if (!!contracts) {
-      let stale = false;
       contracts.visionEmitter.getNumberOfPools().then(setPoolLength);
       contracts.visionEmitter.estimateGas
         .distribute()
         .then((_) => setDistributionEnabled(true))
         .catch((_) => setDistributionEnabled(false));
-      return () => {
-        stale = true;
-        setPoolLength(undefined);
-      };
     }
   }, [contracts]);
 
   useEffect(() => {
     if (!!contracts && !!poolLength) {
-      let stale = false;
       const { visionEmitter } = contracts;
       Promise.all(
         Array(poolLength.toNumber())
           .fill(0)
           .map((_, i) => visionEmitter.pools(i))
       ).then(setPools);
-      return () => {
-        stale = true;
-        setPools([]);
-      };
     }
   }, [contracts, poolLength]);
 
   useEffect(() => {
     if (!!contracts && !!pools) {
-      let stale = false;
       setLiquidityMiningIdx(
         pools.findIndex(
           (v) => getAddress(v) === getAddress(contracts.liquidityMining.address)
@@ -82,26 +75,18 @@ const Mine = () => {
         setEmissionWeightSum(w.sum);
       });
       getPriceFromCoingecko(contracts.vision.address).then(setVisionPrice);
-      return () => {
-        stale = true;
-        setPoolLength(undefined);
-        setEmission(undefined);
-        setLiquidityMiningIdx(-1);
-        setCommitMiningIdx(-1);
-      };
     }
-  }, [library, contracts, pools]);
+  }, [library, contracts, pools, txStatus]);
 
   const distribute = () => {
     if (!!account && !!contracts && !!library) {
       const signer = library.getSigner(account);
-      contracts.visionEmitter
-        .connect(signer)
-        .distribute()
-        .then((tx) => {
-          tx.wait().then(setLastTx);
-        })
-        .catch(alert);
+      handleTransaction(
+        contracts.visionEmitter.connect(signer).distribute(),
+        setTxStatus,
+        addToast,
+        "You've mined the distribution transaction!!"
+      );
     }
   };
 

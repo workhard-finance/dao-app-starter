@@ -5,7 +5,7 @@ import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther, parseEther } from "@ethersproject/units";
 import { IERC20__factory } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
-import { getNetworkName, MyNetwork } from "@workhard/protocol/dist/deployed";
+import { getNetworkName } from "@workhard/protocol/dist/deployed";
 import {
   constants,
   Contract,
@@ -16,7 +16,6 @@ import {
 import IPFS from "ipfs-core/src/components";
 import { Dispatch, SetStateAction } from "react";
 import { AddToast } from "react-toast-notifications";
-import { JsxElement } from "typescript";
 import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
@@ -167,6 +166,13 @@ export function flatten(val: ContractValue | ContractValue[]): string {
   }
 }
 
+export enum TxStatus {
+  NOT_EXIST,
+  PENDING,
+  REVERTED,
+  CONFIRMED,
+}
+
 export function approveAndRun(
   signer: Signer,
   erc20: string,
@@ -221,12 +227,6 @@ export const errorHandler = (
   }
 };
 
-export enum TxStatus {
-  NOT_EXIST,
-  PENDING,
-  REVERTED,
-  CONFIRMED,
-}
 export const handleTransaction = (
   transaction: Promise<ContractTransaction>,
   setTxStatus: React.Dispatch<React.SetStateAction<TxStatus | undefined>>,

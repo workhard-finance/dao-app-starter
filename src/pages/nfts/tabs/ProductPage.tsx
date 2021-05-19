@@ -12,7 +12,7 @@ import { ProductView } from "../../../components/contracts/marketplace/product/P
 import { useIPFS } from "../../../providers/IPFSProvider";
 
 export const ProductPage: React.FC = () => {
-  const { account, library, chainId } = useWeb3React();
+  const { account, library } = useWeb3React();
   const history = useHistory();
   const contracts = useWorkhardContracts();
   const { ipfs } = useIPFS();
@@ -90,13 +90,13 @@ export const ProductPage: React.FC = () => {
       return;
     }
     if (
-      name == undefined ||
-      symbol == undefined ||
-      baseURI == undefined ||
-      descriptionURI == undefined ||
-      price == undefined ||
-      profitRate == undefined ||
-      initialSupply == undefined
+      name === undefined ||
+      symbol === undefined ||
+      baseURI === undefined ||
+      descriptionURI === undefined ||
+      price === undefined ||
+      profitRate === undefined ||
+      initialSupply === undefined
     ) {
       alert("Fill out the form.");
       return;

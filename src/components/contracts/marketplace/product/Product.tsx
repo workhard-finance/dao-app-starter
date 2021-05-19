@@ -11,8 +11,6 @@ import {
 import { constants, ContractTransaction } from "ethers";
 import { ProductData, ProductView } from "./ProductView";
 import { useBlockNumber } from "../../../../providers/BlockNumberProvider";
-import { useIPFS } from "../../../../providers/IPFSProvider";
-import { IPFS } from "ipfs-core/src";
 import { useToasts } from "react-toast-notifications";
 
 export interface ProductProps {
@@ -51,7 +49,7 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
         .then(setProduct)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, blockNumber]);
+  }, [account, contracts, blockNumber, approveTx]);
 
   const approveAndBuy = () => {
     if (!account || !contracts || !library) {

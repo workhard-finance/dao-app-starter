@@ -12,14 +12,11 @@ import { useParams } from "react-router-dom";
 
 const featured: BigNumber[] = [];
 const Store: React.FC = () => {
-  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
+  const { library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const contracts = useWorkhardContracts();
   const [allProducts, setAllProducts] = useState<BigNumber[]>([]);
-  // const [page, setPage] = useState(0);
-  // const [projIdToVote, setProjIdToVote] = useState();
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
-  const [timestamp, setTimestamp] = useState<number>(0);
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
 
@@ -41,9 +38,6 @@ const Store: React.FC = () => {
           ...events.map((event) => event.args.id),
         ]);
       });
-    library
-      .getBlock(blockNumber)
-      .then((block) => setTimestamp(block.timestamp));
   }, [contracts, blockNumber]);
 
   useEffect(() => {
@@ -64,9 +58,6 @@ const Store: React.FC = () => {
           ...events.map((event) => event.args.id),
         ]);
       });
-    library
-      .getBlock(blockNumber)
-      .then((block) => setTimestamp(block.timestamp));
   }, [contracts, blockNumber]);
 
   return (

@@ -91,7 +91,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, txStatus, blockNumber]);
+  }, [account, contracts, txStatus, blockNumber, addToast]);
 
   return (
     <Card>

@@ -1,14 +1,13 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BigNumber,
-  Contract,
   ContractTransaction,
   PopulatedTransaction,
   providers,
   Signer,
   Transaction,
 } from "ethers";
-import { Accordion, Button, Card, Modal, Row, Col } from "react-bootstrap";
+import { Accordion, Button, Card, Modal } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";

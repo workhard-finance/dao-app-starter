@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Page from "../layouts/Page";
-import { Button, Container, Image, Toast } from "react-bootstrap";
+import { Button, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 const Home = () => {
   return (

@@ -17,7 +17,6 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
 
   useEffect(() => {
     if (!!contracts) {
-      let stale = false;
       const timelockedGovernance = contracts.timelockedGovernance;
       timelockedGovernance
         .queryFilter(
@@ -40,10 +39,6 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
           });
           setEmittedEvents(_txIds);
         });
-      return () => {
-        stale = true;
-        setEmittedEvents({});
-      };
     }
   }, [contracts]);
 

@@ -1,10 +1,5 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import {
-  providers,
-  BigNumber,
-  BigNumberish,
-  ContractTransaction,
-} from "ethers";
+import { providers, BigNumber, BigNumberish } from "ethers";
 import { Button, Card, Form, InputGroup } from "react-bootstrap";
 import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
 import { randomBytes } from "ethers/lib/utils";

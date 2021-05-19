@@ -33,7 +33,7 @@ const Vote: React.FC = () => {
     workersUnion.votingRule().then((rule) => {
       setQuorum(rule.minimumVotes);
     });
-  }, [library, chainId, timestamp]);
+  }, [library, chainId, timestamp, contracts]);
 
   useEffect(() => {
     if (!account || !library || !chainId || !contracts) {
@@ -43,7 +43,7 @@ const Vote: React.FC = () => {
     workersUnion.getVotesAt(account, timestamp).then((vote) => {
       setMyVotes(vote);
     });
-  }, [account, library, chainId, timestamp]);
+  }, [account, library, chainId, timestamp, contracts]);
 
   useEffect(() => {
     if (!library || !contracts || !blockNumber) {

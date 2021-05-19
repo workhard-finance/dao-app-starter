@@ -6,11 +6,7 @@ import { formatEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { useToasts } from "react-toast-notifications";
 import { ConditionalButton } from "../../ConditionalButton";
-import {
-  getTokenSymbol,
-  handleTransaction,
-  TxStatus,
-} from "../../../utils/utils";
+import { handleTransaction, TxStatus } from "../../../utils/utils";
 
 export interface ExecuteBudgetProps {
   projId: BigNumberish;
