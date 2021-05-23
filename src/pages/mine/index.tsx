@@ -6,8 +6,6 @@ import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20BurnMiningV1";
-import { getAddress } from "ethers/lib/utils";
-import { getPriceFromCoingecko } from "../../utils/coingecko";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import {
   altWhenEmptyList,
@@ -17,66 +15,37 @@ import {
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
+import { initMineStore, MineStore } from "../../store/mineStore";
+import { observer } from "mobx-react";
 
-const Mine = () => {
+const Mine = observer(() => {
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
   const { addToast } = useToasts();
   const { account, library } = useWeb3React();
   const contracts = useWorkhardContracts();
-  const [pools, setPools] = useState<string[]>();
-  const [poolLength, setPoolLength] = useState<BigNumber>();
-  const [visionPrice, setVisionPrice] = useState<number>();
-  const [emission, setEmission] = useState<BigNumber>();
-  const [emissionWeightSum, setEmissionWeightSum] = useState<BigNumber>();
-  const [distributionEnabled, setDistributionEnabled] = useState<boolean>(
-    false
+  const mineStore: MineStore = initMineStore(
+    !!contracts ? contracts.visionEmitter : null,
+    !!contracts ? contracts.liquidityMining.address : null,
+    !!contracts ? contracts.commitMining.address : null,
+    !!contracts ? contracts.vision.address : null
   );
   const [txStatus, setTxStatus] = useState<TxStatus>();
 
-  const [liquidityMiningIdx, setLiquidityMiningIdx] = useState<number>(-1);
-  const [commitMiningIdx, setCommitMiningIdx] = useState<number>(-1);
-
   useEffect(() => {
     if (!!contracts) {
-      contracts.visionEmitter.getNumberOfPools().then(setPoolLength);
-      contracts.visionEmitter.estimateGas
-        .distribute()
-        .then((_) => setDistributionEnabled(true))
-        .catch((_) => setDistributionEnabled(false));
+      mineStore.loadPools().then();
+      mineStore.isDistributable();
     }
   }, [contracts]);
 
   useEffect(() => {
-    if (!!contracts && !!poolLength) {
-      const { visionEmitter } = contracts;
-      Promise.all(
-        Array(poolLength.toNumber())
-          .fill(0)
-          .map((_, i) => visionEmitter.pools(i))
-      ).then(setPools);
+    if (!!contracts && !!mineStore.pools) {
+      mineStore.loadEmission();
+      mineStore.loadEmissionWeightSum();
+      mineStore.loadVisionPrice();
     }
-  }, [contracts, poolLength]);
-
-  useEffect(() => {
-    if (!!contracts && !!pools) {
-      setLiquidityMiningIdx(
-        pools.findIndex(
-          (v) => getAddress(v) === getAddress(contracts.liquidityMining.address)
-        )
-      );
-      setCommitMiningIdx(
-        pools.findIndex(
-          (v) => getAddress(v) === getAddress(contracts.commitMining.address)
-        )
-      );
-      contracts.visionEmitter.emission().then(setEmission);
-      contracts.visionEmitter.emissionWeight().then((w) => {
-        setEmissionWeightSum(w.sum);
-      });
-      getPriceFromCoingecko(contracts.vision.address).then(setVisionPrice);
-    }
-  }, [library, contracts, pools, txStatus]);
+  }, [library, contracts, txStatus]);
 
   const distribute = () => {
     if (!!account && !!contracts && !!library) {
@@ -85,7 +54,8 @@ const Mine = () => {
         contracts.visionEmitter.connect(signer).distribute(),
         setTxStatus,
         addToast,
-        "You've mined the distribution transaction!!"
+        "You've mined the distribution transaction!!",
+        mineStore.isDistributable
       );
     }
   };
@@ -97,7 +67,7 @@ const Mine = () => {
         src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
         style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
       />
-      {distributionEnabled && (
+      {mineStore.distributable && (
         <Alert variant={"info"}>
           You just discovered a $VISION mine. Please call that smart contract
           function now.
@@ -125,17 +95,19 @@ const Mine = () => {
           style={{ marginTop: "1rem" }}
           onEnter={() => history.push("/mine/liquidity")}
         >
-          {(pools && liquidityMiningIdx !== -1 && emissionWeightSum && (
-            <ERC20StakeMiningV1
-              poolIdx={liquidityMiningIdx}
-              title={"Liquidity Mining"}
-              tokenName={"VISION/ETH LP"}
-              poolAddress={pools[liquidityMiningIdx]}
-              totalEmission={emission || BigNumber.from(0)}
-              emissionWeightSum={emissionWeightSum}
-              visionPrice={visionPrice || 0}
-            />
-          )) || (
+          {(mineStore.pools &&
+            mineStore.liquidityMiningIdx() !== -1 &&
+            mineStore.emissionWeightSum && (
+              <ERC20StakeMiningV1
+                poolIdx={mineStore.liquidityMiningIdx()}
+                title={"Liquidity Mining"}
+                tokenName={"VISION/ETH LP"}
+                poolAddress={mineStore.pools[mineStore.liquidityMiningIdx()]}
+                totalEmission={mineStore.emission}
+                emissionWeightSum={mineStore.emissionWeightSum}
+                visionPrice={mineStore.visionPrice || 0}
+              />
+            )) || (
             <p>
               Oops, we cannot find the liquidity mining pool. Are you connected
               to the wallet?
@@ -148,17 +120,19 @@ const Mine = () => {
           style={{ marginTop: "1rem" }}
           onEnter={() => history.push("/mine/commit")}
         >
-          {(pools && commitMiningIdx !== -1 && emissionWeightSum && (
-            <ERC20BurnMiningV1
-              poolIdx={commitMiningIdx}
-              title={"Commit Mining"}
-              tokenName={"COMMIT"}
-              poolAddress={pools[commitMiningIdx]}
-              totalEmission={emission || BigNumber.from(0)}
-              emissionWeightSum={emissionWeightSum}
-              visionPrice={visionPrice || 0}
-            />
-          )) || (
+          {(mineStore.pools &&
+            mineStore.commitMiningIdx() !== -1 &&
+            mineStore.emissionWeightSum && (
+              <ERC20BurnMiningV1
+                poolIdx={mineStore.commitMiningIdx()}
+                title={"Commit Mining"}
+                tokenName={"COMMIT"}
+                poolAddress={mineStore.pools[mineStore.commitMiningIdx()]}
+                totalEmission={mineStore.emission || BigNumber.from(0)}
+                emissionWeightSum={mineStore.emissionWeightSum}
+                visionPrice={mineStore.visionPrice || 0}
+              />
+            )) || (
             <p>
               Oops, we cannot find the commit mining pool. Are you connected to
               the wallet?
@@ -173,11 +147,11 @@ const Mine = () => {
         >
           {altWhenEmptyList(
             <p>Partnerships are on the way 👀</p>,
-            pools?.map((addr, idx) => {
+            mineStore.pools?.map((addr, idx) => {
               if (
-                idx === liquidityMiningIdx ||
-                idx === commitMiningIdx ||
-                !emissionWeightSum
+                idx === mineStore.liquidityMiningIdx() ||
+                idx === mineStore.commitMiningIdx() ||
+                !mineStore.emissionWeightSum
               )
                 return undefined;
               else
@@ -188,9 +162,9 @@ const Mine = () => {
                       poolIdx={idx}
                       title={"Stake"}
                       poolAddress={addr}
-                      totalEmission={emission || BigNumber.from(0)}
-                      emissionWeightSum={emissionWeightSum}
-                      visionPrice={visionPrice || 0}
+                      totalEmission={mineStore.emission}
+                      emissionWeightSum={mineStore.emissionWeightSum}
+                      visionPrice={mineStore.visionPrice || 0}
                       collapsible={true}
                     />
                   </div>
@@ -316,6 +290,6 @@ const Mine = () => {
       </Tabs>
     </Page>
   );
-};
+});
 
 export default Mine;
