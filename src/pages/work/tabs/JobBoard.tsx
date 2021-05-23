@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
@@ -8,7 +8,7 @@ import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
 import { PostAJobBox } from "../../../components/contracts/job-board/PostAJob";
 
 export const JobBoard: React.FC = () => {
-  const contracts = useWorkhardContracts();
+  const { workhard, dao } = useWorkhard() || {};
   const history = useHistory();
   const { subtab } = useParams<{ subtab?: string }>();
   // const { account, library, chainId } = useWeb3React();
@@ -23,17 +23,17 @@ export const JobBoard: React.FC = () => {
   // TODO listen JobBoard events and add dependency to useEffect()
 
   useEffect(() => {
-    if (!!contracts) {
+    if (!!dao && !!workhard) {
       let stale = false;
-      const { project, jobBoard } = contracts;
-      project
+      const { jobBoard } = dao;
+      workhard
         .totalSupply()
         .then((n: BigNumber) => {
           if (!stale) {
             Array(n.toNumber())
               .fill(undefined)
               .forEach((_, index) => {
-                project.tokenByIndex(index).then((projId) => {
+                workhard.tokenByIndex(index).then((projId) => {
                   jobBoard.approvedProjects(projId).then((approved) => {
                     if (approved) {
                       if (!activeProjects.find((v) => v.eq(projId))) {
@@ -70,7 +70,7 @@ export const JobBoard: React.FC = () => {
         setInactiveProjects([]);
       };
     }
-  }, [contracts]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [dao]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
     <Tab.Container defaultActiveKey={subtab || "active"}>
       <Row>

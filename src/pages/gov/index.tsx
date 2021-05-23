@@ -6,14 +6,14 @@ import { Propose } from "./tabs/Propose";
 import Vote from "./tabs/Vote";
 import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
 const Gov: React.FC = () => {
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
 
   return (
     <Page>
@@ -33,7 +33,7 @@ const Gov: React.FC = () => {
           onEnter={() => history.push("/gov/right")}
         >
           <Erc20Balance
-            address={contracts?.right.address}
+            address={dao?.right.address}
             description={`= staked amount x locking period / max period`}
             symbolAlt={`RIGHT(a.k.a. veVISION)`}
           />

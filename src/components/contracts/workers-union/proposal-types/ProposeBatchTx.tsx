@@ -1,7 +1,7 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { providers, BigNumber, BigNumberish } from "ethers";
 import { Button, Card, Form, InputGroup } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../../providers/WorkhardProvider";
 import { randomBytes } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../../ConditionalButton";
@@ -21,7 +21,7 @@ interface ProposeTx {
 
 export const ProposeBatchTx: React.FC = ({}) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
   const [timestamp, setTimestamp] = useState<number>(0);
@@ -58,8 +58,8 @@ export const ProposeBatchTx: React.FC = ({}) => {
   }>({});
 
   useEffect(() => {
-    if (!!account && !!contracts && !!library && !!blockNumber) {
-      const workersUnion = contracts.workersUnion;
+    if (!!account && !!dao && !!library && !!blockNumber) {
+      const workersUnion = dao.workersUnion;
       workersUnion
         .votingRule()
         .then((result) => {
@@ -83,11 +83,11 @@ export const ProposeBatchTx: React.FC = ({}) => {
         .getBlock(blockNumber)
         .then((block) => setTimestamp(block.timestamp));
     }
-  }, [account, contracts, txStatus, blockNumber]);
+  }, [account, dao, txStatus, blockNumber]);
 
   useEffect(() => {
-    if (!!account && !!contracts && !!timestamp) {
-      const { workersUnion } = contracts;
+    if (!!account && !!dao && !!timestamp) {
+      const { workersUnion } = dao;
       workersUnion
         .getVotesAt(account, timestamp)
         .then(setMyVotes)
@@ -98,7 +98,7 @@ export const ProposeBatchTx: React.FC = ({}) => {
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
@@ -111,7 +111,7 @@ export const ProposeBatchTx: React.FC = ({}) => {
 
     const signer = library.getSigner(account);
     handleTransaction(
-      contracts.workersUnion.connect(signer).proposeBatchTx(
+      dao.workersUnion.connect(signer).proposeBatchTx(
         Object.values(proposalProperties).map((prop) => prop.msgTo),
         Object.values(proposalProperties).map((prop) => prop.msgValue),
         Object.values(proposalProperties).map((prop) => prop.msgData),

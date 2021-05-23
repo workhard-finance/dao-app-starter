@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Page from "../../../layouts/Page";
 
 import { Row, Col, Card, Button, Form } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, ContractTransaction } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import { parseEther } from "ethers/lib/utils";
@@ -15,7 +15,7 @@ import { permaPinToArweave } from "../../../utils/utils";
 export const Manufacture: React.FC = () => {
   const { account, library } = useWeb3React();
   const history = useHistory();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { ipfs } = useIPFS();
 
   const [name, setName] = useState<string>();
@@ -88,7 +88,7 @@ export const Manufacture: React.FC = () => {
   }
 
   function submitTx() {
-    if (!contracts) {
+    if (!dao) {
       alert("Web3 is not connected.");
       return;
     }
@@ -101,7 +101,7 @@ export const Manufacture: React.FC = () => {
       return;
     }
     let submission: Promise<ContractTransaction>;
-    const marketplace = contracts?.marketplace;
+    const marketplace = dao?.marketplace;
     if (!marketplace) {
       alert("Not connected");
       return;

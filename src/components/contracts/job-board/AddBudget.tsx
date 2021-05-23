@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BigNumber, BigNumberish, constants } from "ethers";
 import { Form } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { IERC20__factory } from "@workhard/protocol";
@@ -27,7 +27,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   budgetOwner,
 }) => {
   const { account, chainId, library } = useWeb3React();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [acceptableTokens, setAcceptableTokens] = useState<
@@ -48,14 +48,14 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   }, [chainId]);
 
   useEffect(() => {
-    if (!!account && !!contracts && !!token) {
+    if (!!account && !!dao && !!token) {
       const erc20 = IERC20__factory.connect(token, library);
       erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
       erc20
-        .allowance(account, contracts.jobBoard.address)
+        .allowance(account, dao.jobBoard.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
-      contracts.jobBoard
+      dao.jobBoard
         .approvedProjects(projId)
         .then(setProjectApproved)
         .catch(errorHandler(addToast));
@@ -63,7 +63,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   }, [account, token, txStatus]);
 
   const addBudget = () => {
-    if (!account || !contracts) {
+    if (!account || !dao) {
       alert("Not connected");
       return;
     } else if (!token) {
@@ -76,14 +76,14 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       handleTransaction(
         erc20
           .connect(signer)
-          .approve(contracts.jobBoard.address, constants.MaxUint256),
+          .approve(dao.jobBoard.address, constants.MaxUint256),
         setTxStatus,
         addToast,
         "Approved JobBoard to use $COMMIT"
       );
       return;
     }
-    const jobBoard = contracts?.jobBoard;
+    const jobBoard = dao?.jobBoard;
     if (!jobBoard) {
       alert("Not connected");
       return;

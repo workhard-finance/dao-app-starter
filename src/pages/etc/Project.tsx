@@ -3,7 +3,7 @@ import Page from "../../layouts/Page";
 
 import { Row, Col, Tab, Nav, Card, Button } from "react-bootstrap";
 import ReactHtmlParser from "react-html-parser";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
@@ -23,7 +23,7 @@ import { useToasts } from "react-toast-notifications";
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
   const history = useHistory();
-  const contracts = useWorkhardContracts();
+  const { workhard, dao } = useWorkhard() || { dao: undefined };
   const { ipfs } = useIPFS();
   const { addToast } = useToasts();
 
@@ -39,13 +39,13 @@ export const Project: React.FC = () => {
     }>
   >(new Array(0));
   useEffect(() => {
-    if (!!contracts && !!ipfs) {
-      const { project, jobBoard } = contracts;
-      project
+    if (!!dao && !!workhard && !!ipfs) {
+      const { jobBoard } = dao;
+      workhard
         .ownerOf(id)
         .then(setBudgetOwner)
         .catch(errorHandler(addToast, undefined, () => setExist(false)));
-      project
+      workhard
         .tokenURI(id)
         .then(async (uri) => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
@@ -53,11 +53,11 @@ export const Project: React.FC = () => {
         .catch(errorHandler(addToast));
       jobBoard.projectFund(id).then(setFund).catch(errorHandler(addToast));
     }
-  }, [contracts, ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [dao, ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   useEffect(() => {
-    if (!!account && !!library && !!chainId && !!contracts) {
-      const { jobBoard } = contracts;
+    if (!!account && !!library && !!chainId && !!dao) {
+      const { jobBoard } = dao;
       jobBoard.getTotalBudgets(id).then((len: BigNumber) => {
         Promise.all(
           new Array(len.toNumber())

@@ -1,7 +1,7 @@
 import { Button, Card, ProgressBar } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, providers, Signer } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
@@ -63,7 +63,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [proposal, setProposal] = useState<Proposal>();
   const [scheduledTimestamp, setScheduledTimestamp] = useState<BigNumber>();
@@ -72,16 +72,16 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
 
   useEffect(() => {
-    if (!contracts || !library || !blockNumber) {
+    if (!dao || !library || !blockNumber) {
       return;
     }
-    const { workersUnion, timelockedGovernance } = contracts;
+    const { workersUnion, timelock } = dao;
     workersUnion.proposals(tx.txHash).then(setProposal);
-    timelockedGovernance.getTimestamp(tx.txHash).then(setScheduledTimestamp);
-  }, [contracts, blockNumber]);
+    timelock.getTimestamp(tx.txHash).then(setScheduledTimestamp);
+  }, [dao, blockNumber]);
 
   useEffect(() => {
-    if (!contracts || !library || !blockNumber || !scheduledTimestamp) {
+    if (!dao || !library || !blockNumber || !scheduledTimestamp) {
       return;
     }
     if (scheduledTimestamp.eq(0)) {
@@ -97,10 +97,10 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         }
       });
     }
-  }, [account, library, contracts, blockNumber, txStatus]);
+  }, [account, library, dao, blockNumber, txStatus]);
 
   useEffect(() => {
-    if (!contracts || !proposal) {
+    if (!dao || !proposal) {
       return;
     }
     const { target, data, value } = tx;
@@ -109,7 +109,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         target.reduce(
           (arr, _target, i) => [
             ...arr,
-            decodeTxDetails(contracts, _target, data[i], value[i]),
+            decodeTxDetails(dao, _target, data[i], value[i]),
           ],
           [] as DecodedTxData[]
         )
@@ -119,24 +119,24 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       !Array.isArray(data) &&
       !Array.isArray(value)
     ) {
-      setDecodedTxData([decodeTxDetails(contracts, target, data, value)]);
+      setDecodedTxData([decodeTxDetails(dao, target, data, value)]);
     }
-  }, [contracts, proposal]);
+  }, [dao, proposal]);
 
   const onVote = (agree: boolean) => async () => {
-    if (!contracts || !library || !account) {
+    if (!dao || !library || !account) {
       return;
     }
-    const workersUnion = contracts.workersUnion;
+    const workersUnion = dao.workersUnion;
     const signer = await library.getSigner(account);
     await workersUnion.connect(signer).vote(tx.txHash, agree);
   };
 
   const schedule = () => {
-    if (!contracts || !library || !account) {
+    if (!dao || !library || !account) {
       return;
     }
-    const workersUnion = contracts.workersUnion;
+    const workersUnion = dao.workersUnion;
     const signer: Signer = library.getSigner(account);
     if (
       !Array.isArray(tx.target) &&
@@ -170,10 +170,10 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   };
 
   const execute = () => {
-    if (!contracts || !library || !account) {
+    if (!dao || !library || !account) {
       return;
     }
-    const workersUnion = contracts.workersUnion;
+    const workersUnion = dao.workersUnion;
     const signer: Signer = library.getSigner(account);
     if (
       !Array.isArray(tx.target) &&

@@ -8,7 +8,7 @@ import {
   Transaction,
 } from "ethers";
 import { Accordion, Button, Card, Modal } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import { formatEther, solidityKeccak256 } from "ethers/lib/utils";
@@ -61,7 +61,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   index,
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [scheduledTx, setScheduledTx] = useState<ScheduledTx>();
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
@@ -79,9 +79,9 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   const handleShow = () => setShow(true);
 
   useEffect(() => {
-    if (!!contracts && !!library) {
-      const timeLockGovernance = contracts.timelockedGovernance;
-      const workersUnion = contracts.workersUnion;
+    if (!!dao && !!library) {
+      const timeLockGovernance = dao.timelock;
+      const workersUnion = dao.workersUnion;
       library
         .getBlock(blockNumber)
         .then((block) => {
@@ -89,7 +89,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         })
         .catch(errorHandler(addToast));
       if (tx.to) {
-        const txDetails = decodeTxDetails(contracts, tx.to, tx.data, tx.value);
+        const txDetails = decodeTxDetails(dao, tx.to, tx.data, tx.value);
         const { result } = txDetails;
         let proposer: TxProposer | undefined;
         let forced: boolean | undefined;
@@ -135,10 +135,10 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         });
       }
     }
-  }, [library, contracts, lastTx]);
+  }, [library, dao, lastTx]);
 
   useEffect(() => {
-    if (!!contracts && !!scheduledTx) {
+    if (!!dao && !!scheduledTx) {
       const { target, data, value } = scheduledTx;
       if (
         Array.isArray(target) &&
@@ -147,7 +147,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
       ) {
         setDecodedTxData(
           target.map((_target: string, i: number) =>
-            decodeTxDetails(contracts, _target, data[i], value[i])
+            decodeTxDetails(dao, _target, data[i], value[i])
           )
         );
       } else if (
@@ -155,21 +155,21 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         !Array.isArray(data) &&
         !Array.isArray(value)
       ) {
-        setDecodedTxData([decodeTxDetails(contracts, target, data, value)]);
+        setDecodedTxData([decodeTxDetails(dao, target, data, value)]);
       } else {
         throw Error("decoding error");
       }
     }
-  }, [contracts, scheduledTx]);
+  }, [dao, scheduledTx]);
 
   const execute = async () => {
-    if (!account || !contracts || !library || !scheduledTx) {
+    if (!account || !dao || !library || !scheduledTx) {
       alert("Not connected");
       return;
     }
 
     const signer: Signer = library.getSigner(account);
-    const timeLockGovernance = contracts.timelockedGovernance;
+    const timeLockGovernance = dao.timelock;
 
     switch (timelockTxStatus) {
       case TimelockTxStatus.PENDING:
@@ -214,25 +214,25 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   };
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const { timelockedGovernance } = contracts;
-      timelockedGovernance
+    if (!!account && !!dao) {
+      const { timelock } = dao;
+      timelock
         .hasRole(solidityKeccak256(["string"], ["EXECUTOR_ROLE"]), account)
         .then(setHasExecutorRole)
         .catch(errorHandler(addToast));
 
-      timelockedGovernance
+      timelock
         .isOperationDone(id)
         .then(async (done) => {
           if (done) {
             setTimelockTxStatus(TimelockTxStatus.DONE);
           } else {
-            const ready = await timelockedGovernance.isOperationReady(id);
+            const ready = await timelock.isOperationReady(id);
             if (ready) {
               setTimelockTxStatus(TimelockTxStatus.READY);
               return;
             }
-            const pending = await timelockedGovernance.isOperationPending(id);
+            const pending = await timelock.isOperationPending(id);
             if (pending) {
               setTimelockTxStatus(TimelockTxStatus.PENDING);
               return;
@@ -241,7 +241,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         })
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, scheduledTx, lastTx]);
+  }, [account, dao, scheduledTx, lastTx]);
 
   const buttonText = (status: TimelockTxStatus) => {
     switch (status) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants, ContractTransaction } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { OverlayTooltip } from "../../OverlayTooltip";
@@ -22,7 +22,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitBalance, setCommitBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
@@ -33,15 +33,15 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   const getMaxSpending = () => formatEther(daiBalance || "0");
 
   const approveAndBuy = () => {
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      contracts.baseCurrency
+      dao.baseCurrency
         .connect(signer)
-        .approve(contracts.stableReserve.address, constants.MaxUint256),
+        .approve(dao.stableReserve.address, constants.MaxUint256),
       setApproveTxStatus,
       addToast,
       "Approved StableReserve.",
@@ -50,12 +50,12 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   };
 
   const buyCommit = () => {
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const stableReserve = contracts?.stableReserve;
+    const stableReserve = dao?.stableReserve;
     const buyAmountInWei = parseEther(spendingDai || "0").div(2);
     if (!daiBalance) {
       alert("Fetching balance..");
@@ -76,9 +76,9 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const baseCurrency = contracts.baseCurrency;
-      const commitToken = contracts.commit;
+    if (!!account && !!dao) {
+      const baseCurrency = dao.baseCurrency;
+      const commitToken = dao.commit;
       baseCurrency
         .balanceOf(account)
         .then(setDaiBalance)
@@ -88,11 +88,11 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
         .then(setCommitBalance)
         .catch(errorHandler(addToast));
       baseCurrency
-        .allowance(account, contracts.stableReserve.address)
+        .allowance(account, dao.stableReserve.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, approveTxStatus, blockNumber]);
+  }, [account, dao, approveTxStatus, blockNumber]);
 
   return (
     <Card>

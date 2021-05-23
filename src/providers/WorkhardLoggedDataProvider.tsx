@@ -1,7 +1,7 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import React, { useState } from "react";
 import { useContext } from "react";
-import { useWorkhardContracts } from "./WorkhardContractProvider";
+import { useWorkhard } from "./WorkhardProvider";
 
 export interface WorkhardLoggedData {
   projects: string[];
@@ -18,9 +18,9 @@ export function useWorkhardLoggedData() {
 
 export const WorkhardLoggedDataProvider = ({ children }: { children: any }) => {
   const [projects, setProjects] = useState<string[]>([]);
-  const contracts = useWorkhardContracts();
-  if (contracts) {
-    const { jobBoard } = contracts;
+  const { dao } = useWorkhard() || {};
+  if (dao) {
+    const { jobBoard } = dao;
     jobBoard
       .queryFilter(jobBoard.filters.ProjectPosted(null))
       .then((result) => console.log("filtered result", result));

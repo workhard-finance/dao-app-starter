@@ -3,9 +3,12 @@ import { Log } from "@ethersproject/abstract-provider";
 import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther, parseEther } from "@ethersproject/units";
-import { IERC20__factory } from "@workhard/protocol";
+import {
+  IERC20__factory,
+  WorkhardDAO,
+  getNetworkName,
+} from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
-import { getNetworkName } from "@workhard/protocol/dist/deployed";
 import {
   constants,
   Contract,
@@ -16,7 +19,7 @@ import {
 import IPFS from "ipfs-core/src/components";
 import { Dispatch, SetStateAction } from "react";
 import { AddToast } from "react-toast-notifications";
-import { WorkhardContracts } from "../providers/WorkhardContractProvider";
+// import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
   contract: {
@@ -56,14 +59,14 @@ export const wrapUrl = (text: string) => {
 
 export const acceptableTokenList = (chainId?: number) => {
   if (!chainId) return [];
-  const contracts =
+  const dao =
     process.env.NODE_ENV === "development"
       ? require("../deployed.dev.json")
       : deployed;
   return [
     {
       symbol: "Base Currency",
-      address: contracts[getNetworkName(chainId)].BaseCurrency as string,
+      address: dao[getNetworkName(chainId)].BaseCurrency as string,
     },
   ];
 };
@@ -104,12 +107,12 @@ export interface DecodedTxData {
 }
 
 export function decodeTxDetails(
-  contracts: WorkhardContracts,
+  dao: WorkhardDAO,
   target: string,
   data: string,
   value: BigNumber
 ): DecodedTxData {
-  const targetContract = (Object.entries(contracts) as Array<
+  const targetContract = (Object.entries(dao) as Array<
     [string, Contract]
   >).find(
     ([_, contract]) => getAddress(target) === getAddress(contract.address)

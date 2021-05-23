@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../../providers/WorkhardProvider";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import {
   errorHandler,
@@ -21,7 +21,7 @@ export interface ProductProps {
 export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [product, setProduct] = useState<ProductData>({
     manufacturer: account || "",
@@ -38,29 +38,29 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
   const [amount, setAmount] = useState<number>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const commit = contracts.commit;
+    if (!!account && !!dao) {
+      const commit = dao.commit;
       commit
-        .allowance(account, contracts.marketplace.address)
+        .allowance(account, dao.marketplace.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
-      contracts.marketplace
+      dao.marketplace
         .products(tokenId)
         .then(setProduct)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, blockNumber, approveTx]);
+  }, [account, dao, blockNumber, approveTx]);
 
   const approveAndBuy = () => {
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      contracts.commit
+      dao.commit
         .connect(signer)
-        .approve(contracts.marketplace.address, constants.MaxUint256),
+        .approve(dao.marketplace.address, constants.MaxUint256),
       setApproveTxStatus,
       addToast,
       "Approved Marketplace",
@@ -69,7 +69,7 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
   };
 
   const buy = () => {
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
@@ -78,7 +78,7 @@ export const Product: React.FC<ProductProps> = ({ tokenId, uri }) => {
       return;
     }
     const signer = library.getSigner(account);
-    const marketplace = contracts.marketplace;
+    const marketplace = dao.marketplace;
     marketplace
       .connect(signer)
       .buy(tokenId, account, amount)

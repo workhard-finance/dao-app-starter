@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown, Nav } from "react-bootstrap";
 import { Col, Row, Tab } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { ProposeTx } from "../../../components/contracts/workers-union/proposal-types/ProposeTx";
 import { ProposeBatchTx } from "../../../components/contracts/workers-union/proposal-types/ProposeBatchTx";
 import { TimelockPresetProposal } from "../../../components/contracts/timelocked-governance/TimelockPresetProposal";
@@ -15,21 +15,21 @@ import { useParams } from "react-router-dom";
 
 export const Propose: React.FC = ({}) => {
   const { account } = useWeb3React<providers.Web3Provider>();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
   const [presets, setPresets] = useState<Preset[]>();
   const history = useHistory();
   const { subtab } = useParams<{ subtab?: string }>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const timeLockGovernance = contracts.timelockedGovernance;
+    if (!!account && !!dao) {
+      const timeLockGovernance = dao.timelock;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole);
-      setPresets(buildPresets(contracts));
+      setPresets(buildPresets(dao));
     }
-  }, [account, contracts]);
+  }, [account, dao]);
 
   return (
     <Tab.Container defaultActiveKey={subtab || "manual"}>

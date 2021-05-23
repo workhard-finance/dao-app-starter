@@ -4687,10 +4687,10 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@workhard/protocol@^1.0.0-rc.7":
-  version "1.0.0-rc.7"
-  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.0-rc.7.tgz#2838100ccc82c438569839fe08a2511b1968fd84"
-  integrity sha512-EF+RH72pStwPQ3Yinj10hzvmyoDe0ANIC3SC5jwz7J+aKIlozerRBa/nETrGSzBiiw5dtVNPT14cWFUIcHzEhA==
+"@workhard/protocol@1.0.0-rc.10":
+  version "1.0.0-rc.10"
+  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.0-rc.10.tgz#f56c6a5c8007a820de6c5dbaa275dbf4188a0340"
+  integrity sha512-YuMcLpZn0CeAqN+N34Qs3VJ7ZfQvk9XJ0AAZ6E03kdn4f8wEO6mCJEUuaveuSe4YMhdlpi1mvCBr5Wru9vKMfA==
   dependencies:
     "@openzeppelin/contracts" "3.4.0-solc-0.7 "
     "@uniswap/v2-core" "^1.0.1"
@@ -15711,6 +15711,23 @@ mkdirp@*, mkdirp@^1.0.3, mkdirp@^1.0.4:
   integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
   dependencies:
     minimist "^1.2.5"
+
+mobx-react-lite@^2.2.0:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/mobx-react-lite/-/mobx-react-lite-2.2.2.tgz#87c217dc72b4e47b22493daf155daf3759f868a6"
+  integrity sha512-2SlXALHIkyUPDsV4VTKVR9DW7K3Ksh1aaIv3NrNJygTbhXe2A9GrcKHZ2ovIiOp/BXilOcTYemfHHZubP431dg==
+
+mobx-react@^6.1.4:
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-6.3.1.tgz#204f9756e42e19d91cb6598837063b7e7de87c52"
+  integrity sha512-IOxdJGnRSNSJrL2uGpWO5w9JH5q5HoxEqwOF4gye1gmZYdjoYkkMzSGMDnRCUpN/BNzZcFoMdHXrjvkwO7KgaQ==
+  dependencies:
+    mobx-react-lite "^2.2.0"
+
+mobx@^5.15.3:
+  version "5.15.7"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.7.tgz#b9a5f2b6251f5d96980d13c78e9b5d8d4ce22665"
+  integrity sha512-wyM3FghTkhmC+hQjyPGGFdpehrcX1KOXsDuERhfK2YbJemkUhEB+6wzEN639T21onxlfYBmriA1PFnvxTUhcKw==
 
 mock-fs@^4.1.0:
   version "4.13.0"

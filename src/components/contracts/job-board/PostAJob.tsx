@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, Form, Image, Row, Col } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import {
   parseLog,
   permaPinToArweave,
@@ -16,7 +16,7 @@ import { useToasts } from "react-toast-notifications";
 export const PostAJobBox: React.FC = () => {
   const { account, library } = useWeb3React();
   const { ipfs } = useIPFS();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
 
   const [description, setDescription] = useState<string>();
@@ -91,7 +91,7 @@ export const PostAJobBox: React.FC = () => {
   };
 
   const createProject = async (uri: string) => {
-    const jobBoard = contracts?.jobBoard;
+    const jobBoard = dao?.jobBoard;
     if (!jobBoard) {
       alert("Not connected");
       return;

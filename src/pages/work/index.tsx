@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { BigNumber } from "ethers";
 import { JobBoard } from "./tabs/JobBoard";
@@ -12,8 +12,7 @@ import { useParams } from "react-router-dom";
 const Work: React.FC = () => {
   const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
-  const contracts = useWorkhardContracts();
-  // const { account, library, chainId } = useWeb3React();
+  const { workhard, dao } = useWorkhard() || {};
 
   const [activeProjects, setActiveProjects] = useState<string[]>(
     [] as string[]
@@ -25,10 +24,10 @@ const Work: React.FC = () => {
   // TODO listen JobBoard events and add dependency to useEffect()
 
   useEffect(() => {
-    if (!!contracts) {
+    if (!!dao && !!workhard) {
       let stale = false;
-      const { project, jobBoard } = contracts;
-      project
+      const { jobBoard } = dao;
+      workhard
         .totalSupply()
         .then((n: BigNumber) => {
           if (!stale) {
@@ -61,7 +60,7 @@ const Work: React.FC = () => {
         setInactiveProjects([]);
       };
     }
-  }, [contracts]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [dao]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
     <Page>
       <Image
@@ -87,10 +86,7 @@ const Work: React.FC = () => {
           style={{ marginTop: "1rem" }}
           onEnter={() => history.push("/work/commit")}
         >
-          <Erc20Balance
-            address={contracts?.commit.address}
-            symbolAlt={"COMMIT"}
-          />
+          <Erc20Balance address={dao?.commit.address} symbolAlt={"COMMIT"} />
         </Tab>
         <Tab
           eventKey="job"

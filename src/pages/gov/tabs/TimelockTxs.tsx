@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { TimelockTx } from "../../../components/contracts/timelocked-governance/TimelockTx";
 import { providers, Transaction } from "ethers";
@@ -7,7 +7,7 @@ import { Alert } from "react-bootstrap";
 
 export const TimelockTxs: React.FC<{}> = ({}) => {
   const { library } = useWeb3React<providers.Web3Provider>();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [emittedEvents, setEmittedEvents] = useState<{
     [hash: string]: { id: string; blockNumber: number };
   }>({});
@@ -16,11 +16,11 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
   }>({});
 
   useEffect(() => {
-    if (!!contracts) {
-      const timelockedGovernance = contracts.timelockedGovernance;
-      timelockedGovernance
+    if (!!dao) {
+      const timelock = dao.timelock;
+      timelock
         .queryFilter(
-          timelockedGovernance.filters.CallScheduled(
+          timelock.filters.CallScheduled(
             null,
             null,
             null,
@@ -40,7 +40,7 @@ export const TimelockTxs: React.FC<{}> = ({}) => {
           setEmittedEvents(_txIds);
         });
     }
-  }, [contracts]);
+  }, [dao]);
 
   useEffect(() => {
     if (!!library) {

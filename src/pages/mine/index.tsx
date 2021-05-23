@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Alert, Button, Image, Tab, Tabs } from "react-bootstrap";
 import { ERC20StakeMiningV1 } from "../../components/contracts/mining-pool/ERC20StakeMiningV1";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20BurnMiningV1";
@@ -23,35 +23,35 @@ const Mine = observer(() => {
   const history = useHistory();
   const { addToast } = useToasts();
   const { account, library } = useWeb3React();
-  const contracts = useWorkhardContracts();
+  const { dao, periphery } = useWorkhard() || {};
   const mineStore: MineStore = initMineStore(
-    !!contracts ? contracts.visionEmitter : null,
-    !!contracts ? contracts.liquidityMining.address : null,
-    !!contracts ? contracts.commitMining.address : null,
-    !!contracts ? contracts.vision.address : null
+    !!dao ? dao.visionEmitter : null,
+    !!periphery ? periphery.liquidityMining.address : null,
+    !!periphery ? periphery.commitMining.address : null,
+    !!dao ? dao.vision.address : null
   );
   const [txStatus, setTxStatus] = useState<TxStatus>();
 
   useEffect(() => {
-    if (!!contracts) {
+    if (!!dao) {
       mineStore.loadPools().then();
       mineStore.isDistributable();
     }
-  }, [contracts]);
+  }, [dao]);
 
   useEffect(() => {
-    if (!!contracts && !!mineStore.pools) {
+    if (!!dao && !!mineStore.pools) {
       mineStore.loadEmission();
       mineStore.loadEmissionWeightSum();
       mineStore.loadVisionPrice();
     }
-  }, [library, contracts, txStatus]);
+  }, [library, dao, txStatus]);
 
   const distribute = () => {
-    if (!!account && !!contracts && !!library) {
+    if (!!account && !!dao && !!library) {
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.visionEmitter.connect(signer).distribute(),
+        dao.visionEmitter.connect(signer).distribute(),
         setTxStatus,
         addToast,
         "You've mined the distribution transaction!!",
@@ -84,10 +84,7 @@ const Mine = observer(() => {
           style={{ marginTop: "1rem" }}
           onEnter={() => history.push("/mine/vision")}
         >
-          <Erc20Balance
-            address={contracts?.vision.address}
-            symbolAlt={"VISION"}
-          />
+          <Erc20Balance address={dao?.vision.address} symbolAlt={"VISION"} />
         </Tab>
         <Tab
           eventKey="liquidity"

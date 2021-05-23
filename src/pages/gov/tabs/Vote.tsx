@@ -7,7 +7,7 @@ import {
 } from "../../../components/contracts/workers-union/VoteForTx";
 import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, providers } from "ethers";
 import { altWhenEmptyList } from "../../../utils/utils";
 import { useHistory } from "react-router-dom";
@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 const Vote: React.FC = () => {
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [proposedTxs, setProposedTxs] = useState<ProposedTx[]>([]);
   const [myVotes, setMyVotes] = useState<BigNumber>();
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
@@ -26,30 +26,30 @@ const Vote: React.FC = () => {
   const { subtab } = useParams<{ subtab?: string }>();
 
   useEffect(() => {
-    if (!library || !chainId || !contracts) {
+    if (!library || !chainId || !dao) {
       return;
     }
-    const workersUnion = contracts.workersUnion;
+    const workersUnion = dao.workersUnion;
     workersUnion.votingRule().then((rule) => {
       setQuorum(rule.minimumVotes);
     });
-  }, [library, chainId, timestamp, contracts]);
+  }, [library, chainId, timestamp, dao]);
 
   useEffect(() => {
-    if (!account || !library || !chainId || !contracts) {
+    if (!account || !library || !chainId || !dao) {
       return;
     }
-    const workersUnion = contracts.workersUnion;
+    const workersUnion = dao.workersUnion;
     workersUnion.getVotesAt(account, timestamp).then((vote) => {
       setMyVotes(vote);
     });
-  }, [account, library, chainId, timestamp, contracts]);
+  }, [account, library, chainId, timestamp, dao]);
 
   useEffect(() => {
-    if (!library || !contracts || !blockNumber) {
+    if (!library || !dao || !blockNumber) {
       return;
     }
-    const workersUnion = contracts.workersUnion;
+    const workersUnion = dao.workersUnion;
     workersUnion
       .queryFilter(
         workersUnion.filters.TxProposed(
@@ -72,7 +72,7 @@ const Vote: React.FC = () => {
     library
       .getBlock(blockNumber)
       .then((block) => setTimestamp(block.timestamp));
-  }, [contracts, blockNumber]);
+  }, [dao, blockNumber]);
 
   return (
     <Tab.Container defaultActiveKey={subtab || "voting"}>
@@ -204,7 +204,7 @@ const Vote: React.FC = () => {
               </h5>
               <p>
                 Timelock contract is the governor! It can change some
-                configurations of these contracts:
+                configurations of these dao:
                 <ul>
                   <li>
                     VisionEmitter: decides the emission rates and weights.

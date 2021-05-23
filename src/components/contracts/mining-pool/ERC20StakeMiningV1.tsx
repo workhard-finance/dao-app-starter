@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
 import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
@@ -52,7 +52,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
 
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -82,17 +82,17 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       : formatEther(stakedAmount || "0");
 
   useEffect(() => {
-    if (!!account && !!contracts) {
+    if (!!account && !!dao) {
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress)
         .catch(errorHandler(addToast));
-      contracts.visionEmitter
+      dao.visionEmitter
         .getPoolWeight(poolIdx)
         .then(setWeight)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts]);
+  }, [account, dao]);
 
   useEffect(() => {
     if (weight) {
@@ -104,7 +104,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
     }
   }, [weight]);
   useEffect(() => {
-    if (!!account && !!contracts && !!tokenAddress) {
+    if (!!account && !!dao && !!tokenAddress) {
       const token = IERC20__factory.connect(tokenAddress, library);
       token
         .balanceOf(account)
@@ -128,7 +128,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, tokenAddress, txStatus, blockNumber]);
+  }, [account, dao, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (stakedAmount && tokenBalance) {
@@ -153,7 +153,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   }, [weight, tokenPrice, totalStake, txStatus]);
 
   const approve = () => {
-    if (!account || !contracts || !tokenAddress) {
+    if (!account || !dao || !tokenAddress) {
       alert("Not connected");
       return;
     }
@@ -173,7 +173,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   };
 
   const stake = () => {
-    if (!account || !contracts) {
+    if (!account || !dao) {
       alert("Not connected");
       return;
     }
@@ -203,7 +203,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   };
 
   const withdraw = () => {
-    if (!account || !contracts) {
+    if (!account || !dao) {
       alert("Not connected");
       return;
     }

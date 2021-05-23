@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
 import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
@@ -24,7 +24,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
   const [amount, setAmount] = useState<string>();
@@ -41,7 +41,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   };
 
   const createLock = () => {
-    if (!!contracts && !!library && !!account) {
+    if (!!dao && !!library && !!account) {
       if (!amount || !lockPeriod) return;
       const amountInWei = parseEther(amount);
       if (amountInWei.gt(tokenBalance || 0)) {
@@ -50,7 +50,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
       }
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.veLocker
+        dao.votingEscrow
           .connect(signer)
           .createLock(amountInWei, lockPeriod || 0),
         setTxStatus,
@@ -63,12 +63,12 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
     }
   };
   const approve = () => {
-    if (!!contracts && !!library && !!account) {
+    if (!!dao && !!library && !!account) {
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.vision
+        dao.vision
           .connect(signer)
-          .approve(contracts.veLocker.address, constants.MaxUint256),
+          .approve(dao.votingEscrow.address, constants.MaxUint256),
         setTxStatus,
         addToast,
         "Approved VotingEscrowLock contract."
@@ -80,18 +80,18 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   };
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const { vision, veLocker } = contracts;
+    if (!!account && !!dao) {
+      const { vision, votingEscrow } = dao;
       vision
         .balanceOf(account)
         .then(setTokenBalance)
         .catch(errorHandler(addToast));
       vision
-        .allowance(account, veLocker.address)
+        .allowance(account, votingEscrow.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, txStatus, blockNumber, addToast]);
+  }, [account, dao, txStatus, blockNumber, addToast]);
 
   return (
     <Card>

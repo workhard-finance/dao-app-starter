@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber } from "ethers";
 import { Card, Form, ListGroup, Col } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, getAddress } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
@@ -21,7 +21,7 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
 
   const [tokens, setTokens] = useState<string[]>([]);
   const [tokensToClaim, setTokensToWithdraw] = useState<string[]>([]);
@@ -35,23 +35,23 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
   const [lastTx, setLastTx] = useState<string>();
 
   useEffect(() => {
-    if (!!contracts && !!account) {
-      contracts.dividendPool
+    if (!!dao && !!account) {
+      dao.dividendPool
         .distributedTokens()
         .then(setTokens)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, lastTx]);
+  }, [account, dao, lastTx]);
 
   useEffect(() => {
-    if (!!contracts && !!account) {
+    if (!!dao && !!account) {
       Promise.all(
         tokens.map((token) =>
-          contracts.dividendPool.connect(account).claimable(token)
+          dao.dividendPool.connect(account).claimable(token)
         )
       ).then(setAmounts);
     }
-  }, [account, contracts, blockNumber, tokens, lastTx]);
+  }, [account, dao, blockNumber, tokens, lastTx]);
 
   useEffect(() => {
     if (!!library && !!tokens) {
@@ -93,12 +93,12 @@ export const Claim: React.FC<ClaimProps> = ({}) => {
   };
 
   const claim = () => {
-    if (!account || !contracts) {
+    if (!account || !dao) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    contracts.dividendPool
+    dao.dividendPool
       .connect(signer)
       .claimBatch(tokensToClaim)
       .then((tx) => {

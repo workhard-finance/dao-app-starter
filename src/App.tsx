@@ -12,7 +12,7 @@ import Gov from "./pages/gov";
 import Res from "./pages/Res";
 import Fork from "./pages/Fork";
 import Store from "./pages/nfts";
-import { WorkhardContractsProvider } from "./providers/WorkhardContractProvider";
+import { WorkhardProvider } from "./providers/WorkhardProvider";
 import { Project } from "./pages/etc/Project";
 import { BlockNumberProvider } from "./providers/BlockNumberProvider";
 import { Manufacture } from "./pages/nfts/tabs/Manufacture";
@@ -31,32 +31,38 @@ function App() {
       >
         <IPFSProvider>
           <BlockNumberProvider>
-            <WorkhardContractsProvider>
-              {/* <WorkhardLoggedDataProvider> */}
-              <WorkhardThemeProvider theme={themes.light}>
-                <Router>
+            <Router>
+              <WorkhardProvider>
+                {/* <WorkhardLoggedDataProvider> */}
+                <WorkhardThemeProvider theme={themes.light}>
                   <Switch>
-                    <Route path="/work/:tab?/:subtab?" children={<Work />} />
-                    <Route path="/mine/:tab?" children={<Mine />} />
-                    <Route path="/gov/:tab?/:subtab?" children={<Gov />} />
-                    <Route path="/nfts/:tab?" children={<Store />} />
-                    <Route path="/res" children={<Res />} />
-                    <Route path="/fork" children={<Fork />} />
-                    <Route path="/proj/:id" children={<Project />} />
                     <Route
-                      path="/product/:address"
+                      path="/:daoId?/work/:tab?/:subtab?"
+                      children={<Work />}
+                    />
+                    <Route path="/:daoId?/mine/:tab?" children={<Mine />} />
+                    <Route
+                      path="/:daoId?/gov/:tab?/:subtab?"
+                      children={<Gov />}
+                    />
+                    <Route path="/:daoId?/nfts/:tab?" children={<Store />} />
+                    <Route path="/:daoId?/res" children={<Res />} />
+                    <Route path="/:daoId?/fork" children={<Fork />} />
+                    <Route path="/:daoId?/proj/:id" children={<Project />} />
+                    <Route
+                      path="/:daoId?/product/:address"
                       children={<ProductPage />}
                     />
                     <Route
-                      path="/manufacturer/new"
+                      path="/:daoId?/manufacturer/new"
                       children={<Manufacture />}
                     />
-                    <Route path="/" children={<Home />} />
+                    <Route path="/:daoId?/" children={<Home />} />
                   </Switch>
-                </Router>
-              </WorkhardThemeProvider>
-              {/* </WorkhardLoggedDataProvider> */}
-            </WorkhardContractsProvider>
+                </WorkhardThemeProvider>
+                {/* </WorkhardLoggedDataProvider> */}
+              </WorkhardProvider>
+            </Router>
           </BlockNumberProvider>
         </IPFSProvider>
       </ToastProvider>

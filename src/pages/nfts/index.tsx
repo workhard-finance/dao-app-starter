@@ -3,7 +3,7 @@ import Page from "../../layouts/Page";
 import { Alert, Button, Col, Row, Tab, Tabs, Image } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
-import { useWorkhardContracts } from "../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber, providers } from "ethers";
 import { Link } from "react-router-dom";
 import { Product } from "../../components/contracts/marketplace/product/Product";
@@ -14,17 +14,17 @@ const featured: BigNumber[] = [];
 const Store: React.FC = () => {
   const { library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [allProducts, setAllProducts] = useState<BigNumber[]>([]);
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
 
   useEffect(() => {
-    if (!library || !contracts || !blockNumber) {
+    if (!library || !dao || !blockNumber) {
       return;
     }
-    const { marketplace } = contracts;
+    const { marketplace } = dao;
     marketplace
       .queryFilter(
         marketplace.filters.NewProduct(null, null, null),
@@ -38,13 +38,13 @@ const Store: React.FC = () => {
           ...events.map((event) => event.args.id),
         ]);
       });
-  }, [contracts, blockNumber]);
+  }, [dao, blockNumber]);
 
   useEffect(() => {
-    if (!library || !contracts || !blockNumber) {
+    if (!library || !dao || !blockNumber) {
       return;
     }
-    const { marketplace } = contracts;
+    const { marketplace } = dao;
     marketplace
       .queryFilter(
         marketplace.filters.NewProduct(null, null, null),
@@ -58,7 +58,7 @@ const Store: React.FC = () => {
           ...events.map((event) => event.args.id),
         ]);
       });
-  }, [contracts, blockNumber]);
+  }, [dao, blockNumber]);
 
   return (
     <Page>

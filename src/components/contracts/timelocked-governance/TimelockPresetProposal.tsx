@@ -1,6 +1,6 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, constants } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
 import { randomBytes, solidityKeccak256 } from "ethers/lib/utils";
@@ -19,7 +19,7 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
   contract,
 }) => {
   const { account, library } = useWeb3React();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>(constants.HashZero);
@@ -36,25 +36,25 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
   const [hasProposerRole, setHasProposerRole] = useState<boolean>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const { timelockedGovernance } = contracts;
-      timelockedGovernance
+    if (!!account && !!dao) {
+      const { timelock } = dao;
+      timelock
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole)
         .catch(errorHandler(addToast));
-      timelockedGovernance
+      timelock
         .getMinDelay()
         .then((_delay) => {
           setDelay(_delay.toNumber());
         })
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, txStatus]);
+  }, [account, dao, txStatus]);
 
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts || !contract) {
+    if (!account || !dao || !contract) {
       alert("Not connected");
       return;
     }
@@ -69,7 +69,7 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
     if (!data) return alert("data is not set");
     const signer = library.getSigner(account);
     handleTransaction(
-      contracts.timelockedGovernance
+      dao.timelock
         .connect(signer)
         .schedule(contract.address, 0, data, predecessor, salt, delay),
       setTxStatus,

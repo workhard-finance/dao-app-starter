@@ -1,7 +1,7 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, constants, ContractTransaction } from "ethers";
 import { Card, Button, Form, InputGroup } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { OverlayTooltip } from "../../OverlayTooltip";
@@ -22,7 +22,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitBalance, setCommitBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
@@ -33,15 +33,15 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   const getMaxRedeem = () => formatEther(commitBalance || "0");
 
   const approveAndRedeem = () => {
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      contracts.commit
+      dao.commit
         .connect(signer)
-        .approve(contracts.stableReserve.address, constants.MaxUint256),
+        .approve(dao.stableReserve.address, constants.MaxUint256),
       setApproveTxStatus,
       addToast,
       "Approved StableReserve.",
@@ -50,12 +50,12 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   };
 
   const redeem = () => {
-    if (!account || !contracts || !library) {
+    if (!account || !dao || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const stableReserve = contracts?.stableReserve;
+    const stableReserve = dao?.stableReserve;
     const redeemAmountInWei = parseEther(redeemAmount || "0");
     if (!daiBalance) {
       alert("Fetching balance..");
@@ -77,9 +77,9 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const baseCurrency = contracts.baseCurrency;
-      const commitToken = contracts.commit;
+    if (!!account && !!dao) {
+      const baseCurrency = dao.baseCurrency;
+      const commitToken = dao.commit;
       baseCurrency
         .balanceOf(account)
         .then(setDaiBalance)
@@ -89,11 +89,11 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
         .then(setCommitBalance)
         .catch(errorHandler(addToast));
       commitToken
-        .allowance(account, contracts.stableReserve.address)
+        .allowance(account, dao.stableReserve.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, blockNumber]);
+  }, [account, dao, blockNumber]);
   return (
     <Card>
       <Card.Header as="h5">Redeem $COMMIT for $DAI</Card.Header>

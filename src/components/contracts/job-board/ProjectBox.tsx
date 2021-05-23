@@ -4,7 +4,7 @@ import { formatEther } from "ethers/lib/utils";
 import ReactHtmlParser from "react-html-parser";
 import { Card, Button, Row, Col, Image } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Link } from "react-router-dom";
 import {
   errorHandler,
@@ -25,7 +25,7 @@ export interface ProjectProps {
 export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
   const { ipfs } = useIPFS();
-  const contracts = useWorkhardContracts();
+  const { dao, workhard } = useWorkhard() || { dao: undefined };
   const { addToast } = useToasts();
 
   const [fund, setFund] = useState<BigNumber>();
@@ -33,13 +33,13 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const [metadata, setMeatadata] = useState<ProjectMetadata>();
 
   useEffect(() => {
-    if (!!account && !!library && !!chainId && !!contracts && !!ipfs) {
-      const { project, jobBoard } = contracts;
-      project
+    if (!!account && !!library && !!chainId && !!dao && !!workhard && !!ipfs) {
+      const { jobBoard } = dao;
+      workhard
         .ownerOf(projId)
         .then(setBudgetOwner)
         .catch(errorHandler(addToast));
-      project
+      workhard
         .tokenURI(projId)
         .then(async (uri) => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 import { Card } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { useToasts } from "react-toast-notifications";
@@ -24,17 +24,17 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
   transferred,
 }) => {
   const { account, chainId, library } = useWeb3React();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [_, setTxStatus] = useState<TxStatus>();
 
   const executeBudget = () => {
-    if (!account || !contracts) {
+    if (!account || !dao) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const jobBoard = contracts.jobBoard;
+    const jobBoard = dao.jobBoard;
     handleTransaction(
       jobBoard.connect(signer).executeBudget(projId, budgetIndex),
       setTxStatus,

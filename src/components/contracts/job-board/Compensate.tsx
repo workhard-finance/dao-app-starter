@@ -2,7 +2,7 @@ import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish } from "ethers";
 import { Form, FormControl, FormLabel } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
@@ -27,7 +27,7 @@ export const Compensate: React.FC<CompensateProps> = ({
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [payTo, setPayTo] = useState("");
   const [payAmount, setPayAmount] = useState<number>();
@@ -37,7 +37,7 @@ export const Compensate: React.FC<CompensateProps> = ({
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const jobBoard = contracts?.jobBoard;
+    const jobBoard = dao?.jobBoard;
     if (!jobBoard) {
       alert("Not connected");
       return;
@@ -61,8 +61,8 @@ export const Compensate: React.FC<CompensateProps> = ({
   };
 
   useEffect(() => {
-    if (!!account && !!library && !!contracts) {
-      const { jobBoard } = contracts;
+    if (!!account && !!library && !!dao) {
+      const { jobBoard } = dao;
       jobBoard
         .projectFund(projId)
         .then(setBalance)

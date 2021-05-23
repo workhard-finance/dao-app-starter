@@ -5,13 +5,13 @@ import { Col, Nav, Row, Tab } from "react-bootstrap";
 import { CreateLock } from "../../../components/contracts/dividend-pool/CreateLock";
 import { MyLock } from "../../../components/contracts/dividend-pool/MyLock";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Claim } from "./Claim";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
 export const EscrowAndDividend: React.FC = () => {
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const history = useHistory();
@@ -20,21 +20,21 @@ export const EscrowAndDividend: React.FC = () => {
   const [lockIds, setLockIds] = useState<BigNumber[]>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const { veLocker } = contracts;
-      veLocker.balanceOf(account).then((locks) => {
+    if (!!account && !!dao) {
+      const { votingEscrow } = dao;
+      votingEscrow.balanceOf(account).then((locks) => {
         Promise.all(
           Array(locks.toNumber())
             .fill(undefined)
-            .map((_, idx) => veLocker.tokenByIndex(idx))
+            .map((_, idx) => votingEscrow.tokenByIndex(idx))
         ).then((lockIds) => setLockIds(lockIds));
       });
     }
-  }, [account, contracts, blockNumber]);
+  }, [account, dao, blockNumber]);
   useEffect(() => {
-    if (!!account && !!contracts && !!lockIds) {
-      const { veLocker } = contracts;
-      Promise.all(lockIds.map((lockId) => veLocker.locks(lockId))).then(
+    if (!!account && !!dao && !!lockIds) {
+      const { votingEscrow } = dao;
+      Promise.all(lockIds.map((lockId) => votingEscrow.locks(lockId))).then(
         (locks) => {
           let totalLocked = locks.reduce(
             (acc, lock) => acc.add(lock.amount),
@@ -44,7 +44,7 @@ export const EscrowAndDividend: React.FC = () => {
         }
       );
     }
-  }, [account, contracts, lockIds]);
+  }, [account, dao, lockIds]);
 
   return (
     <Tab.Container defaultActiveKey={subtab || "locks"}>
@@ -164,14 +164,14 @@ export const EscrowAndDividend: React.FC = () => {
                 Codes are the re-implemented version of veCRV's vyper contract
                 in solidity. You can find them{" "}
                 <a
-                  href="https://github.com/workhard-finance/protocol/tree/main/contracts/core/governance/libraries"
+                  href="https://github.com/workhard-finance/protocol/tree/main/dao/core/governance/libraries"
                   target="_blank"
                 >
                   here
                 </a>{" "}
                 and the original codes{" "}
                 <a
-                  href="https://github.com/curvefi/curve-dao-contracts/blob/master/contracts/VotingEscrow.vy"
+                  href="https://github.com/curvefi/curve-dao-dao/blob/master/dao/VotingEscrow.vy"
                   target="_blank"
                 >
                   here

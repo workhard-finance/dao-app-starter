@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Page from "../../../layouts/Page";
 
 import { Row, Col, Card, Button, Form } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, ContractTransaction } from "ethers";
 import { useWeb3React } from "@web3-react/core";
 import { parseEther } from "ethers/lib/utils";
@@ -14,7 +14,7 @@ import { useIPFS } from "../../../providers/IPFSProvider";
 export const ProductPage: React.FC = () => {
   const { account, library } = useWeb3React();
   const history = useHistory();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { ipfs } = useIPFS();
 
   const [description, setDescription] = useState<string>();
@@ -85,7 +85,7 @@ export const ProductPage: React.FC = () => {
   }
 
   function launch() {
-    if (!contracts) {
+    if (!dao) {
       alert("Web3 is not connected.");
       return;
     }
@@ -104,7 +104,7 @@ export const ProductPage: React.FC = () => {
     let submission: Promise<ContractTransaction>;
     const signer = library.getSigner(account);
     if (limitedEdition) {
-      submission = contracts.marketplace
+      submission = dao.marketplace
         .connect(signer)
         .launchNewProductWithMaxSupply(
           name,
@@ -117,7 +117,7 @@ export const ProductPage: React.FC = () => {
           initialSupply
         );
     } else {
-      submission = contracts.marketplace
+      submission = dao.marketplace
         .connect(signer)
         .launchNewProduct(
           name,

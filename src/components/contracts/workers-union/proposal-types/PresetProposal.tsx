@@ -1,6 +1,6 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
-import { useWorkhardContracts } from "../../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../../providers/WorkhardProvider";
 import {
   providers,
   BigNumber,
@@ -26,7 +26,7 @@ export const PresetProposal: React.FC<Preset> = ({
   contract,
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const { blockNumber } = useBlockNumber();
   const [timestamp, setTimestamp] = useState<number>(0);
@@ -60,8 +60,8 @@ export const PresetProposal: React.FC<Preset> = ({
   ] = useState<BigNumberish>();
 
   useEffect(() => {
-    if (!!account && !!contracts && !!library && !!blockNumber) {
-      const workersUnion = contracts.workersUnion;
+    if (!!account && !!dao && !!library && !!blockNumber) {
+      const workersUnion = dao.workersUnion;
       workersUnion
         .votingRule()
         .then((result: any) => {
@@ -86,10 +86,10 @@ export const PresetProposal: React.FC<Preset> = ({
         .then((block) => setTimestamp(block.timestamp))
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, txStatus]);
+  }, [account, dao, txStatus]);
   useEffect(() => {
-    if (!!account && !!contracts && !!timestamp) {
-      const { workersUnion } = contracts;
+    if (!!account && !!dao && !!timestamp) {
+      const { workersUnion } = dao;
       workersUnion
         .getVotesAt(account, timestamp)
         .then(setMyVotes)
@@ -99,7 +99,7 @@ export const PresetProposal: React.FC<Preset> = ({
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !contracts || !contract || !library) {
+    if (!account || !dao || !contract || !library) {
       alert("Not connected");
       return;
     }
@@ -119,7 +119,7 @@ export const PresetProposal: React.FC<Preset> = ({
     if (!votingPeriod) return alert("Voting Period is not set");
     const signer = library.getSigner(account);
     handleTransaction(
-      contracts.workersUnion
+      dao.workersUnion
         .connect(signer)
         .proposeTx(
           contract.address,

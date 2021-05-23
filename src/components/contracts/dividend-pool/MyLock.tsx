@@ -7,7 +7,7 @@ import {
   ProgressBar,
   Accordion,
 } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, isAddress, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
@@ -33,7 +33,7 @@ const MAX_LOCK_EPOCHS = 208;
 export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
   // form
@@ -52,15 +52,15 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const [txStatus, setTxStatus] = useState<TxStatus>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      contracts.veLocker.delegateeOf(lockId).then(setDelegatee);
-      contracts.veLocker.locks(lockId).then((lock) => {
+    if (!!account && !!dao) {
+      dao.votingEscrow.delegateeOf(lockId).then(setDelegatee);
+      dao.votingEscrow.locks(lockId).then((lock) => {
         setLockedAmount(lock.amount);
         setLockedUntil(lock.end);
         setLockedFrom(lock.start);
       });
     }
-  }, [contracts, account, txStatus]);
+  }, [dao, account, txStatus]);
 
   useEffect(() => {
     if (!!library && !!blockNumber) {
@@ -99,7 +99,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   };
 
   const increaseAmount = () => {
-    if (!!contracts && !!library && !!account) {
+    if (!!dao && !!library && !!account) {
       if (!amount || getLockedPeriod() === 0) {
         alert("Expired");
         return;
@@ -110,7 +110,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
       }
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.veLocker
+        dao.votingEscrow
           .connect(signer)
           .increaseAmount(lockId, parseEther(amount)),
         setTxStatus,
@@ -128,7 +128,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
       alert("Epoch is not setup");
       return;
     }
-    if (!!contracts && !!library && !!account) {
+    if (!!dao && !!library && !!account) {
       if (!amount || getLockedPeriod() !== 0) {
         alert("Expired");
         return;
@@ -139,7 +139,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
       }
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.veLocker.connect(signer).extendLock(lockId, _epochs),
+        dao.votingEscrow.connect(signer).extendLock(lockId, _epochs),
         setTxStatus,
         addToast,
         "Successfully extended."
@@ -151,12 +151,12 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   };
 
   const approve = () => {
-    if (!!contracts && !!library && !!account) {
+    if (!!dao && !!library && !!account) {
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.vision
+        dao.vision
           .connect(signer)
-          .approve(contracts.dividendPool.address, constants.MaxUint256),
+          .approve(dao.dividendPool.address, constants.MaxUint256),
         setTxStatus,
         addToast,
         "Approved DividendPool"
@@ -168,10 +168,10 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   };
 
   const delegate = () => {
-    if (!!contracts && !!library && !!account && !!delegateTo) {
+    if (!!dao && !!library && !!account && !!delegateTo) {
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.veLocker.connect(signer).delegate(lockId, delegateTo),
+        dao.votingEscrow.connect(signer).delegate(lockId, delegateTo),
         setTxStatus,
         addToast,
         "Successfully delegated.",
@@ -185,10 +185,10 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
     }
   };
   const withdraw = () => {
-    if (!!contracts && !!library && !!account) {
+    if (!!dao && !!library && !!account) {
       const signer = library.getSigner(account);
       handleTransaction(
-        contracts.veLocker.connect(signer).withdraw(lockId),
+        dao.votingEscrow.connect(signer).withdraw(lockId),
         setTxStatus,
         addToast,
         "Successfully withdrew."
@@ -200,8 +200,8 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   };
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const { vision, dividendPool } = contracts;
+    if (!!account && !!dao) {
+      const { vision, dividendPool } = dao;
       vision
         .balanceOf(account)
         .then(setTokenBalance)
@@ -215,7 +215,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, txStatus, blockNumber]);
+  }, [account, dao, txStatus, blockNumber]);
 
   return (
     <Card>

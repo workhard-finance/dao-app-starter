@@ -1,6 +1,6 @@
 import { parseEther } from "@ethersproject/units";
+import { WorkhardDAO } from "@workhard/protocol";
 import { Contract } from "ethers";
-import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export enum PARAM_TYPE {
   ARRAY = "Array",
@@ -38,7 +38,7 @@ export const convertType = (type: PARAM_TYPE, value: string) => {
   }
 };
 
-export const buildPresets = (contracts: WorkhardContracts): Preset[] => {
+export const buildPresets = (dao: WorkhardDAO): Preset[] => {
   return [
     {
       paramArray: [
@@ -46,19 +46,19 @@ export const buildPresets = (contracts: WorkhardContracts): Preset[] => {
         { name: "amount", type: PARAM_TYPE.ETHER },
       ],
       methodName: "grant",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "currency", type: PARAM_TYPE.STRING }],
       methodName: "addCurrency",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "currency", type: PARAM_TYPE.STRING }],
       methodName: "removeCurrency",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
@@ -67,37 +67,37 @@ export const buildPresets = (contracts: WorkhardContracts): Preset[] => {
         { name: "active", type: PARAM_TYPE.BOOLEAN },
       ],
       methodName: "setManager",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "projId", type: PARAM_TYPE.STRING }],
       methodName: "approveProject",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "projId", type: PARAM_TYPE.STRING }],
       methodName: "disapproveProject",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "_oneInch", type: PARAM_TYPE.STRING }],
       methodName: "setExchange",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
       methodName: "setTaxRate",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
       methodName: "setTaxRateForUndeclared",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
@@ -106,43 +106,43 @@ export const buildPresets = (contracts: WorkhardContracts): Preset[] => {
         { name: "amount", type: PARAM_TYPE.NUMBER },
       ],
       methodName: "taxToDividendPool",
-      contract: contracts.jobBoard,
+      contract: dao.jobBoard,
       contractName: "JobBoard",
     },
     {
       paramArray: [{ name: "planter", type: PARAM_TYPE.STRING }],
       methodName: "addPlanter",
-      contract: contracts.dividendPool,
+      contract: dao.dividendPool,
       contractName: "DividendPool",
     },
     {
       paramArray: [{ name: "planter", type: PARAM_TYPE.STRING }],
       methodName: "removePlanter",
-      contract: contracts.dividendPool,
+      contract: dao.dividendPool,
       contractName: "DividendPool",
     },
     {
       paramArray: [{ name: "_fund", type: PARAM_TYPE.STRING }],
       methodName: "setProtocolFund",
-      contract: contracts.visionEmitter,
+      contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
     {
       paramArray: [],
       methodName: "start",
-      contract: contracts.visionEmitter,
+      contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
     {
       paramArray: [{ name: "rate", type: PARAM_TYPE.NUMBER }],
       methodName: "setMinimumRate",
-      contract: contracts.visionEmitter,
+      contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
     {
       paramArray: [{ name: "factory", type: PARAM_TYPE.STRING }],
       methodName: "setFactory",
-      contract: contracts.visionEmitter,
+      contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
     {
@@ -153,13 +153,13 @@ export const buildPresets = (contracts: WorkhardContracts): Preset[] => {
         { name: "_caller", type: PARAM_TYPE.NUMBER },
       ],
       methodName: "setEmission",
-      contract: contracts.visionEmitter,
+      contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
     {
       paramArray: [{ name: "period", type: PARAM_TYPE.NUMBER }],
       methodName: "setEmissionPeriod",
-      contract: contracts.visionEmitter,
+      contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
   ];

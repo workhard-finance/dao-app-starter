@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber } from "ethers";
 import { Card } from "react-bootstrap";
-import { useWorkhardContracts } from "../../../providers/WorkhardContractProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { bigNumToFixed, errorHandler } from "../../../utils/utils";
 import { OverlayTooltip } from "../../OverlayTooltip";
@@ -14,18 +14,18 @@ export const RightBalance: React.FC<RightBalanceProps> = ({}) => {
   const { account } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const contracts = useWorkhardContracts();
+  const { dao } = useWorkhard() || {};
   const [rightBalance, setRightBalance] = useState<BigNumber>();
 
   useEffect(() => {
-    if (!!account && !!contracts) {
-      const { right } = contracts;
+    if (!!account && !!dao) {
+      const { right } = dao;
       right
         .balanceOf(account)
         .then(setRightBalance)
         .catch(errorHandler(addToast));
     }
-  }, [account, contracts, blockNumber]);
+  }, [account, dao, blockNumber]);
 
   return (
     <Card>
