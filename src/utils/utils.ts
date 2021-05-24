@@ -340,3 +340,11 @@ export const altWhenEmptyList = (alt: JSX.Element, list?: any[]) => {
     return alt;
   }
 };
+
+export const prefix = (daoId: string | number | undefined, url: string) => {
+  if (daoId && `${daoId}` !== "0") {
+    return `/${daoId}` + url;
+  } else {
+    return url;
+  }
+};

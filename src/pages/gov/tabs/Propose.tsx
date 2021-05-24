@@ -12,6 +12,7 @@ import { useWeb3React } from "@web3-react/core";
 import { providers } from "ethers";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { prefix } from "../../../utils/utils";
 
 export const Propose: React.FC = ({}) => {
   const { account } = useWeb3React<providers.Web3Provider>();
@@ -19,7 +20,7 @@ export const Propose: React.FC = ({}) => {
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
   const [presets, setPresets] = useState<Preset[]>();
   const history = useHistory();
-  const { subtab } = useParams<{ subtab?: string }>();
+  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
 
   useEffect(() => {
     if (!!account && !!dao) {
@@ -126,13 +127,15 @@ export const Propose: React.FC = ({}) => {
           <Tab.Content>
             <Tab.Pane
               eventKey="manual"
-              onEnter={() => history.push("/gov/propose/manual")}
+              onEnter={() => history.push(prefix(daoId, "/gov/propose/manual"))}
             >
               <ProposeTx />
             </Tab.Pane>
             <Tab.Pane
               eventKey="manual-batch"
-              onEnter={() => history.push("/gov/propose/manual-batch")}
+              onEnter={() =>
+                history.push(prefix(daoId, "/gov/propose/manual-batch"))
+              }
             >
               <ProposeBatchTx />
             </Tab.Pane>
@@ -143,7 +146,10 @@ export const Propose: React.FC = ({}) => {
                   eventKey={`${prop.contractName}-${prop.methodName}`}
                   onEnter={() =>
                     history.push(
-                      `/gov/propose/${`${prop.contractName}-${prop.methodName}`}`
+                      prefix(
+                        daoId,
+                        `/gov/propose/${`${prop.contractName}-${prop.methodName}`}`
+                      )
                     )
                   }
                 >
@@ -163,7 +169,10 @@ export const Propose: React.FC = ({}) => {
                   eventKey={`multisig-${prop.contractName}-${prop.methodName}`}
                   onEnter={() =>
                     history.push(
-                      `/gov/propose/multisig-${`${prop.contractName}-${prop.methodName}`}`
+                      prefix(
+                        daoId,
+                        `/gov/propose/multisig-${`${prop.contractName}-${prop.methodName}`}`
+                      )
                     )
                   }
                 >

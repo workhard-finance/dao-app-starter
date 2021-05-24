@@ -4,9 +4,10 @@ import { BuyCommit } from "../../../components/contracts/stable-reserve/BuyCommi
 import { RedeemCommit } from "../../../components/contracts/stable-reserve/RedeemCommit";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { prefix } from "../../../utils/utils";
 
 const StableReserve: React.FC = () => {
-  const { subtab } = useParams<{ subtab?: string }>();
+  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
   const history = useHistory();
   return (
     <Tab.Container defaultActiveKey={subtab || "buy"}>
@@ -28,7 +29,7 @@ const StableReserve: React.FC = () => {
           <Tab.Content>
             <Tab.Pane
               eventKey="buy"
-              onEnter={() => history.push("/work/reserve/buy")}
+              onEnter={() => history.push(prefix(daoId, "/work/reserve/buy"))}
             >
               <BuyCommit />
               <br />
@@ -36,13 +37,15 @@ const StableReserve: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="redeem"
-              onEnter={() => history.push("/work/reserve/redeem")}
+              onEnter={() =>
+                history.push(prefix(daoId, "/work/reserve/redeem"))
+              }
             >
               <RedeemCommit />
             </Tab.Pane>
             <Tab.Pane
               eventKey="faq"
-              onEnter={() => history.push("/work/reserve/faq")}
+              onEnter={() => history.push(prefix(daoId, "/work/reserve/faq"))}
             >
               <h5>
                 <strong>What can I do with $COMMIT?</strong>

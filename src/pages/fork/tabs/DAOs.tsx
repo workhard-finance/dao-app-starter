@@ -23,7 +23,12 @@ const DAOs: React.FC = () => {
   useEffect(() => {
     if (workhardCtx) {
       const { workhard } = workhardCtx;
-      workhard.getAllDAOs().then(setProjects).catch(errorHandler(addToast));
+      workhard
+        .getAllDAOs()
+        .then((daos) => {
+          setProjects(daos.filter((id) => !id.eq(0)));
+        })
+        .catch(errorHandler(addToast));
     }
   }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
 

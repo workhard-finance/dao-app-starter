@@ -10,6 +10,7 @@ import {
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 import { BigNumberish } from "ethers";
+import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
 const defaultSetting = {
   minDelay: 86400,
@@ -25,6 +26,7 @@ export const UpgradeToDAO: React.FC<{
   onUpgraded?: () => void;
 }> = ({ id, onUpgraded }) => {
   const { chainId, account, library } = useWeb3React();
+  const { blockNumber } = useBlockNumber();
   const workhardCtx = useWorkhard();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const { addToast } = useToasts();
@@ -83,7 +85,7 @@ export const UpgradeToDAO: React.FC<{
       const { workhard } = workhardCtx;
       workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
     }
-  }, [workhardCtx]);
+  }, [workhardCtx, id]);
 
   const upgradeToDAO = async () => {
     if (!workhardCtx) {

@@ -12,7 +12,7 @@ const NavBarBrand = (props: React.ComponentProps<any>) => {
     <Navbar.Brand
       {...props}
       as={Link}
-      to={forked ? `/${forked}/work` : `/`}
+      to={forked ? `/${forked}/nfts` : `/`}
       style={{
         fontFamily: theme.typography.fontFamilies.title,
         // color: theme.palette.workhard.light,

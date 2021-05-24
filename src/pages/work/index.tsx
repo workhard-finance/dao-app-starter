@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Image, Tab, Tabs } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import { Image } from "react-bootstrap";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import WorkTabs from "./tabs";
 import { BigNumber } from "ethers";
-import { JobBoard } from "./tabs/JobBoard";
-import StableReserve from "./tabs/StableReserve";
 import { useParams } from "react-router-dom";
 
 const Work: React.FC = () => {
-  const { tab } = useParams<{ tab?: string }>();
-  const history = useHistory();
+  const { daoId } = useParams<{ tab?: string; daoId?: string }>();
   const { workhard, dao } = useWorkhard() || {};
 
   const [activeProjects, setActiveProjects] = useState<string[]>(
@@ -63,15 +59,17 @@ const Work: React.FC = () => {
   }, [dao]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
     <Page>
-      <Image
-        className="jumbotron"
-        src={process.env.PUBLIC_URL + "/images/work.jpg"}
-        style={{
-          width: "100%",
-          padding: "0px",
-          borderWidth: "5px",
-        }}
-      />
+      {!daoId && (
+        <Image
+          className="jumbotron"
+          src={process.env.PUBLIC_URL + "/images/work.jpg"}
+          style={{
+            width: "100%",
+            padding: "0px",
+            borderWidth: "5px",
+          }}
+        />
+      )}
       {/* <blockquote className="blockquote" style={{ textAlign: "right" }}>
         <p className="mb-0">
           All men must work, even the rich, because to work was the will of God

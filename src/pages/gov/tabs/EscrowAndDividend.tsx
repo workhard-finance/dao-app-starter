@@ -9,13 +9,14 @@ import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Claim } from "./Claim";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { prefix } from "../../../utils/utils";
 
 export const EscrowAndDividend: React.FC = () => {
   const { dao } = useWorkhard() || {};
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const history = useHistory();
-  const { subtab } = useParams<{ subtab?: string }>();
+  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
   const [stakedAmount, setStakedAmount] = useState<BigNumber>();
   const [lockIds, setLockIds] = useState<BigNumber[]>();
 
@@ -66,7 +67,7 @@ export const EscrowAndDividend: React.FC = () => {
           <Tab.Content>
             <Tab.Pane
               eventKey="locks"
-              onEnter={() => history.push("/gov/dividend/locks")}
+              onEnter={() => history.push(prefix(daoId, "/gov/dividend/locks"))}
             >
               <CreateLock stakedAmount={stakedAmount} />
               <hr />
@@ -86,13 +87,13 @@ export const EscrowAndDividend: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="claim"
-              onEnter={() => history.push("/gov/dividend/claim")}
+              onEnter={() => history.push(prefix(daoId, "/gov/dividend/claim"))}
             >
               <Claim />
             </Tab.Pane>
             <Tab.Pane
               eventKey="faq"
-              onEnter={() => history.push("/gov/dividend/faq")}
+              onEnter={() => history.push(prefix(daoId, "/gov/dividend/faq"))}
             >
               <h5>
                 <strong>What is Voting Escrow?</strong>

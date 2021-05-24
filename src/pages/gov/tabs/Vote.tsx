@@ -9,7 +9,7 @@ import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, providers } from "ethers";
-import { altWhenEmptyList } from "../../../utils/utils";
+import { altWhenEmptyList, prefix } from "../../../utils/utils";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
@@ -23,7 +23,7 @@ const Vote: React.FC = () => {
   const [timestamp, setTimestamp] = useState<number>(0);
   const [quorum, setQuorum] = useState<BigNumber>();
   const history = useHistory();
-  const { subtab } = useParams<{ subtab?: string }>();
+  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
 
   useEffect(() => {
     if (!library || !chainId || !dao) {
@@ -98,7 +98,7 @@ const Vote: React.FC = () => {
             <Tab.Pane
               eventKey="voting"
               style={{ marginTop: "1rem" }}
-              onEnter={() => history.push("/gov/vote/voting")}
+              onEnter={() => history.push(prefix(daoId, "/gov/vote/voting"))}
             >
               {altWhenEmptyList(
                 <p>No proposal is in voting.</p>,
@@ -125,7 +125,7 @@ const Vote: React.FC = () => {
             <Tab.Pane
               eventKey="ended"
               style={{ marginTop: "1rem" }}
-              onEnter={() => history.push("/gov/vote/ended")}
+              onEnter={() => history.push(prefix(daoId, "/gov/vote/ended"))}
             >
               {altWhenEmptyList(
                 <p>No ended proposal exists.</p>,
@@ -148,7 +148,7 @@ const Vote: React.FC = () => {
             <Tab.Pane
               eventKey="pending"
               style={{ marginTop: "1rem" }}
-              onEnter={() => history.push("/gov/vote/pending")}
+              onEnter={() => history.push(prefix(daoId, "/gov/vote/pending"))}
             >
               {altWhenEmptyList(
                 <p>No pending proposal exists.</p>,
@@ -171,7 +171,7 @@ const Vote: React.FC = () => {
             <Tab.Pane
               eventKey="faq"
               style={{ marginTop: "1rem" }}
-              onEnter={() => history.push("/gov/vote/faq")}
+              onEnter={() => history.push(prefix(daoId, "/gov/vote/faq"))}
             >
               <h5>
                 <strong>What can I propose via Workers' Union?</strong>

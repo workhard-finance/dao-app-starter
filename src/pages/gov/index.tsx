@@ -9,19 +9,22 @@ import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { prefix } from "../../utils/utils";
 
 const Gov: React.FC = () => {
-  const { tab } = useParams<{ tab?: string }>();
+  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
   const history = useHistory();
   const { dao } = useWorkhard() || {};
 
   return (
     <Page>
-      <Image
-        className="jumbotron"
-        src={process.env.PUBLIC_URL + "/images/vote.jpg"}
-        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-      />
+      {!daoId && (
+        <Image
+          className="jumbotron"
+          src={process.env.PUBLIC_URL + "/images/vote.jpg"}
+          style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
+        />
+      )}
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
@@ -30,7 +33,7 @@ const Gov: React.FC = () => {
           eventKey="right"
           title="$RIGHT"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/gov/right")}
+          onEnter={() => history.push(prefix(daoId, "/gov/right"))}
         >
           <Erc20Balance
             address={dao?.right.address}
@@ -42,7 +45,7 @@ const Gov: React.FC = () => {
           eventKey="dividend"
           title="Escrow & Dividend"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/gov/dividend")}
+          onEnter={() => history.push(prefix(daoId, "/gov/dividend"))}
         >
           <EscrowAndDividend />
         </Tab>
@@ -50,7 +53,7 @@ const Gov: React.FC = () => {
           eventKey="timelock"
           title="Transactions"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/gov/timelock")}
+          onEnter={() => history.push(prefix(daoId, "/gov/timelock"))}
         >
           <TimelockTxs />
         </Tab>
@@ -58,7 +61,7 @@ const Gov: React.FC = () => {
           eventKey="vote"
           title="Vote"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/gov/vote")}
+          onEnter={() => history.push(prefix(daoId, "/gov/vote"))}
         >
           <Vote />
         </Tab>
@@ -66,7 +69,7 @@ const Gov: React.FC = () => {
           eventKey="proposal"
           title="Proposal"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/gov/proposal")}
+          onEnter={() => history.push(prefix(daoId, "/gov/proposal"))}
         >
           <Propose />
         </Tab>

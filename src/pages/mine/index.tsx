@@ -10,6 +10,7 @@ import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import {
   altWhenEmptyList,
   handleTransaction,
+  prefix,
   TxStatus,
 } from "../../utils/utils";
 import { useHistory } from "react-router-dom";
@@ -19,7 +20,7 @@ import { initMineStore, MineStore } from "../../store/mineStore";
 import { observer } from "mobx-react";
 
 const Mine = observer(() => {
-  const { tab } = useParams<{ tab?: string }>();
+  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
   const history = useHistory();
   const { addToast } = useToasts();
   const { account, library } = useWeb3React();
@@ -62,11 +63,13 @@ const Mine = observer(() => {
 
   return (
     <Page>
-      <Image
-        className="jumbotron"
-        src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
-        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-      />
+      {!daoId && (
+        <Image
+          className="jumbotron"
+          src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
+          style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
+        />
+      )}
       {mineStore.distributable && (
         <Alert variant={"info"}>
           You just discovered a $VISION mine. Please call that smart contract
@@ -82,7 +85,7 @@ const Mine = observer(() => {
           eventKey="vision"
           title="$VISION"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/mine/vision")}
+          onEnter={() => history.push(prefix(daoId, "/mine/vision"))}
         >
           <Erc20Balance address={dao?.vision.address} symbolAlt={"VISION"} />
         </Tab>
@@ -90,7 +93,7 @@ const Mine = observer(() => {
           eventKey="liquidity"
           title="Liquidity Mining"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/mine/liquidity")}
+          onEnter={() => history.push(prefix(daoId, "/mine/liquidity"))}
         >
           {(mineStore.pools &&
             mineStore.liquidityMiningIdx() !== -1 &&
@@ -115,7 +118,7 @@ const Mine = observer(() => {
           eventKey="commit"
           title="Commit Mining"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/mine/commit")}
+          onEnter={() => history.push(prefix(daoId, "/mine/commit"))}
         >
           {(mineStore.pools &&
             mineStore.commitMiningIdx() !== -1 &&
@@ -140,7 +143,7 @@ const Mine = observer(() => {
           eventKey="airdrops"
           title="Airdrops"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/mine/airdrops")}
+          onEnter={() => history.push(prefix(daoId, "/mine/airdrops"))}
         >
           {altWhenEmptyList(
             <p>Partnerships are on the way 👀</p>,
@@ -173,7 +176,7 @@ const Mine = observer(() => {
           eventKey="faq"
           title="FAQ"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push("/mine/faq")}
+          onEnter={() => history.push(prefix(daoId, "/mine/faq"))}
         >
           <h5>
             <strong>What can I do with VISION?</strong>

@@ -8,9 +8,10 @@ import { BigNumber } from "ethers";
 import { JobBoard } from "./JobBoard";
 import StableReserve from "./StableReserve";
 import { useParams } from "react-router-dom";
+import { prefix } from "../../../utils/utils";
 
 const Work: React.FC = () => {
-  const { tab } = useParams<{ tab?: string }>();
+  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
   const history = useHistory();
   const { workhard, dao } = useWorkhard() || {};
 
@@ -67,7 +68,7 @@ const Work: React.FC = () => {
         eventKey="commit"
         title="$COMMIT"
         style={{ marginTop: "1rem" }}
-        onEnter={() => history.push("/work/commit")}
+        onEnter={() => history.push(prefix(daoId, "/work/commit"))}
       >
         <Erc20Balance address={dao?.commit.address} symbolAlt={"COMMIT"} />
       </Tab>
@@ -75,7 +76,7 @@ const Work: React.FC = () => {
         eventKey="job"
         title="Job Board"
         style={{ marginTop: "1rem" }}
-        onEnter={() => history.push("/work/job")}
+        onEnter={() => history.push(prefix(daoId, "/work/job"))}
       >
         <JobBoard />
         {/* <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} /> */}
@@ -84,7 +85,7 @@ const Work: React.FC = () => {
         eventKey="reserve"
         title="Stable Reserve"
         style={{ marginTop: "1rem" }}
-        onEnter={() => history.push("/work/reserve")}
+        onEnter={() => history.push(prefix(daoId, "/work/reserve"))}
       >
         <StableReserve />
       </Tab>

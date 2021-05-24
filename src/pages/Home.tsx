@@ -1,8 +1,13 @@
 import React from "react";
 import Page from "../layouts/Page";
 import { Button, Image } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 const Home = () => {
+  const { daoId } = useParams<{ tab?: string; daoId?: string }>();
+  const history = useHistory();
+  if (daoId) {
+    history.push(`/${daoId}/nfts`);
+  }
   return (
     <Page>
       <Image

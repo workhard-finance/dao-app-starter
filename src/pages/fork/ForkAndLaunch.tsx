@@ -1,52 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import Page from "../../layouts/Page";
 
-import {
-  Row,
-  Col,
-  Card,
-  Button,
-  Form,
-  Accordion,
-  Container,
-} from "react-bootstrap";
-import { useWorkhard } from "../../providers/WorkhardProvider";
-import { BigNumber, ContractTransaction } from "ethers";
-import { useWeb3React } from "@web3-react/core";
-import { parseEther } from "ethers/lib/utils";
+import { Row, Col, Card, Button, Accordion, Container } from "react-bootstrap";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { ConditionalButton } from "../../components/ConditionalButton";
-import { useIPFS } from "../../providers/IPFSProvider";
-import { permaPinToArweave } from "../../utils/utils";
-import { DAOThumbnail } from "../../components/contracts/workhard/DAOThumbnail";
 import { CreateProject } from "../../components/contracts/workhard/CreateProject";
 import { LaunchDAO } from "../../components/contracts/workhard/LaunchDAO";
 import { UpgradeToDAO } from "../../components/contracts/workhard/UpgradeToDAO";
 // import { UpgradeToDAO } from "../../components/contracts/workhard/UpgradeToDAO";
 
 export const ForkAndLaunch: React.FC = () => {
-  const { account, library } = useWeb3React();
   const history = useHistory();
-  const { dao } = useWorkhard() || {};
-  const { ipfs } = useIPFS();
   const { step, projId } = useParams<{ step: string; projId?: string }>();
-
-  const [name, setName] = useState<string>();
-  const [symbol, setSymbol] = useState<string>();
-  const [description, setDescription] = useState<string>();
-  const [file, setFile] = useState<File>();
-  const [imageURI, setImageURI] = useState<string>();
-  const [imageArweaveId, setImageArweaveId] = useState<string>();
-  const [metadataURI, setMetadataURI] = useState<string>();
-  const [metadataArweaveId, setMetadataArweaveId] = useState<string>();
-  const [price, setPrice] = useState<number>(100);
-  const [profitRate, setProfitRate] = useState<number>(0);
-  const [maxSupply, setMaxSupply] = useState<number>(10);
-  const [limitedEdition, setLimitedEdition] = useState<boolean>(false);
-  const [uploaded, setUploaded] = useState<boolean>();
-  const [uploading, setUploading] = useState<boolean>();
-  const [launchTx, setLaunchTx] = useState<ContractTransaction>();
-  const [previewURL, setPreviewURL] = useState<string>();
 
   return (
     <Page>

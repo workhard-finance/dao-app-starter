@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
-import { useWorkhard, WorkhardCtx } from "../../../providers/WorkhardProvider";
+import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
 import { CreateProject } from "../../../components/contracts/workhard/CreateProject";
+import { prefix } from "../../../utils/utils";
 
 export const JobBoard: React.FC = () => {
   const workhardCtx = useWorkhard();
   const history = useHistory();
-  const { subtab } = useParams<{ subtab?: string; daoId?: string }>();
+  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
   // const { account, library, chainId } = useWeb3React();
 
   const [activeProjects, setActiveProjects] = useState<BigNumber[]>(
@@ -95,7 +96,7 @@ export const JobBoard: React.FC = () => {
           <Tab.Content>
             <Tab.Pane
               eventKey="active"
-              onEnter={() => history.push("/work/job/active")}
+              onEnter={() => history.push(prefix(daoId, "/work/job/active"))}
             >
               {activeProjects.length === 0 && (
                 <p>
@@ -112,7 +113,7 @@ export const JobBoard: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="pending"
-              onEnter={() => history.push("/work/job/pending")}
+              onEnter={() => history.push(prefix(daoId, "/work/job/pending"))}
             >
               {inactiveProjects.length === 0 && <p>Empty!</p>}
               {inactiveProjects.map((id) => (
@@ -124,7 +125,7 @@ export const JobBoard: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="post"
-              onEnter={() => history.push("/work/job/post")}
+              onEnter={() => history.push(prefix(daoId, "/work/job/post"))}
             >
               <Card>
                 <Card.Header as="h5">Post a crypto job</Card.Header>
@@ -135,7 +136,7 @@ export const JobBoard: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="faq"
-              onEnter={() => history.push("/work/job/faq")}
+              onEnter={() => history.push(prefix(daoId, "/work/job/faq"))}
             >
               <h5>
                 <strong>How can I work?</strong>
