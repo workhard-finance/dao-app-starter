@@ -30,7 +30,7 @@ export const ForkAndLaunch: React.FC = () => {
       </Row>
       <hr />
       <Row>
-        <Col>
+        <Col md={{ span: 8, offset: 2 }}>
           <Accordion activeKey={step}>
             <Card>
               <Card.Header>
@@ -96,14 +96,6 @@ export const ForkAndLaunch: React.FC = () => {
               </Accordion.Collapse>
             </Card>
           </Accordion>
-        </Col>
-        <Col md={4}>
-          <h4>
-            <b>Guide</b>
-          </h4>
-          <p>Do you want to do some test on Rinkeby first?</p>
-          <Link to={"/res"}>Go to Rinkeby Workhard</Link>
-          {step === "new" || <p></p>}
         </Col>
       </Row>
     </Page>
