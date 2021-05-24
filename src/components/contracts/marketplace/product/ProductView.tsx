@@ -4,10 +4,10 @@ import { OverlayTooltip } from "../../../OverlayTooltip";
 import { BigNumber } from "@ethersproject/bignumber";
 import { formatEther } from "ethers/lib/utils";
 import { useIPFS } from "../../../../providers/IPFSProvider";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { CID, IPFS } from "ipfs-core/src";
 import { useWeb3React } from "@web3-react/core";
-import { uriToURL } from "../../../../utils/utils";
+import { prefix, uriToURL } from "../../../../utils/utils";
 
 export interface ProductMetadata {
   name: string;
@@ -43,6 +43,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
 }) => {
   const { account } = useWeb3React();
   const { ipfs } = useIPFS();
+  const { daoId } = useParams<{ daoId?: string }>();
   const [amount, setAmount] = useState<number>(1);
   const [metadata, setMetadata] = useState<ProductMetadata>();
   const _profitRate = Math.floor(
@@ -150,7 +151,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
             <br />
             <Button
               as={Link}
-              to={`/product/${product.id}`}
+              to={prefix(daoId, `/product/${product.id}`)}
               variant="warning"
               block
               disabled={stock.eq(0)}

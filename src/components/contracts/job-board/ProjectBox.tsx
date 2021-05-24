@@ -5,10 +5,11 @@ import ReactHtmlParser from "react-html-parser";
 import { Card, Button, Row, Col, Image } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   errorHandler,
   fetchProjectMetadataFromIPFS,
+  prefix,
   ProjectMetadata,
   uriToURL,
   wrapUrl,
@@ -24,6 +25,7 @@ export interface ProjectProps {
 
 export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
+  const { daoId } = useParams<{ daoId?: string }>();
   const { ipfs } = useIPFS();
   const { dao, workhard } = useWorkhard() || { dao: undefined };
   const { addToast } = useToasts();
@@ -78,11 +80,19 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
             </Card.Text>
             <ConditionalButton
               as={budgetOwner === account ? Link : Button}
-              to={`/proj/${projId}`}
+              to={prefix(daoId, `/proj/${projId}`)}
               variant={"primary"}
               enabledWhen={account === budgetOwner ? false : undefined}
               whyDisabled={"Please log in with budget owner account."}
               children={"Go to admin tool"}
+            />
+            <ConditionalButton
+              as={budgetOwner === account ? Link : Button}
+              to={`/fork/upgrade/${projId}`}
+              variant={"secondary"}
+              enabledWhen={account === budgetOwner ? false : undefined}
+              whyDisabled={"Please log in with budget owner account."}
+              children={"Upgrade to DAO"}
             />
           </Col>
           <Col md={4}>
