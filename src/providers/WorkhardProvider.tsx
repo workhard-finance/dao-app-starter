@@ -33,6 +33,7 @@ if (process.env.NODE_ENV === "development") {
 
 export interface WorkhardLibrary {
   workhard: Workhard;
+  daoId: number;
   dao: WorkhardDAO;
   periphery: WorkhardPeriphery;
   commons: WorkhardCommons;
@@ -60,7 +61,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
   console.log("daoId", daoId);
   const [context, setContext] = useState<WorkhardLibrary>();
   const getContext = async (
-    daoId: BigNumberish
+    daoId: number
   ): Promise<WorkhardLibrary | undefined> => {
     if (!active) return undefined;
     if (!library) return undefined;
@@ -76,6 +77,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
     ]);
     if (!dao || !periphery) return undefined;
     return {
+      daoId,
       client,
       dao,
       periphery,

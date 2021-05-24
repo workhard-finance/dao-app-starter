@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
-import { useWorkhard } from "../../../providers/WorkhardProvider";
+import { useWorkhard, WorkhardCtx } from "../../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
@@ -8,9 +8,9 @@ import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
 import { PostAJobBox } from "../../../components/contracts/job-board/PostAJob";
 
 export const JobBoard: React.FC = () => {
-  const { workhard, dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const history = useHistory();
-  const { subtab } = useParams<{ subtab?: string }>();
+  const { subtab } = useParams<{ subtab?: string; daoId?: string }>();
   // const { account, library, chainId } = useWeb3React();
 
   const [activeProjects, setActiveProjects] = useState<BigNumber[]>(
@@ -23,17 +23,18 @@ export const JobBoard: React.FC = () => {
   // TODO listen JobBoard events and add dependency to useEffect()
 
   useEffect(() => {
-    if (!!dao && !!workhard) {
+    if (workhardCtx) {
+      const { daoId, workhard, dao } = workhardCtx;
       let stale = false;
       const { jobBoard } = dao;
       workhard
-        .totalSupply()
+        .projectsOf(daoId)
         .then((n: BigNumber) => {
           if (!stale) {
             Array(n.toNumber())
               .fill(undefined)
               .forEach((_, index) => {
-                workhard.tokenByIndex(index).then((projId) => {
+                workhard.projectsOfDAOByIndex(daoId, index).then((projId) => {
                   jobBoard.approvedProjects(projId).then((approved) => {
                     if (approved) {
                       if (!activeProjects.find((v) => v.eq(projId))) {
@@ -70,7 +71,7 @@ export const JobBoard: React.FC = () => {
         setInactiveProjects([]);
       };
     }
-  }, [dao]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
     <Tab.Container defaultActiveKey={subtab || "active"}>
       <Row>
