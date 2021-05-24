@@ -10,12 +10,13 @@ import Mine from "./pages/mine";
 import Work from "./pages/work";
 import Gov from "./pages/gov";
 import Res from "./pages/Res";
-import Fork from "./pages/Fork";
+import Fork from "./pages/fork";
 import Store from "./pages/nfts";
 import { WorkhardProvider } from "./providers/WorkhardProvider";
 import { Project } from "./pages/etc/Project";
 import { BlockNumberProvider } from "./providers/BlockNumberProvider";
 import { Manufacture } from "./pages/nfts/tabs/Manufacture";
+import { ForkAndLaunch } from "./pages/fork/ForkAndLaunch";
 import { ProductPage } from "./pages/nfts/tabs/ProductPage";
 import { IPFSProvider } from "./providers/IPFSProvider";
 import { ToastProvider } from "react-toast-notifications";
@@ -47,6 +48,10 @@ function App() {
                     />
                     <Route path="/:daoId?/nfts/:tab?" children={<Store />} />
                     <Route path="/:daoId?/res" children={<Res />} />
+                    <Route
+                      path="/:daoId?/fork/:step/:projId?"
+                      children={<ForkAndLaunch />}
+                    />
                     <Route path="/:daoId?/fork" children={<Fork />} />
                     <Route path="/:daoId?/proj/:id" children={<Project />} />
                     <Route

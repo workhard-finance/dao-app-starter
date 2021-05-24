@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Col, Nav, Row, Tab } from "react-bootstrap";
+import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
 import { useWorkhard, WorkhardCtx } from "../../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
-import { PostAJobBox } from "../../../components/contracts/job-board/PostAJob";
+import { CreateProject } from "../../../components/contracts/workhard/CreateProject";
 
 export const JobBoard: React.FC = () => {
   const workhardCtx = useWorkhard();
@@ -126,7 +126,12 @@ export const JobBoard: React.FC = () => {
               eventKey="post"
               onEnter={() => history.push("/work/job/post")}
             >
-              <PostAJobBox />
+              <Card>
+                <Card.Header as="h5">Post a crypto job</Card.Header>
+                <Card.Body>
+                  <CreateProject />
+                </Card.Body>
+              </Card>
             </Tab.Pane>
             <Tab.Pane
               eventKey="faq"

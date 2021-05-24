@@ -71,6 +71,41 @@ export const acceptableTokenList = (chainId?: number) => {
   ];
 };
 
+export const getStablecoinList = (chainId?: number) => {
+  if (!chainId) return [];
+  if (process.env.NODE_ENV === "development") {
+    const dao = require("../deployed.dev.json");
+    return [
+      {
+        symbol: "Mock Token",
+        address: dao[getNetworkName(chainId)].BaseCurrency as string,
+      },
+    ];
+  } else if (getNetworkName(chainId) === "mainnet") {
+    return [
+      {
+        symbol: "DAI",
+        address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      },
+      {
+        symbol: "USDC",
+        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      },
+      {
+        symbol: "USDT",
+        address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      },
+    ];
+  } else if (getNetworkName(chainId) === "rinkeby") {
+    return [
+      {
+        symbol: "Rinkeby DAI",
+        address: "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa",
+      },
+    ];
+  }
+};
+
 export const getTokenSymbol = (
   address: string,
   chainId?: number

@@ -13,7 +13,7 @@ import {
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
 import { useRouteMatch } from "react-router-dom";
-import { BigNumber, BigNumberish, ethers } from "ethers";
+import { ethers } from "ethers";
 
 let deployedContracts: Deployed;
 if (process.env.NODE_ENV === "development") {
@@ -38,6 +38,8 @@ export interface WorkhardLibrary {
   periphery: WorkhardPeriphery;
   commons: WorkhardCommons;
   client: WorkhardClient;
+  name: string;
+  symbol: string;
 }
 
 export const WorkhardCtx = React.createContext<WorkhardLibrary | undefined>(
@@ -58,7 +60,6 @@ export const WorkhardProvider: React.FC = ({ children }) => {
   const match = useRouteMatch<{ daoId?: string }>("/:daoId?/");
   const parsed = parseInt(match?.params.daoId || "0");
   const daoId = Number.isNaN(parsed) ? 0 : parsed;
-  console.log("daoId", daoId);
   const [context, setContext] = useState<WorkhardLibrary>();
   const getContext = async (
     daoId: number
@@ -71,9 +72,11 @@ export const WorkhardProvider: React.FC = ({ children }) => {
 
     if (!workhardAddress) return undefined;
     const client = await WorkhardClient.from(library, workhardAddress);
-    const [dao, periphery] = await Promise.all([
+    const [dao, periphery, name, symbol] = await Promise.all([
       client.getDAO(daoId),
       client.getPeriphery(daoId),
+      client.workhard.nameOf(daoId),
+      client.workhard.symbolOf(daoId),
     ]);
     if (!dao || !periphery) return undefined;
     return {
@@ -83,6 +86,8 @@ export const WorkhardProvider: React.FC = ({ children }) => {
       periphery,
       commons: client.commons,
       workhard: client.workhard,
+      name,
+      symbol,
     };
   };
   useEffect(() => {
