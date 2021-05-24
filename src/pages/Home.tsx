@@ -39,9 +39,30 @@ const Home = () => {
       </Button>{" "}
       <br />
       <br />
-      <h3>COMMIT</h3>
-      <h3>VISION</h3>
-      <h3>RIGHT</h3>
+      <h1>
+        Create a <strong>Project</strong>.
+      </h1>
+      <h1>
+        Get <strong>grants</strong>.
+      </h1>
+      <h1>
+        Upgrade to <strong>DAO</strong> and fork out!
+      </h1>
+      <h1>
+        The <strong>trinity</strong>
+      </h1>
+      <h4>
+        <strong>COMMIT</strong>
+      </h4>
+      <h4>
+        <strong>VISION</strong>
+      </h4>
+      <h4>
+        <strong>RIGHT</strong>
+      </h4>
+      <h1>
+        Find out projects and <strong>COMMIT</strong> at the early stages.
+      </h1>
       <h3>Join the community now!</h3>
     </Page>
   );
