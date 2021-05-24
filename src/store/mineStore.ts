@@ -44,9 +44,11 @@ export class MineStore {
   @action
   loadPools = async () => {
     const poolLength = await this.visionEmitter?.getNumberOfPools();
+    const _pools = [];
     for (let i = 0; i < poolLength.toNumber(); i++) {
-      this.pools.push(await this.visionEmitter?.pools(i));
+      _pools.push(await this.visionEmitter?.pools(i));
     }
+    this.pools = _pools;
   };
 
   @action
