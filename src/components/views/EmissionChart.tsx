@@ -12,14 +12,16 @@ import {
   Legend,
 } from "recharts";
 
-export const EmissionChart: React.FC<{
+export interface EmissionChartProps {
   width?: number;
   height?: number;
   initialEmission: BigNumber;
   emissionCut: number; // bootstrapping emission cut rate (denom: 10000)
   minimumRate: number; // weekly emission minimumRate
   currentWeek?: number;
-}> = ({
+}
+
+export const EmissionChart: React.FC<EmissionChartProps> = ({
   width,
   height,
   initialEmission,

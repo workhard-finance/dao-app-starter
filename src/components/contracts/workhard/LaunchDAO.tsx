@@ -11,6 +11,7 @@ import {
 import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
 import { BigNumber, BigNumberish } from "ethers";
+import { AllocationChart } from "../../views/AllocationChart";
 
 const defaultSetting = {
   minDelay: 86400,
@@ -38,7 +39,7 @@ export const LaunchDAO: React.FC<{
   const [visionSymbol, setVisionSymbol] = useState<string>();
   const [
     founderShareDenominator,
-    setfounderShareDenominator,
+    setFounderShareDenominator,
   ] = useState<BigNumber>(BigNumber.from(500));
 
   const defaultSetting = {
@@ -63,7 +64,7 @@ export const LaunchDAO: React.FC<{
       workhard.nameOf(id).then(setProjectName).catch(errorHandler(addToast));
       dao.visionEmitter
         .FOUNDER_SHARE_DENOMINATOR()
-        .then(setfounderShareDenominator)
+        .then(setFounderShareDenominator)
         .catch(errorHandler(addToast));
       dao.vision.symbol().then(setVisionSymbol).catch(errorHandler(addToast));
     }
@@ -93,58 +94,25 @@ export const LaunchDAO: React.FC<{
       }
     );
   };
-  const notAProjectOwner = (
-    <p>Only the project owner can upgrade it to a DAO.</p>
+  const poolSum = liquidityMining + commitMining + treasury + caller;
+  const founderWeight = Math.floor(
+    poolSum / founderShareDenominator?.toNumber() || 20
   );
-  const notFound = <p>Not Found</p>;
-  const getSum = () => {
-    return liquidityMining + commitMining + treasury + caller;
-  };
-  const getFounderShare = (): number => {
-    if (!founderShareDenominator) return 0;
-    const founderShare = getSum() / founderShareDenominator.toNumber();
-    const founderShareRate =
-      (founderShare / (founderShare + getSum())) * (33 / 34) * 100;
-    return founderShareRate;
-  };
-  const getPercent = (val: number) => {
-    if (!founderShareDenominator) return 0;
-    const founderShare = getSum() / founderShareDenominator.toNumber();
-    const p = (val / (founderShare + getSum())) * (33 / 34) * 100;
-    return p;
-  };
+  const protocolWeight = Math.floor((poolSum + founderWeight) / 33);
+  const sum = poolSum + founderWeight + protocolWeight;
 
   return (
     <Form>
-      <PieChart
-        radius={30}
-        viewBoxSize={[100, 70]}
-        center={[50, 35]}
-        data={[
-          {
-            title: `${visionSymbol || "VISION"}/ETH LP`,
-            value: getPercent(liquidityMining),
-            color: "#17a2b8",
-          },
-          {
-            title: "Commit Burners",
-            value: getPercent(commitMining),
-            color: "#ffc107",
-          },
-          { title: "Treasury", value: getPercent(treasury), color: "#28a745" },
-          { title: "Founder", value: getFounderShare(), color: "#dc3545" },
-          {
-            title: "Protocol",
-            value: (1 / 34) * 100,
-            color: "#868e96",
-          },
-          { title: "Caller", value: getPercent(caller), color: "#6A2135" },
+      <AllocationChart
+        pools={[
+          { name: "Commit Burners(Commit Burn Pool)", weight: commitMining },
+          { name: "Market Makers(VISION/ETH LP)", weight: liquidityMining },
         ]}
-        labelStyle={{ fontSize: 3 }}
-        labelPosition={100}
-        label={(data) =>
-          `${data.dataEntry.title}: ${data.dataEntry.value.toFixed(2)}%`
-        }
+        treasury={treasury}
+        caller={caller}
+        protocol={protocolWeight}
+        founder={founderWeight}
+        sum={sum}
       />
       <ConditionalButton
         variant="success"
