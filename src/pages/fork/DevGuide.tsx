@@ -1,6 +1,5 @@
 import { BigNumberish } from "ethers";
 import React from "react";
-import { Button } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { ConditionalButton } from "../../components/ConditionalButton";
 import { prefix } from "../../utils/utils";
@@ -20,10 +19,10 @@ export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
       value until you connect your protocol's revenue stream.
       <br />
       <br />
-      Here's how to connect them to your DAO.
+      Here are 3 easy ways to build the intrinsic values!
       <ol>
         <li>
-          From external owned accounts(e.g., Metamask)
+          Using an external owned accounts(e.g., Metamask)
           <ul>
             <li>
               Go to{" "}
@@ -31,11 +30,13 @@ export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
                 [gov {`>`} Escrow {`&`} Dividend {`>`} Distribute]
               </Link>
             </li>
-            <li>Set up amount and click distribute!</li>
+            <li>Fill out the form to set token and amount to distribute.</li>
+            <li>Click distribute!</li>
           </ul>
         </li>
         <li>
-          Or you can implement your own smart contract
+          Are you building a protocol? Then you can implement your own smart
+          contract.
           <ul>
             <li>
               Define interface.
@@ -57,6 +58,14 @@ export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
               </pre>
             </li>
           </ul>
+        </li>
+        <li>
+          Or, try to make your products own digital product and register them to
+          the{" "}
+          <Link to={prefix(projId, "/manufacturer/new")}>NFT marketplace</Link>{" "}
+          that we've created for you!. It supports ERC1155 for now but we're
+          looking forward to supporting ERC721 soon with the OpenSea storefront
+          integration :)
         </li>
       </ol>
       Cool! Everything is ready!
