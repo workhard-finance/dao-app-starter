@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 
 import { Row, Col, Card, Button, Accordion, Container } from "react-bootstrap";
@@ -6,11 +6,30 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import { CreateProject } from "../../components/contracts/workhard/CreateProject";
 import { LaunchDAO } from "../../components/contracts/workhard/LaunchDAO";
 import { UpgradeToDAO } from "../../components/contracts/workhard/UpgradeToDAO";
-// import { UpgradeToDAO } from "../../components/contracts/workhard/UpgradeToDAO";
+import { DevGuide } from "./DevGuide";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 
 export const ForkAndLaunch: React.FC = () => {
   const history = useHistory();
   const { step, projId } = useParams<{ step: string; projId?: string }>();
+  const workhardCtx = useWorkhard();
+  const [id, setId] = useState<string>();
+
+  useEffect(() => {
+    if (workhardCtx && projId && !Number.isNaN(parseInt(projId))) {
+      const { workhard } = workhardCtx;
+      workhard
+        .ownerOf(projId)
+        .then(() => {
+          setId(projId);
+        })
+        .catch((_) => {
+          setId(undefined);
+        });
+    } else {
+      setId(undefined);
+    }
+  }, [workhardCtx, id]);
 
   return (
     <Page>
@@ -35,7 +54,8 @@ export const ForkAndLaunch: React.FC = () => {
             <Card>
               <Card.Header>
                 <Accordion.Toggle
-                  as={Container}
+                  as={Link}
+                  to={`/fork/new/${id || ""}`}
                   eventKey={"new"}
                   className={step === "new" ? "text-primary" : "text-muted"}
                 >
@@ -60,7 +80,8 @@ export const ForkAndLaunch: React.FC = () => {
             <Card>
               <Card.Header>
                 <Accordion.Toggle
-                  as={Container}
+                  as={Link}
+                  to={`/fork/upgrade/${id || ""}`}
                   eventKey={"upgrade"}
                   className={step === "upgrade" ? "text-primary" : "text-muted"}
                 >
@@ -70,8 +91,8 @@ export const ForkAndLaunch: React.FC = () => {
               <Accordion.Collapse eventKey={`upgrade`}>
                 <Card.Body>
                   <UpgradeToDAO
-                    id={projId}
-                    onUpgraded={() => history.push(`/fork/launch/${projId}`)}
+                    id={id}
+                    onUpgraded={() => history.push(`/fork/launch/${id || ""}`)}
                   />
                 </Card.Body>
               </Accordion.Collapse>
@@ -79,7 +100,8 @@ export const ForkAndLaunch: React.FC = () => {
             <Card>
               <Card.Header>
                 <Accordion.Toggle
-                  as={Container}
+                  as={Link}
+                  to={`/fork/launch/${id || ""}`}
                   eventKey={`launch`}
                   className={step === "launch" ? "text-primary" : "text-muted"}
                 >
@@ -88,10 +110,24 @@ export const ForkAndLaunch: React.FC = () => {
               </Card.Header>
               <Accordion.Collapse eventKey={`launch`}>
                 <Card.Body>
-                  <LaunchDAO
-                    id={projId}
-                    onLaunched={() => history.push(`/fork`)}
-                  />
+                  <LaunchDAO id={id} onLaunched={() => history.push(`/fork`)} />
+                </Card.Body>
+              </Accordion.Collapse>
+            </Card>
+            <Card>
+              <Card.Header>
+                <Accordion.Toggle
+                  as={Link}
+                  to={`/fork/connect/${id || ""}`}
+                  eventKey={`connect`}
+                  className={step === "connect" ? "text-primary" : "text-muted"}
+                >
+                  Step4. Connnect your revenue stream!
+                </Accordion.Toggle>
+              </Card.Header>
+              <Accordion.Collapse eventKey={`connect`}>
+                <Card.Body>
+                  <DevGuide />
                 </Card.Body>
               </Accordion.Collapse>
             </Card>

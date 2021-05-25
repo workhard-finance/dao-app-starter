@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Nav, Row, Tab } from "react-bootstrap";
 import { CreateLock } from "../../../components/contracts/dividend-pool/CreateLock";
 import { MyLock } from "../../../components/contracts/dividend-pool/MyLock";
+import { Distribute } from "../../../components/contracts/dividend-pool/Distribute";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Claim } from "./Claim";
@@ -59,6 +60,9 @@ export const EscrowAndDividend: React.FC = () => {
               <Nav.Link eventKey="claim">Claim Dividend</Nav.Link>
             </Nav.Item>
             <Nav.Item>
+              <Nav.Link eventKey="distribute">Distribute</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
               <Nav.Link eventKey="faq">FAQ</Nav.Link>
             </Nav.Item>
           </Nav>
@@ -90,6 +94,14 @@ export const EscrowAndDividend: React.FC = () => {
               onEnter={() => history.push(prefix(daoId, "/gov/dividend/claim"))}
             >
               <Claim />
+            </Tab.Pane>
+            <Tab.Pane
+              eventKey="distribute"
+              onEnter={() =>
+                history.push(prefix(daoId, "/gov/dividend/distribute"))
+              }
+            >
+              <Distribute />
             </Tab.Pane>
             <Tab.Pane
               eventKey="faq"

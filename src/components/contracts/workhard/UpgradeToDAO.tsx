@@ -11,6 +11,7 @@ import {
 import { useToasts } from "react-toast-notifications";
 import { BigNumberish } from "ethers";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { ConditionalButton } from "../../ConditionalButton";
 
 const defaultSetting = {
   minDelay: 86400,
@@ -146,11 +147,7 @@ export const UpgradeToDAO: React.FC<{
       }
     );
   };
-  const notAProjectOwner = (
-    <p>Only the project owner can upgrade it to a DAO.</p>
-  );
-  const notFound = <p>Not Found</p>;
-  const found = (
+  return (
     <Form>
       <Form.Group>
         <Form.Label>Multisig Wallet</Form.Label>
@@ -215,16 +212,20 @@ export const UpgradeToDAO: React.FC<{
           />
         </Form.Group>
       </Row>
-      <Button variant="info" onClick={upgradeToDAO}>
-        Launch!
-      </Button>
+      <ConditionalButton
+        variant="info"
+        onClick={upgradeToDAO}
+        enabledWhen={account === projectOwner}
+        whyDisabled={id ? `Not allowed` : "This is a preview"}
+        children="Start DAO!"
+      />
       <hr />
       <a
         className="text-warning"
         style={{ cursor: "pointer" }}
         onClick={() => setAdvancedMode(!advancedMode)}
       >
-        Advanced Configuration Zone
+        Advanced
       </a>
       <div hidden={!advancedMode}>
         <br />
@@ -404,8 +405,4 @@ export const UpgradeToDAO: React.FC<{
       </div>
     </Form>
   );
-  if (!id) return notFound;
-  if (!projectOwner) return <p>Fetching...</p>;
-  if (projectOwner === account) return found;
-  else return notAProjectOwner;
 };

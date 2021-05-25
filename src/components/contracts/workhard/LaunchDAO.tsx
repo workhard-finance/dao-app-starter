@@ -8,6 +8,7 @@ import {
   handleTransaction,
   errorHandler,
 } from "../../../utils/utils";
+import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
 import { BigNumber, BigNumberish } from "ethers";
 
@@ -38,7 +39,7 @@ export const LaunchDAO: React.FC<{
   const [
     founderShareDenominator,
     setfounderShareDenominator,
-  ] = useState<BigNumber>();
+  ] = useState<BigNumber>(BigNumber.from(500));
 
   const defaultSetting = {
     commitMining: 4750,
@@ -113,7 +114,7 @@ export const LaunchDAO: React.FC<{
     return p;
   };
 
-  const found = (
+  return (
     <Form>
       <PieChart
         radius={30}
@@ -121,7 +122,7 @@ export const LaunchDAO: React.FC<{
         center={[50, 35]}
         data={[
           {
-            title: `${visionSymbol}/ETH LP`,
+            title: `${visionSymbol || "VISION"}/ETH LP`,
             value: getPercent(liquidityMining),
             color: "#17a2b8",
           },
@@ -145,9 +146,13 @@ export const LaunchDAO: React.FC<{
           `${data.dataEntry.title}: ${data.dataEntry.value.toFixed(2)}%`
         }
       />
-      <Button variant="success" onClick={launchDAO}>
-        Launch now!
-      </Button>
+      <ConditionalButton
+        variant="success"
+        onClick={launchDAO}
+        enabledWhen={account === projectOwner}
+        whyDisabled={id ? `Not allowed` : "This is a preview"}
+        children="Start Emission!"
+      />
       <br />
       <br />
       <a
@@ -221,8 +226,4 @@ export const LaunchDAO: React.FC<{
       </div>
     </Form>
   );
-  if (!id) return notFound;
-  if (!projectOwner) return <p>Fetching...</p>;
-  if (projectOwner === account) return found;
-  else return notAProjectOwner;
 };
