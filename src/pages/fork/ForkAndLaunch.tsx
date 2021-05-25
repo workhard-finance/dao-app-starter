@@ -105,7 +105,7 @@ export const ForkAndLaunch: React.FC = () => {
                   eventKey={`launch`}
                   className={step === "launch" ? "text-primary" : "text-muted"}
                 >
-                  Step3. Setup emission and launch.
+                  Step3. Allocate emissions and launch.
                 </Accordion.Toggle>
               </Card.Header>
               <Accordion.Collapse eventKey={`launch`}>

@@ -12,13 +12,15 @@ import { useToasts } from "react-toast-notifications";
 import { BigNumberish } from "ethers";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
+import { EmissionChart } from "../../views/EmissionChart";
+import { parseEther } from "ethers/lib/utils";
 
 const defaultSetting = {
   minDelay: 86400,
   launchDelay: 86400 * 28,
   initialEmission: 24000000,
   minEmissionRatePerWeek: 60,
-  emissionCutRate: 3000,
+  emissionCutRate: 1000,
   founderShare: 500,
 };
 
@@ -212,14 +214,6 @@ export const UpgradeToDAO: React.FC<{
           />
         </Form.Group>
       </Row>
-      <ConditionalButton
-        variant="info"
-        onClick={upgradeToDAO}
-        enabledWhen={account === projectOwner}
-        whyDisabled={id ? `Not allowed` : "This is a preview"}
-        children="Start DAO!"
-      />
-      <hr />
       <a
         className="text-warning"
         style={{ cursor: "pointer" }}
@@ -227,7 +221,10 @@ export const UpgradeToDAO: React.FC<{
       >
         Advanced
       </a>
+      <br />
+      <br />
       <div hidden={!advancedMode}>
+        <hr />
         <br />
         <Row>
           <Form.Group as={Col} md={8}>
@@ -313,30 +310,61 @@ export const UpgradeToDAO: React.FC<{
         </Form.Group>
         <Form.Group>
           <Form.Label>Initial Emission</Form.Label>
-          <Form.Control
-            type="range"
-            min={1}
-            max={100000000}
-            value={initialEmission}
-            step={1}
-            onChange={({ target: { value } }) =>
-              setInitialEmission(parseInt(value))
-            }
-          />
+          <Row>
+            <Col md={9}>
+              <Form.Control
+                type="range"
+                min={1}
+                max={100000000}
+                value={initialEmission}
+                step={1}
+                onChange={({ target: { value } }) =>
+                  setInitialEmission(parseInt(value))
+                }
+              />
+            </Col>
+            <Col md={3}>
+              <Form.Control
+                type="number"
+                min={1}
+                value={initialEmission}
+                step={1}
+                onChange={({ target: { value } }) =>
+                  setInitialEmission(parseInt(value))
+                }
+              />
+            </Col>
+          </Row>
           <Form.Text>{initialEmission} 1e18 wei(s)</Form.Text>
         </Form.Group>
         <Form.Group>
           <Form.Label>Minimum Emission Rate Per Week</Form.Label>
-          <Form.Control
-            type="range"
-            min={0}
-            max={134}
-            value={minEmissionRatePerWeek}
-            step={1}
-            onChange={({ target: { value } }) =>
-              setMinEmissionRatePerWeek(parseInt(value))
-            }
-          />
+          <Row>
+            <Col md={10}>
+              <Form.Control
+                type="range"
+                min={0}
+                max={134}
+                value={minEmissionRatePerWeek}
+                step={1}
+                onChange={({ target: { value } }) =>
+                  setMinEmissionRatePerWeek(parseInt(value))
+                }
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                type="number"
+                min={0}
+                max={134}
+                value={minEmissionRatePerWeek}
+                step={1}
+                onChange={({ target: { value } }) =>
+                  setMinEmissionRatePerWeek(parseInt(value))
+                }
+              />
+            </Col>
+          </Row>
           <Form.Text>
             Minimum {minEmissionRatePerWeek / 100} % emission per week ~={" "}
             {(((1 + minEmissionRatePerWeek / 10000) ** 52 - 1) * 100).toFixed(
@@ -347,16 +375,33 @@ export const UpgradeToDAO: React.FC<{
         </Form.Group>
         <Form.Group>
           <Form.Label>Founder Share Rate</Form.Label>
-          <Form.Control
-            type="range"
-            min={0}
-            max={3000}
-            value={founderShare}
-            step={1}
-            onChange={({ target: { value } }) =>
-              setFounderShare(parseInt(value))
-            }
-          />
+          <Row>
+            <Col md={10}>
+              <Form.Control
+                type="range"
+                min={0}
+                max={3000}
+                value={founderShare}
+                step={1}
+                onChange={({ target: { value } }) =>
+                  setFounderShare(parseInt(value))
+                }
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                type="number"
+                min={0}
+                max={3000}
+                value={founderShare}
+                step={1}
+                onChange={({ target: { value } }) =>
+                  setFounderShare(parseInt(value))
+                }
+              />
+            </Col>
+          </Row>
+
           <Form.Text>
             {((33 / 34) * (1 / (10000 / founderShare + 1)) * 100).toFixed(2)}%
             goes to the founder reward pool
@@ -364,16 +409,33 @@ export const UpgradeToDAO: React.FC<{
         </Form.Group>
         <Form.Group>
           <Form.Label>Initial Emission Cut Rate</Form.Label>
-          <Form.Control
-            type="range"
-            min={500}
-            max={5000}
-            value={emissionCutRate}
-            step={100}
-            onChange={({ target: { value } }) =>
-              setEmissionCutRate(parseInt(value))
-            }
-          />
+          <Row>
+            <Col md={10}>
+              <Form.Control
+                type="range"
+                min={500}
+                max={5000}
+                value={emissionCutRate}
+                step={100}
+                onChange={({ target: { value } }) =>
+                  setEmissionCutRate(parseInt(value))
+                }
+              />
+            </Col>
+            <Col md={2}>
+              <Form.Control
+                type="number"
+                min={500}
+                max={5000}
+                value={emissionCutRate}
+                step={100}
+                onChange={({ target: { value } }) =>
+                  setEmissionCutRate(parseInt(value))
+                }
+              />
+            </Col>
+          </Row>
+
           <Form.Text>
             {emissionCutRate / 100} % cuts per week until it reaches to the
             minimum emission rate.
@@ -402,7 +464,22 @@ export const UpgradeToDAO: React.FC<{
         >
           Use default
         </Button>
+        <hr />
+        <p>Expected Emission Schedule</p>
+        <EmissionChart
+          initialEmission={parseEther(`${initialEmission}`)}
+          emissionCut={emissionCutRate}
+          minimumRate={minEmissionRatePerWeek}
+          currentWeek={0}
+        />
       </div>
+      <ConditionalButton
+        variant="info"
+        onClick={upgradeToDAO}
+        enabledWhen={account === projectOwner}
+        whyDisabled={id ? `Not allowed` : "This is a preview"}
+        children="Start DAO!"
+      />
     </Form>
   );
 };
