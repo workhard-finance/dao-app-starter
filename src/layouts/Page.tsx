@@ -1,6 +1,8 @@
-import React from "react";
-import { useRouteMatch } from "react-router-dom";
-import { Container, Row } from "react-bootstrap";
+import React, { useState } from "react";
+import { useHistory, useRouteMatch } from "react-router-dom";
+import { useWeb3React } from "@web3-react/core";
+import { Container, Row, Image } from "react-bootstrap";
+import { ethers } from "ethers";
 import WorkIcon from "../components/icons/WorkIcon";
 import GovIcon from "../components/icons/GovIcon";
 import StoreIcon from "../components/icons/StoreIcon";
@@ -9,11 +11,23 @@ import DupIcon from "../components/icons/DupIcon";
 import NavBar from "../components/nav/NavBar";
 import Footer from "../components/Footer";
 import { Menu } from "../contexts/menu";
-import { prefix } from "../utils/utils";
+import { getNetworkNameFromHostname, prefix } from "../utils/utils";
+import { getNetworkName } from "@workhard/protocol";
+import { useWorkhard } from "../providers/WorkhardProvider";
 
 export type PageProps = React.ComponentProps<any>;
 
 const Page = (props: React.ComponentProps<any>) => {
+  const history = useHistory();
+  const [network, useNetwork] = useState<string>();
+  const { active, chainId } = useWeb3React<ethers.providers.Web3Provider>();
+  const workhard = useWorkhard();
+
+  const isValidNetwork =
+    chainId &&
+    getNetworkName(chainId) !==
+      getNetworkNameFromHostname(window.location.hostname);
+
   const match = useRouteMatch<{ daoId?: string }>("/:daoId?/");
   const parsed = parseInt(match?.params.daoId || "0");
   const daoId = Number.isNaN(parsed) ? 0 : parsed;
@@ -79,7 +93,16 @@ const Page = (props: React.ComponentProps<any>) => {
       <NavBar menus={menus} secondary={secondary} />
       <br />
       <Row>
-        <Container>{props.children}</Container>
+        <Container>
+          {active ? (
+            props.children
+          ) : (
+            <Image
+              src={process.env.PUBLIC_URL + "/images/connect-wallet-ser.png"}
+              style={{ width: "50%", padding: "0px", marginTop: "120px" }}
+            />
+          )}
+        </Container>
       </Row>
       <br />
       <Footer />

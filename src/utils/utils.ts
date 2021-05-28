@@ -7,6 +7,7 @@ import {
   IERC20__factory,
   WorkhardDAO,
   getNetworkName,
+  MyNetwork,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
 import {
@@ -104,6 +105,14 @@ export const getStablecoinList = (chainId?: number) => {
       },
     ];
   }
+};
+
+export const getNetworkNameFromHostname = (hostname: string): MyNetwork => {
+  if (process.env.NETWORK) return process.env.NETWORK as MyNetwork;
+  else if (hostname.includes("localhost")) return "localhost";
+  else if (hostname.includes("rinkeby")) return "rinkeby";
+  else if (hostname === "workhard.finance") return "mainnet";
+  else return "hardhat";
 };
 
 export const getTokenSymbol = (

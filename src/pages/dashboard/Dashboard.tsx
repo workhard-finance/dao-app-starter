@@ -243,7 +243,7 @@ const Dashboard = () => {
           <Erc20Balance
             title={commitName || "COMMIT Token"}
             address={workhardCtx?.dao.commit.address}
-            symbolAlt={commitSymbol}
+            symbolAlt={commitSymbol || "COMMIT"}
           >
             <Button as={Link} to={prefix(daoId, "work")}>
               Go to work
@@ -254,7 +254,7 @@ const Dashboard = () => {
           <Erc20Balance
             title={visionName || "VISION Token"}
             address={workhardCtx?.dao.vision.address}
-            symbolAlt={visionSymbol}
+            symbolAlt={visionSymbol || "VISION"}
           >
             <Button as={Link} to={prefix(daoId, "mine")}>
               Go to mine
@@ -265,7 +265,7 @@ const Dashboard = () => {
           <Erc20Balance
             title={rightName || "RIGHT Token"}
             address={workhardCtx?.dao.right.address}
-            symbolAlt={rightSymbol}
+            symbolAlt={rightSymbol || "RIGHT"}
           >
             <Button as={Link} to={prefix(daoId, "gov")}>
               Go to lock ${visionSymbol}
