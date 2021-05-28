@@ -39,7 +39,7 @@ export const LaunchDAO: React.FC<{
   const [
     founderShareDenominator,
     setFounderShareDenominator,
-  ] = useState<BigNumber>(BigNumber.from(500));
+  ] = useState<BigNumber>(BigNumber.from(20));
 
   const defaultSetting = {
     commitMining: 4750,

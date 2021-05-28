@@ -106,8 +106,8 @@ const Dashboard = () => {
         .emissionStarted()
         .then((num) => setEmissionStarted(num.toNumber()))
         .catch(errorHandler(addToast));
-      workhardCtx.dao.stableReserve
-        .mintable()
+      workhardCtx.dao.baseCurrency
+        .balanceOf(workhardCtx.dao.stableReserve.address)
         .then(setReserved)
         .catch(errorHandler(addToast));
       workhardCtx.dao.commit
@@ -228,7 +228,7 @@ const Dashboard = () => {
           </h2>
           <p>{metadata?.description}</p>
           {metadata?.url && (
-            <Button as={Link} to={metadata.url} variant="secondary">
+            <Button as={Link} to={metadata.url} variant="info">
               Go to homepage
             </Button>
           )}
@@ -344,7 +344,10 @@ const Dashboard = () => {
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
                 {bigNumToFixed(burnedCommit || 0)}
-                <span style={{ fontSize: "1rem" }}> {`$${commitSymbol}`}</span>
+                <span style={{ fontSize: "1rem" }}>
+                  {" "}
+                  {`$${commitSymbol || "COMMIT"}`}
+                </span>
               </Card.Text>
             </Card.Body>
           </Card>
@@ -363,7 +366,10 @@ const Dashboard = () => {
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
                 {bigNumToFixed(visionSupply || 0)}
-                <span style={{ fontSize: "1rem" }}> {`$${visionSymbol}`}</span>
+                <span style={{ fontSize: "1rem" }}>
+                  {" "}
+                  {`$${visionSymbol || "VISION"}`}
+                </span>
               </Card.Text>
             </Card.Body>
           </Card>
@@ -382,7 +388,10 @@ const Dashboard = () => {
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
                 {bigNumToFixed(rightSupply || 0)}
-                <span style={{ fontSize: "1rem" }}> {`$${rightSymbol}`}</span>
+                <span style={{ fontSize: "1rem" }}>
+                  {" "}
+                  {`$${rightSymbol || "RIGHT"}`}
+                </span>
               </Card.Text>
             </Card.Body>
           </Card>

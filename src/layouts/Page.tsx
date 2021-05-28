@@ -36,11 +36,11 @@ const Page = (props: React.ComponentProps<any>) => {
         name: "Gov",
         url: "/gov",
       },
-      {
-        Icon: StoreIcon,
-        name: "NFTs",
-        url: "/nfts",
-      },
+      // {
+      //   Icon: StoreIcon,
+      //   name: "NFTs",
+      //   url: "/nfts",
+      // },
       {
         Icon: DupIcon,
         name: "Fork",

@@ -63,6 +63,13 @@ function App() {
                       path="/:daoId?/manufacturer/new"
                       children={<Manufacture />}
                     />
+                    <Route
+                      path="/docs"
+                      component={() => {
+                        window.location.replace("https://gitbook.io");
+                        return null;
+                      }}
+                    />
                     <Route path="/:daoId?/" children={<Dashboard />} />
                   </Switch>
                 </WorkhardThemeProvider>
