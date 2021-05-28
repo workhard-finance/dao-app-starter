@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Form, Row, Col, Button, Figure } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
-import { PieChart } from "react-minimal-pie-chart";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import {
   TxStatus,

@@ -28,19 +28,7 @@ const Gov: React.FC = () => {
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
-      <Tabs defaultActiveKey={tab || "right"}>
-        <Tab
-          eventKey="right"
-          title="$RIGHT"
-          style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/gov/right"))}
-        >
-          <Erc20Balance
-            address={dao?.right.address}
-            description={`= staked amount x locking period / max period`}
-            symbolAlt={`RIGHT(a.k.a. veVISION)`}
-          />
-        </Tab>
+      <Tabs defaultActiveKey={tab || "dividend"}>
         <Tab
           eventKey="dividend"
           title="Escrow & Dividend"

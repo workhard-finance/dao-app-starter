@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Alert, Button, Image, Tab, Tabs } from "react-bootstrap";
+import { Alert, Button, Col, Image, Row, Tab, Tabs } from "react-bootstrap";
 import { ERC20StakeMiningV1 } from "../../components/contracts/mining-pool/ERC20StakeMiningV1";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -80,64 +80,57 @@ const Mine = observer(() => {
           </Button>
         </Alert>
       )}
-      <Tabs defaultActiveKey={tab || "vision"}>
+      <Tabs defaultActiveKey={tab || "main-pools"}>
         <Tab
-          eventKey="vision"
-          title="$VISION"
+          eventKey="main-pools"
+          title="Main Pools"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/mine/vision"))}
+          onEnter={() => history.push(prefix(daoId, "/mine/main-pools"))}
         >
-          <Erc20Balance address={dao?.vision.address} symbolAlt={"VISION"} />
-        </Tab>
-        <Tab
-          eventKey="liquidity"
-          title="Liquidity Mining"
-          style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/mine/liquidity"))}
-        >
-          {(mineStore.pools &&
-            mineStore.liquidityMiningIdx() !== -1 &&
-            mineStore.emissionWeightSum && (
-              <ERC20StakeMiningV1
-                poolIdx={mineStore.liquidityMiningIdx()}
-                title={"Liquidity Mining"}
-                tokenName={"VISION/ETH LP"}
-                poolAddress={mineStore.pools[mineStore.liquidityMiningIdx()]}
-                totalEmission={mineStore.emission}
-                emissionWeightSum={mineStore.emissionWeightSum}
-                visionPrice={mineStore.visionPrice || 0}
-              />
-            )) || (
-            <p>
-              Oops, we cannot find the liquidity mining pool. Are you connected
-              to the wallet?
-            </p>
-          )}
-        </Tab>
-        <Tab
-          eventKey="commit"
-          title="Commit Mining"
-          style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/mine/commit"))}
-        >
-          {(mineStore.pools &&
-            mineStore.commitMiningIdx() !== -1 &&
-            mineStore.emissionWeightSum && (
-              <ERC20BurnMiningV1
-                poolIdx={mineStore.commitMiningIdx()}
-                title={"Commit Mining"}
-                tokenName={"COMMIT"}
-                poolAddress={mineStore.pools[mineStore.commitMiningIdx()]}
-                totalEmission={mineStore.emission || BigNumber.from(0)}
-                emissionWeightSum={mineStore.emissionWeightSum}
-                visionPrice={mineStore.visionPrice || 0}
-              />
-            )) || (
-            <p>
-              Oops, we cannot find the commit mining pool. Are you connected to
-              the wallet?
-            </p>
-          )}
+          <Row>
+            <Col md={6}>
+              {(mineStore.pools &&
+                mineStore.liquidityMiningIdx() !== -1 &&
+                mineStore.emissionWeightSum && (
+                  <ERC20StakeMiningV1
+                    poolIdx={mineStore.liquidityMiningIdx()}
+                    title={"Liquidity Mining"}
+                    tokenName={"VISION/ETH LP"}
+                    poolAddress={
+                      mineStore.pools[mineStore.liquidityMiningIdx()]
+                    }
+                    totalEmission={mineStore.emission}
+                    emissionWeightSum={mineStore.emissionWeightSum}
+                    visionPrice={mineStore.visionPrice || 0}
+                  />
+                )) || (
+                <p>
+                  Oops, we cannot find the liquidity mining pool. Are you
+                  connected to the wallet?
+                </p>
+              )}
+            </Col>
+            <Col md={6}>
+              {(mineStore.pools &&
+                mineStore.commitMiningIdx() !== -1 &&
+                mineStore.emissionWeightSum && (
+                  <ERC20BurnMiningV1
+                    poolIdx={mineStore.commitMiningIdx()}
+                    title={"Commit Mining"}
+                    tokenName={"COMMIT"}
+                    poolAddress={mineStore.pools[mineStore.commitMiningIdx()]}
+                    totalEmission={mineStore.emission || BigNumber.from(0)}
+                    emissionWeightSum={mineStore.emissionWeightSum}
+                    visionPrice={mineStore.visionPrice || 0}
+                  />
+                )) || (
+                <p>
+                  Oops, we cannot find the commit mining pool. Are you connected
+                  to the wallet?
+                </p>
+              )}
+            </Col>
+          </Row>
         </Tab>
         <Tab
           eventKey="airdrops"

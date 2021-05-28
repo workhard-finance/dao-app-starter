@@ -21,6 +21,7 @@ import { ProductPage } from "./pages/nfts/tabs/ProductPage";
 import { IPFSProvider } from "./providers/IPFSProvider";
 import { ToastProvider } from "react-toast-notifications";
 import DefaultToast from "./components/Toast";
+import Dashboard from "./pages/dashboard/Dashboard";
 
 function App() {
   return (
@@ -62,7 +63,7 @@ function App() {
                       path="/:daoId?/manufacturer/new"
                       children={<Manufacture />}
                     />
-                    <Route path="/:daoId?/" children={<Home />} />
+                    <Route path="/:daoId?/" children={<Dashboard />} />
                   </Switch>
                 </WorkhardThemeProvider>
                 {/* </WorkhardLoggedDataProvider> */}

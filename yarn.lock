@@ -4716,10 +4716,10 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@workhard/protocol@1.0.0-rc.13":
-  version "1.0.0-rc.13"
-  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.0-rc.13.tgz#544d46283c3b97171361ce9ff2a479ea6c0bdb96"
-  integrity sha512-b9hWpxDy6lsR+zSbJJF+PHC0jH6aDblR+DxG44grtVjNIV3owbAaJejZWMJ1eDTbRevNtA3zn3NibfC+gDrzWg==
+"@workhard/protocol@1.0.0-rc.14":
+  version "1.0.0-rc.14"
+  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.0-rc.14.tgz#6fa7237c2697a2ff6a924e2c315dccbf0f0a4b57"
+  integrity sha512-82dT28BSM3snYIW6qKO28EkoPWAObKFv4IjKbf9DTxlduiH+2+X4m2NJDIvhFL6HD25DbMey3AhGSsHRDG71Dw==
   dependencies:
     "@openzeppelin/contracts" "3.4.0-solc-0.7 "
     "@uniswap/v2-core" "^1.0.1"
@@ -18824,11 +18824,6 @@ react-lifecycles-compat@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
-
-react-minimal-pie-chart@^8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/react-minimal-pie-chart/-/react-minimal-pie-chart-8.2.0.tgz#22b53af2363f040d818331721658dfa7a1ea847a"
-  integrity sha512-RhrHzprJt3KfBe4L3sE0Ha6fj4kYcwQtesQgscnld9Umf64+nZnxxInycnbimKsbIjxJONv77JIZp+qRbJD+bA==
 
 react-overlays@^5.0.0:
   version "5.0.1"

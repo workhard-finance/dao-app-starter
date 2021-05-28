@@ -63,15 +63,7 @@ const Work: React.FC = () => {
     }
   }, [dao]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
-    <Tabs defaultActiveKey={tab || "commit"}>
-      <Tab
-        eventKey="commit"
-        title="$COMMIT"
-        style={{ marginTop: "1rem" }}
-        onEnter={() => history.push(prefix(daoId, "/work/commit"))}
-      >
-        <Erc20Balance address={dao?.commit.address} symbolAlt={"COMMIT"} />
-      </Tab>
+    <Tabs defaultActiveKey={tab || "job"}>
       <Tab
         eventKey="job"
         title="Job Board"
