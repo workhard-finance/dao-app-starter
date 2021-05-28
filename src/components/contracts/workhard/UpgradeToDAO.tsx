@@ -223,256 +223,258 @@ export const UpgradeToDAO: React.FC<{
       </a>
       <br />
       <br />
-      <div hidden={!advancedMode}>
-        <hr />
-        <br />
-        <Row>
-          <Form.Group as={Col} md={8}>
-            <Form.Label>VISION token name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="eg) Workhard Vision Token (Your own token name)"
-              onChange={({ target: { value } }) => setVisionName(value)}
-              value={visionName}
-            />
-          </Form.Group>
-          <Form.Group as={Col} md={4}>
-            <Form.Label>VISION token symbol</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="eg) VISION"
-              onChange={({ target: { value } }) => setVisionSymbol(value)}
-              value={visionSymbol}
-            />
-          </Form.Group>
-          <Form.Group as={Col} md={8}>
-            <Form.Label>COMMIT token name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="eg) Workhard Commit Token (Your DAO's commit token name)"
-              onChange={({ target: { value } }) => setCommitName(value)}
-              value={commitName}
-            />
-          </Form.Group>
-          <Form.Group as={Col} md={4}>
-            <Form.Label>COMMIT token symbol</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="eg) COMMIT"
-              onChange={({ target: { value } }) => setCommitSymbol(value)}
-              value={commitSymbol}
-            />
-          </Form.Group>
-          <Form.Group as={Col} md={8}>
-            <Form.Label>RIGHT token name</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="eg) Workhard Right Token (Your DAO's right token name)"
-              onChange={({ target: { value } }) => setRightName(value)}
-              value={rightName}
-            />
-          </Form.Group>
-          <Form.Group as={Col} md={4}>
-            <Form.Label>RIGHT token symbol</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="eg) RIGHT"
-              onChange={({ target: { value } }) => setRightSymbol(value)}
-              value={rightSymbol}
-            />
-          </Form.Group>
-        </Row>
-        <Form.Group>
-          <Form.Label>Minimum Timelock Delay</Form.Label>
-          <Form.Control
-            type="range"
-            min={86400}
-            max={86400 * 7}
-            value={minDelay}
-            step={86400}
-            onChange={({ target: { value } }) => setMinDelay(parseInt(value))}
-          />
-          <Form.Text>{(minDelay / 86400).toFixed(0)} day(s)</Form.Text>
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>Enable Vote After</Form.Label>
-          <Form.Control
-            type="range"
-            min={86400}
-            max={86400 * 365}
-            value={launchDelay}
-            step={86400}
-            onChange={({ target: { value } }) =>
-              setLaunchDelay(parseInt(value))
-            }
-          />
-          <Form.Text>{(launchDelay / 86400).toFixed(0)} day(s)</Form.Text>
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>Initial Emission</Form.Label>
+      {advancedMode && (
+        <div>
+          <hr />
+          <br />
           <Row>
-            <Col md={9}>
+            <Form.Group as={Col} md={8}>
+              <Form.Label>VISION token name</Form.Label>
               <Form.Control
-                type="range"
-                min={1}
-                max={100000000}
-                value={initialEmission}
-                step={1}
-                onChange={({ target: { value } }) =>
-                  setInitialEmission(parseInt(value))
-                }
+                type="text"
+                placeholder="eg) Workhard Vision Token (Your own token name)"
+                onChange={({ target: { value } }) => setVisionName(value)}
+                value={visionName}
               />
-            </Col>
-            <Col md={3}>
+            </Form.Group>
+            <Form.Group as={Col} md={4}>
+              <Form.Label>VISION token symbol</Form.Label>
               <Form.Control
-                type="number"
-                min={1}
-                value={initialEmission}
-                step={1}
-                onChange={({ target: { value } }) =>
-                  setInitialEmission(parseInt(value))
-                }
+                type="text"
+                placeholder="eg) VISION"
+                onChange={({ target: { value } }) => setVisionSymbol(value)}
+                value={visionSymbol}
               />
-            </Col>
+            </Form.Group>
+            <Form.Group as={Col} md={8}>
+              <Form.Label>COMMIT token name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="eg) Workhard Commit Token (Your DAO's commit token name)"
+                onChange={({ target: { value } }) => setCommitName(value)}
+                value={commitName}
+              />
+            </Form.Group>
+            <Form.Group as={Col} md={4}>
+              <Form.Label>COMMIT token symbol</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="eg) COMMIT"
+                onChange={({ target: { value } }) => setCommitSymbol(value)}
+                value={commitSymbol}
+              />
+            </Form.Group>
+            <Form.Group as={Col} md={8}>
+              <Form.Label>RIGHT token name</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="eg) Workhard Right Token (Your DAO's right token name)"
+                onChange={({ target: { value } }) => setRightName(value)}
+                value={rightName}
+              />
+            </Form.Group>
+            <Form.Group as={Col} md={4}>
+              <Form.Label>RIGHT token symbol</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="eg) RIGHT"
+                onChange={({ target: { value } }) => setRightSymbol(value)}
+                value={rightSymbol}
+              />
+            </Form.Group>
           </Row>
-          <Form.Text>{initialEmission} 1e18 wei(s)</Form.Text>
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>Minimum Emission Rate Per Week</Form.Label>
-          <Row>
-            <Col md={10}>
-              <Form.Control
-                type="range"
-                min={0}
-                max={134}
-                value={minEmissionRatePerWeek}
-                step={1}
-                onChange={({ target: { value } }) =>
-                  setMinEmissionRatePerWeek(parseInt(value))
-                }
-              />
-            </Col>
-            <Col md={2}>
-              <Form.Control
-                type="number"
-                min={0}
-                max={134}
-                value={minEmissionRatePerWeek}
-                step={1}
-                onChange={({ target: { value } }) =>
-                  setMinEmissionRatePerWeek(parseInt(value))
-                }
-              />
-            </Col>
-          </Row>
-          <Form.Text>
-            Minimum {minEmissionRatePerWeek / 100} % emission per week ~={" "}
-            {(((1 + minEmissionRatePerWeek / 10000) ** 52 - 1) * 100).toFixed(
-              1
-            )}{" "}
-            % yearly inflation
-          </Form.Text>
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>Founder Share Rate</Form.Label>
-          <Row>
-            <Col md={10}>
-              <Form.Control
-                type="range"
-                min={0}
-                max={3000}
-                value={founderShare}
-                step={1}
-                onChange={({ target: { value } }) =>
-                  setFounderShare(parseInt(value))
-                }
-              />
-            </Col>
-            <Col md={2}>
-              <Form.Control
-                type="number"
-                min={0}
-                max={3000}
-                value={founderShare}
-                step={1}
-                onChange={({ target: { value } }) =>
-                  setFounderShare(parseInt(value))
-                }
-              />
-            </Col>
-          </Row>
+          <Form.Group>
+            <Form.Label>Minimum Timelock Delay</Form.Label>
+            <Form.Control
+              type="range"
+              min={86400}
+              max={86400 * 7}
+              value={minDelay}
+              step={86400}
+              onChange={({ target: { value } }) => setMinDelay(parseInt(value))}
+            />
+            <Form.Text>{(minDelay / 86400).toFixed(0)} day(s)</Form.Text>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Enable Vote After</Form.Label>
+            <Form.Control
+              type="range"
+              min={86400}
+              max={86400 * 365}
+              value={launchDelay}
+              step={86400}
+              onChange={({ target: { value } }) =>
+                setLaunchDelay(parseInt(value))
+              }
+            />
+            <Form.Text>{(launchDelay / 86400).toFixed(0)} day(s)</Form.Text>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Initial Emission</Form.Label>
+            <Row>
+              <Col md={9}>
+                <Form.Control
+                  type="range"
+                  min={1}
+                  max={100000000}
+                  value={initialEmission}
+                  step={1}
+                  onChange={({ target: { value } }) =>
+                    setInitialEmission(parseInt(value))
+                  }
+                />
+              </Col>
+              <Col md={3}>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={initialEmission}
+                  step={1}
+                  onChange={({ target: { value } }) =>
+                    setInitialEmission(parseInt(value))
+                  }
+                />
+              </Col>
+            </Row>
+            <Form.Text>{initialEmission} 1e18 wei(s)</Form.Text>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Minimum Emission Rate Per Week</Form.Label>
+            <Row>
+              <Col md={10}>
+                <Form.Control
+                  type="range"
+                  min={0}
+                  max={134}
+                  value={minEmissionRatePerWeek}
+                  step={1}
+                  onChange={({ target: { value } }) =>
+                    setMinEmissionRatePerWeek(parseInt(value))
+                  }
+                />
+              </Col>
+              <Col md={2}>
+                <Form.Control
+                  type="number"
+                  min={0}
+                  max={134}
+                  value={minEmissionRatePerWeek}
+                  step={1}
+                  onChange={({ target: { value } }) =>
+                    setMinEmissionRatePerWeek(parseInt(value))
+                  }
+                />
+              </Col>
+            </Row>
+            <Form.Text>
+              Minimum {minEmissionRatePerWeek / 100} % emission per week ~={" "}
+              {(((1 + minEmissionRatePerWeek / 10000) ** 52 - 1) * 100).toFixed(
+                1
+              )}{" "}
+              % yearly inflation
+            </Form.Text>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Founder Share Rate</Form.Label>
+            <Row>
+              <Col md={10}>
+                <Form.Control
+                  type="range"
+                  min={0}
+                  max={3000}
+                  value={founderShare}
+                  step={1}
+                  onChange={({ target: { value } }) =>
+                    setFounderShare(parseInt(value))
+                  }
+                />
+              </Col>
+              <Col md={2}>
+                <Form.Control
+                  type="number"
+                  min={0}
+                  max={3000}
+                  value={founderShare}
+                  step={1}
+                  onChange={({ target: { value } }) =>
+                    setFounderShare(parseInt(value))
+                  }
+                />
+              </Col>
+            </Row>
 
-          <Form.Text>
-            {((33 / 34) * (1 / (10000 / founderShare + 1)) * 100).toFixed(2)}%
-            goes to the founder reward pool
-          </Form.Text>
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>Initial Emission Cut Rate</Form.Label>
-          <Row>
-            <Col md={10}>
-              <Form.Control
-                type="range"
-                min={500}
-                max={5000}
-                value={emissionCutRate}
-                step={100}
-                onChange={({ target: { value } }) =>
-                  setEmissionCutRate(parseInt(value))
-                }
-              />
-            </Col>
-            <Col md={2}>
-              <Form.Control
-                type="number"
-                min={500}
-                max={5000}
-                value={emissionCutRate}
-                step={100}
-                onChange={({ target: { value } }) =>
-                  setEmissionCutRate(parseInt(value))
-                }
-              />
-            </Col>
-          </Row>
+            <Form.Text>
+              {((33 / 34) * (1 / (10000 / founderShare + 1)) * 100).toFixed(2)}%
+              goes to the founder reward pool
+            </Form.Text>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Initial Emission Cut Rate</Form.Label>
+            <Row>
+              <Col md={10}>
+                <Form.Control
+                  type="range"
+                  min={500}
+                  max={5000}
+                  value={emissionCutRate}
+                  step={100}
+                  onChange={({ target: { value } }) =>
+                    setEmissionCutRate(parseInt(value))
+                  }
+                />
+              </Col>
+              <Col md={2}>
+                <Form.Control
+                  type="number"
+                  min={500}
+                  max={5000}
+                  value={emissionCutRate}
+                  step={100}
+                  onChange={({ target: { value } }) =>
+                    setEmissionCutRate(parseInt(value))
+                  }
+                />
+              </Col>
+            </Row>
 
-          <Form.Text>
-            {emissionCutRate / 100} % cuts per week until it reaches to the
-            minimum emission rate.
-          </Form.Text>
-        </Form.Group>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setMinDelay(defaultSetting.minDelay);
-            setLaunchDelay(defaultSetting.launchDelay);
-            setInitialEmission(defaultSetting.initialEmission);
-            setMinEmissionRatePerWeek(defaultSetting.minEmissionRatePerWeek);
-            setEmissionCutRate(defaultSetting.emissionCutRate);
-            setFounderShare(defaultSetting.founderShare);
-            if (projectName) {
-              setVisionName(`${projectName} Vision Token`);
-              setCommitName(`${projectName} Commit Token`);
-              setRightName(`${projectName} Right Token`);
-            }
-            if (projectSymbol) {
-              setVisionSymbol(`v${projectSymbol}`);
-              setCommitSymbol(`c${projectSymbol}`);
-              setRightSymbol(`r${projectSymbol}`);
-            }
-          }}
-        >
-          Use default
-        </Button>
-        <hr />
-        <p>Expected Emission Schedule</p>
-        <EmissionChart
-          initialEmission={parseEther(`${initialEmission}`)}
-          emissionCut={emissionCutRate}
-          minimumRate={minEmissionRatePerWeek}
-          currentWeek={0}
-        />
-      </div>
+            <Form.Text>
+              {emissionCutRate / 100} % cuts per week until it reaches to the
+              minimum emission rate.
+            </Form.Text>
+          </Form.Group>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setMinDelay(defaultSetting.minDelay);
+              setLaunchDelay(defaultSetting.launchDelay);
+              setInitialEmission(defaultSetting.initialEmission);
+              setMinEmissionRatePerWeek(defaultSetting.minEmissionRatePerWeek);
+              setEmissionCutRate(defaultSetting.emissionCutRate);
+              setFounderShare(defaultSetting.founderShare);
+              if (projectName) {
+                setVisionName(`${projectName} Vision Token`);
+                setCommitName(`${projectName} Commit Token`);
+                setRightName(`${projectName} Right Token`);
+              }
+              if (projectSymbol) {
+                setVisionSymbol(`v${projectSymbol}`);
+                setCommitSymbol(`c${projectSymbol}`);
+                setRightSymbol(`r${projectSymbol}`);
+              }
+            }}
+          >
+            Use default
+          </Button>
+          <hr />
+          <p>Expected Emission Schedule</p>
+          <EmissionChart
+            initialEmission={parseEther(`${initialEmission}`)}
+            emissionCut={emissionCutRate}
+            minimumRate={minEmissionRatePerWeek}
+            currentWeek={0}
+          />
+        </div>
+      )}
       <ConditionalButton
         variant="info"
         onClick={upgradeToDAO}

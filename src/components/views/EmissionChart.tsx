@@ -43,7 +43,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
     totalSupply: initialEmission,
   });
   let totalSupply = BigNumber.from(initialEmission);
-  for (let weekNum = 1; weekNum < 52 * 4; weekNum++) {
+  for (let weekNum = 1; weekNum < 52 * 2; weekNum++) {
     const cutEmission = Array(weekNum)
       .fill(0)
       .reduce(
@@ -132,7 +132,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
           <Form.Control
             type="range"
             min={0}
-            max={52 * 4}
+            max={52 * 2}
             value={weekDisplayRange}
             step={1}
             onChange={({ target: { value } }) =>
