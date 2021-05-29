@@ -96,12 +96,13 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
 
   return (
     <Card>
-      <Card.Header as="h5">Buy $COMMIT at a premium</Card.Header>
       <Card.Body>
+        <Card.Title>Buy $COMMIT at a premium</Card.Title>
         <Card.Text>
           <span style={{ fontSize: "2rem" }}>2 DAI</span> per $COMMIT
         </Card.Text>
         <Form>
+          <Form.Text>$DAI balance: {formatEther(daiBalance || 0)}</Form.Text>
           <Form.Group>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>

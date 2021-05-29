@@ -96,12 +96,15 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   }, [account, dao, blockNumber]);
   return (
     <Card>
-      <Card.Header as="h5">Redeem $COMMIT for $DAI at 1:1</Card.Header>
       <Card.Body>
+        <Card.Title>Redeem $COMMIT for $DAI at a 1:1 exchange</Card.Title>
         <Card.Text>
           <span style={{ fontSize: "2rem" }}>1 $COMMIT</span> per $DAI
         </Card.Text>
         <Form>
+          <Form.Text>
+            $COMMIT balance: {formatEther(commitBalance || 0)}
+          </Form.Text>
           <Form.Group>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>

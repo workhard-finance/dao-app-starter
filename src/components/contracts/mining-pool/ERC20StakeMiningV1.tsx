@@ -6,7 +6,7 @@ import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
   ERC20StakeMiningV1__factory,
-  IERC20__factory,
+  ERC20__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
 import {
@@ -60,6 +60,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   );
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
+  const [symbol, setSymbol] = useState<string>();
   const [stakedAmount, setStakedAmount] = useState<BigNumber>();
   const [totalStake, setTotalStake] = useState<BigNumber>();
   const [tokenPrice, setTokenPrice] = useState<number>();
@@ -105,7 +106,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   }, [weight]);
   useEffect(() => {
     if (!!account && !!dao && !!tokenAddress) {
-      const token = IERC20__factory.connect(tokenAddress, library);
+      const token = ERC20__factory.connect(tokenAddress, library);
       token
         .balanceOf(account)
         .then(setTokenBalance)
@@ -123,7 +124,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         .catch(errorHandler(addToast));
       pool.totalMiners().then(setTotalStake).catch(errorHandler(addToast));
       pool.mined(account).then(setMined).catch(errorHandler(addToast));
-      IERC20__factory.connect(tokenAddress, library)
+      ERC20__factory.connect(tokenAddress, library)
         .allowance(account, poolAddress)
         .then(setAllowance)
         .catch(errorHandler(addToast));
@@ -137,6 +138,15 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       setStakePercent(percent);
     }
   }, [stakedAmount, tokenBalance, txStatus]);
+
+  useEffect(() => {
+    if (!!tokenAddress) {
+      ERC20__factory.connect(tokenAddress, library)
+        .symbol()
+        .then(setSymbol)
+        .catch(errorHandler(addToast));
+    }
+  }, [tokenAddress, library]);
 
   useEffect(() => {
     if (weight && tokenPrice && totalStake) {
@@ -162,7 +172,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       return;
     }
     const signer = library.getSigner(account);
-    const token = IERC20__factory.connect(tokenAddress, library);
+    const token = ERC20__factory.connect(tokenAddress, library);
     handleTransaction(
       token.connect(signer).approve(poolAddress, constants.MaxUint256),
       setTxStatus,
@@ -277,7 +287,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Stake ${tokenDetails?.name || tokenName}</Card.Title>
+      <Card.Title>Stake ${tokenName || symbol}</Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">

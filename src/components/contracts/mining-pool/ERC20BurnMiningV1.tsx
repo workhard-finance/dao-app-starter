@@ -6,7 +6,7 @@ import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
   ERC20BurnMiningV1__factory,
-  IERC20__factory,
+  ERC20__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
 import {
@@ -61,6 +61,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   );
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
+  const [symbol, setSymbol] = useState<string>();
   const [burnedAmount, setBurnedAmount] = useState<BigNumber>();
   const [totalBurn, setTotalBurn] = useState<BigNumber>();
   const [tokenPrice, setTokenPrice] = useState<number>();
@@ -101,7 +102,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   }, [weight]);
   useEffect(() => {
     if (!!account && !!dao && !!tokenAddress) {
-      const token = IERC20__factory.connect(tokenAddress, library);
+      const token = ERC20__factory.connect(tokenAddress, library);
       token
         .balanceOf(account)
         .then(setTokenBalance)
@@ -119,12 +120,21 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
         .catch(errorHandler(addToast));
       pool.totalMiners().then(setTotalBurn).catch(errorHandler(addToast));
       pool.mined(account).then(setMined).catch(errorHandler(addToast));
-      IERC20__factory.connect(tokenAddress, library)
+      ERC20__factory.connect(tokenAddress, library)
         .allowance(account, poolAddress)
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
   }, [account, dao, tokenAddress, txStatus, blockNumber]);
+
+  useEffect(() => {
+    if (!!tokenAddress) {
+      ERC20__factory.connect(tokenAddress, library)
+        .symbol()
+        .then(setSymbol)
+        .catch(errorHandler(addToast));
+    }
+  }, [tokenAddress, library]);
 
   useEffect(() => {
     if (burnedAmount && tokenBalance) {
@@ -161,7 +171,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
       return;
     }
     const signer = library.getSigner(account);
-    const token = IERC20__factory.connect(tokenAddress, library);
+    const token = ERC20__factory.connect(tokenAddress, library);
     handleTransaction(
       token.connect(signer).approve(poolAddress, constants.MaxUint256),
       setTxStatus,
@@ -223,7 +233,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Burn ${tokenDetails?.name || tokenName}</Card.Title>
+      <Card.Title>Burn ${tokenName || symbol}</Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
