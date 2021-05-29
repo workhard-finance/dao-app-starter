@@ -107,14 +107,19 @@ export const getStablecoinList = (chainId?: number) => {
   }
 };
 
-export const getTargetNetworkName = (): MyNetwork => {
+export const isOnTargetNetwork = (chainId?: number): boolean => {
+  if (!chainId) return false;
+  const targetNetwork = getTargetNetworkName() || getNetworkName(chainId);
+  return getNetworkName(chainId) === targetNetwork;
+};
+
+export const getTargetNetworkName = (): MyNetwork | undefined => {
   if (process.env.REACT_APP_NETWORK)
     return process.env.REACT_APP_NETWORK as MyNetwork;
   const hostname = window.location.hostname;
-  if (hostname.includes("localhost")) return "localhost";
-  else if (hostname.includes("rinkeby")) return "rinkeby";
+  if (hostname.includes("localhost")) return undefined;
   else if (hostname === "app.workhard.finance") return "mainnet";
-  else return "hardhat";
+  else return "rinkeby";
 };
 
 export const getTokenSymbol = (
