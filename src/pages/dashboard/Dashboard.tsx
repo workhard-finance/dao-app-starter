@@ -226,7 +226,7 @@ const Dashboard = () => {
           </h2>
           <p>{metadata?.description}</p>
           {metadata?.url && (
-            <Button as={Link} to={metadata.url} variant="info">
+            <Button as={"a"} href={metadata.url} target="_blank" variant="info">
               Go to homepage
             </Button>
           )}
