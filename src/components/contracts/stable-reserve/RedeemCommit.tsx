@@ -96,24 +96,13 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   }, [account, dao, blockNumber]);
   return (
     <Card>
-      <Card.Header as="h5">Redeem $COMMIT for $DAI</Card.Header>
+      <Card.Header as="h5">Redeem $COMMIT for $DAI at 1:1</Card.Header>
       <Card.Body>
-        <Card.Title>
-          $DAI per $COMMIT
-          <OverlayTooltip
-            tip="You can redeem 1 $COMMIT for 1 $DAI."
-            text="❔"
-          />
-        </Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>1 COMMIT TOKEN</Card.Text>
-        <Card.Title>Your balance:</Card.Title>
         <Card.Text>
-          $DAI: {formatEther(daiBalance || "0")} / $COMMIT:{" "}
-          {formatEther(commitBalance || "0")}
+          <span style={{ fontSize: "2rem" }}>1 $COMMIT</span> per $DAI
         </Card.Text>
         <Form>
           <Form.Group>
-            <Card.Title>Redeem</Card.Title>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
                 <InputGroup.Text>$COMMIT</InputGroup.Text>
@@ -134,7 +123,6 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
           <Card.Text>
             {`= ${formatEther(parseEther(redeemAmount || "0"))} $DAI`}
           </Card.Text>
-          <br />
           <ConditionalButton
             variant="primary"
             onClick={

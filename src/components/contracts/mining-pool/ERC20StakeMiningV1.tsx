@@ -334,7 +334,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           {tokenName || tokenDetails?.name} token is staked.
         </Card.Text>
         <Button
-          variant="primary"
+          variant="success"
           onClick={
             stakeOrWithdraw
               ? isApproved(allowance, amount)
@@ -364,10 +364,12 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
 
   return (
     <Card border="success">
-      <Card.Header as="h5">{title}</Card.Header>
       <Card.Body>
+        <Card.Title as={"h3"}>
+          <b>{title}</b>
+        </Card.Title>
         <Card.Title>APY</Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>{apy}%</Card.Text>
+        <Card.Text style={{ fontSize: "2rem" }}>{apy}%</Card.Text>
         <Card.Text>
           {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
           this week.

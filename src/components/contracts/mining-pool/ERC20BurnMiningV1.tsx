@@ -255,7 +255,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
           )}
         </Card.Text>
         <Button
-          variant="primary"
+          variant="danger"
           onClick={isApproved(allowance, amount) ? burn : approve}
         >
           {isApproved(allowance, amount) ? "Burn" : "Approve"}
@@ -272,8 +272,10 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
 
   return (
     <Card border="danger">
-      <Card.Header as="h5">{title}</Card.Header>
       <Card.Body>
+        <Card.Title as={"h3"}>
+          <b>{title}</b>
+        </Card.Title>
         <Card.Title>
           ARR
           <OverlayTooltip
@@ -283,7 +285,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
             text="❔"
           />
         </Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>{annualRevenue}%</Card.Text>
+        <Card.Text style={{ fontSize: "2rem" }}>{annualRevenue}%</Card.Text>
         <Card.Text>
           {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
           this week.

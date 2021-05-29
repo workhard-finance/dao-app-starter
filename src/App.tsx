@@ -1,6 +1,5 @@
 import React from "react";
 import { themes } from "./theme";
-import Home from "./pages/Home";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Web3ReactProvider } from "@web3-react/core";
 import { getLibrary } from "./web3/provider";
@@ -47,7 +46,7 @@ function App() {
                       path="/:daoId?/gov/:tab?/:subtab?"
                       children={<Gov />}
                     />
-                    <Route path="/:daoId?/nfts/:tab?" children={<Store />} />
+                    <Route path="/:daoId?/store/:tab?" children={<Store />} />
                     <Route path="/:daoId?/res" children={<Res />} />
                     <Route
                       path="/:daoId?/fork/:step/:projId?"

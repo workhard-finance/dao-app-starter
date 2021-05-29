@@ -18,8 +18,6 @@ export const FatherSays: React.FC<FatherSaysProps> = ({ say }) => {
       setFontSize(size);
     }
   }, [col.current?.offsetWidth, imageCol.current?.offsetWidth]);
-
-  // const []
   return (
     <Container style={{ position: "relative" }}>
       <Row>
@@ -42,7 +40,6 @@ export const FatherSays: React.FC<FatherSaysProps> = ({ say }) => {
             <p>{say}</p>
           </Container>
         </Col>
-        <Col md={6}></Col>
       </Row>
     </Container>
   );

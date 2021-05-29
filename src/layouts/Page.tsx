@@ -49,11 +49,11 @@ const Page = (props: React.ComponentProps<any>) => {
         name: "Gov",
         url: "/gov",
       },
-      // {
-      //   Icon: StoreIcon,
-      //   name: "NFTs",
-      //   url: "/nfts",
-      // },
+      {
+        Icon: StoreIcon,
+        name: "Store",
+        url: "/store",
+      },
       {
         Icon: DupIcon,
         name: "Fork",
@@ -64,8 +64,8 @@ const Page = (props: React.ComponentProps<any>) => {
     menus = [
       {
         Icon: StoreIcon,
-        name: "NFTs",
-        url: prefix(daoId, "/nfts"),
+        name: "Store",
+        url: prefix(daoId, "/store"),
       },
     ];
     secondary = [

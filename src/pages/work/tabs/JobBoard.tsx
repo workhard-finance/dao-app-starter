@@ -74,7 +74,16 @@ export const JobBoard: React.FC = () => {
     }
   }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
-    <Tab.Container defaultActiveKey={subtab || "active"}>
+    <Tab.Container
+      defaultActiveKey={
+        subtab ||
+        (activeProjects.length > 0
+          ? "active"
+          : inactiveProjects.length > 0
+          ? "pending"
+          : "post")
+      }
+    >
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -86,9 +95,6 @@ export const JobBoard: React.FC = () => {
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="post">Post a job</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="faq">FAQ</Nav.Link>
             </Nav.Item>
           </Nav>
         </Col>
@@ -128,52 +134,10 @@ export const JobBoard: React.FC = () => {
               onEnter={() => history.push(prefix(daoId, "/work/job/post"))}
             >
               <Card>
-                <Card.Header as="h5">Post a crypto job</Card.Header>
                 <Card.Body>
                   <CreateProject />
                 </Card.Body>
               </Card>
-            </Tab.Pane>
-            <Tab.Pane
-              eventKey="faq"
-              onEnter={() => history.push(prefix(daoId, "/work/job/faq"))}
-            >
-              <h5>
-                <strong>How can I work?</strong>
-              </h5>
-              <p>
-                You can get in touch with the budget owner via the url on the
-                job post. Or, visit Workhard's official discord channel to get
-                more information.
-              </p>
-              <h5>
-                <strong>How can I post a job?</strong>
-              </h5>
-              <p>
-                An approved project's budget owner has an ability to mint
-                $COMMIT tokens by reserving stable coins. To manage the abusing
-                usage of the job board, governance(Workers Union) can approve or
-                disapprove project. Therefore, to get whitelisted, visit
-                Workhard discord channel and explain your plan to people first.
-              </p>
-              <h5>
-                <strong>How can my posted job get approved?</strong>
-              </h5>
-              <p>
-                For the first 4 weeks after the launch date, dev's multisig
-                wallet has the control for the approval and disapproval of a
-                post. After 4 weeks, Workers Union decides it via onchain
-                voting.
-              </p>
-              <h5>
-                <strong>How to use this job board?</strong>
-              </h5>
-              <p>
-                App shows "project admin tool" menu to the budget owner. In the
-                admin tool, you can compensate people with $COMMIT and the
-                contributors can use $COMMIT to redeem for $DAI or burn to get
-                $VISION.
-              </p>
             </Tab.Pane>
           </Tab.Content>
         </Col>

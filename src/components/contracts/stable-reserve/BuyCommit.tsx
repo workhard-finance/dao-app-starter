@@ -96,27 +96,13 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
 
   return (
     <Card>
-      <Card.Header as="h5">
-        I'll pay instead of working to get $COMMIT
-      </Card.Header>
+      <Card.Header as="h5">Buy $COMMIT at a premium</Card.Header>
       <Card.Body>
-        <Card.Title>
-          DAI per $COMMIT
-          <OverlayTooltip
-            tip=" Annual Percentage Yield by Burning $Commit token = (Revenue
-                - Burn) / Year"
-            text="❔"
-          />
-        </Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>2 DAI</Card.Text>
-        <Card.Title>Your balance:</Card.Title>
         <Card.Text>
-          $DAI: {formatEther(daiBalance || "0")} / $COMMIT:{" "}
-          {formatEther(commitBalance || "0")}
+          <span style={{ fontSize: "2rem" }}>2 DAI</span> per $COMMIT
         </Card.Text>
         <Form>
           <Form.Group>
-            <Card.Title>Buy</Card.Title>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
                 <InputGroup.Text>$DAI</InputGroup.Text>
@@ -137,7 +123,6 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
           <Card.Text>
             {`= ${formatEther(parseEther(spendingDai || "0").div(2))} $COMMIT`}
           </Card.Text>
-          <br />
           <ConditionalButton
             variant="primary"
             onClick={

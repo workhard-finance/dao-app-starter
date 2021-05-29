@@ -24,9 +24,7 @@ const Footer = () => (
             <a href="https://medium.com/@Cutshamache">Medium</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
-            <Link to={"/res"} className="text-info">
-              Resources
-            </Link>
+            <Link to={"/res"}>Resources</Link>
           </li>
         </ul>
         <br />

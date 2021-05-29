@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Image } from "react-bootstrap";
 import { useWorkhard } from "../../providers/WorkhardProvider";
-import WorkTabs from "./tabs";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router-dom";
+import StableReserve from "./tabs/StableReserve";
+import { JobBoard } from "./tabs/JobBoard";
+import { SerHelpPlz } from "../../components/views/HelpSer";
 
 const Work: React.FC = () => {
   const { daoId } = useParams<{ tab?: string; daoId?: string }>();
@@ -70,6 +72,11 @@ const Work: React.FC = () => {
           }}
         />
       )}
+      <h2>
+        <b>Job Board</b>
+      </h2>
+      <br />
+      <JobBoard />
       {/* <blockquote className="blockquote" style={{ textAlign: "right" }}>
         <p className="mb-0">
           All men must work, even the rich, because to work was the will of God
@@ -77,7 +84,29 @@ const Work: React.FC = () => {
         <footer className="blockquote-footer">John Calvin</footer>
       </blockquote>
       <hr /> */}
-      <WorkTabs />
+      {/* <WorkTabs /> */}
+      <hr />
+      <h2>
+        <b>Stable Reserve</b>
+      </h2>
+      <StableReserve />
+      <hr />
+      <SerHelpPlz>
+        <p>
+          Employers <a href="#">post jobs</a> on the JOB BOARD and Workers get
+          paid in <a href="#">$COMMIT</a> tokens for completing jobs from the
+          JOB BOARD.
+        </p>
+        <p>
+          The <a href="#">STABLE RESERVE</a> is a vault that allows anyone to
+          redeem hard-earned $COMMIT for $DAI at a 1:1 exchange or buy $COMMIT
+          directly for $DAI at a premium.
+        </p>
+        <p>
+          Workers can burn their hard earned $COMMIT by <a href="#">mine</a>{" "}
+          <a href="#">VISION</a>
+        </p>
+      </SerHelpPlz>
     </Page>
   );
 };
