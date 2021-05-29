@@ -134,7 +134,7 @@ export const UpgradeToDAO: React.FC<{
         rightSymbol,
         minDelay,
         launchDelay,
-        initialEmission,
+        initialEmission: parseEther(`${initialEmission}`),
         minEmissionRatePerWeek,
         emissionCutRate,
         founderShare,

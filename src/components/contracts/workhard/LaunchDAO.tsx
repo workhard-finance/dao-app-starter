@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Form, Row, Col, Button, Figure } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Form, Row, Col, Button, Figure, Modal } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import {
@@ -9,17 +9,9 @@ import {
 } from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, PopulatedTransaction } from "ethers";
 import { AllocationChart } from "../../views/AllocationChart";
-
-const defaultSetting = {
-  minDelay: 86400,
-  launchDelay: 86400 * 28,
-  initialEmission: 24000000,
-  minEmissionRatePerWeek: 60,
-  emissionCutRate: 3000,
-  founderShare: 500,
-};
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export const LaunchDAO: React.FC<{
   id?: BigNumberish;
@@ -55,10 +47,12 @@ export const LaunchDAO: React.FC<{
   );
   const [treasury, setTreasury] = useState<number>(defaultSetting.treasury);
   const [caller, setCaller] = useState<number>(defaultSetting.caller);
+  const [popTx, setPopTx] = useState<PopulatedTransaction>();
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
     if (workhardCtx && id) {
-      const { workhard, dao, periphery } = workhardCtx;
+      const { workhard, dao } = workhardCtx;
       workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
       workhard.nameOf(id).then(setProjectName).catch(errorHandler(addToast));
       dao.visionEmitter
@@ -67,7 +61,16 @@ export const LaunchDAO: React.FC<{
         .catch(errorHandler(addToast));
       dao.vision.symbol().then(setVisionSymbol).catch(errorHandler(addToast));
     }
-  }, [workhardCtx]);
+  }, [workhardCtx, id]);
+
+  useEffect(() => {
+    if (workhardCtx && id) {
+      const { workhard } = workhardCtx;
+      workhard.populateTransaction
+        .launch(id, liquidityMining, commitMining, treasury, caller)
+        .then(setPopTx);
+    }
+  }, [workhardCtx, liquidityMining, commitMining, treasury, caller]);
 
   const launchDAO = async () => {
     if (!workhardCtx) {
@@ -100,6 +103,8 @@ export const LaunchDAO: React.FC<{
   const protocolWeight = Math.floor((poolSum + founderWeight) / 33);
   const sum = poolSum + founderWeight + protocolWeight;
 
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
   return (
     <Form>
       <AllocationChart
@@ -119,7 +124,12 @@ export const LaunchDAO: React.FC<{
         enabledWhen={account === projectOwner}
         whyDisabled={id ? `Not allowed` : "This is a preview"}
         children="Start Emission!"
-      />
+      />{" "}
+      <OverlayTooltip tip={`Data for Gnosis Safe Multisig Wallet.`}>
+        <Button variant="outline" onClick={handleShow}>
+          ABI?
+        </Button>
+      </OverlayTooltip>
       <br />
       <br />
       <a
@@ -191,6 +201,29 @@ export const LaunchDAO: React.FC<{
           Use default
         </Button>
       </div>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Here's the custom data for gnosis safe</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h5>Address:</h5>
+          <code style={{ color: "black", fontFamily: "Neucha" }}>
+            {popTx?.to}
+          </code>
+          <br />
+          <br />
+          <h5>Value:</h5>
+          <code style={{ color: "black", fontFamily: "Neucha" }}>
+            {popTx?.value || 0}
+          </code>
+          <br />
+          <br />
+          <h5>Data:</h5>
+          <code style={{ color: "black", fontFamily: "Neucha" }}>
+            {popTx?.data}
+          </code>
+        </Modal.Body>
+      </Modal>
     </Form>
   );
 };
