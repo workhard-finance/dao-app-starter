@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import StableReserve from "./tabs/StableReserve";
 import { JobBoard } from "./tabs/JobBoard";
 import { SerHelpPlz } from "../../components/views/HelpSer";
+import { TitleButSer } from "../../components/views/TitleButSer";
 
 const Work: React.FC = () => {
   const { daoId } = useParams<{ tab?: string; daoId?: string }>();
@@ -72,9 +73,7 @@ const Work: React.FC = () => {
           }}
         />
       )}
-      <h2>
-        <b>Job Board</b>
-      </h2>
+      <TitleButSer link="#todo">Job Board</TitleButSer>
       <br />
       <JobBoard />
       {/* <blockquote className="blockquote" style={{ textAlign: "right" }}>
@@ -86,9 +85,7 @@ const Work: React.FC = () => {
       <hr /> */}
       {/* <WorkTabs /> */}
       <hr />
-      <h2>
-        <b>Stable Reserve</b>
-      </h2>
+      <TitleButSer link="#todo">Stable Reserve</TitleButSer>
       <StableReserve />
       <hr />
       <SerHelpPlz>

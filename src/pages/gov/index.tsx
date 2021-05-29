@@ -10,6 +10,7 @@ import { useWorkhard } from "../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { prefix } from "../../utils/utils";
+import { TitleButSer } from "../../components/views/TitleButSer";
 
 const Gov: React.FC = () => {
   const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
@@ -28,6 +29,7 @@ const Gov: React.FC = () => {
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
+      <TitleButSer link="#todo" />
       <Tabs defaultActiveKey={tab || "dividend"}>
         <Tab
           eventKey="dividend"

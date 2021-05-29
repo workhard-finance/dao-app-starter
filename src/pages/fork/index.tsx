@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
+import { SerHelpPlz } from "../../components/views/HelpSer";
 import Page from "../../layouts/Page";
 import { prefix } from "../../utils/utils";
 import DAOs from "./tabs/DAOs";
@@ -15,6 +16,10 @@ const Fork: React.FC = () => {
       <br />
       <br />
       <DAOs />
+      <br />
+      <SerHelpPlz>
+        <p>Explanation plz ser!</p>
+      </SerHelpPlz>
     </Page>
   );
 };

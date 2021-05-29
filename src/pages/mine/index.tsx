@@ -28,6 +28,7 @@ import { useToasts } from "react-toast-notifications";
 import { initMineStore, MineStore } from "../../store/mineStore";
 import { observer } from "mobx-react";
 import { SerHelpPlz } from "../../components/views/HelpSer";
+import { TitleButSer } from "../../components/views/TitleButSer";
 
 const Mine = observer(() => {
   const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
@@ -115,7 +116,7 @@ const Mine = observer(() => {
           </Button>
         </Alert>
       )}
-      {subPools.length > 0 && <h2>Main pools</h2>}
+      <TitleButSer link="#todo">Main pools</TitleButSer>
       <Row>
         <Col md={6}>
           {mineStore.pools &&
@@ -181,7 +182,7 @@ const Mine = observer(() => {
       {subPools.length > 0 && (
         <>
           <hr />
-          <h2>Sub pools</h2>
+          <TitleButSer link="#todo">Sub pools</TitleButSer>
           {subPools}
         </>
       )}

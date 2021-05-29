@@ -11,6 +11,7 @@ import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { prefix } from "../../utils/utils";
 import { SerHelpPlz } from "../../components/views/HelpSer";
+import { TitleButSer } from "../../components/views/TitleButSer";
 
 const featured: BigNumber[] = [];
 const Store: React.FC = () => {
@@ -71,6 +72,7 @@ const Store: React.FC = () => {
           style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
         />
       )}
+      <TitleButSer link="#todo" />
       <Tabs defaultActiveKey={tab || "featured"}>
         <Tab
           eventKey="featured"
