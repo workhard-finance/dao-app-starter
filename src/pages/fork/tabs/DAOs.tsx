@@ -39,7 +39,7 @@ const DAOs: React.FC = () => {
           <Col key={`all-${daoId}`} md={3}>
             <DAOThumbnail
               daoId={daoId}
-              onClick={() => history.push(`/${daoId}/work`)}
+              onClick={() => history.push(`/${daoId}`)}
             />
             <br />
           </Col>

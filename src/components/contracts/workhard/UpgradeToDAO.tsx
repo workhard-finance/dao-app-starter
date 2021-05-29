@@ -88,7 +88,7 @@ export const UpgradeToDAO: React.FC<{
       const { workhard } = workhardCtx;
       workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
     }
-  }, [workhardCtx, id]);
+  }, [workhardCtx, id, blockNumber]);
 
   const upgradeToDAO = async () => {
     if (!workhardCtx) {

@@ -76,7 +76,7 @@ const NavBar: React.FC<NavBarProps> = ({ menus, secondary }) => {
         />
         {secondary && (
           <Button as={Link} to={`/`} style={{ margin: 10 }}>
-            Go back to Workhard
+            Go to Work Hard
           </Button>
         )}
         <Wallet className="justify-content-end" style={{ margin: 10 }} />
