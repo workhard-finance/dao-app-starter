@@ -87,7 +87,11 @@ const Page = (props: React.ComponentProps<any>) => {
     ];
   }
   return (
-    <Container style={{ minHeight: "100vh" }}>
+    <Container
+      style={{
+        minHeight: "100vh",
+      }}
+    >
       <br />
       <NavBar menus={menus} secondary={secondary} />
       <br />
