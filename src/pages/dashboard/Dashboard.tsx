@@ -91,7 +91,6 @@ const Dashboard = () => {
             minimumRate: minimumRate.toNumber(),
             currentWeek: currentWeek.toNumber(),
           });
-          console.log("hi");
         })
         .catch(errorHandler(addToast));
       workhardCtx.dao.visionEmitter
@@ -180,7 +179,6 @@ const Dashboard = () => {
   }, [workhardCtx, daoId, poolNum]);
 
   useEffect(() => {
-    console.log("ipfs", ipfs);
     if (!!workhardCtx && !!ipfs) {
       const projId = daoId || 0;
       workhardCtx.workhard
