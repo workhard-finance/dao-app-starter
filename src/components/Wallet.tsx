@@ -95,9 +95,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
         variant={active ? "outline-success" : "success"}
         onClick={active ? handleShow : handleShow}
       >
-        {active
-          ? `${account?.slice(0, 6)}...${account?.slice(-4)}`
-          : "Connect wallet"}
+        {active ? `${account?.slice(0, 6)}...${account?.slice(-4)}` : "Connect"}
       </Button>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>

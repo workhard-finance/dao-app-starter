@@ -1,29 +1,49 @@
-import React from "react";
-import { Image, Container } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
+import { Image, Container, Col, Row } from "react-bootstrap";
 
 export interface FatherSaysProps {
   say: string;
 }
 
 export const FatherSays: React.FC<FatherSaysProps> = ({ say }) => {
+  const col = useRef<HTMLDivElement>(null);
+  const imageCol = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState<string>("100%");
+  useEffect(() => {
+    if (!!col.current && !!imageCol.current) {
+      col.current.addEventListener("resize", (ev) => {});
+      const size = `${Math.floor(
+        (50 * col.current.offsetWidth) / imageCol.current.offsetWidth
+      )}%`;
+      setFontSize(size);
+    }
+  }, [col.current?.offsetWidth, imageCol.current?.offsetWidth]);
+
+  // const []
   return (
     <Container style={{ position: "relative" }}>
-      <Image
-        src={process.env.PUBLIC_URL + "/images/father-says.png"}
-        style={{ width: "50%", padding: "0px", marginTop: "120px" }}
-      />
-      <Container
-        style={{
-          position: "absolute",
-          top: "148px",
-          left: "54px",
-          fontSize: "16px",
-          width: "120px",
-          lineHeight: "20px",
-        }}
-      >
-        <p>{say}</p>
-      </Container>
+      <Row>
+        <Col ref={col} md={12} style={{ height: "10vh" }}></Col>
+        <Col ref={imageCol} md={6}>
+          <Image
+            src={process.env.PUBLIC_URL + "/images/father-says.png"}
+            style={{ width: "100%", padding: "0px" }}
+          />
+          <Container
+            style={{
+              position: "absolute",
+              top: "5%",
+              left: "10%",
+              width: "25%",
+              fontSize,
+              lineHeight: "100%",
+            }}
+          >
+            <p>{say}</p>
+          </Container>
+        </Col>
+        <Col md={6}></Col>
+      </Row>
     </Container>
   );
 };
