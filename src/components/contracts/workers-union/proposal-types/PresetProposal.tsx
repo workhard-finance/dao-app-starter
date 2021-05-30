@@ -137,7 +137,7 @@ export const PresetProposal: React.FC<Preset> = ({
   };
   return (
     <Card>
-      <Card.Header as="h5">preset proposal: {methodName}</Card.Header>
+      <Card.Header>preset proposal: {methodName}</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
           {paramArray.map((arg, i) => (

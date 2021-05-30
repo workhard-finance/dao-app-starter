@@ -38,7 +38,7 @@ export const Propose: React.FC = ({}) => {
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
             <h5>
-              <strong>Preset proposals</strong>
+              <strong>By workers' union</strong>
             </h5>
             {presets ? (
               ["JobBoard", "DividendPool", "VisionEmitter"].map(
@@ -85,41 +85,37 @@ export const Propose: React.FC = ({}) => {
               </Dropdown>
             )}
             <hr />
-            {hasProposerRole && (
-              <>
-                <h5>
-                  <strong>Multisig</strong>
-                </h5>
-                {presets ? (
-                  ["JobBoard", "DividendPool", "VisionEmitter"].map(
-                    (contractName) => (
-                      <Dropdown as={Nav.Item} key={`multisig-${contractName}`}>
-                        <Dropdown.Toggle variant="success" as={Nav.Link}>
-                          {contractName}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          {presets
-                            ?.filter(
-                              (preset) => preset.contractName === contractName
-                            )
-                            .map((prop) => {
-                              return (
-                                <Dropdown.Item
-                                  key={`multisig-${prop.contractName}-${prop.methodName}`}
-                                  eventKey={`multisig-${prop.contractName}-${prop.methodName}`}
-                                >
-                                  {`${prop.methodName}`}
-                                </Dropdown.Item>
-                              );
-                            })}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    )
-                  )
-                ) : (
-                  <p>Not connected to the web3 module</p>
-                )}
-              </>
+            <h5>
+              <strong>By Multisig</strong>
+            </h5>
+            {presets ? (
+              ["JobBoard", "DividendPool", "VisionEmitter"].map(
+                (contractName) => (
+                  <Dropdown as={Nav.Item} key={`multisig-${contractName}`}>
+                    <Dropdown.Toggle variant="success" as={Nav.Link}>
+                      {contractName}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      {presets
+                        ?.filter(
+                          (preset) => preset.contractName === contractName
+                        )
+                        .map((prop) => {
+                          return (
+                            <Dropdown.Item
+                              key={`multisig-${prop.contractName}-${prop.methodName}`}
+                              eventKey={`multisig-${prop.contractName}-${prop.methodName}`}
+                            >
+                              {`${prop.methodName}`}
+                            </Dropdown.Item>
+                          );
+                        })}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                )
+              )
+            ) : (
+              <p>Not connected to the web3 module</p>
             )}
           </Nav>
         </Col>

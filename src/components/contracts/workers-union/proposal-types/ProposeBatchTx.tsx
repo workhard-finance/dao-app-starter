@@ -153,9 +153,7 @@ export const ProposeBatchTx: React.FC = ({}) => {
 
   return (
     <Card>
-      <Card.Header as="h5">
-        Submit a new proposal Batch manner (manual)
-      </Card.Header>
+      <Card.Header>Submit a new proposal Batch manner (manual)</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
           {indexes.map((index) => {

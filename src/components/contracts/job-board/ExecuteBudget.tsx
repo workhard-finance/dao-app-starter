@@ -45,7 +45,7 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
 
   return (
     <Card>
-      <Card.Header as="h5"># {budgetIndex}</Card.Header>
+      <Card.Header># {budgetIndex}</Card.Header>
       <Card.Body>
         <Card.Text>Amount: {formatEther(amount)}</Card.Text>
         <Card.Text>Executed: {transferred ? "True" : "False"}</Card.Text>

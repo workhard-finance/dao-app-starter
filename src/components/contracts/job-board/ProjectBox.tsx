@@ -53,12 +53,12 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
 
   return (
     <Card>
-      <Card.Header as="h5">{metadata?.name}</Card.Header>
+      <Card.Header>
+        #{projId.toNumber()} {metadata?.name}
+      </Card.Header>
       <Card.Body>
         <Row>
           <Col md={8}>
-            <Card.Title>Project ID</Card.Title>
-            <Card.Text>{projId.toHexString()}</Card.Text>
             <Card.Title>Fund</Card.Title>
             <Card.Text style={{ fontSize: "3rem" }}>
               {formatEther(fund || 0)} $COMMIT{" "}
@@ -78,18 +78,16 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
                 {budgetOwner}
               </a>
             </Card.Text>
-            <ConditionalButton
-              as={budgetOwner === account ? Link : Button}
+            <Button
+              as={Link}
               to={prefix(daoId, `/proj/${projId}`)}
               variant={"primary"}
-              enabledWhen={account === budgetOwner ? false : undefined}
-              whyDisabled={"Please log in with budget owner account."}
-              children={"Go to admin tool"}
-            />
+              children={"Go to budget tool"}
+            />{" "}
             <ConditionalButton
               as={budgetOwner === account ? Link : Button}
               to={`/fork/upgrade/${projId}`}
-              variant={"secondary"}
+              variant={"warning"}
               enabledWhen={account === budgetOwner ? false : undefined}
               whyDisabled={"Please log in with budget owner account."}
               children={"Upgrade to DAO"}

@@ -1,11 +1,19 @@
+import { hexlify, randomBytes } from "ethers/lib/utils";
 import React from "react";
-import { Col, Row } from "react-bootstrap";
+import { Col, OverlayTrigger, Row, Tooltip } from "react-bootstrap";
 
 export interface TitleButSerProps {
   link?: string;
+  hint?: string;
+  tooltipStyle?: React.CSSProperties;
 }
 
-export const TitleButSer: React.FC<TitleButSerProps> = ({ children, link }) => {
+export const TitleButSer: React.FC<TitleButSerProps> = ({
+  children,
+  link,
+  hint,
+  tooltipStyle,
+}) => {
   return (
     <Row>
       <Col md={8}>
@@ -14,10 +22,26 @@ export const TitleButSer: React.FC<TitleButSerProps> = ({ children, link }) => {
         </h2>
       </Col>
       <Col md={4} style={{ textAlign: "end" }}>
-        {link && (
+        {link && !hint && (
           <a href={link} target="_blank">
             But Ser..?
           </a>
+        )}
+        {link && hint && (
+          <OverlayTrigger
+            overlay={
+              <Tooltip
+                style={tooltipStyle}
+                id={`tooltip-${hexlify(randomBytes(8))}`}
+              >
+                {hint}
+              </Tooltip>
+            }
+          >
+            <a href={link} target="_blank">
+              But Ser..?
+            </a>
+          </OverlayTrigger>
         )}
       </Col>
     </Row>

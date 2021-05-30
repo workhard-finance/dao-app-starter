@@ -1,25 +1,33 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { BigNumber, constants } from "ethers";
-import { Card, Form, InputGroup } from "react-bootstrap";
-import { randomBytes, solidityKeccak256 } from "ethers/lib/utils";
+import { BigNumber, constants, PopulatedTransaction } from "ethers";
+import { Card, Form, InputGroup, Modal } from "react-bootstrap";
+import {
+  getIcapAddress,
+  randomBytes,
+  solidityKeccak256,
+} from "ethers/lib/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { convertType, Param, Preset } from "../../../utils/preset";
 import { useToasts } from "react-toast-notifications";
+import EthersSafe, {
+  SafeTransactionDataPartial,
+} from "@gnosis.pm/safe-core-sdk";
 import {
   errorHandler,
   handleTransaction,
   TxStatus,
 } from "../../../utils/utils";
+import { getNetworkName } from "@workhard/protocol";
 
 export const TimelockPresetProposal: React.FC<Preset> = ({
   paramArray,
   methodName,
   contract,
 }) => {
-  const { account, library } = useWeb3React();
-  const { dao } = useWorkhard() || {};
+  const { account, chainId, library } = useWeb3React();
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
   /** Proposal */
   const [predecessor, setPredecessor] = useState<string>(constants.HashZero);
@@ -33,15 +41,12 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
   const [args, setArgs] = useState<{ [key: string]: string }>({});
 
   /** Timelock permission */
-  const [hasProposerRole, setHasProposerRole] = useState<boolean>();
+  const [multisigOwner, setMultisigOwner] = useState<boolean>();
 
   useEffect(() => {
-    if (!!account && !!dao) {
+    if (!!account && !!workhardCtx) {
+      const { dao } = workhardCtx;
       const { timelock } = dao;
-      timelock
-        .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
-        .then(setHasProposerRole)
-        .catch(errorHandler(addToast));
       timelock
         .getMinDelay()
         .then((_delay) => {
@@ -49,12 +54,36 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
         })
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, txStatus]);
+  }, [account, workhardCtx, txStatus]);
+
+  useEffect(() => {
+    if (!!account && !!workhardCtx && !!chainId) {
+      const network = getNetworkName(chainId);
+      const { dao } = workhardCtx;
+      const { multisig } = dao;
+      if (multisig.address === account) {
+        setMultisigOwner(true);
+      } else {
+        const gnosisAPI =
+          network === "mainnet"
+            ? `https://safe-transaction.gnosis.io/`
+            : network === "rinkeby"
+            ? `https://safe-transaction.rinkeby.gnosis.io/`
+            : undefined;
+
+        if (gnosisAPI) {
+          fetch(gnosisAPI + `safes/${multisig.address}/`).then((result) => {
+            console.log("result", result);
+          });
+        }
+      }
+    }
+  }, [account, workhardCtx, chainId]);
 
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !dao || !contract) {
+    if (!account || !workhardCtx || !contract) {
       alert("Not connected");
       return;
     }
@@ -68,18 +97,33 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
     const { data } = await contract.populateTransaction[methodName](...params);
     if (!data) return alert("data is not set");
     const signer = library.getSigner(account);
-    handleTransaction(
-      dao.timelock
-        .connect(signer)
-        .schedule(contract.address, 0, data, predecessor, salt, delay),
-      setTxStatus,
-      addToast,
-      "Scheduled transaction"
+    const popScheduledTx = await workhardCtx.dao.timelock.populateTransaction.schedule(
+      contract.address,
+      0,
+      data,
+      predecessor,
+      salt,
+      delay
     );
+    if (!popScheduledTx.to || !popScheduledTx.value || !popScheduledTx.data) {
+      throw Error("Populated transaction doesn't have any value");
+    }
+    const safe = await EthersSafe.create(
+      library,
+      workhardCtx.dao.multisig.address,
+      signer
+    );
+    const safeTx = await safe.createTransaction({
+      to: popScheduledTx.to,
+      value: popScheduledTx.value.toString(),
+      data: popScheduledTx.data,
+    });
+    const safeTxHash = await safe.getTransactionHash(safeTx);
+    alert(`Safe tx id: ${safeTxHash}`);
   };
   return (
     <Card>
-      <Card.Header as="h5">preset proposal(timelock): {methodName}</Card.Header>
+      <Card.Header>preset proposal(timelock): {methodName}</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
           {paramArray.map((arg, i) => (
@@ -139,7 +183,7 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
             variant="primary"
             type="submit"
             children="Submit"
-            enabledWhen={hasProposerRole}
+            enabledWhen={multisigOwner}
             whyDisabled={"You don't have the proposer role."}
           />
         </Form>

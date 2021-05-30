@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 
-import { Row, Col, Tab, Nav, Card, Button } from "react-bootstrap";
+import { Row, Col, Tab, Nav, Card, Button, Image } from "react-bootstrap";
 import ReactHtmlParser from "react-html-parser";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "ethers";
@@ -14,11 +14,14 @@ import {
   errorHandler,
   fetchProjectMetadataFromIPFS,
   ProjectMetadata,
+  uriToURL,
   wrapUrl,
 } from "../../utils/utils";
 import { ExecuteBudget } from "../../components/contracts/job-board/ExecuteBudget";
 import { useIPFS } from "../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
+import { TitleButSer } from "../../components/views/TitleButSer";
+import { SerHelpPlz } from "../../components/views/HelpSer";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -77,12 +80,25 @@ export const Project: React.FC = () => {
     <>
       <Card>
         <Card.Body>
-          <Card.Subtitle>Name</Card.Subtitle>
-          <Card.Text>{metadata?.name}</Card.Text>
-          <Card.Subtitle>Description</Card.Subtitle>
-          <Card.Text>
-            {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
-          </Card.Text>
+          <Row>
+            <Col md={2}>
+              <Card>
+                <Image
+                  style={{ borderRadius: 0 }}
+                  src={uriToURL(
+                    metadata?.image ||
+                      "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1"
+                  )}
+                />
+              </Card>
+            </Col>
+            <Col md={10}>
+              <Card.Subtitle>Description</Card.Subtitle>
+              <Card.Text>
+                {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
+              </Card.Text>
+            </Col>
+          </Row>
         </Card.Body>
       </Card>
       <br />
@@ -94,28 +110,40 @@ export const Project: React.FC = () => {
                 <Nav.Link eventKey="pay">Pay</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="budget">Budget</Nav.Link>
+                <Nav.Link eventKey="budget">Add budget</Nav.Link>
               </Nav.Item>
             </Nav>
           </Col>
           <Col sm={9}>
             <Tab.Content>
               <Tab.Pane eventKey="pay">
-                <Compensate
-                  projId={id}
-                  fund={fund || 0}
-                  budgetOwner={budgetOwner}
-                />
+                <Card>
+                  <Card.Body>
+                    <Compensate
+                      projId={id}
+                      fund={fund || 0}
+                      budgetOwner={budgetOwner}
+                    />
+                  </Card.Body>
+                </Card>
               </Tab.Pane>
               <Tab.Pane eventKey="budget">
-                <h2>Add budget</h2>
-                <AddBudget
-                  projId={id}
-                  fund={fund || 0}
-                  budgetOwner={budgetOwner}
-                />
-                <hr />
-                <h2>History</h2>
+                <Card>
+                  <Card.Body>
+                    <AddBudget
+                      projId={id}
+                      fund={fund || 0}
+                      budgetOwner={budgetOwner}
+                    />
+                  </Card.Body>
+                </Card>
+
+                {budgets.length > 0 && (
+                  <>
+                    <hr />
+                    <h2>History</h2>
+                  </>
+                )}
                 {budgets
                   .map((budget, i) => {
                     if (!!budget) {
@@ -144,7 +172,9 @@ export const Project: React.FC = () => {
     <Page>
       <Row>
         <Col md={4}>
-          <h1>Project setting</h1>
+          <h3>
+            <b>{metadata?.name}</b>
+          </h3>
         </Col>
         <Col md={{ span: 4, offset: 4 }} style={{ textAlign: "end" }}>
           <Button
@@ -154,8 +184,36 @@ export const Project: React.FC = () => {
           />
         </Col>
       </Row>
-      <hr />
+      <br />
       {exist ? WhenExist() : WhenNotExist()}
+      <br />
+      <br />
+      <SerHelpPlz>
+        <p>
+          You can add budgets in 3 ways.
+          <ol>
+            <li>
+              Get grants by the governance. If the project is absolutely helpful
+              for the protocol, governance will give it some grants to
+              accelerate the development.
+            </li>
+            <li>
+              Get approved to mint $COMMIT with vision tax. Approved project can
+              mint $COMMIT with 20% of vision tax. For example, you have a
+              permission to mint 8000 $COMMIT with 10000 $DAI.
+            </li>
+            <li>
+              Or, you can add fund without any approval but the tax rate is 50%.
+              This rate is same with the premium ration in the stable reserve to
+              buy $COMMIT with $DAI.
+            </li>
+          </ol>
+          Projects will be grown organically by the support from the community,
+          or getting driven by project owner's strong willingness. Once the
+          project matures enough, project owner can upgrade it to a dao and
+          start its own token emission.
+        </p>
+      </SerHelpPlz>
     </Page>
   );
 };

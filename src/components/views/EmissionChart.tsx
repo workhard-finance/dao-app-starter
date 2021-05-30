@@ -90,7 +90,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
               name="Emission"
               type="number"
               dataKey="emission"
-              domain={["auto", "auto"]}
+              domain={[0, "auto"]}
             />
             <YAxis
               yAxisId="totalSupply"
@@ -98,7 +98,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
               type="number"
               dataKey="totalSupply"
               orientation="right"
-              domain={["auto", "auto"]}
+              domain={[0, "auto"]}
             />
             <Area
               type="monotone"

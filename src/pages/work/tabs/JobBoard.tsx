@@ -74,16 +74,7 @@ export const JobBoard: React.FC = () => {
     }
   }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
-    <Tab.Container
-      defaultActiveKey={
-        subtab ||
-        (activeProjects.length > 0
-          ? "active"
-          : inactiveProjects.length > 0
-          ? "pending"
-          : "post")
-      }
-    >
+    <Tab.Container defaultActiveKey={subtab || "active"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">

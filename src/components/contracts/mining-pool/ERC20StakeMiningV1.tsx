@@ -374,10 +374,8 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
 
   return (
     <Card border="success">
+      <Card.Header className="bg-success text-white">{title}</Card.Header>
       <Card.Body>
-        <Card.Title as={"h3"}>
-          <b>{title}</b>
-        </Card.Title>
         <Card.Title>APY</Card.Title>
         <Card.Text style={{ fontSize: "2rem" }}>{apy}%</Card.Text>
         <Card.Text>

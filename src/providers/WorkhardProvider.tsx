@@ -79,6 +79,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
       client.workhard.symbolOf(daoId),
     ]);
     if (!dao || !periphery) return undefined;
+
     return {
       daoId,
       client,

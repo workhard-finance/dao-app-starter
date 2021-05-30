@@ -282,10 +282,8 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
 
   return (
     <Card border="danger">
+      <Card.Header className="bg-danger text-white">{title}</Card.Header>
       <Card.Body>
-        <Card.Title as={"h3"}>
-          <b>{title}</b>
-        </Card.Title>
         <Card.Title>
           ARR
           <OverlayTooltip
