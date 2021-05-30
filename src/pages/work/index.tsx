@@ -3,7 +3,7 @@ import Page from "../../layouts/Page";
 import { Image } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import StableReserve from "./tabs/StableReserve";
-import { JobBoard } from "./tabs/JobBoard";
+import { ContributionBoard } from "./tabs/ContributionBoard";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
 
@@ -25,7 +25,7 @@ const Work: React.FC = () => {
       )}
       <TitleButSer link="#todo">Job Board</TitleButSer>
       <br />
-      <JobBoard />
+      <ContributionBoard />
       <hr />
       <TitleButSer link="#todo">Stable Reserve</TitleButSer>
       <StableReserve />

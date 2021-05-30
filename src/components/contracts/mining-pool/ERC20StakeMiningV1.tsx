@@ -24,11 +24,6 @@ import {
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
-export enum ERC20StakeMiningV1Type {
-  STAKE_MINING_POOL,
-  BURN_MINING_POOL,
-}
-
 export interface ERC20StakeMiningV1Props {
   poolIdx: number;
   title: string;
@@ -363,10 +358,10 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       <hr />
       <Card.Title>Mine</Card.Title>
       <Card.Text>You mined {formatEther(mined || "0")} $VISION</Card.Text>
-      <Button variant="primary" onClick={mine}>
+      <Button variant="outline-success" onClick={mine}>
         Mine
       </Button>{" "}
-      <Button variant="primary" onClick={exit}>
+      <Button variant="outline-success" onClick={exit}>
         Mine & Exit
       </Button>
     </>

@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Erc20Balance } from "../../../components/contracts/erc20/Erc20Balance";
 import { BigNumber } from "ethers";
-import { JobBoard } from "./JobBoard";
+import { ContributionBoard } from "./ContributionBoard";
 import StableReserve from "./StableReserve";
 import { useParams } from "react-router-dom";
 import { prefix } from "../../../utils/utils";
@@ -22,12 +22,12 @@ const Work: React.FC = () => {
     [] as string[]
   );
 
-  // TODO listen JobBoard events and add dependency to useEffect()
+  // TODO listen ContributionBoard events and add dependency to useEffect()
 
   useEffect(() => {
     if (!!dao && !!workhard) {
       let stale = false;
-      const { jobBoard } = dao;
+      const { contributionBoard } = dao;
       workhard
         .totalSupply()
         .then((n: BigNumber) => {
@@ -36,7 +36,7 @@ const Work: React.FC = () => {
               .fill(undefined)
               .map((_, i) => i.toString())
               .forEach((projId) => {
-                jobBoard.approvedProjects(projId).then((approved) => {
+                contributionBoard.approvedProjects(projId).then((approved) => {
                   if (approved) {
                     activeProjects.push(projId);
                     setActiveProjects([...new Set(activeProjects)]);
@@ -70,7 +70,7 @@ const Work: React.FC = () => {
         style={{ marginTop: "1rem" }}
         onEnter={() => history.push(prefix(daoId, "/work/job"))}
       >
-        <JobBoard />
+        <ContributionBoard />
         {/* <Compensate projId={id} fund={fund} budgetOwner={budgetOwner} /> */}
       </Tab>
       <Tab

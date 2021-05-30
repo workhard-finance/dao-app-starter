@@ -34,9 +34,9 @@ export const ExecuteBudget: React.FC<ExecuteBudgetProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    const jobBoard = dao.jobBoard;
+    const contributionBoard = dao.contributionBoard;
     handleTransaction(
-      jobBoard.connect(signer).executeBudget(projId, budgetIndex),
+      contributionBoard.connect(signer).executeBudget(projId, budgetIndex),
       setTxStatus,
       addToast,
       "Budget executed."

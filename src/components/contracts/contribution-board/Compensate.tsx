@@ -37,8 +37,8 @@ export const Compensate: React.FC<CompensateProps> = ({
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const jobBoard = dao?.jobBoard;
-    if (!jobBoard) {
+    const contributionBoard = dao?.contributionBoard;
+    if (!contributionBoard) {
       alert("Not connected");
       return;
     }
@@ -53,7 +53,9 @@ export const Compensate: React.FC<CompensateProps> = ({
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      jobBoard.connect(signer).compensate(projId, payTo, payAmountInWei),
+      contributionBoard
+        .connect(signer)
+        .compensate(projId, payTo, payAmountInWei),
       setTxStatus,
       addToast,
       "Compensation complete!"
@@ -62,8 +64,8 @@ export const Compensate: React.FC<CompensateProps> = ({
 
   useEffect(() => {
     if (!!account && !!library && !!dao) {
-      const { jobBoard } = dao;
-      jobBoard
+      const { contributionBoard } = dao;
+      contributionBoard
         .projectFund(projId)
         .then(setBalance)
         .catch(errorHandler(addToast));

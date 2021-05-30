@@ -20,11 +20,11 @@ export const WorkhardLoggedDataProvider = ({ children }: { children: any }) => {
   const [projects, setProjects] = useState<string[]>([]);
   const { dao } = useWorkhard() || {};
   if (dao) {
-    const { jobBoard } = dao;
-    jobBoard
-      .queryFilter(jobBoard.filters.ProjectPosted(null))
+    const { contributionBoard } = dao;
+    contributionBoard
+      .queryFilter(contributionBoard.filters.ProjectPosted(null))
       .then((result) => console.log("filtered result", result));
-    jobBoard.on("ProjectPosted(uint256)", (event: BigNumber) => {
+    contributionBoard.on("ProjectPosted(uint256)", (event: BigNumber) => {
       if (!projects.find((p) => event.toString() === p))
         projects.push(event.toString());
       setProjects(projects);

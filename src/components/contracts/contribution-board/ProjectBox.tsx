@@ -36,7 +36,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!dao && !!workhard && !!ipfs) {
-      const { jobBoard } = dao;
+      const { contributionBoard } = dao;
       workhard
         .ownerOf(projId)
         .then(setBudgetOwner)
@@ -47,7 +47,10 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
         })
         .catch(errorHandler(addToast));
-      jobBoard.projectFund(projId).then(setFund).catch(errorHandler(addToast));
+      contributionBoard
+        .projectFund(projId)
+        .then(setFund)
+        .catch(errorHandler(addToast));
     }
   }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
 

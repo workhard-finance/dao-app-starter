@@ -52,10 +52,10 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       const erc20 = IERC20__factory.connect(token, library);
       erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
       erc20
-        .allowance(account, dao.jobBoard.address)
+        .allowance(account, dao.contributionBoard.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
-      dao.jobBoard
+      dao.contributionBoard
         .approvedProjects(projId)
         .then(setProjectApproved)
         .catch(errorHandler(addToast));
@@ -76,15 +76,15 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       handleTransaction(
         erc20
           .connect(signer)
-          .approve(dao.jobBoard.address, constants.MaxUint256),
+          .approve(dao.contributionBoard.address, constants.MaxUint256),
         setTxStatus,
         addToast,
-        "Approved JobBoard to use $COMMIT"
+        "Approved ContributionBoard to use $COMMIT"
       );
       return;
     }
-    const jobBoard = dao?.jobBoard;
-    if (!jobBoard) {
+    const contributionBoard = dao?.contributionBoard;
+    if (!contributionBoard) {
       alert("Not connected");
       return;
     }
@@ -98,8 +98,10 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       return;
     }
     const txPromise = projectApproved
-      ? jobBoard.connect(signer).addAndExecuteBudget(projId, token, amountInWei)
-      : jobBoard.connect(signer).addBudget(projId, token, amountInWei);
+      ? contributionBoard
+          .connect(signer)
+          .addAndExecuteBudget(projId, token, amountInWei)
+      : contributionBoard.connect(signer).addBudget(projId, token, amountInWei);
 
     handleTransaction(
       txPromise,

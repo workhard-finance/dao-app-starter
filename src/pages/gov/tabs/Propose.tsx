@@ -41,7 +41,7 @@ export const Propose: React.FC = ({}) => {
               <strong>By workers' union</strong>
             </h5>
             {presets ? (
-              ["JobBoard", "DividendPool", "VisionEmitter"].map(
+              ["ContributionBoard", "DividendPool", "VisionEmitter"].map(
                 (contractName) => (
                   <Dropdown as={Nav.Item}>
                     <Dropdown.Toggle variant="success" as={Nav.Link}>
@@ -89,7 +89,7 @@ export const Propose: React.FC = ({}) => {
               <strong>By Multisig</strong>
             </h5>
             {presets ? (
-              ["JobBoard", "DividendPool", "VisionEmitter"].map(
+              ["ContributionBoard", "DividendPool", "VisionEmitter"].map(
                 (contractName) => (
                   <Dropdown as={Nav.Item} key={`multisig-${contractName}`}>
                     <Dropdown.Toggle variant="success" as={Nav.Link}>

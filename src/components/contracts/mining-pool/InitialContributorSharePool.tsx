@@ -5,50 +5,36 @@ import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
+  ContributionBoard__factory,
   ERC20BurnMiningV1__factory,
-  ERC20__factory,
+  InitialContributorShare__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
 import {
   errorHandler,
   getVariantForProgressBar,
   handleTransaction,
-  isApproved,
   TxStatus,
 } from "../../../utils/utils";
-import {
-  CoingeckoTokenDetails,
-  getPriceFromCoingecko,
-  getTokenDetailsFromCoingecko,
-} from "../../../utils/coingecko";
-import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useToasts } from "react-toast-notifications";
 
-export interface ERC20BurnMiningV1Props {
-  poolIdx: number;
-  title: string;
-  tokenName?: string;
+export interface InitialContributorSharePoolProps {
   poolAddress: string;
   totalEmission: BigNumber;
-  visionPrice: number;
   emissionWeightSum: BigNumber;
   collapsible?: boolean;
 }
 
-export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
-  poolIdx,
-  title,
-  tokenName,
+export const InitialContributorSharePool: React.FC<InitialContributorSharePoolProps> = ({
   poolAddress,
   totalEmission,
-  visionPrice,
   collapsible,
   emissionWeightSum,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhard = useWorkhard();
   const { addToast } = useToasts();
 
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -56,16 +42,13 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   );
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
-  const [symbol, setSymbol] = useState<string>();
   const [burnedAmount, setBurnedAmount] = useState<BigNumber>();
   const [totalBurn, setTotalBurn] = useState<BigNumber>();
-  const [tokenPrice, setTokenPrice] = useState<number>();
-  const [tokenDetails, setTokenDetails] = useState<CoingeckoTokenDetails>();
   const [weight, setWeight] = useState<BigNumber>();
   const [allocatedVISION, setAllocatedVISION] = useState<BigNumber>(
     constants.Zero
   );
-  const [allowance, setAllowance] = useState<BigNumber>();
+  const [isApprovedForAll, setIsApprovedForAll] = useState<boolean>();
   const [burnPercent, setBurnPercent] = useState<number>();
   const [amount, setAmount] = useState<string>();
   const [mined, setMined] = useState<BigNumber>();
@@ -75,17 +58,19 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
   useEffect(() => {
-    if (!!account && !!dao) {
+    if (!!account && !!workhard) {
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress)
         .catch(errorHandler(addToast));
-      dao.visionEmitter
-        .getPoolWeight(poolIdx)
-        .then(setWeight)
+      workhard.dao.visionEmitter
+        .emissionWeight()
+        .then((emissions) => {
+          setWeight(emissions.dev);
+        })
         .catch(errorHandler(addToast));
     }
-  }, [account, dao]);
+  }, [account, workhard]);
   useEffect(() => {
     if (weight) {
       if (emissionWeightSum.eq(0)) {
@@ -96,40 +81,28 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
     }
   }, [weight]);
   useEffect(() => {
-    if (!!account && !!dao && !!tokenAddress) {
-      const token = ERC20__factory.connect(tokenAddress, library);
+    if (!!account && !!workhard && !!tokenAddress) {
+      const token = ContributionBoard__factory.connect(tokenAddress, library);
       token
-        .balanceOf(account)
+        .balanceOf(account, workhard.daoId)
         .then(setTokenBalance)
         .catch(errorHandler(addToast));
-      getPriceFromCoingecko(tokenAddress)
-        .then(setTokenPrice)
-        .catch(errorHandler(addToast));
-      getTokenDetailsFromCoingecko(tokenAddress)
-        .then(setTokenDetails)
-        .catch(errorHandler(addToast));
-      const pool = ERC20BurnMiningV1__factory.connect(poolAddress, library);
+      const pool = InitialContributorShare__factory.connect(
+        poolAddress,
+        library
+      );
       pool
         .dispatchedMiners(account)
         .then(setBurnedAmount)
         .catch(errorHandler(addToast));
       pool.totalMiners().then(setTotalBurn).catch(errorHandler(addToast));
       pool.mined(account).then(setMined).catch(errorHandler(addToast));
-      ERC20__factory.connect(tokenAddress, library)
-        .allowance(account, poolAddress)
-        .then(setAllowance)
+      ContributionBoard__factory.connect(tokenAddress, library)
+        .isApprovedForAll(account, poolAddress)
+        .then(setIsApprovedForAll)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, tokenAddress, txStatus, blockNumber]);
-
-  useEffect(() => {
-    if (!!tokenAddress) {
-      ERC20__factory.connect(tokenAddress, library)
-        .symbol()
-        .then(setSymbol)
-        .catch(errorHandler(addToast));
-    }
-  }, [tokenAddress, library]);
+  }, [account, workhard, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (burnedAmount && tokenBalance) {
@@ -139,36 +112,19 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
     }
   }, [burnedAmount, tokenBalance]);
 
-  useEffect(() => {
-    if (weight && tokenPrice && totalBurn) {
-      const visionPerWeek = parseFloat(
-        formatEther(totalEmission.mul(weight).div(emissionWeightSum))
-      );
-      const totalBurnedToken = parseFloat(formatEther(totalBurn));
-      setAnnualRevenue(
-        100 *
-          ((visionPerWeek * visionPrice * 52) /
-            (totalBurnedToken * tokenPrice) -
-            1)
-      );
-    } else {
-      setAnnualRevenue(NaN);
-    }
-  }, [weight, tokenPrice, totalBurn]);
-
   const approve = () => {
-    if (!account || !dao || !tokenAddress) {
+    if (!account || !workhard || !tokenAddress) {
       alert("Not connected");
       return;
     }
-    if (isApproved(allowance, amount)) {
+    if (isApprovedForAll) {
       alert("Already approved");
       return;
     }
     const signer = library.getSigner(account);
-    const token = ERC20__factory.connect(tokenAddress, library);
+    const token = ContributionBoard__factory.connect(tokenAddress, library);
     handleTransaction(
-      token.connect(signer).approve(poolAddress, constants.MaxUint256),
+      token.connect(signer).setApprovalForAll(poolAddress, true),
       setTxStatus,
       addToast,
       `Approved MiningPool ${poolAddress}`
@@ -177,11 +133,11 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   };
 
   const burn = () => {
-    if (!account || !dao) {
+    if (!account || !workhard) {
       alert("Not connected");
       return;
     }
-    if (!isApproved(allowance, amount)) {
+    if (!isApprovedForAll) {
       alert("Not approved");
       return;
     }
@@ -207,7 +163,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   };
 
   const exit = () => {
-    if (!account || !dao) {
+    if (!account || !workhard) {
       alert("Not connected");
       return;
     }
@@ -228,7 +184,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Burn ${tokenName || symbol}</Card.Title>
+      <Card.Title>Burn your initial contribution</Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
@@ -259,39 +215,33 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
             BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
           )}
         </Card.Text>
-        <Button
-          variant="danger"
-          onClick={isApproved(allowance, amount) ? burn : approve}
-        >
-          {isApproved(allowance, amount) ? "Burn" : "Approve"}
+        <Button variant="warning" onClick={isApprovedForAll ? burn : approve}>
+          {isApprovedForAll ? "Burn" : "Approve"}
         </Button>
       </Form>
       <hr />
       <Card.Title>Mine</Card.Title>
       <Card.Text>You mined {formatEther(mined || "0")} $VISION</Card.Text>
-      <Button variant="outline-danger" onClick={exit}>
+      <Button variant="outline-warning" onClick={exit}>
         Stop mining and withdraw rewards
       </Button>
     </>
   );
 
   return (
-    <Card border="danger">
-      <Card.Header className="bg-danger text-white">{title}</Card.Header>
+    <Card border="warning">
+      <Card.Header className="bg-warning text-white">
+        Initial Contributor Share Pool
+      </Card.Header>
       <Card.Body>
-        <Card.Title>
-          ARR
-          <OverlayTooltip
-            tip={
-              "Annual Revenue Run Rate = (earned vision - burned commit) * 12 months / burned commit"
-            }
-            text="❔"
-          />
-        </Card.Title>
-        <Card.Text style={{ fontSize: "2rem" }}>{annualRevenue}%</Card.Text>
+        <Card.Text>
+          You are one of the initial Contributor! Thanks for your hard
+          commitment for this project's early stages. Enjoy this special
+          rewards!
+        </Card.Text>
         <Card.Text>
           {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
-          this week.
+          for initial contributors this week.
         </Card.Text>
         {collapsible && (
           <Button

@@ -181,8 +181,8 @@ const Vote: React.FC = () => {
                 you can consider Workers' Union as a huge multisig wallet that
                 works by voting. By the way, Workers' Union is the manager of
                 timelock governance that is governing Workers' Union itself,
-                VisionEmitter, DividendPool, Marketplace, JobBoard, and etc.
-                Therefore, in most cases, we will propose the governance
+                VisionEmitter, DividendPool, Marketplace, ContributionBoard, and
+                etc. Therefore, in most cases, we will propose the governance
                 transaction to schedule and execute them. The governance
                 transactions are prepared in the proposal tab with the forms.
               </p>
@@ -214,7 +214,7 @@ const Vote: React.FC = () => {
                     StableReserve: allow minter list that can reserve DAI and
                     mint COMMIT
                   </li>
-                  <li>JobBoard: approve / disapprove / tax rate</li>
+                  <li>ContributionBoard: approve / disapprove / tax rate</li>
                   <li>Marketplace: tax rate</li>
                 </ul>
                 And the timelock transactions are scheduled and executed by

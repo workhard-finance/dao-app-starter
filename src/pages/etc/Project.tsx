@@ -7,8 +7,8 @@ import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
-import { Compensate } from "../../components/contracts/job-board/Compensate";
-import { AddBudget } from "../../components/contracts/job-board/AddBudget";
+import { Compensate } from "../../components/contracts/contribution-board/Compensate";
+import { AddBudget } from "../../components/contracts/contribution-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import {
   errorHandler,
@@ -17,7 +17,7 @@ import {
   uriToURL,
   wrapUrl,
 } from "../../utils/utils";
-import { ExecuteBudget } from "../../components/contracts/job-board/ExecuteBudget";
+import { ExecuteBudget } from "../../components/contracts/contribution-board/ExecuteBudget";
 import { useIPFS } from "../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { TitleButSer } from "../../components/views/TitleButSer";
@@ -43,7 +43,7 @@ export const Project: React.FC = () => {
   >(new Array(0));
   useEffect(() => {
     if (!!dao && !!workhard && !!ipfs) {
-      const { jobBoard } = dao;
+      const { contributionBoard } = dao;
       workhard
         .ownerOf(id)
         .then(setBudgetOwner)
@@ -54,18 +54,21 @@ export const Project: React.FC = () => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
         })
         .catch(errorHandler(addToast));
-      jobBoard.projectFund(id).then(setFund).catch(errorHandler(addToast));
+      contributionBoard
+        .projectFund(id)
+        .then(setFund)
+        .catch(errorHandler(addToast));
     }
   }, [dao, ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!dao) {
-      const { jobBoard } = dao;
-      jobBoard.getTotalBudgets(id).then((len: BigNumber) => {
+      const { contributionBoard } = dao;
+      contributionBoard.getTotalBudgets(id).then((len: BigNumber) => {
         Promise.all(
           new Array(len.toNumber())
             .fill(0)
-            .map((_, i) => jobBoard.projectBudgets(id, i))
+            .map((_, i) => contributionBoard.projectBudgets(id, i))
         )
           .then((_budgets) => {
             setBudgets(_budgets);

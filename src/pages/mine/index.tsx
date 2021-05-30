@@ -18,24 +18,29 @@ import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20B
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import {
   altWhenEmptyList,
+  errorHandler,
   handleTransaction,
   prefix,
   TxStatus,
 } from "../../utils/utils";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
 import { initMineStore, MineStore } from "../../store/mineStore";
 import { observer } from "mobx-react";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
+import { ContributionBoard } from "../work/tabs/ContributionBoard";
+import { ContributionBoard__factory } from "@workhard/protocol";
+import { InitialContributorSharePool } from "../../components/contracts/mining-pool/InitialContributorSharePool";
 
 const Mine = observer(() => {
   const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
   const history = useHistory();
   const { addToast } = useToasts();
   const { account, library } = useWeb3React();
-  const { dao, periphery } = useWorkhard() || {};
+  const workhard = useWorkhard();
+  const { dao, periphery } = workhard || {};
   const mineStore: MineStore = initMineStore(
     !!dao ? dao.visionEmitter : null,
     !!periphery ? periphery.liquidityMining.address : null,
@@ -43,13 +48,42 @@ const Mine = observer(() => {
     !!dao ? dao.vision.address : null
   );
   const [txStatus, setTxStatus] = useState<TxStatus>();
+  const [initialContributor, setInitialContributor] = useState<boolean>();
+  const [
+    initialContributorShare,
+    setInitialContributorShare,
+  ] = useState<string>();
+  const [
+    initialContributorPool,
+    setInitialContributorPool,
+  ] = useState<string>();
 
   useEffect(() => {
     if (!!dao) {
       mineStore.loadPools().then();
       mineStore.isDistributable();
+      dao.visionEmitter
+        .initialContributorShare()
+        .then(setInitialContributorShare)
+        .catch(errorHandler(addToast));
+      dao.visionEmitter
+        .initialContributorPool()
+        .then(setInitialContributorPool)
+        .catch(errorHandler(addToast));
     }
   }, [dao]);
+
+  useEffect(() => {
+    if (!!initialContributorShare && !!library && !!account) {
+      ContributionBoard__factory.connect(initialContributorShare, library)
+        .balanceOf(account, daoId || "0")
+        .then((bal) => {
+          if (bal.gt(0)) {
+            setInitialContributor(true);
+          }
+        });
+    }
+  }, [account, library, initialContributorShare]);
 
   useEffect(() => {
     if (!!dao && !!mineStore.pools) {
@@ -149,7 +183,19 @@ const Mine = observer(() => {
             )}
         </Col>
       </Row>
+      {initialContributor && initialContributorPool && (
+        <>
+          <br />
+          <TitleButSer>Initial Contributors Pool!</TitleButSer>
+          <InitialContributorSharePool
+            poolAddress={initialContributorPool}
+            totalEmission={mineStore.emission || BigNumber.from(0)}
+            emissionWeightSum={mineStore.emissionWeightSum}
+          />
+        </>
+      )}
       <br />
+
       <SerHelpPlz>
         <p>
           The two ways to mine $VISION{" "}

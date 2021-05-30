@@ -4,11 +4,11 @@ import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
-import { ProjectBox } from "../../../components/contracts/job-board/ProjectBox";
+import { ProjectBox } from "../../../components/contracts/contribution-board/ProjectBox";
 import { CreateProject } from "../../../components/contracts/workhard/CreateProject";
 import { prefix } from "../../../utils/utils";
 
-export const JobBoard: React.FC = () => {
+export const ContributionBoard: React.FC = () => {
   const workhardCtx = useWorkhard();
   const history = useHistory();
   const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
@@ -21,13 +21,13 @@ export const JobBoard: React.FC = () => {
     [] as BigNumber[]
   );
 
-  // TODO listen JobBoard events and add dependency to useEffect()
+  // TODO listen ContributionBoard events and add dependency to useEffect()
 
   useEffect(() => {
     if (workhardCtx) {
       const { daoId, workhard, dao } = workhardCtx;
       let stale = false;
-      const { jobBoard } = dao;
+      const { contributionBoard } = dao;
       workhard
         .projectsOf(daoId)
         .then((n: BigNumber) => {
@@ -36,25 +36,27 @@ export const JobBoard: React.FC = () => {
               .fill(undefined)
               .forEach((_, index) => {
                 workhard.projectsOfDAOByIndex(daoId, index).then((projId) => {
-                  jobBoard.approvedProjects(projId).then((approved) => {
-                    if (approved) {
-                      if (!activeProjects.find((v) => v.eq(projId))) {
-                        activeProjects.push(projId);
-                        setActiveProjects(activeProjects);
-                        setInactiveProjects(
-                          inactiveProjects.filter((v) => !v.eq(projId))
-                        );
+                  contributionBoard
+                    .approvedProjects(projId)
+                    .then((approved) => {
+                      if (approved) {
+                        if (!activeProjects.find((v) => v.eq(projId))) {
+                          activeProjects.push(projId);
+                          setActiveProjects(activeProjects);
+                          setInactiveProjects(
+                            inactiveProjects.filter((v) => !v.eq(projId))
+                          );
+                        }
+                      } else {
+                        if (!inactiveProjects.find((v) => v.eq(projId))) {
+                          inactiveProjects.push(projId);
+                          setInactiveProjects(inactiveProjects);
+                          setActiveProjects(
+                            activeProjects.filter((v) => !v.eq(projId))
+                          );
+                        }
                       }
-                    } else {
-                      if (!inactiveProjects.find((v) => v.eq(projId))) {
-                        inactiveProjects.push(projId);
-                        setInactiveProjects(inactiveProjects);
-                        setActiveProjects(
-                          activeProjects.filter((v) => !v.eq(projId))
-                        );
-                      }
-                    }
-                  });
+                    });
                 });
               });
           }
