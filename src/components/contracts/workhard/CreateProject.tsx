@@ -69,30 +69,50 @@ export const CreateProject: React.FC<{
   };
 
   const post = async () => {
-    if (!title || !description || !file) {
+    if (!title || !description) {
       alert("Fill out the form.");
       return;
     }
     setUploading(true);
-    uploadImageToIPFS(file)
-      .then((imageURI) => {
-        uploadMetadataToIPFS(title, description, imageURI, url)
-          .then((uri) => {
-            setImageURI(imageURI);
-            setUploaded(true);
-            setUploading(undefined);
-            setURI(uri);
-            createProject(uri);
-          })
-          .catch((_) => {
-            setUploaded(false);
-            setUploading(undefined);
-          });
-      })
-      .catch((_) => {
-        setUploaded(false);
-        setUploading(undefined);
-      });
+    if (file) {
+      uploadImageToIPFS(file)
+        .then((imageURI) => {
+          uploadMetadataToIPFS(title, description, imageURI, url)
+            .then((uri) => {
+              setImageURI(imageURI);
+              setUploaded(true);
+              setUploading(undefined);
+              setURI(uri);
+              createProject(uri);
+            })
+            .catch((_) => {
+              setUploaded(false);
+              setUploading(undefined);
+            });
+        })
+        .catch((_) => {
+          setUploaded(false);
+          setUploading(undefined);
+        });
+    } else {
+      uploadMetadataToIPFS(
+        title,
+        description,
+        "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1",
+        url
+      )
+        .then((uri) => {
+          setImageURI(imageURI);
+          setUploaded(true);
+          setUploading(undefined);
+          setURI(uri);
+          createProject(uri);
+        })
+        .catch((_) => {
+          setUploaded(false);
+          setUploading(undefined);
+        });
+    }
   };
 
   const createProject = async (uri: string) => {
@@ -119,9 +139,9 @@ export const CreateProject: React.FC<{
           onCreated(BigNumber.from(log.args.id));
         }
         setTxStatus(undefined);
-        setTitle("");
-        setURL("");
-        setDescription("");
+        setTitle(undefined);
+        setURL(undefined);
+        setDescription(undefined);
         setFile(undefined);
         setImageURI(undefined);
       }
@@ -150,7 +170,7 @@ export const CreateProject: React.FC<{
         />
       </Form.Group>
       <Form.Group>
-        <Form.Label>URL(optional)</Form.Label>
+        <Form.Label>URL(forum url or etc)</Form.Label>
         <Form.Control
           type="text"
           placeholder="eg) https://hackmd.io/samplejobpost"
@@ -159,7 +179,7 @@ export const CreateProject: React.FC<{
         />
       </Form.Group>
       <Form.Group>
-        <Form.Label>Thumbnail(optional)</Form.Label>
+        <Form.Label>Thumbnail</Form.Label>
         <Form.File
           onChange={(e: { target: HTMLInputElement }) => {
             if (!ipfs) {
