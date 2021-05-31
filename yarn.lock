@@ -4723,10 +4723,10 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@workhard/protocol@1.0.0-rc.21":
-  version "1.0.0-rc.21"
-  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.0-rc.21.tgz#814397144159d894b47211901290f180c472ab35"
-  integrity sha512-vs/IXqwHFc4DQNGRs1Zm952RsqwoS7M72yOqnMEwLFkE07rcv+/BXIWeHDuwRc6Vr5XrzGQ1xGEMdnPbK5xEdQ==
+"@workhard/protocol@1.0.0-rc.22":
+  version "1.0.0-rc.22"
+  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.0-rc.22.tgz#2dbd05efe97235345c7fd6dc3f1963d74aac82a5"
+  integrity sha512-2HBqFlp0i7rXOOW5HZfGHqzRkmBTx363EjOgnmdmSiYAa8yhTMuZ18hvwvdq+qytmKSjg3zZt1WIoU0JfaqO8g==
   dependencies:
     "@openzeppelin/contracts" "3.4.0-solc-0.7 "
     "@uniswap/v2-core" "^1.0.1"
