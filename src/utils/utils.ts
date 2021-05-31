@@ -336,12 +336,10 @@ export const fetchProjectMetadataFromIPFS = async (
   uri: string
 ): Promise<ProjectMetadata> => {
   let result = "";
-  console.log("uri", uri);
   for await (const chunk of ipfs.cat(uri.replace("ipfs://", ""))) {
     result += chunk;
   }
   const metadata = JSON.parse(result) as ProjectMetadata;
-  console.log("metadata", metadata);
   return metadata;
 };
 

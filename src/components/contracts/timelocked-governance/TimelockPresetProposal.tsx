@@ -66,15 +66,24 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
       } else {
         const gnosisAPI =
           network === "mainnet"
-            ? `https://safe-transaction.gnosis.io/`
+            ? `https://safe-transaction.gnosis.io/api/v1/`
             : network === "rinkeby"
-            ? `https://safe-transaction.rinkeby.gnosis.io/`
+            ? `https://safe-transaction.rinkeby.gnosis.io/api/v1/`
             : undefined;
 
         if (gnosisAPI) {
-          fetch(gnosisAPI + `safes/${multisig.address}/`).then((result) => {
-            console.log("result", result);
-          });
+          fetch(gnosisAPI + `safes/${multisig.address}/`).then(
+            async (response) => {
+              const result = await response.json();
+              if (
+                (result.owners as string[])
+                  .map(getIcapAddress)
+                  .includes(getIcapAddress(account))
+              ) {
+                setMultisigOwner(true);
+              }
+            }
+          );
         }
       }
     }

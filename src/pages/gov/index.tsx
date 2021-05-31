@@ -45,7 +45,7 @@ const Gov: React.FC = () => {
           style={{ marginTop: "1rem" }}
           onEnter={() => history.push(prefix(daoId, "/gov/timelock"))}
         >
-          <TimelockTxs />
+          {/* <TimelockTxs /> */}
         </Tab>
         <Tab
           eventKey="vote"

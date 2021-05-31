@@ -25,6 +25,7 @@ import { SerHelpPlz } from "../../components/views/HelpSer";
 import { RecordContribution } from "../../components/contracts/contribution-board/RecordContribution";
 import { ContributorChart } from "../../components/views/ContributorChart";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
+import { Grant } from "../../components/contracts/stable-reserve/Grant";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -38,6 +39,8 @@ export const Project: React.FC = () => {
   const [fund, setFund] = useState<BigNumber>();
   const [budgetOwner, setBudgetOwner] = useState("");
   const [exist, setExist] = useState<boolean>(true);
+  const [streams, setStreams] = useState<BigNumber[]>([]);
+  const [contributors, setContributors] = useState<string[]>([]);
   const [budgets, setBudgets] = useState<
     Array<{
       amount: BigNumber;
@@ -63,6 +66,19 @@ export const Project: React.FC = () => {
         .catch(errorHandler(addToast));
     }
   }, [dao, ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
+
+  useEffect(() => {
+    if (dao) {
+      dao.contributionBoard
+        .getStreams(id)
+        .then(setStreams)
+        .catch(errorHandler(addToast));
+      dao.contributionBoard
+        .getContributors(id)
+        .then(setContributors)
+        .catch(errorHandler(addToast));
+    }
+  }, [dao]);
 
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!dao) {
@@ -119,7 +135,7 @@ export const Project: React.FC = () => {
                 <Nav.Link eventKey="budget">Add budget</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="record">Record Contribution</Nav.Link>
+                <Nav.Link eventKey="record">History</Nav.Link>
               </Nav.Item>
             </Nav>
           </Col>
@@ -139,11 +155,19 @@ export const Project: React.FC = () => {
               <Tab.Pane eventKey="budget">
                 <Card>
                   <Card.Body>
+                    <Card.Title>Fund to accelerate project!</Card.Title>
                     <AddBudget
                       projId={id}
                       fund={fund || 0}
                       budgetOwner={budgetOwner}
                     />
+                  </Card.Body>
+                </Card>
+                <br />
+                <Card>
+                  <Card.Body>
+                    <Card.Title>Grants (multisig & governance)</Card.Title>
+                    <Grant projId={id} />
                   </Card.Body>
                 </Card>
 
@@ -172,8 +196,24 @@ export const Project: React.FC = () => {
                   .reverse()}
               </Tab.Pane>
               <Tab.Pane eventKey="record">
-                <Card>
-                  <Card.Body>
+                {streams.length > 0 && (
+                  <>
+                    <h5>Streamings</h5>
+                    {streams.map((stream) => (
+                      <p>
+                        <a
+                          href={`https://app.sablier.finance/stream/${stream.toNumber()}`}
+                          target="_blank"
+                        >
+                          {stream.toNumber()}
+                        </a>
+                      </p>
+                    ))}
+                    <br />
+                  </>
+                )}
+                {contributors.length > 0 && (
+                  <>
                     <h5>
                       Contributors
                       <OverlayTooltip
@@ -184,18 +224,19 @@ export const Project: React.FC = () => {
                       />
                     </h5>
                     <ContributorChart id={id} />
-                    <h5>
-                      Record{" "}
-                      <OverlayTooltip
-                        tip={
-                          "Contributions are automatically recorded when budget owner pays to the contributor. Otherwise, budget owner can record contributions manually using this form."
-                        }
-                        text={`❔`}
-                      />
-                    </h5>
-                    <RecordContribution projId={id} budgetOwner={budgetOwner} />
-                  </Card.Body>
-                </Card>
+                    <hr />
+                  </>
+                )}
+                <h5>
+                  Manual Record of Contributions{" "}
+                  <OverlayTooltip
+                    tip={
+                      "Contributions are automatically recorded when budget owner pays to the contributor. Otherwise, budget owner can record contributions manually using this form."
+                    }
+                    text={`❔`}
+                  />
+                </h5>
+                <RecordContribution projId={id} budgetOwner={budgetOwner} />
                 <br />
               </Tab.Pane>
             </Tab.Content>

@@ -1,6 +1,14 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish } from "ethers";
-import { Card, Form, FormControl, FormLabel } from "react-bootstrap";
+import {
+  ButtonGroup,
+  Card,
+  Form,
+  FormControl,
+  FormLabel,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
@@ -30,9 +38,11 @@ export const Compensate: React.FC<CompensateProps> = ({
   const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [payTo, setPayTo] = useState("");
-  const [payAmount, setPayAmount] = useState<number>();
+  const [payAmount, setPayAmount] = useState<number>(0);
   const [balance, setBalance] = useState<BigNumberish>(fund);
   const [txStatus, setTxStatus] = useState<TxStatus>();
+  const [moneyStreaming, setMoneyStreaming] = useState<boolean>(true);
+  const [streamingPeriod, setStreamingPeriod] = useState<number>(86400 * 28);
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -51,15 +61,25 @@ export const Compensate: React.FC<CompensateProps> = ({
       alert("Not enough amount of $COMMIT tokens");
       return;
     }
-    const signer = library.getSigner(account);
-    handleTransaction(
-      contributionBoard
-        .connect(signer)
-        .compensate(projId, payTo, payAmountInWei),
-      setTxStatus,
-      addToast,
-      "Compensation complete!"
+    setPayAmount(
+      parseFloat(
+        formatEther(payAmountInWei.div(streamingPeriod).mul(streamingPeriod))
+      )
     );
+    const signer = library.getSigner(account);
+    const tx = moneyStreaming
+      ? contributionBoard
+          .connect(signer)
+          .compensateInStream(
+            projId,
+            payTo,
+            payAmountInWei.div(streamingPeriod).mul(streamingPeriod),
+            streamingPeriod
+          )
+      : contributionBoard
+          .connect(signer)
+          .compensate(projId, payTo, payAmountInWei);
+    handleTransaction(tx, setTxStatus, addToast, "Compensation complete!");
   };
 
   useEffect(() => {
@@ -94,9 +114,56 @@ export const Compensate: React.FC<CompensateProps> = ({
           placeholder="3214.23"
           type="number"
           value={payAmount}
-          onChange={(event) => setPayAmount(parseFloat(event.target.value))}
+          onChange={(event) => {
+            setPayAmount(parseFloat(event.target.value));
+          }}
         />
       </Form.Group>
+      <ButtonGroup toggle>
+        <ToggleButton
+          type="radio"
+          variant="outline-primary"
+          checked={moneyStreaming}
+          value={0}
+          onClick={() => {
+            setMoneyStreaming(true);
+          }}
+        >
+          Streaming
+        </ToggleButton>
+        <ToggleButton
+          type="radio"
+          variant="outline-primary"
+          checked={!moneyStreaming}
+          value={1}
+          onClick={() => setMoneyStreaming(false)}
+        >
+          Pay at once
+        </ToggleButton>
+      </ButtonGroup>
+      <br />
+      {moneyStreaming && (
+        <>
+          <br />
+          <Form.Group>
+            <Form.Label>Streaming Period</Form.Label>
+            <Form.Control
+              type="range"
+              min={86400}
+              max={86400 * 365}
+              value={streamingPeriod}
+              step={86400}
+              onChange={({ target: { value } }) => {
+                const period = parseInt(value);
+                setStreamingPeriod(period);
+              }}
+            />
+            <Form.Text>{(streamingPeriod / 86400).toFixed(0)} day(s)</Form.Text>
+          </Form.Group>
+        </>
+      )}
+
+      <br />
       <ConditionalButton
         variant="primary"
         type="submit"

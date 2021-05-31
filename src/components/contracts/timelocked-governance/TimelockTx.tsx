@@ -80,7 +80,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
 
   useEffect(() => {
     if (!!dao && !!library) {
-      const timeLockGovernance = dao.timelock;
+      const timelock = dao.timelock;
       const workersUnion = dao.workersUnion;
       library
         .getBlock(blockNumber)
@@ -93,12 +93,12 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         const { result } = txDetails;
         let proposer: TxProposer | undefined;
         let forced: boolean | undefined;
-        if (tx.to === timeLockGovernance.address) {
+        if (tx.to === timelock.address) {
           proposer = TxProposer.DEV;
           if (
             tx.data.startsWith(
-              timeLockGovernance.interface.getSighash(
-                timeLockGovernance.interface.functions[
+              timelock.interface.getSighash(
+                timelock.interface.functions[
                   "forceSchedule(address,uint256,bytes,bytes32,bytes32,uint256)"
                 ]
               )
@@ -122,8 +122,8 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           proposer,
         });
         const fn = Array.isArray(result.target)
-          ? timeLockGovernance.populateTransaction.executeBatch
-          : timeLockGovernance.populateTransaction.execute;
+          ? timelock.populateTransaction.executeBatch
+          : timelock.populateTransaction.execute;
         fn(
           result.target,
           result.value,
@@ -281,9 +281,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           <li key={`${index}-${id}-predecessor`}>
             predecessor: {scheduledTx?.predecessor}
           </li>
-          <li key={`${index}-${id}-salt`}>
-            salt: {scheduledTx?.salt.toString()}
-          </li>
+          <li key={`${index}-${id}-salt`}>salt: {scheduledTx?.salt}</li>
         </ul>
         <Card.Text>Transaction:</Card.Text>
         <Accordion>

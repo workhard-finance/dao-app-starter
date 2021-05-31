@@ -230,7 +230,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
 
   return (
     <Card border="warning">
-      <Card.Header className="bg-warning text-white">
+      <Card.Header className="bg-warning text-white" onClick={() => {}}>
         Initial Contributor Share Pool
       </Card.Header>
       <Card.Body>

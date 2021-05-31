@@ -2,7 +2,8 @@ import { action, get, observable } from "mobx";
 import { VisionEmitter } from "@workhard/protocol";
 import { getAddress } from "ethers/lib/utils";
 import { getPriceFromCoingecko } from "../utils/coingecko";
-import { BigNumber } from "ethers";
+import { BigNumber, Signer } from "ethers";
+import { Provider } from "@ethersproject/abstract-provider";
 
 export class MineStore {
   @observable public pools: string[] = [];
@@ -67,9 +68,10 @@ export class MineStore {
   };
 
   @action
-  isDistributable = () => {
-    this.visionEmitter.estimateGas
-      .distribute()
+  isDistributable = (account: Signer | Provider) => {
+    this.visionEmitter
+      .connect(account)
+      .estimateGas.distribute()
       .then((_) => (this.distributable = true))
       .catch((_) => (this.distributable = false));
   };

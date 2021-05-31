@@ -31,8 +31,12 @@ import { observer } from "mobx-react";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
 import { ContributionBoard } from "../work/tabs/ContributionBoard";
-import { ContributionBoard__factory } from "@workhard/protocol";
+import {
+  ContributionBoard__factory,
+  InitialContributorShare__factory,
+} from "@workhard/protocol";
 import { InitialContributorSharePool } from "../../components/contracts/mining-pool/InitialContributorSharePool";
+import { useBlockNumber } from "../../providers/BlockNumberProvider";
 
 const Mine = observer(() => {
   const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
@@ -47,6 +51,7 @@ const Mine = observer(() => {
     !!periphery ? periphery.commitMining.address : null,
     !!dao ? dao.vision.address : null
   );
+  const { blockNumber } = useBlockNumber();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [initialContributor, setInitialContributor] = useState<boolean>();
   const [
@@ -59,9 +64,10 @@ const Mine = observer(() => {
   ] = useState<string>();
 
   useEffect(() => {
-    if (!!dao) {
+    if (!!dao && account && library) {
+      const signer = library.getSigner(account);
       mineStore.loadPools().then();
-      mineStore.isDistributable();
+      mineStore.isDistributable(signer);
       dao.visionEmitter
         .initialContributorShare()
         .then(setInitialContributorShare)
@@ -71,10 +77,15 @@ const Mine = observer(() => {
         .then(setInitialContributorPool)
         .catch(errorHandler(addToast));
     }
-  }, [dao]);
+  }, [dao, blockNumber, account, library]);
 
   useEffect(() => {
-    if (!!initialContributorShare && !!library && !!account) {
+    if (
+      !!initialContributorPool &&
+      !!initialContributorShare &&
+      !!library &&
+      !!account
+    ) {
       ContributionBoard__factory.connect(initialContributorShare, library)
         .balanceOf(account, daoId || "0")
         .then((bal) => {
@@ -82,8 +93,15 @@ const Mine = observer(() => {
             setInitialContributor(true);
           }
         });
+      InitialContributorShare__factory.connect(initialContributorPool, library)
+        .dispatchedMiners(account)
+        .then((miners) => {
+          if (miners.gt(0)) {
+            setInitialContributor(true);
+          }
+        });
     }
-  }, [account, library, initialContributorShare]);
+  }, [account, library, initialContributorShare, initialContributorPool]);
 
   useEffect(() => {
     if (!!dao && !!mineStore.pools) {
@@ -101,7 +119,7 @@ const Mine = observer(() => {
         setTxStatus,
         addToast,
         "You've mined the distribution transaction!!",
-        mineStore.isDistributable
+        () => mineStore.isDistributable(signer)
       );
     }
   };

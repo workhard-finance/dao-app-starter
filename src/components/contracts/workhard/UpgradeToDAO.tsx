@@ -16,8 +16,9 @@ import { EmissionChart } from "../../views/EmissionChart";
 import { parseEther } from "ethers/lib/utils";
 
 const defaultSetting = {
+  emissionStartDelay: 86400 * 7,
   minDelay: 86400,
-  launchDelay: 86400 * 28,
+  voteLaunchDelay: 86400 * 28,
   initialEmission: 24000000,
   minEmissionRatePerWeek: 60,
   emissionCutRate: 1000,
@@ -58,9 +59,12 @@ export const UpgradeToDAO: React.FC<{
   const [rightName, setRightName] = useState<string>();
   const [rightSymbol, setRightSymbol] = useState<string>();
 
+  const [emissionStartDelay, setEmissionStartDelay] = useState<number>(
+    defaultSetting.emissionStartDelay
+  );
   const [minDelay, setMinDelay] = useState<number>(defaultSetting.minDelay);
-  const [launchDelay, setLaunchDelay] = useState<number>(
-    defaultSetting.launchDelay
+  const [voteLaunchDelay, setVoteLaunchDelay] = useState<number>(
+    defaultSetting.voteLaunchDelay
   );
   const [initialEmission, setInitialEmission] = useState<number>(
     defaultSetting.initialEmission
@@ -108,8 +112,9 @@ export const UpgradeToDAO: React.FC<{
       !commitSymbol ||
       !rightName ||
       !rightSymbol ||
+      !emissionStartDelay ||
       !minDelay ||
-      !launchDelay ||
+      !voteLaunchDelay ||
       !initialEmission ||
       !minEmissionRatePerWeek ||
       !emissionCutRate ||
@@ -132,8 +137,9 @@ export const UpgradeToDAO: React.FC<{
         commitSymbol,
         rightName,
         rightSymbol,
+        emissionStartDelay,
         minDelay,
-        launchDelay,
+        voteLaunchDelay,
         initialEmission: parseEther(`${initialEmission}`),
         minEmissionRatePerWeek,
         emissionCutRate,
@@ -301,13 +307,29 @@ export const UpgradeToDAO: React.FC<{
               type="range"
               min={86400}
               max={86400 * 365}
-              value={launchDelay}
+              value={voteLaunchDelay}
               step={86400}
               onChange={({ target: { value } }) =>
-                setLaunchDelay(parseInt(value))
+                setVoteLaunchDelay(parseInt(value))
               }
             />
-            <Form.Text>{(launchDelay / 86400).toFixed(0)} day(s)</Form.Text>
+            <Form.Text>{(voteLaunchDelay / 86400).toFixed(0)} day(s)</Form.Text>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Emission starts after</Form.Label>
+            <Form.Control
+              type="range"
+              min={86400}
+              max={86400 * 28}
+              value={emissionStartDelay}
+              step={86400}
+              onChange={({ target: { value } }) =>
+                setEmissionStartDelay(parseInt(value))
+              }
+            />
+            <Form.Text>
+              {(emissionStartDelay / 86400).toFixed(0)} day(s)
+            </Form.Text>
           </Form.Group>
           <Form.Group>
             <Form.Label>Initial Emission</Form.Label>
@@ -445,8 +467,9 @@ export const UpgradeToDAO: React.FC<{
           <Button
             variant="secondary"
             onClick={() => {
+              setEmissionStartDelay(defaultSetting.emissionStartDelay);
               setMinDelay(defaultSetting.minDelay);
-              setLaunchDelay(defaultSetting.launchDelay);
+              setVoteLaunchDelay(defaultSetting.voteLaunchDelay);
               setInitialEmission(defaultSetting.initialEmission);
               setMinEmissionRatePerWeek(defaultSetting.minEmissionRatePerWeek);
               setEmissionCutRate(defaultSetting.emissionCutRate);

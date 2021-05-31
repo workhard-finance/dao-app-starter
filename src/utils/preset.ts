@@ -42,12 +42,13 @@ export const buildPresets = (dao: WorkhardDAO): Preset[] => {
   return [
     {
       paramArray: [
-        { name: "projId", type: PARAM_TYPE.STRING },
+        { name: "contributionBoard", type: PARAM_TYPE.STRING },
         { name: "amount", type: PARAM_TYPE.ETHER },
+        { name: "projId", type: PARAM_TYPE.STRING },
       ],
       methodName: "grant",
-      contract: dao.contributionBoard,
-      contractName: "ContributionBoard",
+      contract: dao.stableReserve,
+      contractName: "StableReserve",
     },
     {
       paramArray: [{ name: "currency", type: PARAM_TYPE.STRING }],
