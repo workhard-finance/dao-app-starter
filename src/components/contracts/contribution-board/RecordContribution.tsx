@@ -76,7 +76,7 @@ export const RecordContribution: React.FC<RecordContributionProps> = ({
         variant="primary"
         type="submit"
         enabledWhen={account === budgetOwner ? true : undefined}
-        whyDisabled={`Only budget owner can call this function.`}
+        whyDisabled={`Only the project owner can call this function.`}
         children={`Record contribution`}
       />
     </Form>

@@ -8,6 +8,7 @@ import { LaunchDAO } from "../../components/contracts/workhard/LaunchDAO";
 import { UpgradeToDAO } from "../../components/contracts/workhard/UpgradeToDAO";
 import { DevGuide } from "./DevGuide";
 import { useWorkhard } from "../../providers/WorkhardProvider";
+import { InitialContribution } from "../../components/contracts/workhard/InitialContribution";
 
 export const ForkAndLaunch: React.FC = () => {
   const history = useHistory();
@@ -55,7 +56,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/new/${id || ""}`}
+                  to={`/fork/new/${projId || ""}`}
                   eventKey={"new"}
                   className={step === "new" ? "text-primary" : "text-muted"}
                 >
@@ -81,7 +82,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/upgrade/${id || ""}`}
+                  to={`/fork/upgrade/${projId || ""}`}
                   eventKey={"upgrade"}
                   className={step === "upgrade" ? "text-primary" : "text-muted"}
                 >
@@ -92,7 +93,9 @@ export const ForkAndLaunch: React.FC = () => {
                 <Card.Body>
                   <UpgradeToDAO
                     id={id}
-                    onUpgraded={() => history.push(`/fork/launch/${id || ""}`)}
+                    onUpgraded={() =>
+                      history.push(`/fork/initial-contribution/${id || ""}`)
+                    }
                   />
                 </Card.Body>
               </Accordion.Collapse>
@@ -101,11 +104,35 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/launch/${id || ""}`}
+                  to={`/fork/initial-contribution/${projId || ""}`}
+                  eventKey={"initial-contribution"}
+                  className={
+                    step === "initial-contribution"
+                      ? "text-primary"
+                      : "text-muted"
+                  }
+                >
+                  Step3. Setup shares for initial contributors.
+                </Accordion.Toggle>
+              </Card.Header>
+              <Accordion.Collapse eventKey={"initial-contribution"}>
+                <Card.Body>
+                  <InitialContribution
+                    id={id}
+                    onSetup={() => history.push(`/fork/launch/${projId || ""}`)}
+                  />
+                </Card.Body>
+              </Accordion.Collapse>
+            </Card>
+            <Card>
+              <Card.Header>
+                <Accordion.Toggle
+                  as={Link}
+                  to={`/fork/launch/${projId || ""}`}
                   eventKey={`launch`}
                   className={step === "launch" ? "text-primary" : "text-muted"}
                 >
-                  Step3. Allocate emissions and launch.
+                  Step4. Allocate emissions and launch.
                 </Accordion.Toggle>
               </Card.Header>
               <Accordion.Collapse eventKey={`launch`}>
@@ -118,11 +145,11 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/connect/${id || ""}`}
+                  to={`/fork/connect/${projId || ""}`}
                   eventKey={`connect`}
                   className={step === "connect" ? "text-primary" : "text-muted"}
                 >
-                  Step4. Connnect your revenue stream!
+                  Step5. Connnect your revenue stream!
                 </Accordion.Toggle>
               </Card.Header>
               <Accordion.Collapse eventKey={`connect`}>

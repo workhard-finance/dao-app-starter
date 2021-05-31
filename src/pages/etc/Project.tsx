@@ -22,6 +22,7 @@ import { useIPFS } from "../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { TitleButSer } from "../../components/views/TitleButSer";
 import { SerHelpPlz } from "../../components/views/HelpSer";
+import { RecordContribution } from "../../components/contracts/contribution-board/RecordContribution";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -115,6 +116,9 @@ export const Project: React.FC = () => {
               <Nav.Item>
                 <Nav.Link eventKey="budget">Add budget</Nav.Link>
               </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="record">Record Contribution</Nav.Link>
+              </Nav.Item>
             </Nav>
           </Col>
           <Col sm={9}>
@@ -164,6 +168,13 @@ export const Project: React.FC = () => {
                     }
                   })
                   .reverse()}
+              </Tab.Pane>
+              <Tab.Pane eventKey="record">
+                <Card>
+                  <Card.Body>
+                    <RecordContribution projId={id} budgetOwner={budgetOwner} />
+                  </Card.Body>
+                </Card>
               </Tab.Pane>
             </Tab.Content>
           </Col>
