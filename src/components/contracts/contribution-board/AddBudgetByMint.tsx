@@ -16,13 +16,13 @@ import {
 import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
 
-export interface AddBudgetProps {
+export interface AddBudgetByMintProps {
   projId: BigNumberish;
   fund: BigNumberish;
   budgetOwner: string;
 }
 
-export const AddBudget: React.FC<AddBudgetProps> = ({
+export const AddBudgetByMint: React.FC<AddBudgetByMintProps> = ({
   projId,
   budgetOwner,
 }) => {
@@ -30,18 +30,28 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
+  const [acceptableTokens, setAcceptableTokens] = useState<
+    { symbol: string; address: string }[]
+  >();
+  const [token, setToken] = useState<string>();
   const [balance, setBalance] = useState<BigNumber>();
   const [amount, setAmount] = useState("0");
   const [allowance, setAllowance] = useState<BigNumber>();
   const [projectApproved, setProjectApproved] = useState(false);
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      dao.commit
-        .balanceOf(account)
-        .then(setBalance)
-        .catch(errorHandler(addToast));
-      dao.commit
+    const list = acceptableTokenList(chainId);
+    setAcceptableTokens(list);
+    if (!token && list[0]) {
+      setToken(list[0].address);
+    }
+  }, [chainId]);
+
+  useEffect(() => {
+    if (!!account && !!dao && !!token) {
+      const erc20 = IERC20__factory.connect(token, library);
+      erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
+      erc20
         .allowance(account, dao.contributionBoard.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
@@ -50,17 +60,21 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         .then(setProjectApproved)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, txStatus]);
+  }, [account, token, txStatus]);
 
-  const addBudgetWithCommit = () => {
+  const addBudget = () => {
     if (!account || !dao) {
       alert("Not connected");
+      return;
+    } else if (!token) {
+      alert("Token is not selected");
       return;
     }
     const signer = library.getSigner(account);
     if (!isApproved(allowance, amount)) {
+      const erc20 = IERC20__factory.connect(token, library); // todo use ERC20__factory instead
       handleTransaction(
-        dao.commit
+        erc20
           .connect(signer)
           .approve(dao.contributionBoard.address, constants.MaxUint256),
         setTxStatus,
@@ -75,27 +89,46 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       return;
     }
     const amountInWei = parseEther(amount);
+    if (!isAddress(token)) {
+      alert("Invalid address");
+      return;
+    }
     if (amountInWei.gt(balance || 0)) {
       alert("Not enough amount of $COMMIT tokens");
       return;
     }
-    const txPromise = contributionBoard
-      .connect(signer)
-      .addProjectFund(projId, amountInWei);
+    const txPromise = projectApproved
+      ? contributionBoard
+          .connect(signer)
+          .addAndExecuteBudget(projId, token, amountInWei)
+      : contributionBoard.connect(signer).addBudget(projId, token, amountInWei);
 
     handleTransaction(
       txPromise,
       setTxStatus,
       addToast,
-      "Successfully funded project."
+      "Successfully scheduled transaction."
     );
   };
   return (
     <Form>
       <Form.Group>
+        <Form.Label>Token</Form.Label>
+        <Form.Control
+          as="select"
+          required
+          type="text"
+          value={token}
+          onChange={({ target: { value } }) => setToken(value)}
+        >
+          {acceptableTokens?.map((t) => (
+            <option value={t.address}>{`${t.symbol}: ${t.address}`}</option>
+          ))}
+        </Form.Control>
+      </Form.Group>
+      <Form.Group>
         <Form.Label>
-          Amount - (balance:{" "}
-          {balance ? `${formatEther(balance.toString())} $COMMIT` : "?"})
+          Amount - (balance: {balance ? formatEther(balance.toString()) : "?"})
         </Form.Label>
         <Form.Control
           required
@@ -108,7 +141,7 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
         variant="primary"
         enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only the project owner can call this function.`}
-        onClick={addBudgetWithCommit}
+        onClick={addBudget}
         children={
           isApproved(allowance, amount)
             ? projectApproved

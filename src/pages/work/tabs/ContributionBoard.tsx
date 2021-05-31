@@ -14,12 +14,7 @@ export const ContributionBoard: React.FC = () => {
   const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
   // const { account, library, chainId } = useWeb3React();
 
-  const [activeProjects, setActiveProjects] = useState<BigNumber[]>(
-    [] as BigNumber[]
-  );
-  const [inactiveProjects, setInactiveProjects] = useState<BigNumber[]>(
-    [] as BigNumber[]
-  );
+  const [projects, setProjects] = useState<BigNumber[]>([] as BigNumber[]);
 
   // TODO listen ContributionBoard events and add dependency to useEffect()
 
@@ -36,55 +31,33 @@ export const ContributionBoard: React.FC = () => {
               .fill(undefined)
               .forEach((_, index) => {
                 workhard.projectsOfDAOByIndex(daoId, index).then((projId) => {
-                  contributionBoard
-                    .approvedProjects(projId)
-                    .then((approved) => {
-                      if (approved) {
-                        if (!activeProjects.find((v) => v.eq(projId))) {
-                          activeProjects.push(projId);
-                          setActiveProjects(activeProjects);
-                          setInactiveProjects(
-                            inactiveProjects.filter((v) => !v.eq(projId))
-                          );
-                        }
-                      } else {
-                        if (!inactiveProjects.find((v) => v.eq(projId))) {
-                          inactiveProjects.push(projId);
-                          setInactiveProjects(inactiveProjects);
-                          setActiveProjects(
-                            activeProjects.filter((v) => !v.eq(projId))
-                          );
-                        }
-                      }
-                    });
+                  if (!projects.find((v) => v.eq(projId))) {
+                    projects.push(projId);
+                    setProjects(projects);
+                  }
                 });
               });
           }
         })
         .catch(() => {
           if (!stale) {
-            setActiveProjects([]);
-            setInactiveProjects([]);
+            setProjects([]);
           }
         });
 
       return () => {
         stale = true;
-        setActiveProjects([]);
-        setInactiveProjects([]);
+        setProjects([]);
       };
     }
   }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
-    <Tab.Container defaultActiveKey={subtab || "active"}>
+    <Tab.Container defaultActiveKey={subtab || "projects"}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
             <Nav.Item>
-              <Nav.Link eventKey="active">Active projects</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="pending">Inactive/pending projects</Nav.Link>
+              <Nav.Link eventKey="projects">Projects</Nav.Link>
             </Nav.Item>
             <Nav.Item>
               <Nav.Link eventKey="post">Post a job</Nav.Link>
@@ -94,30 +67,17 @@ export const ContributionBoard: React.FC = () => {
         <Col sm={9}>
           <Tab.Content>
             <Tab.Pane
-              eventKey="active"
-              onEnter={() => history.push(prefix(daoId, "/work/job/active"))}
+              eventKey="projects"
+              onEnter={() => {
+                history.push(prefix(daoId, "/work/job/projects"));
+              }}
             >
-              {activeProjects.length === 0 && (
-                <p>
-                  No active project exists! Post a new one or approve the
-                  pending projects.
-                </p>
+              {projects.length === 0 && (
+                <p>No project exists! Post a new one :)</p>
               )}
-              {activeProjects.map((id) => (
+              {projects.map((id) => (
                 <div key={id.toString()}>
                   <ProjectBox projId={id} active={true} />
-                  <br />
-                </div>
-              ))}
-            </Tab.Pane>
-            <Tab.Pane
-              eventKey="pending"
-              onEnter={() => history.push(prefix(daoId, "/work/job/pending"))}
-            >
-              {inactiveProjects.length === 0 && <p>Empty!</p>}
-              {inactiveProjects.map((id) => (
-                <div key={id.toString()}>
-                  <ProjectBox projId={id} active={false} />
                   <br />
                 </div>
               ))}

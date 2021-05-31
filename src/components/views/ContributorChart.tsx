@@ -14,6 +14,8 @@ import { useBlockNumber } from "../../providers/BlockNumberProvider";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { errorHandler } from "../../utils/utils";
 import { formatEther } from "ethers/lib/utils";
+import { constants } from "ethers";
+import { OverlayTooltip } from "../OverlayTooltip";
 
 export interface ERC1155HolderChartProps {
   id: BigNumberish;
@@ -29,7 +31,7 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
   const [balances, setBalances] = useState<BigNumber[]>();
   const [data, setData] = useState<
     {
-      title: string;
+      address: string;
       proportion: number;
       commits: string;
       color: string;
@@ -39,16 +41,24 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
 
   useEffect(() => {
     if (!!workhardCtx && !!library) {
-      const { workhard } = workhardCtx;
+      const { workhard, dao } = workhardCtx;
       workhard
         .getDAO(id)
         .then((contracts) => {
-          VisionEmitter__factory.connect(contracts.visionEmitter, library)
-            .initialContributorShare()
-            .then(setShareAddress)
-            .catch(errorHandler(addToast));
+          if (contracts.visionEmitter === constants.AddressZero) {
+            // project
+            setShareAddress(dao.contributionBoard.address);
+          } else {
+            // dao
+            VisionEmitter__factory.connect(contracts.visionEmitter, library)
+              .initialContributorShare()
+              .then(setShareAddress)
+              .catch(errorHandler(addToast));
+          }
         })
-        .catch(errorHandler(addToast));
+        .catch(() => {
+          setShareAddress(workhard.dao.contributionBoard.address);
+        });
     }
   }, [library, workhardCtx]);
 
@@ -84,17 +94,11 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
   const COLORS = ["#28a745", "#17a2b8", "#ffc107", "#dc3545"];
   useEffect(() => {
     if (balances && contributors && balances.length === contributors.length) {
-      const sum = parseFloat(
-        formatEther(balances.reduce((sum, v) => sum.add(v)) || "0")
-      );
-      if (sum === 0) return;
       setData(
         balances
-          .map((bal) => (100 * parseFloat(formatEther(bal))) / sum)
+          .map((bal) => parseFloat(formatEther(bal)))
           .map((val, i) => ({
-            title: `${contributors[i].slice(0, 10)}...${contributors[i].slice(
-              -8
-            )}`,
+            address: contributors[i],
             proportion: val,
             commits: formatEther(balances[i]),
             color: COLORS[i % 4],
@@ -126,14 +130,29 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
     return (
-      <text
-        x={x}
-        y={y}
-        textAnchor={x > cx ? "start" : "end"}
-        dominantBaseline="central"
-      >
-        {data[index].title} - {`$COMMIT ${data[index].commits}`}
-      </text>
+      <svg>
+        <text
+          x={x}
+          y={y}
+          textAnchor={x > cx ? "start" : "end"}
+          dominantBaseline="central"
+        >
+          <a
+            href={`https://etherscan.io/address/${data[index].address}`}
+            target="_blank"
+          >{`${data[index].address.slice(0, 6)}...${data[index].address.slice(
+            -4
+          )}`}</a>
+        </text>
+        <text
+          x={x}
+          y={y + 16}
+          textAnchor={x > cx ? "start" : "end"}
+          dominantBaseline="central"
+        >
+          {`${data[index].commits} $COMMIT`}
+        </text>
+      </svg>
     );
   };
 

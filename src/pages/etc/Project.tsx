@@ -23,6 +23,8 @@ import { useToasts } from "react-toast-notifications";
 import { TitleButSer } from "../../components/views/TitleButSer";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { RecordContribution } from "../../components/contracts/contribution-board/RecordContribution";
+import { ContributorChart } from "../../components/views/ContributorChart";
+import { OverlayTooltip } from "../../components/OverlayTooltip";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -172,9 +174,29 @@ export const Project: React.FC = () => {
               <Tab.Pane eventKey="record">
                 <Card>
                   <Card.Body>
+                    <h5>
+                      Contributors
+                      <OverlayTooltip
+                        tip={
+                          "This becomes the initial contributors' share when this project gets upgraded to a DAO."
+                        }
+                        text={`❔`}
+                      />
+                    </h5>
+                    <ContributorChart id={id} />
+                    <h5>
+                      Record{" "}
+                      <OverlayTooltip
+                        tip={
+                          "Contributions are automatically recorded when budget owner pays to the contributor. Otherwise, budget owner can record contributions manually using this form."
+                        }
+                        text={`❔`}
+                      />
+                    </h5>
                     <RecordContribution projId={id} budgetOwner={budgetOwner} />
                   </Card.Body>
                 </Card>
+                <br />
               </Tab.Pane>
             </Tab.Content>
           </Col>

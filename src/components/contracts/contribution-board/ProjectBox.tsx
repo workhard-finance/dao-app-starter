@@ -94,7 +94,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
               enabledWhen={account === budgetOwner ? false : undefined}
               whyDisabled={"Please log in with budget owner account."}
               children={"Upgrade to DAO"}
-            />
+            />{" "}
           </Col>
           <Col md={4}>
             <Card>

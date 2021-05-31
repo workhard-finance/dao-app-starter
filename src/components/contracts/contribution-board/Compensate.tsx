@@ -1,6 +1,6 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, BigNumberish } from "ethers";
-import { Form, FormControl, FormLabel } from "react-bootstrap";
+import { Card, Form, FormControl, FormLabel } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
@@ -76,10 +76,12 @@ export const Compensate: React.FC<CompensateProps> = ({
     <Form onSubmit={handleSubmit}>
       <Form.Group>
         <Form.Label>Budget</Form.Label>
-        <Form.Text>{formatEther(balance || "0")} $COMMIT</Form.Text>
+        <Card.Text style={{ fontSize: "1.5rem" }}>
+          {formatEther(balance || "0")} $COMMIT
+        </Card.Text>
       </Form.Group>
       <Form.Group>
-        <FormLabel>Contributor address</FormLabel>
+        <FormLabel>Pay to</FormLabel>
         <FormControl
           placeholder="0xABCDEF0123456789ABCDEF0123456789ABCDEF"
           value={payTo}
