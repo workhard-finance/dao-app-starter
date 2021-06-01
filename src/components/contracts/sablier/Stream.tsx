@@ -1,19 +1,7 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, BigNumberish, ethers, providers } from "ethers";
-import {
-  Button,
-  ButtonGroup,
-  Card,
-  Form,
-  FormControl,
-  FormLabel,
-  ProgressBar,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-bootstrap";
-import { isAddress } from "@ethersproject/address";
+import React, { useEffect, useState } from "react";
+import { BigNumber, BigNumberish, providers } from "ethers";
+import { Form, ProgressBar } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import {
@@ -24,6 +12,7 @@ import {
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { formatEther } from "ethers/lib/utils";
 
 export interface StreamProps {
   streamId: BigNumberish;
@@ -36,8 +25,6 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [timestamp, setTimestamp] = useState<number>();
-  const [moneyStreaming, setMoneyStreaming] = useState<boolean>(true);
-  const [streamingPeriod, setStreamingPeriod] = useState<number>(86400 * 28);
   const [stream, setStream] = useState<{
     sender: string;
     recipient: string;
