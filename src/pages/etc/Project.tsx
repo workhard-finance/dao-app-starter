@@ -120,6 +120,16 @@ export const Project: React.FC = () => {
               <Card.Text>
                 {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
               </Card.Text>
+              {metadata?.url && (
+                <>
+                  <Card.Subtitle>URL</Card.Subtitle>
+                  <Card.Text>
+                    <a href={metadata.url} target="_blank">
+                      {metadata.url}
+                    </a>
+                  </Card.Text>
+                </>
+              )}
             </Col>
           </Row>
         </Card.Body>
