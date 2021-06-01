@@ -122,6 +122,14 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
             Stream ID: {streamId}
           </a>
           <br />
+          To:{" "}
+          <a
+            href={`https://etherscan.com/address/${stream?.recipient}`}
+            target="_blank"
+          >
+            {stream?.recipient.slice(0, 6)}...{stream?.recipient.slice(-4)}
+          </a>
+          <br />
           Total: {toFix3(stream?.deposit)}
           <br />
           Remaining: {toFix3(stream?.remainingBalance)}
