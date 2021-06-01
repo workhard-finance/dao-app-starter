@@ -102,12 +102,12 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
         defaultAbiCoder.encode(["uint256"], [projId])
       );
     const timelockTx = await dao.timelock.populateTransaction.schedule(
-      dao.stableReserve.address,
-      0,
+      stableReserve.address,
+      grantTx.value || 0,
       grantTx.data || "0x",
       constants.HashZero,
       constants.HashZero,
-      60
+      chainId === 1 ? 86400 * 1 : 60
     );
     setPopTx(timelockTx);
   };

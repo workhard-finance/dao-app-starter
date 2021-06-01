@@ -11,7 +11,7 @@ import { Accordion, Button, Card, Modal } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import { formatEther, solidityKeccak256 } from "ethers/lib/utils";
+import { formatEther, Result, solidityKeccak256 } from "ethers/lib/utils";
 import {
   DecodedTxData,
   decodeTxDetails,
@@ -90,7 +90,6 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         .catch(errorHandler(addToast));
       if (tx.to) {
         const txDetails = decodeTxDetails(dao, tx.to, tx.data, tx.value);
-        const { result } = txDetails;
         let proposer: TxProposer | undefined;
         let forced: boolean | undefined;
         if (tx.to === timelock.address) {
@@ -108,8 +107,23 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           }
         } else if (tx.to === workersUnion.address) {
           proposer = TxProposer.WORKERS_UNION;
+        } else if (tx.to === dao.multisig.address) {
+          proposer = TxProposer.DEV;
         } else {
           proposer = TxProposer.UNKNOWN;
+        }
+
+        let result: Result;
+        if (tx.to === dao.multisig.address) {
+          const decodedGnosisSafeTx = decodeTxDetails(
+            dao,
+            txDetails.result.to,
+            txDetails.result.data,
+            txDetails.result.value
+          );
+          result = decodedGnosisSafeTx.result;
+        } else {
+          result = txDetails.result;
         }
         setScheduledTx({
           target: result.target,
@@ -146,9 +160,9 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         Array.isArray(value)
       ) {
         setDecodedTxData(
-          target.map((_target: string, i: number) =>
-            decodeTxDetails(dao, _target, data[i], value[i])
-          )
+          target.map((_target: string, i: number) => {
+            return decodeTxDetails(dao, _target, data[i], value[i]);
+          })
         );
       } else if (
         !Array.isArray(target) &&
