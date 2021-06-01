@@ -109,10 +109,6 @@ const Dashboard = () => {
         .balanceOf(workhardCtx.dao.stableReserve.address)
         .then(setReserved)
         .catch(errorHandler(addToast));
-      workhardCtx.dao.commit
-        .balanceOf(constants.AddressZero)
-        .then(setBurnedCommit)
-        .catch(errorHandler(addToast));
       workhardCtx.dao.vision
         .name()
         .then(setVisionName)
@@ -148,6 +144,10 @@ const Dashboard = () => {
       workhardCtx.dao.right
         .totalSupply()
         .then(setRightSupply)
+        .catch(errorHandler(addToast));
+      workhardCtx.dao.commit
+        .totalBurned()
+        .then(setBurnedCommit)
         .catch(errorHandler(addToast));
     }
   }, [workhardCtx, daoId]);
