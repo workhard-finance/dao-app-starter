@@ -26,6 +26,7 @@ import { RecordContribution } from "../../components/contracts/contribution-boar
 import { ContributorChart } from "../../components/views/ContributorChart";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Grant } from "../../components/contracts/stable-reserve/Grant";
+import { Stream } from "../../components/contracts/sablier/Stream";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
@@ -132,10 +133,10 @@ export const Project: React.FC = () => {
                 <Nav.Link eventKey="pay">Pay</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="budget">Add budget</Nav.Link>
+                <Nav.Link eventKey="record">History</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="record">History</Nav.Link>
+                <Nav.Link eventKey="budget">Add budget</Nav.Link>
               </Nav.Item>
             </Nav>
           </Col>
@@ -152,10 +153,56 @@ export const Project: React.FC = () => {
                   </Card.Body>
                 </Card>
               </Tab.Pane>
+              <Tab.Pane eventKey="record">
+                {streams.length > 0 && (
+                  <>
+                    <h5>Streamings</h5>
+                    <Row>
+                      {streams.map((stream) => (
+                        <Col md={4}>
+                          <Card>
+                            <Card.Body>
+                              <Stream streamId={stream.toNumber()} />
+                            </Card.Body>
+                          </Card>
+                          <br />
+                        </Col>
+                      ))}
+                    </Row>
+                    <br />
+                  </>
+                )}
+                {contributors.length > 0 && (
+                  <>
+                    <h5>
+                      Contributors
+                      <OverlayTooltip
+                        tip={
+                          "This becomes the initial contributors' share when this project gets upgraded to a DAO."
+                        }
+                        text={`❔`}
+                      />
+                    </h5>
+                    <ContributorChart id={id} />
+                    <hr />
+                  </>
+                )}
+                <h5>
+                  Manual Record of Contributions{" "}
+                  <OverlayTooltip
+                    tip={
+                      "Contributions are automatically recorded when budget owner pays to the contributor. Otherwise, budget owner can record contributions manually using this form."
+                    }
+                    text={`❔`}
+                  />
+                </h5>
+                <RecordContribution projId={id} budgetOwner={budgetOwner} />
+                <br />
+              </Tab.Pane>
               <Tab.Pane eventKey="budget">
                 <Card>
                   <Card.Body>
-                    <Card.Title>Fund to accelerate project!</Card.Title>
+                    <Card.Title>Fund to accelerate this project!</Card.Title>
                     <AddBudget
                       projId={id}
                       fund={fund || 0}
@@ -194,50 +241,6 @@ export const Project: React.FC = () => {
                     }
                   })
                   .reverse()}
-              </Tab.Pane>
-              <Tab.Pane eventKey="record">
-                {streams.length > 0 && (
-                  <>
-                    <h5>Streamings</h5>
-                    {streams.map((stream) => (
-                      <p>
-                        <a
-                          href={`https://app.sablier.finance/stream/${stream.toNumber()}`}
-                          target="_blank"
-                        >
-                          {stream.toNumber()}
-                        </a>
-                      </p>
-                    ))}
-                    <br />
-                  </>
-                )}
-                {contributors.length > 0 && (
-                  <>
-                    <h5>
-                      Contributors
-                      <OverlayTooltip
-                        tip={
-                          "This becomes the initial contributors' share when this project gets upgraded to a DAO."
-                        }
-                        text={`❔`}
-                      />
-                    </h5>
-                    <ContributorChart id={id} />
-                    <hr />
-                  </>
-                )}
-                <h5>
-                  Manual Record of Contributions{" "}
-                  <OverlayTooltip
-                    tip={
-                      "Contributions are automatically recorded when budget owner pays to the contributor. Otherwise, budget owner can record contributions manually using this form."
-                    }
-                    text={`❔`}
-                  />
-                </h5>
-                <RecordContribution projId={id} budgetOwner={budgetOwner} />
-                <br />
               </Tab.Pane>
             </Tab.Content>
           </Col>

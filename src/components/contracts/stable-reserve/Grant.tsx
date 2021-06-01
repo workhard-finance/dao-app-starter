@@ -130,7 +130,7 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
           />
         </Form.Group>
         <ConditionalButton
-          variant="outline-primary"
+          variant="outline"
           enabledWhen={multisigOwner}
           whyDisabled={`Only dev multisig or Workers Union can call this function.`}
           onClick={() => {
