@@ -25,7 +25,7 @@ const NavBarBrand = (props: React.ComponentProps<any>) => {
         fontSize: "4vmin",
       }}
     >
-      <strong>{forked ? workhard?.name : `WORKHARD`}</strong>
+      <strong>{forked ? workhard?.metadata.daoName : `WORKHARD`}</strong>
     </Navbar.Brand>
   );
 };

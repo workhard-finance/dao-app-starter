@@ -31,6 +31,17 @@ if (process.env.NODE_ENV === "development") {
   deployedContracts = deployed;
 }
 
+export interface DAOMetadata {
+  daoName: string;
+  daoSymbol: string;
+  visionName: string;
+  visionSymbol: string;
+  commitName: string;
+  commitSymbol: string;
+  rightName: string;
+  rightSymbol: string;
+}
+
 export interface WorkhardLibrary {
   workhard: Workhard;
   daoId: number;
@@ -38,8 +49,7 @@ export interface WorkhardLibrary {
   periphery: WorkhardPeriphery;
   commons: WorkhardCommons;
   client: WorkhardClient;
-  name: string;
-  symbol: string;
+  metadata: DAOMetadata;
 }
 
 export const WorkhardCtx = React.createContext<WorkhardLibrary | undefined>(
@@ -72,14 +82,29 @@ export const WorkhardProvider: React.FC = ({ children }) => {
 
     if (!workhardAddress) return undefined;
     const client = await WorkhardClient.from(library, workhardAddress);
-    const [dao, periphery, name, symbol] = await Promise.all([
+    const [dao, periphery, daoName, daoSymbol] = await Promise.all([
       client.getDAO(daoId),
       client.getPeriphery(daoId),
       client.workhard.nameOf(daoId),
       client.workhard.symbolOf(daoId),
     ]);
-    if (!dao || !periphery) return undefined;
 
+    if (!dao || !periphery) return undefined;
+    const [
+      visionName,
+      visionSymbol,
+      commitName,
+      commitSymbol,
+      rightName,
+      rightSymbol,
+    ] = await Promise.all([
+      dao.vision.name(),
+      dao.vision.symbol(),
+      dao.commit.name(),
+      dao.commit.symbol(),
+      dao.right.name(),
+      dao.right.symbol(),
+    ]);
     return {
       daoId,
       client,
@@ -87,8 +112,16 @@ export const WorkhardProvider: React.FC = ({ children }) => {
       periphery,
       commons: client.commons,
       workhard: client.workhard,
-      name,
-      symbol,
+      metadata: {
+        daoName,
+        daoSymbol,
+        visionName,
+        visionSymbol,
+        commitName,
+        commitSymbol,
+        rightName,
+        rightSymbol,
+      },
     };
   };
   useEffect(() => {
