@@ -150,7 +150,7 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
           textAnchor={x > cx ? "start" : "end"}
           dominantBaseline="central"
         >
-          {`${data[index].commits} $COMMIT`}
+          {`${data[index].commits} commits`}
         </text>
       </svg>
     );
