@@ -86,14 +86,13 @@ export const ProposeBatchTx: React.FC = ({}) => {
   }, [account, dao, txStatus, blockNumber]);
 
   useEffect(() => {
-    if (!!account && !!dao && !!timestamp) {
-      const { workersUnion } = dao;
-      workersUnion
-        .getVotesAt(account, timestamp)
+    if (!!account && !!dao) {
+      dao.right
+        .balanceOf(account)
         .then(setMyVotes)
         .catch(errorHandler(addToast));
     }
-  }, [timestamp]);
+  }, [blockNumber]);
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();

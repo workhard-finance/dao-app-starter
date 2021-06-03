@@ -33,17 +33,21 @@ const Vote: React.FC = () => {
     workersUnion.votingRule().then((rule) => {
       setQuorum(rule.minimumVotes);
     });
-  }, [library, chainId, timestamp, dao]);
+  }, [library, chainId, blockNumber, dao]);
 
   useEffect(() => {
     if (!account || !library || !chainId || !dao) {
       return;
     }
-    const workersUnion = dao.workersUnion;
-    workersUnion.getVotesAt(account, timestamp).then((vote) => {
-      setMyVotes(vote);
-    });
-  }, [account, library, chainId, timestamp, dao]);
+    dao.voteCounter
+      .balanceOf(account)
+      .then((vote) => {
+        setMyVotes(vote);
+      })
+      .catch((_) => {
+        console.log("You can vote after 1 week");
+      });
+  }, [account, library, chainId, blockNumber, dao]);
 
   useEffect(() => {
     if (!library || !dao || !blockNumber) {

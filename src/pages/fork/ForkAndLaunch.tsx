@@ -71,9 +71,10 @@ export const ForkAndLaunch: React.FC = () => {
                     upgrade! Or create a new one here!
                   </p>
                   <CreateProject
-                    onCreated={(id) =>
-                      history.push(`/fork/upgrade/${id.toNumber()}`)
-                    }
+                    onCreated={(id) => {
+                      setId(id.toString());
+                      history.push(`/fork/upgrade/${id.toNumber()}`);
+                    }}
                   />
                 </Card.Body>
               </Accordion.Collapse>

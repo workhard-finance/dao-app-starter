@@ -28,7 +28,10 @@ const DAOs: React.FC = () => {
         .then((daos) => {
           setProjects(daos.filter((id) => !id.eq(0)));
         })
-        .catch(errorHandler(addToast));
+        .catch((err) => {
+          // right after launching a dao, it may fail to find the correct dao info for a while
+          console.error(err);
+        });
     }
   }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
 

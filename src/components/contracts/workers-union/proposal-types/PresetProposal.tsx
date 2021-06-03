@@ -88,14 +88,13 @@ export const PresetProposal: React.FC<Preset> = ({
     }
   }, [account, dao, txStatus]);
   useEffect(() => {
-    if (!!account && !!dao && !!timestamp) {
-      const { workersUnion } = dao;
-      workersUnion
-        .getVotesAt(account, timestamp)
+    if (!!account && !!dao) {
+      dao.right
+        .balanceOf(account)
         .then(setMyVotes)
         .catch(errorHandler(addToast));
     }
-  }, [blockNumber, timestamp]);
+  }, [blockNumber]);
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();

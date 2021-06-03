@@ -115,7 +115,7 @@ export const UpgradeToDAO: React.FC<{
       !commitSymbol ||
       !rightName ||
       !rightSymbol ||
-      !emissionStartDelay ||
+      emissionStartDelay === undefined ||
       !minDelay ||
       !voteLaunchDelay ||
       !initialEmission ||
@@ -150,7 +150,7 @@ export const UpgradeToDAO: React.FC<{
       }),
       setTxStatus,
       addToast,
-      "Posted a new job",
+      "Successfully upgraded this project to a DAO!",
       (receipt) => {
         alert(`You've successfully upgraded project to a DAO`);
         setTxStatus(undefined);
@@ -322,7 +322,7 @@ export const UpgradeToDAO: React.FC<{
             <Form.Label>Emission starts after</Form.Label>
             <Form.Control
               type="range"
-              min={86400}
+              min={0}
               max={86400 * 28}
               value={emissionStartDelay}
               step={86400}

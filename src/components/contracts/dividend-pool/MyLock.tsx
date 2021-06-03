@@ -71,6 +71,24 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
     }
   }, [library, blockNumber]);
 
+  useEffect(() => {
+    if (!!account && !!dao) {
+      const { vision, dividendPool } = dao;
+      vision
+        .balanceOf(account)
+        .then(setTokenBalance)
+        .catch(errorHandler(addToast));
+      dividendPool
+        .getCurrentEpoch()
+        .then(setCurrentEpoch)
+        .catch(errorHandler(addToast));
+      vision
+        .allowance(account, dividendPool.address)
+        .then(setAllowance)
+        .catch(errorHandler(addToast));
+    }
+  }, [account, dao, txStatus, blockNumber]);
+
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
   const extendablePeriod = () => {
@@ -198,24 +216,6 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
       alert("Not connected");
     }
   };
-
-  useEffect(() => {
-    if (!!account && !!dao) {
-      const { vision, dividendPool } = dao;
-      vision
-        .balanceOf(account)
-        .then(setTokenBalance)
-        .catch(errorHandler(addToast));
-      dividendPool
-        .getCurrentEpoch()
-        .then(setCurrentEpoch)
-        .catch(errorHandler(addToast));
-      vision
-        .allowance(account, dividendPool.address)
-        .then(setAllowance)
-        .catch(errorHandler(addToast));
-    }
-  }, [account, dao, txStatus, blockNumber]);
 
   return (
     <Card>

@@ -78,7 +78,7 @@ export const getStablecoinList = (chainId?: number) => {
     const dao = require("../deployed.dev.json");
     return [
       {
-        symbol: "Mock Token",
+        symbol: "DAI",
         address: dao[getNetworkName(chainId)].BaseCurrency as string,
       },
     ];
