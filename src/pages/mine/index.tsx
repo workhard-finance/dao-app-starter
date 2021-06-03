@@ -43,8 +43,8 @@ const Mine = observer(() => {
   const history = useHistory();
   const { addToast } = useToasts();
   const { account, library } = useWeb3React();
-  const workhard = useWorkhard();
-  const { dao, periphery } = workhard || {};
+  const workhardCtx = useWorkhard();
+  const { dao, periphery } = workhardCtx || {};
   const mineStore: MineStore = initMineStore(
     !!dao ? dao.visionEmitter : null,
     !!periphery ? periphery.liquidityMining.address : null,
@@ -173,12 +173,13 @@ const Mine = observer(() => {
         <Col md={6}>
           {mineStore.pools &&
             mineStore.liquidityMiningIdx() !== -1 &&
+            workhardCtx &&
             mineStore.emissionWeightSum && (
               <ERC20StakeMiningV1
                 poolIdx={mineStore.liquidityMiningIdx()}
                 title={"Liquidity Mining"}
                 tokenName={"VISION/ETH LP"}
-                poolAddress={mineStore.pools[mineStore.liquidityMiningIdx()]}
+                poolAddress={workhardCtx.periphery.liquidityMining.address}
                 totalEmission={mineStore.emission}
                 emissionWeightSum={mineStore.emissionWeightSum}
                 visionPrice={mineStore.visionPrice || 0}
@@ -188,12 +189,13 @@ const Mine = observer(() => {
         <Col md={6}>
           {mineStore.pools &&
             mineStore.commitMiningIdx() !== -1 &&
+            workhardCtx &&
             mineStore.emissionWeightSum && (
               <ERC20BurnMiningV1
                 poolIdx={mineStore.commitMiningIdx()}
                 title={"Commit Mining"}
                 tokenName={"COMMIT"}
-                poolAddress={mineStore.pools[mineStore.commitMiningIdx()]}
+                poolAddress={workhardCtx.periphery.commitMining.address}
                 totalEmission={mineStore.emission || BigNumber.from(0)}
                 emissionWeightSum={mineStore.emissionWeightSum}
                 visionPrice={mineStore.visionPrice || 0}
