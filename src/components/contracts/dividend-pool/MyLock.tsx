@@ -92,9 +92,9 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
 
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
-  const extendablePeriod = () => {
+  const extendableEpochs = () => {
     const remaining = getTotalLockPeriod() - getLockedPeriod();
-    return remaining > 0 ? remaining : 0;
+    return remaining > 0 ? Math.floor(remaining / (86400 * 7)) : 0;
   };
 
   const getLockedPeriod = () => {
@@ -111,10 +111,6 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
 
   const getLockedPercent = () => {
     return (getLockedPeriod() * 100) / getTotalLockPeriod();
-  };
-
-  const getRemainingLockPercent = () => {
-    return (extendablePeriod() * 100) / getTotalLockPeriod();
   };
 
   const increaseAmount = () => {
@@ -301,15 +297,15 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
                 }
               />
               <Form.Text>
-                You can extend {lockPeriod || "0"} weeks /{" "}
-                {extendablePeriod() / (86400 * 7)} weeks
+                You can extend {lockPeriod || "0"} weeks / {extendableEpochs()}{" "}
+                weeks
               </Form.Text>
               <ConditionalButton
                 whyDisabled={
-                  extendablePeriod() === 0 ? "You locked the MAX!" : "Expired"
+                  extendableEpochs() === 0 ? "You locked the MAX!" : "Expired"
                 }
                 enabledWhen={
-                  extendablePeriod() !== 0 && getLockedPeriod() !== 0
+                  extendableEpochs() !== 0 && getLockedPeriod() !== 0
                 }
                 children="Extend lock"
                 onClick={() => extendLock(lockPeriod)}
