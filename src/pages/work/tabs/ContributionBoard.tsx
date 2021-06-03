@@ -22,7 +22,6 @@ export const ContributionBoard: React.FC = () => {
     if (workhardCtx) {
       const { daoId, workhard, dao } = workhardCtx;
       let stale = false;
-      const { contributionBoard } = dao;
       workhard
         .projectsOf(daoId)
         .then((n: BigNumber) => {

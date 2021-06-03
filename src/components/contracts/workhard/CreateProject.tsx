@@ -134,7 +134,9 @@ export const CreateProject: React.FC<{
           "NewProject(uint256,uint256)"
         );
         const log = parsed[0];
-        alert(`You created a new project. The NFT id is ${log.args.id}`);
+        alert(
+          `You created a new project. The NFT id is ${log.args.id}. Please refresh the page and check your project.`
+        );
         if (onCreated) {
           onCreated(BigNumber.from(log.args.id));
         }
