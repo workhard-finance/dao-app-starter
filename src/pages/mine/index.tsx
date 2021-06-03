@@ -214,7 +214,7 @@ const Mine = observer(() => {
       <SerHelpPlz>
         <p>
           The two ways to mine{" "}
-          {workhardCtx
+          {workhardCtx && workhardCtx.daoId !== 0
             ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
             : "$VISION"}{" "}
           <a href="#" className="text-info">
@@ -224,11 +224,11 @@ const Mine = observer(() => {
           <ol>
             <li>
               Burn{" "}
-              {workhardCtx
+              {workhardCtx && workhardCtx.daoId !== 0
                 ? `${workhardCtx.metadata.commitName}(${workhardCtx.metadata.commitSymbol})`
                 : "$COMMIT"}{" "}
               to get{" "}
-              {workhardCtx
+              {workhardCtx && workhardCtx.daoId !== 0
                 ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
                 : "$VISION"}{" "}
               through COMMIT MINING.
@@ -242,17 +242,31 @@ const Mine = observer(() => {
               {workhardCtx?.metadata.visionName || "$VISION"}
             </li>
           </ol>
-          Stake & lock {workhardCtx?.metadata.visionName || "$VISION"} to
-          receive{" "}
+          Stake & lock{" "}
+          {workhardCtx && workhardCtx.daoId !== 0
+            ? workhardCtx.metadata.visionName
+            : "$VISION"}{" "}
+          to receive{" "}
           <a href="#" className="text-info">
-            {workhardCtx?.metadata.rightName || "$RIGHT"}
+            {workhardCtx && workhardCtx.daoId !== 0
+              ? workhardCtx.metadata.rightName
+              : "$RIGHT"}
           </a>{" "}
-          ({workhardCtx?.metadata.rightSymbol || "$veVISION"}) and join to{" "}
+          (
+          {workhardCtx && workhardCtx.daoId !== 0
+            ? workhardCtx.metadata.rightSymbol
+            : "$veVISION"}
+          ) and join to{" "}
           <a href="#" className="text-info">
             govern
           </a>{" "}
-          the WORKER’S UNION. With {workhardCtx?.metadata.rightName || "$RIGHT"}{" "}
-          you can claim a share of the Work Hard Finance’s profit.
+          the WORKER’S UNION. With{" "}
+          {workhardCtx?.metadata.rightSymbol || "$RIGHT"} you can claim a share
+          of the{" "}
+          {workhardCtx && workhardCtx.daoId !== 0
+            ? workhardCtx.metadata.daoName
+            : "Work Hard Finance"}
+          ’s profit.
         </p>
       </SerHelpPlz>
 
