@@ -6,6 +6,7 @@ import {
   InputGroup,
   ProgressBar,
   Accordion,
+  Tooltip,
 } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, isAddress, parseEther } from "ethers/lib/utils";
@@ -221,7 +222,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
     <Card>
       <Card.Header>
         <Card.Text>
-          Your veVISION NFT #{index} - id: {lockId.toHexString()}
+          Your veVISION Lock #{index} - id: {lockId.toHexString()}
         </Card.Text>
       </Card.Header>
       <Card.Body>
