@@ -126,6 +126,11 @@ export const WorkhardProvider: React.FC = ({ children }) => {
   };
   useEffect(() => {
     // dao id = 0 : master dao
+    if (context) {
+      if (context.daoId !== daoId) {
+        setContext(undefined);
+      }
+    }
     getContext(daoId).then((ctx) => {
       setContext(ctx);
     });

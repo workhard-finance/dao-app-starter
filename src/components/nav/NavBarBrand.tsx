@@ -11,6 +11,11 @@ const NavBarBrand = (props: React.ComponentProps<any>) => {
   const daoId = Number.isNaN(parsed) ? 0 : parsed;
   const workhard = useWorkhard();
   const forked = daoId !== 0 ? daoId : undefined;
+  const title = forked
+    ? workhard?.daoId === daoId
+      ? workhard.metadata.daoName
+      : `...`
+    : `WORKHARD`;
   return (
     <Navbar.Brand
       {...props}
@@ -25,7 +30,7 @@ const NavBarBrand = (props: React.ComponentProps<any>) => {
         fontSize: "4vmin",
       }}
     >
-      <strong>{forked ? workhard?.metadata.daoName : `WORKHARD`}</strong>
+      <strong>{title}</strong>
     </Navbar.Brand>
   );
 };

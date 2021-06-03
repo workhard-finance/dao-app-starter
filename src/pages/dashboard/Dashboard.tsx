@@ -19,6 +19,7 @@ import { AllocationChart } from "../../components/views/AllocationChart";
 import { useIPFS } from "../../providers/IPFSProvider";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
+import { FatherSays } from "../../components/views/FatherSays";
 
 const Dashboard = () => {
   const { daoId } = useParams<{ tab?: string; daoId?: string }>();
@@ -69,7 +70,6 @@ const Dashboard = () => {
       });
     }
     if (workhardCtx) {
-      const id = daoId || 0;
       // get emission rule
       Promise.all([
         workhardCtx.dao.visionEmitter.INITIAL_EMISSION(),
@@ -176,7 +176,12 @@ const Dashboard = () => {
     return address;
   };
 
-  return (
+  const fetching = (
+    <Page>
+      <FatherSays say={`Loading...`} />
+    </Page>
+  );
+  const fetched = (
     <Page>
       <Row>
         <Col md={5}>
@@ -194,9 +199,9 @@ const Dashboard = () => {
             What is <b>{metadata?.name}?</b>
           </h2>
           <p>{metadata?.description}</p>
-          {metadata?.url && (
+          {(daoId || 0) !== 0 && metadata?.url && (
             <Button as={"a"} href={metadata.url} target="_blank" variant="info">
-              Go to homepage
+              Go to app
             </Button>
           )}
         </Col>
@@ -366,6 +371,8 @@ const Dashboard = () => {
       </Row>
     </Page>
   );
+
+  return !!metadata && !!workhardCtx ? fetched : fetching;
 };
 
 export default Dashboard;
