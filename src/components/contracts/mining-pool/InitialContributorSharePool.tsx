@@ -34,7 +34,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const workhard = useWorkhard();
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
 
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -58,19 +58,19 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
   useEffect(() => {
-    if (!!account && !!workhard) {
+    if (!!account && !!workhardCtx) {
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress)
         .catch(errorHandler(addToast));
-      workhard.dao.visionEmitter
+      workhardCtx.dao.visionEmitter
         .emissionWeight()
         .then((emissions) => {
           setWeight(emissions.dev);
         })
         .catch(errorHandler(addToast));
     }
-  }, [account, workhard]);
+  }, [account, workhardCtx]);
   useEffect(() => {
     if (weight) {
       if (emissionWeightSum.eq(0)) {
@@ -81,10 +81,10 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
     }
   }, [weight]);
   useEffect(() => {
-    if (!!account && !!workhard && !!tokenAddress) {
+    if (!!account && !!workhardCtx && !!tokenAddress) {
       const token = ContributionBoard__factory.connect(tokenAddress, library);
       token
-        .balanceOf(account, workhard.daoId)
+        .balanceOf(account, workhardCtx.daoId)
         .then(setTokenBalance)
         .catch(errorHandler(addToast));
       const pool = InitialContributorShare__factory.connect(
@@ -102,7 +102,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
         .then(setIsApprovedForAll)
         .catch(errorHandler(addToast));
     }
-  }, [account, workhard, tokenAddress, txStatus, blockNumber]);
+  }, [account, workhardCtx, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (burnedAmount && tokenBalance) {
@@ -113,7 +113,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
   }, [burnedAmount, tokenBalance]);
 
   const approve = () => {
-    if (!account || !workhard || !tokenAddress) {
+    if (!account || !workhardCtx || !tokenAddress) {
       alert("Not connected");
       return;
     }
@@ -133,7 +133,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
   };
 
   const burn = () => {
-    if (!account || !workhard) {
+    if (!account || !workhardCtx) {
       alert("Not connected");
       return;
     }
@@ -163,7 +163,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
   };
 
   const exit = () => {
-    if (!account || !workhard) {
+    if (!account || !workhardCtx) {
       alert("Not connected");
       return;
     }
@@ -221,7 +221,10 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
       </Form>
       <hr />
       <Card.Title>Mine</Card.Title>
-      <Card.Text>You mined {formatEther(mined || "0")} $VISION</Card.Text>
+      <Card.Text>
+        You mined {formatEther(mined || "0")}{" "}
+        {workhardCtx?.metadata.visionSymbol || "$VISION"}
+      </Card.Text>
       <Button variant="outline-warning" onClick={exit}>
         Stop mining and withdraw rewards
       </Button>
@@ -240,8 +243,9 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
           rewards!
         </Card.Text>
         <Card.Text>
-          {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
-          for initial contributors this week.
+          {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+          {workhardCtx?.metadata.visionSymbol || "VISION"} allocated for initial
+          contributors this week.
         </Card.Text>
         {collapsible && (
           <Button

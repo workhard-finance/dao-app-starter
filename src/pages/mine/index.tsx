@@ -1,47 +1,33 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Image,
-  Row,
-  Tab,
-  Tabs,
-} from "react-bootstrap";
+import { Alert, Button, Col, Image, Row } from "react-bootstrap";
 import { ERC20StakeMiningV1 } from "../../components/contracts/mining-pool/ERC20StakeMiningV1";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20BurnMiningV1";
-import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import {
-  altWhenEmptyList,
   errorHandler,
   handleTransaction,
   prefix,
   TxStatus,
 } from "../../utils/utils";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
 import { initMineStore, MineStore } from "../../store/mineStore";
 import { observer } from "mobx-react";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
-import { ContributionBoard } from "../work/tabs/ContributionBoard";
 import {
   ContributionBoard__factory,
-  getNetworkName,
   InitialContributorShare__factory,
 } from "@workhard/protocol";
 import { InitialContributorSharePool } from "../../components/contracts/mining-pool/InitialContributorSharePool";
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
 
 const Mine = observer(() => {
-  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
-  const history = useHistory();
+  const { daoId } = useParams<{ daoId?: string }>();
   const { addToast } = useToasts();
   const { account, library, chainId } = useWeb3React();
   const workhardCtx = useWorkhard();
@@ -161,8 +147,9 @@ const Mine = observer(() => {
       )}
       {mineStore.distributable && (
         <Alert variant={"info"}>
-          You just discovered a $VISION mine. Please call that smart contract
-          function now.
+          You just discovered a{" "}
+          {workhardCtx?.metadata.visionSymbol || "$VISION"} mine. Please call
+          that smart contract function now.
           {"  "}
           <Button onClick={distribute} variant={"info"}>
             distribute()
@@ -179,7 +166,9 @@ const Mine = observer(() => {
               <ERC20StakeMiningV1
                 poolIdx={mineStore.liquidityMiningIdx()}
                 title={"Liquidity Mining"}
-                tokenName={"VISION/ETH LP"}
+                tokenName={`${
+                  workhardCtx?.metadata.visionSymbol || "VISION"
+                }/ETH LP`}
                 link={
                   chainId === 1
                     ? `https://app.sushi.com/add/ETH/${workhardCtx.dao.vision.address}`

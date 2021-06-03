@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 const Vote: React.FC = () => {
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [proposedTxs, setProposedTxs] = useState<ProposedTx[]>([]);
   const [myVotes, setMyVotes] = useState<BigNumber>();
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
@@ -26,20 +26,20 @@ const Vote: React.FC = () => {
   const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
 
   useEffect(() => {
-    if (!library || !chainId || !dao) {
+    if (!library || !chainId || !workhardCtx) {
       return;
     }
-    const workersUnion = dao.workersUnion;
+    const workersUnion = workhardCtx.dao.workersUnion;
     workersUnion.votingRule().then((rule) => {
       setQuorum(rule.minimumVotes);
     });
-  }, [library, chainId, blockNumber, dao]);
+  }, [library, chainId, blockNumber, workhardCtx]);
 
   useEffect(() => {
-    if (!account || !library || !chainId || !dao) {
+    if (!account || !library || !chainId || !workhardCtx) {
       return;
     }
-    dao.voteCounter
+    workhardCtx.dao.voteCounter
       .balanceOf(account)
       .then((vote) => {
         setMyVotes(vote);
@@ -47,13 +47,13 @@ const Vote: React.FC = () => {
       .catch((_) => {
         console.log("You can vote after 1 week");
       });
-  }, [account, library, chainId, blockNumber, dao]);
+  }, [account, library, chainId, blockNumber, workhardCtx]);
 
   useEffect(() => {
-    if (!library || !dao || !blockNumber) {
+    if (!library || !workhardCtx || !blockNumber) {
       return;
     }
-    const workersUnion = dao.workersUnion;
+    const workersUnion = workhardCtx.dao.workersUnion;
     workersUnion
       .queryFilter(
         workersUnion.filters.TxProposed(
@@ -76,7 +76,7 @@ const Vote: React.FC = () => {
     library
       .getBlock(blockNumber)
       .then((block) => setTimestamp(block.timestamp));
-  }, [dao, blockNumber]);
+  }, [workhardCtx, blockNumber]);
 
   return (
     <Tab.Container defaultActiveKey={subtab || "voting"}>
@@ -232,18 +232,22 @@ const Vote: React.FC = () => {
                 onchain voting.
               </p>
               <h5>
-                <strong>How much RIGHT do I need to start a new vote?</strong>
+                <strong>
+                  How much {workhardCtx?.metadata.rightSymbol || `$RIGHT`} do I
+                  need to start a new vote?
+                </strong>
               </h5>
               <p>
-                You should have more than 1 $RIGHT to start a vote. Governance
-                will increase or decrease this value by voting.
+                You should have more than 1{" "}
+                {workhardCtx?.metadata.rightSymbol || `$RIGHT`} to start a vote.
+                Governance will increase or decrease this value by voting.
               </p>
               <h5>
                 <strong>What is the quorum?</strong>
               </h5>
               <p>
                 To pass a proposal, Workers' Union needs square root of 100
-                RIGHT for its quorum.
+                {workhardCtx?.metadata.rightSymbol || `$RIGHT`} for its quorum.
               </p>
               <h5>
                 <strong>What happens if a proposal passed?</strong>

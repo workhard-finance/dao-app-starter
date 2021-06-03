@@ -63,7 +63,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
   const [proposal, setProposal] = useState<Proposal>();
   const [scheduledTimestamp, setScheduledTimestamp] = useState<BigNumber>();
@@ -72,16 +72,16 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
 
   useEffect(() => {
-    if (!dao || !library || !blockNumber) {
+    if (!workhardCtx || !library || !blockNumber) {
       return;
     }
-    const { workersUnion, timelock } = dao;
+    const { workersUnion, timelock } = workhardCtx.dao;
     workersUnion.proposals(tx.txHash).then(setProposal);
     timelock.getTimestamp(tx.txHash).then(setScheduledTimestamp);
-  }, [dao, blockNumber]);
+  }, [workhardCtx, blockNumber]);
 
   useEffect(() => {
-    if (!dao || !library || !blockNumber || !scheduledTimestamp) {
+    if (!library || !blockNumber || !scheduledTimestamp) {
       return;
     }
     if (scheduledTimestamp.eq(0)) {
@@ -97,10 +97,10 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         }
       });
     }
-  }, [account, library, dao, blockNumber, txStatus]);
+  }, [account, library, blockNumber, txStatus]);
 
   useEffect(() => {
-    if (!dao || !proposal) {
+    if (!workhardCtx || !proposal) {
       return;
     }
     const { target, data, value } = tx;
@@ -109,7 +109,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         target.reduce(
           (arr, _target, i) => [
             ...arr,
-            decodeTxDetails(dao, _target, data[i], value[i]),
+            decodeTxDetails(workhardCtx.dao, _target, data[i], value[i]),
           ],
           [] as DecodedTxData[]
         )
@@ -119,24 +119,24 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       !Array.isArray(data) &&
       !Array.isArray(value)
     ) {
-      setDecodedTxData([decodeTxDetails(dao, target, data, value)]);
+      setDecodedTxData([decodeTxDetails(workhardCtx.dao, target, data, value)]);
     }
-  }, [dao, proposal]);
+  }, [workhardCtx, proposal]);
 
   const onVote = (agree: boolean) => async () => {
-    if (!dao || !library || !account) {
+    if (!workhardCtx || !library || !account) {
       return;
     }
-    const workersUnion = dao.workersUnion;
+    const workersUnion = workhardCtx.dao.workersUnion;
     const signer = await library.getSigner(account);
     await workersUnion.connect(signer).vote(tx.txHash, agree);
   };
 
   const schedule = () => {
-    if (!dao || !library || !account) {
+    if (!workhardCtx || !library || !account) {
       return;
     }
-    const workersUnion = dao.workersUnion;
+    const workersUnion = workhardCtx.dao.workersUnion;
     const signer: Signer = library.getSigner(account);
     if (
       !Array.isArray(tx.target) &&
@@ -170,10 +170,10 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
   };
 
   const execute = () => {
-    if (!dao || !library || !account) {
+    if (!workhardCtx || !library || !account) {
       return;
     }
-    const workersUnion = dao.workersUnion;
+    const workersUnion = workhardCtx.dao.workersUnion;
     const signer: Signer = library.getSigner(account);
     if (
       !Array.isArray(tx.target) &&
@@ -224,7 +224,12 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         <br />
         <Card.Text>
           Voting power
-          <OverlayTooltip tip="Square root of $RIGHT balance." text="❔" />
+          <OverlayTooltip
+            tip={`Your ${
+              workhardCtx?.metadata.rightSymbol || "$RIGHT"
+            } balance.`}
+            text="❔"
+          />
         </Card.Text>
         <Card.Text style={{ fontSize: "3rem" }}>
           {votesInGwei(myVotes)}

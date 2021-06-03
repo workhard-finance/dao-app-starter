@@ -50,7 +50,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
 
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -77,17 +77,17 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
   useEffect(() => {
-    if (!!account && !!dao) {
+    if (!!account && !!workhardCtx) {
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress)
         .catch(errorHandler(addToast));
-      dao.visionEmitter
+      workhardCtx.dao.visionEmitter
         .getPoolWeight(poolIdx)
         .then(setWeight)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao]);
+  }, [account, workhardCtx]);
   useEffect(() => {
     if (weight) {
       if (emissionWeightSum.eq(0)) {
@@ -98,7 +98,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
     }
   }, [weight]);
   useEffect(() => {
-    if (!!account && !!dao && !!tokenAddress) {
+    if (!!account && !!tokenAddress) {
       const token = ERC20__factory.connect(tokenAddress, library);
       token
         .balanceOf(account)
@@ -122,7 +122,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, tokenAddress, txStatus, blockNumber]);
+  }, [account, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (!!tokenAddress) {
@@ -159,7 +159,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   }, [weight, tokenPrice, totalBurn]);
 
   const approve = () => {
-    if (!account || !dao || !tokenAddress) {
+    if (!account || !tokenAddress) {
       alert("Not connected");
       return;
     }
@@ -179,7 +179,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   };
 
   const burn = () => {
-    if (!account || !dao) {
+    if (!account) {
       alert("Not connected");
       return;
     }
@@ -209,7 +209,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   };
 
   const exit = () => {
-    if (!account || !dao) {
+    if (!account) {
       alert("Not connected");
       return;
     }
@@ -275,7 +275,10 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
       </Form>
       <hr />
       <Card.Title>Mine</Card.Title>
-      <Card.Text>You mined {formatEther(mined || "0")} $VISION</Card.Text>
+      <Card.Text>
+        You mined {formatEther(mined || "0")}{" "}
+        {workhardCtx?.metadata.visionSymbol || "$VISION"}
+      </Card.Text>
       <Button variant="outline-danger" onClick={exit}>
         Stop mining and withdraw rewards
       </Button>
@@ -297,8 +300,8 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
         </Card.Title>
         <Card.Text style={{ fontSize: "2rem" }}>{annualRevenue}%</Card.Text>
         <Card.Text>
-          {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
-          this week.
+          {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+          {workhardCtx?.metadata.visionSymbol || "VISION"} allocated this week.
         </Card.Text>
         {collapsible && (
           <Button

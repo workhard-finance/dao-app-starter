@@ -24,7 +24,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
   const [amount, setAmount] = useState<string>();
@@ -41,7 +41,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   };
 
   const createLock = () => {
-    if (!!dao && !!library && !!account) {
+    if (!!workhardCtx && !!library && !!account) {
       if (!amount || !lockPeriod) return;
       const amountInWei = parseEther(amount);
       if (amountInWei.gt(tokenBalance || 0)) {
@@ -50,7 +50,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
       }
       const signer = library.getSigner(account);
       handleTransaction(
-        dao.votingEscrow
+        workhardCtx.dao.votingEscrow
           .connect(signer)
           .createLock(amountInWei, lockPeriod || 0),
         setTxStatus,
@@ -63,12 +63,12 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
     }
   };
   const approve = () => {
-    if (!!dao && !!library && !!account) {
+    if (!!workhardCtx && !!library && !!account) {
       const signer = library.getSigner(account);
       handleTransaction(
-        dao.vision
+        workhardCtx.dao.vision
           .connect(signer)
-          .approve(dao.votingEscrow.address, constants.MaxUint256),
+          .approve(workhardCtx.dao.votingEscrow.address, constants.MaxUint256),
         setTxStatus,
         addToast,
         "Approved VotingEscrowLock contract."
@@ -80,8 +80,8 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
   };
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      const { vision, votingEscrow } = dao;
+    if (!!account && !!workhardCtx) {
+      const { vision, votingEscrow } = workhardCtx.dao;
       vision
         .balanceOf(account)
         .then(setTokenBalance)
@@ -91,7 +91,7 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, txStatus, blockNumber, addToast]);
+  }, [account, workhardCtx, txStatus, blockNumber, addToast]);
 
   return (
     <Card>
@@ -123,7 +123,8 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
               {formatEther(
                 (tokenBalance || BigNumber.from(0)).add(stakedAmount || 0)
               )}{" "}
-              of your $VISION token is staked.
+              of your {workhardCtx?.metadata.visionSymbol || "$VISION"} token is
+              staked.
             </Form.Text>
           </Form.Group>
           <Form.Group>
@@ -153,7 +154,10 @@ export const CreateLock: React.FC<CreateLockProps> = ({ stakedAmount }) => {
                   .div(MAX_LOCK_EPOCHS)
               )
             ).toFixed(0)}
-            <span style={{ fontSize: "1rem" }}> $RIGHT</span>
+            <span style={{ fontSize: "1rem" }}>
+              {" "}
+              {workhardCtx?.metadata.rightSymbol || "$RIGHT"}
+            </span>
           </Card.Text>
           <Button
             variant="primary"

@@ -14,24 +14,24 @@ export const RightBalance: React.FC<RightBalanceProps> = ({}) => {
   const { account } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [rightBalance, setRightBalance] = useState<BigNumber>();
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      const { right } = dao;
+    if (!!account && !!workhardCtx) {
+      const { right } = workhardCtx.dao;
       right
         .balanceOf(account)
         .then(setRightBalance)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, blockNumber]);
+  }, [account, workhardCtx, blockNumber]);
 
   return (
     <Card>
       <Card.Body>
         <Card.Title>
-          Your current $RIGHT
+          Your current {workhardCtx?.metadata.rightName || `$RIGHT`}
           <OverlayTooltip
             tip={`= staked amount x locking period`}
             text={`❔`}
@@ -39,7 +39,10 @@ export const RightBalance: React.FC<RightBalanceProps> = ({}) => {
         </Card.Title>
         <Card.Text style={{ fontSize: "3rem" }}>
           {bigNumToFixed(rightBalance || 0)}
-          <span style={{ fontSize: "1rem" }}> $veVISION(a.k.a. $RIGHT)</span>
+          <span style={{ fontSize: "1rem" }}>
+            {" "}
+            {workhardCtx?.metadata.rightSymbol || `$veVISION(a.k.a.$RIGHT)`}
+          </span>
         </Card.Text>
       </Card.Body>
     </Card>

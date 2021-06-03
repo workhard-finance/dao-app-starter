@@ -131,7 +131,7 @@ const Store: React.FC = () => {
         <p>
           Revenues from NFTs sold are shared with{" "}
           <a href="#" className="text-info">
-            $RIGHT
+            {workhardCtx?.metadata.rightSymbol || `$RIGHT`}
           </a>{" "}
           holders. NFTs in the store are{" "}
           <a

@@ -49,7 +49,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
 
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -80,17 +80,17 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       : formatEther(stakedAmount || "0");
 
   useEffect(() => {
-    if (!!account && !!dao) {
+    if (!!account && !!workhardCtx) {
       MiningPool__factory.connect(poolAddress, library)
         .baseToken()
         .then(setTokenAddress)
         .catch(errorHandler(addToast));
-      dao.visionEmitter
+      workhardCtx.dao.visionEmitter
         .getPoolWeight(poolIdx)
         .then(setWeight)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao]);
+  }, [account, workhardCtx]);
 
   useEffect(() => {
     if (weight) {
@@ -102,7 +102,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
     }
   }, [weight]);
   useEffect(() => {
-    if (!!account && !!dao && !!tokenAddress) {
+    if (!!account && !!tokenAddress) {
       const token = ERC20__factory.connect(tokenAddress, library);
       token
         .balanceOf(account)
@@ -126,7 +126,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, tokenAddress, txStatus, blockNumber]);
+  }, [account, tokenAddress, txStatus, blockNumber]);
 
   useEffect(() => {
     if (stakedAmount && tokenBalance) {
@@ -160,7 +160,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   }, [weight, tokenPrice, totalStake, txStatus]);
 
   const approve = () => {
-    if (!account || !dao || !tokenAddress) {
+    if (!account || !tokenAddress) {
       alert("Not connected");
       return;
     }
@@ -180,7 +180,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   };
 
   const stake = () => {
-    if (!account || !dao) {
+    if (!account) {
       alert("Not connected");
       return;
     }
@@ -210,7 +210,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   };
 
   const withdraw = () => {
-    if (!account || !dao) {
+    if (!account) {
       alert("Not connected");
       return;
     }
@@ -242,7 +242,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       return;
     }
     if (!mined || mined.eq(0)) {
-      alert("No $VISION mined");
+      alert(`No ${workhardCtx?.metadata.visionSymbol || "$VISION"} mined`);
       return;
     }
     const signer = library.getSigner(account);
@@ -264,7 +264,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       return;
     }
     if (!mined || mined.eq(0)) {
-      alert("No $VISION mined");
+      alert(`No ${workhardCtx?.metadata.visionSymbol || "$VISION"} mined`);
       return;
     }
     const signer = library.getSigner(account);
@@ -364,7 +364,10 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       </Form>
       <hr />
       <Card.Title>Mine</Card.Title>
-      <Card.Text>You mined {formatEther(mined || "0")} $VISION</Card.Text>
+      <Card.Text>
+        You mined {formatEther(mined || "0")}{" "}
+        {workhardCtx?.metadata.visionSymbol || "$VISION"}
+      </Card.Text>
       <Button variant="outline-success" onClick={mine}>
         Mine
       </Button>{" "}
@@ -381,8 +384,8 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         <Card.Title>APY</Card.Title>
         <Card.Text style={{ fontSize: "2rem" }}>{apy}%</Card.Text>
         <Card.Text>
-          {parseFloat(formatEther(allocatedVISION)).toFixed(2)} VISION allocated
-          this week.
+          {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+          {workhardCtx?.metadata.visionSymbol || "VISION"} allocated this week.
         </Card.Text>
         {collapsible && (
           <Button

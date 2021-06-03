@@ -28,6 +28,7 @@ export const LaunchDAO: React.FC<{
 
   const [projectName, setProjectName] = useState<string>();
   const [visionSymbol, setVisionSymbol] = useState<string>();
+  const [commitSymbol, setCommitSymbol] = useState<string>();
   const [
     founderShareDenominator,
     setFounderShareDenominator,
@@ -60,6 +61,7 @@ export const LaunchDAO: React.FC<{
         .then(setFounderShareDenominator)
         .catch(errorHandler(addToast));
       dao.vision.symbol().then(setVisionSymbol).catch(errorHandler(addToast));
+      dao.commit.symbol().then(setCommitSymbol).catch(errorHandler(addToast));
     }
   }, [workhardCtx, id]);
 
@@ -109,8 +111,14 @@ export const LaunchDAO: React.FC<{
     <Form>
       <AllocationChart
         pools={[
-          { name: "Commit Burners(Commit Burn Pool)", weight: commitMining },
-          { name: "Market Makers(VISION/ETH LP)", weight: liquidityMining },
+          {
+            name: `Commit Burners($${commitSymbol} Burn Pool)`,
+            weight: commitMining,
+          },
+          {
+            name: `Market Makers($${visionSymbol}/ETH LP)`,
+            weight: liquidityMining,
+          },
         ]}
         treasury={treasury}
         caller={caller}
