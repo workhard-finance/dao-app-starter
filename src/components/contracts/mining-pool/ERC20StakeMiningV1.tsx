@@ -33,6 +33,7 @@ export interface ERC20StakeMiningV1Props {
   visionPrice: number;
   emissionWeightSum: BigNumber;
   collapsible?: boolean;
+  link?: string;
 }
 
 export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
@@ -44,6 +45,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   collapsible,
   totalEmission,
   emissionWeightSum,
+  link,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -282,7 +284,12 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Stake ${tokenName || symbol}</Card.Title>
+      <Card.Title>
+        Stake{" "}
+        <a href={link} target="_blank">
+          ${tokenName || symbol}
+        </a>
+      </Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
@@ -336,7 +343,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         <Card.Text>
           {formatEther(stakedAmount || 0)} /
           {formatEther(stakedAmount?.add(tokenBalance || 0) || 0)} of your{" "}
-          {tokenName || tokenDetails?.name} token is staked.
+          {tokenName || tokenDetails?.name} is staked.
         </Card.Text>
         <Button
           variant="success"

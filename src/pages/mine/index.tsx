@@ -33,6 +33,7 @@ import { TitleButSer } from "../../components/views/TitleButSer";
 import { ContributionBoard } from "../work/tabs/ContributionBoard";
 import {
   ContributionBoard__factory,
+  getNetworkName,
   InitialContributorShare__factory,
 } from "@workhard/protocol";
 import { InitialContributorSharePool } from "../../components/contracts/mining-pool/InitialContributorSharePool";
@@ -42,7 +43,7 @@ const Mine = observer(() => {
   const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
   const history = useHistory();
   const { addToast } = useToasts();
-  const { account, library } = useWeb3React();
+  const { account, library, chainId } = useWeb3React();
   const workhardCtx = useWorkhard();
   const { dao, periphery } = workhardCtx || {};
   const mineStore: MineStore = initMineStore(
@@ -179,6 +180,11 @@ const Mine = observer(() => {
                 poolIdx={mineStore.liquidityMiningIdx()}
                 title={"Liquidity Mining"}
                 tokenName={"VISION/ETH LP"}
+                link={
+                  chainId === 1
+                    ? `https://app.sushi.com/add/ETH/${workhardCtx.dao.vision.address}`
+                    : `https://app.uniswap.org/#/add/v2/ETH/${workhardCtx.dao.vision.address}`
+                }
                 poolAddress={workhardCtx.periphery.liquidityMining.address}
                 totalEmission={mineStore.emission}
                 emissionWeightSum={mineStore.emissionWeightSum}
@@ -195,6 +201,7 @@ const Mine = observer(() => {
                 poolIdx={mineStore.commitMiningIdx()}
                 title={"Commit Mining"}
                 tokenName={"COMMIT"}
+                link={prefix(daoId, "/work")}
                 poolAddress={workhardCtx.periphery.commitMining.address}
                 totalEmission={mineStore.emission || BigNumber.from(0)}
                 emissionWeightSum={mineStore.emissionWeightSum}

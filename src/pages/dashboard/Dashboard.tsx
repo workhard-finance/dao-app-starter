@@ -17,7 +17,6 @@ import {
 import { getIcapAddress } from "ethers/lib/utils";
 import { AllocationChart } from "../../components/views/AllocationChart";
 import { useIPFS } from "../../providers/IPFSProvider";
-import { constants } from "ethers";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 
@@ -54,12 +53,6 @@ const Dashboard = () => {
   const [emissionStarted, setEmissionStarted] = useState<number>();
   const [reserved, setReserved] = useState<BigNumber>();
   const [burnedCommit, setBurnedCommit] = useState<BigNumber>();
-  const [visionName, setVisionName] = useState<string>();
-  const [commitName, setCommitName] = useState<string>();
-  const [rightName, setRightName] = useState<string>();
-  const [visionSymbol, setVisionSymbol] = useState<string>();
-  const [commitSymbol, setCommitSymbol] = useState<string>();
-  const [rightSymbol, setRightSymbol] = useState<string>();
   const [baseCurrencySymbol, setBaseCurrencySymbol] = useState<string>();
   const [visionSupply, setVisionSupply] = useState<BigNumber>();
   const [rightSupply, setRightSupply] = useState<BigNumber>();
@@ -108,30 +101,6 @@ const Dashboard = () => {
       workhardCtx.dao.baseCurrency
         .balanceOf(workhardCtx.dao.stableReserve.address)
         .then(setReserved)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.vision
-        .name()
-        .then(setVisionName)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.vision
-        .symbol()
-        .then(setVisionSymbol)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.commit
-        .name()
-        .then(setCommitName)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.commit
-        .symbol()
-        .then(setCommitSymbol)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.right
-        .name()
-        .then(setRightName)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.right
-        .symbol()
-        .then(setRightSymbol)
         .catch(errorHandler(addToast));
       workhardCtx.dao.baseCurrency
         .symbol()
@@ -239,9 +208,9 @@ const Dashboard = () => {
       <Row>
         <Col md={4}>
           <Erc20Balance
-            title={commitName || "COMMIT Token"}
+            title={workhardCtx?.metadata.commitName || "COMMIT Token"}
             address={workhardCtx?.dao.commit.address}
-            symbolAlt={commitSymbol || "COMMIT"}
+            symbolAlt={workhardCtx?.metadata.commitSymbol || "COMMIT"}
           >
             <Button as={Link} to={prefix(daoId, "work")}>
               Go to work
@@ -250,9 +219,9 @@ const Dashboard = () => {
         </Col>
         <Col md={4}>
           <Erc20Balance
-            title={visionName || "VISION Token"}
+            title={workhardCtx?.metadata.visionName || "VISION Token"}
             address={workhardCtx?.dao.vision.address}
-            symbolAlt={visionSymbol || "VISION"}
+            symbolAlt={workhardCtx?.metadata.visionSymbol || "VISION"}
           >
             <Button as={Link} to={prefix(daoId, "mine")}>
               Go to mine
@@ -261,12 +230,12 @@ const Dashboard = () => {
         </Col>
         <Col md={4}>
           <Erc20Balance
-            title={rightName || "RIGHT Token"}
+            title={workhardCtx?.metadata.rightName || "RIGHT Token"}
             address={workhardCtx?.dao.right.address}
-            symbolAlt={rightSymbol || "RIGHT"}
+            symbolAlt={workhardCtx?.metadata.rightSymbol || "RIGHT"}
           >
             <Button as={Link} to={prefix(daoId, "gov")}>
-              Go to lock ${visionSymbol}
+              Go to lock ${workhardCtx?.metadata.visionSymbol}
             </Button>
           </Erc20Balance>
         </Col>
@@ -344,7 +313,7 @@ const Dashboard = () => {
                 {bigNumToFixed(burnedCommit || 0)}
                 <span style={{ fontSize: "1rem" }}>
                   {" "}
-                  {`$${commitSymbol || "COMMIT"}`}
+                  {`$${workhardCtx?.metadata.commitSymbol || "COMMIT"}`}
                 </span>
               </Card.Text>
             </Card.Body>
@@ -366,7 +335,7 @@ const Dashboard = () => {
                 {bigNumToFixed(visionSupply || 0)}
                 <span style={{ fontSize: "1rem" }}>
                   {" "}
-                  {`$${visionSymbol || "VISION"}`}
+                  {`$${workhardCtx?.metadata.visionSymbol || "VISION"}`}
                 </span>
               </Card.Text>
             </Card.Body>
@@ -388,7 +357,7 @@ const Dashboard = () => {
                 {bigNumToFixed(rightSupply || 0)}
                 <span style={{ fontSize: "1rem" }}>
                   {" "}
-                  {`$${rightSymbol || "RIGHT"}`}
+                  {`$${workhardCtx?.metadata.rightSymbol || "RIGHT"}`}
                 </span>
               </Card.Text>
             </Card.Body>

@@ -34,6 +34,7 @@ export interface ERC20BurnMiningV1Props {
   visionPrice: number;
   emissionWeightSum: BigNumber;
   collapsible?: boolean;
+  link?: string;
 }
 
 export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
@@ -45,6 +46,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   visionPrice,
   collapsible,
   emissionWeightSum,
+  link,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -228,7 +230,12 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Burn ${tokenName || symbol}</Card.Title>
+      <Card.Title>
+        Burn{" "}
+        <a href={link} target="_blank">
+          ${tokenName || symbol}
+        </a>
+      </Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
