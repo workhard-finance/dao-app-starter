@@ -14,28 +14,32 @@ export const ContributionBoard: React.FC = () => {
   const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
   // const { account, library, chainId } = useWeb3React();
 
-  const [projects, setProjects] = useState<BigNumber[]>([] as BigNumber[]);
+  const [projects, setProjects] = useState<BigNumber[]>();
+
+  const [lastFetched, setLastFetched] = useState<number>(0);
+  const [lastCreated, setLastCreated] = useState<BigNumber>();
+  const [tabKey, setTabKey] = useState<string>(subtab || "projects");
 
   // TODO listen ContributionBoard events and add dependency to useEffect()
 
   useEffect(() => {
     if (workhardCtx) {
-      const { daoId, workhard, dao } = workhardCtx;
+      const { daoId, workhard } = workhardCtx;
       let stale = false;
       workhard
         .projectsOf(daoId)
         .then((n: BigNumber) => {
-          if (!stale) {
-            Array(n.toNumber())
-              .fill(undefined)
-              .forEach((_, index) => {
-                workhard.projectsOfDAOByIndex(daoId, index).then((projId) => {
-                  if (!projects.find((v) => v.eq(projId))) {
-                    projects.push(projId);
-                    setProjects(projects);
-                  }
-                });
+          if (n.eq(0)) {
+            setTabKey("post");
+          } else if (!stale) {
+            for (let idx = lastFetched; idx < n.toNumber(); idx++) {
+              workhard.projectsOfDAOByIndex(daoId, idx).then((projId) => {
+                if (!projects?.find((v) => v.eq(projId))) {
+                  setProjects([...(projects || []), projId]);
+                }
               });
+            }
+            setLastFetched(n.toNumber());
           }
         })
         .catch(() => {
@@ -49,9 +53,9 @@ export const ContributionBoard: React.FC = () => {
         setProjects([]);
       };
     }
-  }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [workhardCtx, lastCreated]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
-    <Tab.Container defaultActiveKey={subtab || "projects"}>
+    <Tab.Container activeKey={tabKey} onSelect={(k) => k && setTabKey(k)}>
       <Row>
         <Col sm={3}>
           <Nav variant="pills" className="flex-column">
@@ -71,15 +75,20 @@ export const ContributionBoard: React.FC = () => {
                 history.push(prefix(daoId, "/work/job/projects"));
               }}
             >
-              {projects.length === 0 && (
-                <p>No project exists! Post a new one :)</p>
+              {projects ? (
+                projects.length === 0 ? (
+                  <p>No project exists! Post a new one :)</p>
+                ) : (
+                  projects.map((id) => (
+                    <div key={id.toString()}>
+                      <ProjectBox projId={id} active={true} />
+                      <br />
+                    </div>
+                  ))
+                )
+              ) : (
+                <p>Fetching...</p>
               )}
-              {projects.map((id) => (
-                <div key={id.toString()}>
-                  <ProjectBox projId={id} active={true} />
-                  <br />
-                </div>
-              ))}
             </Tab.Pane>
             <Tab.Pane
               eventKey="post"
@@ -87,7 +96,7 @@ export const ContributionBoard: React.FC = () => {
             >
               <Card>
                 <Card.Body>
-                  <CreateProject />
+                  <CreateProject onCreated={setLastCreated} />
                 </Card.Body>
               </Card>
             </Tab.Pane>
