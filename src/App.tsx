@@ -9,13 +9,13 @@ import Mine from "./pages/mine";
 import Work from "./pages/work";
 import Gov from "./pages/gov";
 import Res from "./pages/Res";
-import Fork from "./pages/fork";
+import DAO from "./pages/dao";
 import Store from "./pages/store";
 import { WorkhardProvider } from "./providers/WorkhardProvider";
 import { Project } from "./pages/etc/Project";
 import { BlockNumberProvider } from "./providers/BlockNumberProvider";
 import { Manufacture } from "./pages/store/tabs/Manufacture";
-import { ForkAndLaunch } from "./pages/fork/ForkAndLaunch";
+import { ForkAndLaunch } from "./pages/dao/ForkAndLaunch";
 import { ProductPage } from "./pages/store/tabs/ProductPage";
 import { IPFSProvider } from "./providers/IPFSProvider";
 import { ToastProvider } from "react-toast-notifications";
@@ -49,10 +49,10 @@ function App() {
                     <Route path="/:daoId?/store/:tab?" children={<Store />} />
                     <Route path="/:daoId?/res" children={<Res />} />
                     <Route
-                      path="/:daoId?/fork/:step/:projId?"
+                      path="/:daoId?/dao/:step/:projId?"
                       children={<ForkAndLaunch />}
                     />
-                    <Route path="/:daoId?/fork" children={<Fork />} />
+                    <Route path="/:daoId?/dao" children={<DAO />} />
                     <Route path="/:daoId?/proj/:id" children={<Project />} />
                     <Route
                       path="/:daoId?/product/:address"

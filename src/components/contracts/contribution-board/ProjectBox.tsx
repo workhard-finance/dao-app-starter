@@ -89,7 +89,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
             />{" "}
             <ConditionalButton
               as={budgetOwner === account ? Link : Button}
-              to={`/fork/upgrade/${projId}`}
+              to={`/dao/upgrade/${projId}`}
               variant={"warning"}
               enabledWhen={account === budgetOwner ? false : undefined}
               whyDisabled={"Please log in with budget owner account."}

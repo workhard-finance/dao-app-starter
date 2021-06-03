@@ -56,8 +56,8 @@ const Page = (props: React.ComponentProps<any>) => {
       },
       {
         Icon: DupIcon,
-        name: "Fork",
-        url: "/fork",
+        name: "DAOs",
+        url: "/dao",
       },
     ];
   } else {

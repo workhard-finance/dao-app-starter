@@ -56,7 +56,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/new/${projId || ""}`}
+                  to={`/dao/new/${projId || ""}`}
                   eventKey={"new"}
                   className={step === "new" ? "text-primary" : "text-muted"}
                 >
@@ -73,7 +73,7 @@ export const ForkAndLaunch: React.FC = () => {
                   <CreateProject
                     onCreated={(id) => {
                       setId(id.toString());
-                      history.push(`/fork/upgrade/${id.toNumber()}`);
+                      history.push(`/dao/upgrade/${id.toNumber()}`);
                     }}
                   />
                 </Card.Body>
@@ -83,7 +83,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/upgrade/${projId || ""}`}
+                  to={`/dao/upgrade/${projId || ""}`}
                   eventKey={"upgrade"}
                   className={step === "upgrade" ? "text-primary" : "text-muted"}
                 >
@@ -95,7 +95,7 @@ export const ForkAndLaunch: React.FC = () => {
                   <UpgradeToDAO
                     id={id}
                     onUpgraded={() =>
-                      history.push(`/fork/initial-contribution/${id || ""}`)
+                      history.push(`/dao/initial-contribution/${id || ""}`)
                     }
                   />
                 </Card.Body>
@@ -105,7 +105,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/initial-contribution/${projId || ""}`}
+                  to={`/dao/initial-contribution/${projId || ""}`}
                   eventKey={"initial-contribution"}
                   className={
                     step === "initial-contribution"
@@ -120,7 +120,7 @@ export const ForkAndLaunch: React.FC = () => {
                 <Card.Body>
                   <InitialContribution
                     id={id}
-                    onSetup={() => history.push(`/fork/launch/${projId || ""}`)}
+                    onSetup={() => history.push(`/dao/launch/${projId || ""}`)}
                   />
                 </Card.Body>
               </Accordion.Collapse>
@@ -129,7 +129,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/launch/${projId || ""}`}
+                  to={`/dao/launch/${projId || ""}`}
                   eventKey={`launch`}
                   className={step === "launch" ? "text-primary" : "text-muted"}
                 >
@@ -138,7 +138,7 @@ export const ForkAndLaunch: React.FC = () => {
               </Card.Header>
               <Accordion.Collapse eventKey={`launch`}>
                 <Card.Body>
-                  <LaunchDAO id={id} onLaunched={() => history.push(`/fork`)} />
+                  <LaunchDAO id={id} onLaunched={() => history.push(`/dao`)} />
                 </Card.Body>
               </Accordion.Collapse>
             </Card>
@@ -146,7 +146,7 @@ export const ForkAndLaunch: React.FC = () => {
               <Card.Header>
                 <Accordion.Toggle
                   as={Link}
-                  to={`/fork/connect/${projId || ""}`}
+                  to={`/dao/connect/${projId || ""}`}
                   eventKey={`connect`}
                   className={step === "connect" ? "text-primary" : "text-muted"}
                 >
