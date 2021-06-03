@@ -27,7 +27,7 @@ export const AddBudgetByMint: React.FC<AddBudgetByMintProps> = ({
   budgetOwner,
 }) => {
   const { account, chainId, library } = useWeb3React();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [acceptableTokens, setAcceptableTokens] = useState<
@@ -48,14 +48,14 @@ export const AddBudgetByMint: React.FC<AddBudgetByMintProps> = ({
   }, [chainId]);
 
   useEffect(() => {
-    if (!!account && !!dao && !!token) {
+    if (!!account && !!workhardCtx && !!token) {
       const erc20 = IERC20__factory.connect(token, library);
       erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
       erc20
-        .allowance(account, dao.contributionBoard.address)
+        .allowance(account, workhardCtx.dao.contributionBoard.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
-      dao.contributionBoard
+      workhardCtx.dao.contributionBoard
         .approvedProjects(projId)
         .then(setProjectApproved)
         .catch(errorHandler(addToast));
@@ -63,7 +63,7 @@ export const AddBudgetByMint: React.FC<AddBudgetByMintProps> = ({
   }, [account, token, txStatus]);
 
   const addBudget = () => {
-    if (!account || !dao) {
+    if (!account || !workhardCtx) {
       alert("Not connected");
       return;
     } else if (!token) {
@@ -76,14 +76,19 @@ export const AddBudgetByMint: React.FC<AddBudgetByMintProps> = ({
       handleTransaction(
         erc20
           .connect(signer)
-          .approve(dao.contributionBoard.address, constants.MaxUint256),
+          .approve(
+            workhardCtx.dao.contributionBoard.address,
+            constants.MaxUint256
+          ),
         setTxStatus,
         addToast,
-        "Approved ContributionBoard to use $COMMIT"
+        `Approved ContributionBoard to use ${
+          workhardCtx?.metadata.commitSymbol || `$COMMIT`
+        }`
       );
       return;
     }
-    const contributionBoard = dao?.contributionBoard;
+    const contributionBoard = workhardCtx.dao.contributionBoard;
     if (!contributionBoard) {
       alert("Not connected");
       return;
@@ -94,7 +99,11 @@ export const AddBudgetByMint: React.FC<AddBudgetByMintProps> = ({
       return;
     }
     if (amountInWei.gt(balance || 0)) {
-      alert("Not enough amount of $COMMIT tokens");
+      alert(
+        `Not enough amount of ${
+          workhardCtx?.metadata.commitSymbol || `$COMMIT`
+        } tokens`
+      );
       return;
     }
     const txPromise = projectApproved

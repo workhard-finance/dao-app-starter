@@ -27,7 +27,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
   const { daoId } = useParams<{ daoId?: string }>();
   const { ipfs } = useIPFS();
-  const { dao, workhard } = useWorkhard() || { dao: undefined };
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
 
   const [fund, setFund] = useState<BigNumber>();
@@ -35,13 +35,13 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const [metadata, setMeatadata] = useState<ProjectMetadata>();
 
   useEffect(() => {
-    if (!!account && !!library && !!chainId && !!dao && !!workhard && !!ipfs) {
-      const { contributionBoard } = dao;
-      workhard
+    if (!!account && !!library && !!chainId && !!workhardCtx && !!ipfs) {
+      const { contributionBoard } = workhardCtx.dao;
+      workhardCtx.workhard
         .ownerOf(projId)
         .then(setBudgetOwner)
         .catch(errorHandler(addToast));
-      workhard
+      workhardCtx.workhard
         .tokenURI(projId)
         .then(async (uri) => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
@@ -52,7 +52,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
         .then(setFund)
         .catch(errorHandler(addToast));
     }
-  }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [account, library, chainId, workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   return (
     <Card>
@@ -64,7 +64,8 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
           <Col md={8}>
             <Card.Title>Fund</Card.Title>
             <Card.Text style={{ fontSize: "3rem" }}>
-              {formatEther(fund || 0)} $COMMIT{" "}
+              {formatEther(fund || 0)}{" "}
+              {workhardCtx?.metadata.commitSymbol || `$COMMIT`}{" "}
               {/*TODO compute in USD ($163710)*/}
             </Card.Text>
             <Card.Title>Details</Card.Title>

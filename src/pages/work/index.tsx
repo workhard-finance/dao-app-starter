@@ -6,9 +6,11 @@ import StableReserve from "./tabs/StableReserve";
 import { ContributionBoard } from "./tabs/ContributionBoard";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
+import { useWorkhard } from "../../providers/WorkhardProvider";
 
 const Work: React.FC = () => {
   const { daoId } = useParams<{ tab?: string; daoId?: string }>();
+  const workhardCtx = useWorkhard();
 
   return (
     <Page>
@@ -33,17 +35,23 @@ const Work: React.FC = () => {
       <SerHelpPlz>
         <p>
           Employers <a href="#">post jobs</a> on the JOB BOARD and Workers get
-          paid in <a href="#">$COMMIT</a> tokens for completing jobs from the
-          JOB BOARD.
+          paid in{" "}
+          <a href="#">{workhardCtx?.metadata.commitSymbol || `$COMMIT`}</a>{" "}
+          tokens for completing jobs from the JOB BOARD.
         </p>
         <p>
           The <a href="#">STABLE RESERVE</a> is a vault that allows anyone to
-          redeem hard-earned $COMMIT for $DAI at a 1:1 exchange or buy $COMMIT
-          directly for $DAI at a premium.
+          redeem hard-earned {workhardCtx?.metadata.commitSymbol || `$COMMIT`}{" "}
+          for $DAI at a 1:1 exchange or buy{" "}
+          {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
+          directly for {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`} at a
+          premium.
         </p>
         <p>
-          Workers can burn their hard earned $COMMIT by <a href="#">mine</a>{" "}
-          <a href="#">VISION</a>
+          Workers can burn their hard earned{" "}
+          {workhardCtx?.metadata.commitSymbol || `$COMMIT`} by{" "}
+          <a href="#">mine</a>{" "}
+          <a href="#">{workhardCtx?.metadata.visionSymbol || `$VISION`}</a>
         </p>
       </SerHelpPlz>
     </Page>

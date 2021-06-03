@@ -29,7 +29,6 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
   const { account, chainId, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const workhardCtx = useWorkhard();
-  const { dao } = useWorkhard() || {};
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [amount, setAmount] = useState("0");
@@ -83,25 +82,25 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
   }, [account, workhardCtx, chainId]);
 
   const grant = async () => {
-    if (!account || !dao || !library) {
+    if (!account || !workhardCtx || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const stableReserve = dao.stableReserve;
+    const stableReserve = workhardCtx.dao.stableReserve;
     const amountInWei = parseEther(amount);
     if (amountInWei.gt(mintable || 0)) {
-      alert("Not enough amount of $COMMIT tokens");
+      alert(`Not enough amount of ${workhardCtx.metadata.commitSymbol} tokens`);
       return;
     }
     const grantTx = await stableReserve
       .connect(signer)
       .populateTransaction.grant(
-        dao.contributionBoard.address,
+        workhardCtx.dao.contributionBoard.address,
         amountInWei,
         defaultAbiCoder.encode(["uint256"], [projId])
       );
-    const timelockTx = await dao.timelock.populateTransaction.schedule(
+    const timelockTx = await workhardCtx.dao.timelock.populateTransaction.schedule(
       stableReserve.address,
       grantTx.value || 0,
       grantTx.data || "0x",
@@ -120,7 +119,12 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
         <Form.Group>
           <Form.Label>
             Mintable - (balance:{" "}
-            {mintable ? `${formatEther(mintable.toString())} $COMMIT` : "?"})
+            {mintable
+              ? `${formatEther(mintable.toString())} ${
+                  workhardCtx?.metadata.commitSymbol || `$COMMIT`
+                }`
+              : "?"}
+            )
           </Form.Label>
           <Form.Control
             required

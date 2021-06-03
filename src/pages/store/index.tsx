@@ -17,17 +17,17 @@ const featured: BigNumber[] = [];
 const Store: React.FC = () => {
   const { library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [allProducts, setAllProducts] = useState<BigNumber[]>([]);
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
   const history = useHistory();
   const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
 
   useEffect(() => {
-    if (!library || !dao || !blockNumber) {
+    if (!library || !workhardCtx || !blockNumber) {
       return;
     }
-    const { marketplace } = dao;
+    const { marketplace } = workhardCtx.dao;
     marketplace
       .queryFilter(
         marketplace.filters.NewProduct(null, null, null),
@@ -41,13 +41,13 @@ const Store: React.FC = () => {
           ...events.map((event) => event.args.id),
         ]);
       });
-  }, [dao, blockNumber]);
+  }, [workhardCtx, blockNumber]);
 
   useEffect(() => {
-    if (!library || !dao || !blockNumber) {
+    if (!library || !workhardCtx || !blockNumber) {
       return;
     }
-    const { marketplace } = dao;
+    const { marketplace } = workhardCtx.dao;
     marketplace
       .queryFilter(
         marketplace.filters.NewProduct(null, null, null),
@@ -61,7 +61,7 @@ const Store: React.FC = () => {
           ...events.map((event) => event.args.id),
         ]);
       });
-  }, [dao, blockNumber]);
+  }, [workhardCtx, blockNumber]);
 
   return (
     <Page>
@@ -120,7 +120,9 @@ const Store: React.FC = () => {
       <br />
       <SerHelpPlz>
         <p>
-          Buy NFTs with $COMMIT. Earn $COMMIT by working or buying on Sushiswap.
+          Buy NFTs with {workhardCtx?.metadata.commitSymbol || `$COMMIT`}. Earn{" "}
+          {workhardCtx?.metadata.commitSymbol || `$COMMIT`} by working or buying
+          on Sushiswap.
         </p>
         <Button variant="success">Go Work Hard</Button>{" "}
         <Button variant="danger">Go to Sushiswap</Button>

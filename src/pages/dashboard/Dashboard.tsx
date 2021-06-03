@@ -286,9 +286,9 @@ const Dashboard = () => {
               <Card.Title>
                 Reserved Stables
                 <OverlayTooltip
-                  tip={
-                    "Governance can mint more $COMMIT and give grants to contributors."
-                  }
+                  tip={`Governance can mint more ${
+                    workhardCtx?.metadata.commitSymbol || "COMMIT"
+                  } and give grants to contributors.`}
                   text={`❔`}
                 />
               </Card.Title>
@@ -308,9 +308,9 @@ const Dashboard = () => {
               <Card.Title>
                 Burned Commits
                 <OverlayTooltip
-                  tip={
-                    "Governance can mint more $COMMIT and give grants to contributors."
-                  }
+                  tip={`Governance can mint more ${
+                    workhardCtx?.metadata.commitSymbol || "COMMIT"
+                  } and give grants to contributors.`}
                   text={`❔`}
                 />
               </Card.Title>
@@ -330,9 +330,9 @@ const Dashboard = () => {
               <Card.Title>
                 Total Vision
                 <OverlayTooltip
-                  tip={
-                    "Governance can mint more $COMMIT and give grants to contributors."
-                  }
+                  tip={`Governance can mint more ${
+                    workhardCtx?.metadata.commitSymbol || "COMMIT"
+                  } and give grants to contributors.`}
                   text={`❔`}
                 />
               </Card.Title>
@@ -352,9 +352,9 @@ const Dashboard = () => {
               <Card.Title>
                 Total Rights
                 <OverlayTooltip
-                  tip={
-                    "Governance can mint more $COMMIT and give grants to contributors."
-                  }
+                  tip={`Governance can mint more ${
+                    workhardCtx?.metadata.commitSymbol || "COMMIT"
+                  } and give grants to contributors.`}
                   text={`❔`}
                 />
               </Card.Title>

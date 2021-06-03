@@ -31,7 +31,7 @@ export interface PayProps {
 export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
   const [payTo, setPayTo] = useState("");
   const [payAmount, setPayAmount] = useState<number>(0);
@@ -43,7 +43,7 @@ export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const contributionBoard = dao?.contributionBoard;
+    const contributionBoard = workhardCtx?.dao.contributionBoard;
     if (!contributionBoard) {
       alert("Not connected");
       return;
@@ -79,21 +79,22 @@ export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
   };
 
   useEffect(() => {
-    if (!!account && !!library && !!dao) {
-      const { contributionBoard } = dao;
+    if (!!account && !!library && !!workhardCtx) {
+      const { contributionBoard } = workhardCtx.dao;
       contributionBoard
         .projectFund(projId)
         .then(setBalance)
         .catch(errorHandler(addToast));
     }
-  }, [txStatus, blockNumber]);
+  }, [txStatus, blockNumber, workhardCtx]);
 
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group>
         <Form.Label>Budget</Form.Label>
         <Card.Text style={{ fontSize: "1.5rem" }}>
-          {formatEther(balance || "0")} $COMMIT
+          {formatEther(balance || "0")}{" "}
+          {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
         </Card.Text>
       </Form.Group>
       <Form.Group>

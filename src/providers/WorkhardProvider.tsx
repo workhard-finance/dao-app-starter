@@ -40,6 +40,7 @@ export interface DAOMetadata {
   commitSymbol: string;
   rightName: string;
   rightSymbol: string;
+  baseCurrencySymbol: string;
 }
 
 export interface WorkhardLibrary {
@@ -97,6 +98,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
       commitSymbol,
       rightName,
       rightSymbol,
+      baseCurrencySymbol,
     ] = await Promise.all([
       dao.vision.name(),
       dao.vision.symbol(),
@@ -104,6 +106,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
       dao.commit.symbol(),
       dao.right.name(),
       dao.right.symbol(),
+      dao.baseCurrency.symbol(),
     ]);
     return {
       daoId,
@@ -121,6 +124,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
         commitSymbol,
         rightName,
         rightSymbol,
+        baseCurrencySymbol,
       },
     };
   };

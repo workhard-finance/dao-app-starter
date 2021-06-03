@@ -61,7 +61,7 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
       sablier.connect(signer).withdrawFromStream(streamId, withdrawable),
       setTxStatus,
       addToast,
-      "Successfully withdrew $COMMITs!"
+      `Successfully withdrew ${workhardCtx.metadata.commitSymbol}!`
     );
   };
 
@@ -149,7 +149,7 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
         onClick={withdraw}
       >
         Withdraw: {parseFloat(formatEther(getWithdrawable() || 0)).toFixed(2)}{" "}
-        $COMMIT
+        {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
       </ConditionalButton>
     </Form>
   );

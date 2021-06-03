@@ -276,34 +276,6 @@ export const Project: React.FC = () => {
       </Row>
       <br />
       {exist ? WhenExist() : WhenNotExist()}
-      <br />
-      <br />
-      <SerHelpPlz>
-        <p>
-          You can add budgets in 3 ways.
-          <ol>
-            <li>
-              Get grants by the governance. If the project is absolutely helpful
-              for the protocol, governance will give it some grants to
-              accelerate the development.
-            </li>
-            <li>
-              Get approved to mint $COMMIT with vision tax. Approved project can
-              mint $COMMIT with 20% of vision tax. For example, you have a
-              permission to mint 8000 $COMMIT with 10000 $DAI.
-            </li>
-            <li>
-              Or, you can add fund without any approval but the tax rate is 50%.
-              This rate is same with the premium ration in the stable reserve to
-              buy $COMMIT with $DAI.
-            </li>
-          </ol>
-          Projects will be grown organically by the support from the community,
-          or getting driven by project owner's strong willingness. Once the
-          project matures enough, project owner can upgrade it to a dao and
-          start its own token emission.
-        </p>
-      </SerHelpPlz>
     </Page>
   );
 };

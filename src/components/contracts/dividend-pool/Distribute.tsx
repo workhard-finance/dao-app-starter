@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BigNumber, BigNumberish, constants } from "ethers";
 import { Button, Card, Form } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
-import { useWorkhard } from "../../../providers/WorkhardProvider";
+import { useWorkhard, WorkhardCtx } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { IERC20__factory } from "@workhard/protocol";
@@ -18,7 +18,7 @@ import { useToasts } from "react-toast-notifications";
 
 export const Distribute: React.FC = () => {
   const { account, chainId, library } = useWeb3React();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [acceptableTokens, setAcceptableTokens] = useState<
@@ -40,6 +40,7 @@ export const Distribute: React.FC = () => {
   }, [chainId]);
 
   useEffect(() => {
+    const { dao } = workhardCtx || {};
     if (!!account && !!dao && !!token && isAddress(token)) {
       const erc20 = IERC20__factory.connect(token, library);
       erc20.balanceOf(account).then(setBalance).catch(errorHandler(addToast));
@@ -51,7 +52,7 @@ export const Distribute: React.FC = () => {
   }, [account, token, txStatus]);
 
   const distribute = () => {
-    if (!account || !dao) {
+    if (!account || !workhardCtx) {
       alert("Not connected");
       return;
     } else if (!token) {
@@ -64,7 +65,7 @@ export const Distribute: React.FC = () => {
       handleTransaction(
         erc20
           .connect(signer)
-          .approve(dao.dividendPool.address, constants.MaxUint256),
+          .approve(workhardCtx.dao.dividendPool.address, constants.MaxUint256),
         setTxStatus,
         addToast,
         "Approved DividendPool"
@@ -77,12 +78,14 @@ export const Distribute: React.FC = () => {
       return;
     }
     if (amountInWei.gt(balance || 0)) {
-      alert("Not enough amount of $COMMIT tokens");
+      alert(`Not enough amount of ${workhardCtx.metadata.commitSymbol} tokens`);
       return;
     }
 
     handleTransaction(
-      dao.dividendPool.connect(signer).distribute(token, amountInWei),
+      workhardCtx.dao.dividendPool
+        .connect(signer)
+        .distribute(token, amountInWei),
       setTxStatus,
       addToast,
       "Successfully scheduled transaction."

@@ -8,6 +8,7 @@ import { Link, useParams } from "react-router-dom";
 import { CID, IPFS } from "ipfs-core/src";
 import { useWeb3React } from "@web3-react/core";
 import { prefix, uriToURL } from "../../../../utils/utils";
+import { useWorkhard } from "../../../../providers/WorkhardProvider";
 
 export interface ProductMetadata {
   name: string;
@@ -43,6 +44,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
 }) => {
   const { account } = useWeb3React();
   const { ipfs } = useIPFS();
+  const workhardCtx = useWorkhard();
   const { daoId } = useParams<{ daoId?: string }>();
   const [amount, setAmount] = useState<number>(1);
   const [metadata, setMetadata] = useState<ProductMetadata>();
@@ -85,7 +87,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
             href={`https://etherscan.io/address/${product.manufacturer}`}
             target="_blank"
           >
-            $COMMIT
+            {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
           </a>
           <br />
           Stock: {product.maxSupply.eq(0) ? "Unlimited" : stock.toNumber()}

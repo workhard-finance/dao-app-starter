@@ -200,7 +200,7 @@ const Mine = observer(() => {
               <ERC20BurnMiningV1
                 poolIdx={mineStore.commitMiningIdx()}
                 title={"Commit Mining"}
-                tokenName={"COMMIT"}
+                tokenName={workhardCtx.metadata.commitSymbol}
                 link={prefix(daoId, "/work")}
                 poolAddress={workhardCtx.periphery.commitMining.address}
                 totalEmission={mineStore.emission || BigNumber.from(0)}
@@ -225,30 +225,46 @@ const Mine = observer(() => {
 
       <SerHelpPlz>
         <p>
-          The two ways to mine $VISION{" "}
+          The two ways to mine{" "}
+          {workhardCtx
+            ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
+            : "$VISION"}{" "}
           <a href="#" className="text-info">
             (Emission Detail)
           </a>
           :
           <ol>
             <li>
-              Burn $COMMIT to get $VISION through COMMIT MINING $VISION.
+              Burn{" "}
+              {workhardCtx
+                ? `${workhardCtx.metadata.commitName}(${workhardCtx.metadata.commitSymbol})`
+                : "$COMMIT"}{" "}
+              to get{" "}
+              {workhardCtx
+                ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
+                : "$VISION"}{" "}
+              through COMMIT MINING.
               <a href="#" className="text-info">
                 (Example)
               </a>
             </li>
-            <li>Provide $VISION/$ETH LP token to LIQUIDITY MINE $VISION</li>
+            <li>
+              Provide {workhardCtx?.metadata.visionSymbol || "$VISION"}/ETH LP
+              token to LIQUIDITY MINE{" "}
+              {workhardCtx?.metadata.visionName || "$VISION"}
+            </li>
           </ol>
-          Stake & lock $VISION to receive{" "}
+          Stake & lock {workhardCtx?.metadata.visionName || "$VISION"} to
+          receive{" "}
           <a href="#" className="text-info">
-            $RIGHT
+            {workhardCtx?.metadata.rightName || "$RIGHT"}
           </a>{" "}
-          ($veVISION) and join to{" "}
+          ({workhardCtx?.metadata.rightSymbol || "$veVISION"}) and join to{" "}
           <a href="#" className="text-info">
             govern
           </a>{" "}
-          the WORKER’S UNION. With $RIGHT you can claim a share of the Work Hard
-          Finance’s profit.
+          the WORKER’S UNION. With {workhardCtx?.metadata.rightName || "$RIGHT"}{" "}
+          you can claim a share of the Work Hard Finance’s profit.
         </p>
       </SerHelpPlz>
 

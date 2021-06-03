@@ -15,7 +15,7 @@ import { permaPinToArweave } from "../../../utils/utils";
 export const Manufacture: React.FC = () => {
   const { account, library } = useWeb3React();
   const history = useHistory();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { ipfs } = useIPFS();
 
   const [name, setName] = useState<string>();
@@ -88,7 +88,7 @@ export const Manufacture: React.FC = () => {
   }
 
   function submitTx() {
-    if (!dao) {
+    if (!workhardCtx) {
       alert("Web3 is not connected.");
       return;
     }
@@ -101,7 +101,7 @@ export const Manufacture: React.FC = () => {
       return;
     }
     let submission: Promise<ContractTransaction>;
-    const marketplace = dao?.marketplace;
+    const marketplace = workhardCtx.dao.marketplace;
     if (!marketplace) {
       alert("Not connected");
       return;
@@ -215,7 +215,9 @@ export const Manufacture: React.FC = () => {
                   />
                 </Form.Group>
                 <Form.Group>
-                  <Form.Label>Price (in $COMMIT)</Form.Label>
+                  <Form.Label>
+                    Price (in {workhardCtx?.metadata.commitSymbol || `$COMMIT`})
+                  </Form.Label>
                   <Form.Control
                     type="number"
                     onChange={({ target: { value } }) =>

@@ -22,7 +22,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitBalance, setCommitBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
@@ -33,15 +33,15 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   const getMaxSpending = () => formatEther(daiBalance || "0");
 
   const approveAndBuy = () => {
-    if (!account || !dao || !library) {
+    if (!account || !workhardCtx || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      dao.baseCurrency
+      workhardCtx.dao.baseCurrency
         .connect(signer)
-        .approve(dao.stableReserve.address, constants.MaxUint256),
+        .approve(workhardCtx.dao.stableReserve.address, constants.MaxUint256),
       setApproveTxStatus,
       addToast,
       "Approved StableReserve.",
@@ -50,12 +50,12 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   };
 
   const buyCommit = () => {
-    if (!account || !dao || !library) {
+    if (!account || !workhardCtx || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const stableReserve = dao?.stableReserve;
+    const stableReserve = workhardCtx.dao.stableReserve;
     const buyAmountInWei = parseEther(spendingDai || "0").div(2);
     if (!daiBalance) {
       alert("Fetching balance..");
@@ -68,7 +68,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
       stableReserve.connect(signer).payInsteadOfWorking(buyAmountInWei),
       setBuyTxStatus,
       addToast,
-      "Successfully bought $COMMIT",
+      `Successfully bought ${workhardCtx.metadata.commitSymbol}`,
       () => {
         setSpendingDai("");
       }
@@ -76,9 +76,9 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      const baseCurrency = dao.baseCurrency;
-      const commitToken = dao.commit;
+    if (!!account && !!workhardCtx) {
+      const baseCurrency = workhardCtx.dao.baseCurrency;
+      const commitToken = workhardCtx.dao.commit;
       baseCurrency
         .balanceOf(account)
         .then(setDaiBalance)
@@ -88,18 +88,21 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
         .then(setCommitBalance)
         .catch(errorHandler(addToast));
       baseCurrency
-        .allowance(account, dao.stableReserve.address)
+        .allowance(account, workhardCtx.dao.stableReserve.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, approveTxStatus, blockNumber]);
+  }, [account, workhardCtx, approveTxStatus, blockNumber]);
 
   return (
     <Card>
       <Card.Body>
-        <Card.Title>Buy $COMMIT at a premium</Card.Title>
+        <Card.Title>
+          Buy {workhardCtx?.metadata.commitSymbol || `$COMMIT`} at a premium
+        </Card.Title>
         <Card.Text>
-          <span style={{ fontSize: "2rem" }}>2 DAI</span> per $COMMIT
+          <span style={{ fontSize: "2rem" }}>2 DAI</span> per{" "}
+          {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
         </Card.Text>
         <Form>
           <Form.Text>$DAI balance: {formatEther(daiBalance || 0)}</Form.Text>
@@ -122,7 +125,9 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
             </InputGroup>
           </Form.Group>
           <Card.Text>
-            {`= ${formatEther(parseEther(spendingDai || "0").div(2))} $COMMIT`}
+            {`= ${formatEther(parseEther(spendingDai || "0").div(2))} ${
+              workhardCtx?.metadata.commitSymbol || `$COMMIT`
+            }`}
           </Card.Text>
           <ConditionalButton
             variant="primary"

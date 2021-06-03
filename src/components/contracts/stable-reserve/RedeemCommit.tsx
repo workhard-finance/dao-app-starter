@@ -22,7 +22,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitBalance, setCommitBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
@@ -33,15 +33,15 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   const getMaxRedeem = () => formatEther(commitBalance || "0");
 
   const approveAndRedeem = () => {
-    if (!account || !dao || !library) {
+    if (!account || !workhardCtx || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      dao.commit
+      workhardCtx.dao.commit
         .connect(signer)
-        .approve(dao.stableReserve.address, constants.MaxUint256),
+        .approve(workhardCtx.dao.stableReserve.address, constants.MaxUint256),
       setApproveTxStatus,
       addToast,
       "Approved StableReserve.",
@@ -50,12 +50,12 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   };
 
   const redeem = () => {
-    if (!account || !dao || !library) {
+    if (!account || !workhardCtx || !library) {
       alert("Not connected");
       return;
     }
     const signer = library.getSigner(account);
-    const stableReserve = dao?.stableReserve;
+    const stableReserve = workhardCtx.dao.stableReserve;
     const redeemAmountInWei = parseEther(redeemAmount || "0");
     if (!daiBalance) {
       alert("Fetching balance..");
@@ -69,7 +69,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
       stableReserve.connect(signer).redeem(redeemAmountInWei),
       setRedeemTxStatus,
       addToast,
-      "Successfully bought $COMMIT",
+      `Successfully bought ${workhardCtx.metadata.commitSymbol}`,
       () => {
         setRedeemAmount("");
       }
@@ -77,9 +77,9 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      const baseCurrency = dao.baseCurrency;
-      const commitToken = dao.commit;
+    if (!!account && !!workhardCtx) {
+      const baseCurrency = workhardCtx.dao.baseCurrency;
+      const commitToken = workhardCtx.dao.commit;
       baseCurrency
         .balanceOf(account)
         .then(setDaiBalance)
@@ -89,26 +89,35 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
         .then(setCommitBalance)
         .catch(errorHandler(addToast));
       commitToken
-        .allowance(account, dao.stableReserve.address)
+        .allowance(account, workhardCtx.dao.stableReserve.address)
         .then(setAllowance)
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, blockNumber]);
+  }, [account, workhardCtx, blockNumber]);
   return (
     <Card>
       <Card.Body>
-        <Card.Title>Redeem $COMMIT for $DAI at a 1:1 exchange</Card.Title>
+        <Card.Title>
+          Redeem {workhardCtx?.metadata.commitSymbol || "$COMMIT"} for $DAI at a
+          1:1 exchange
+        </Card.Title>
         <Card.Text>
-          <span style={{ fontSize: "2rem" }}>1 $COMMIT</span> per $DAI
+          <span style={{ fontSize: "2rem" }}>
+            1 {workhardCtx?.metadata.commitSymbol || "$COMMIT"}
+          </span>{" "}
+          per $DAI
         </Card.Text>
         <Form>
           <Form.Text>
-            $COMMIT balance: {formatEther(commitBalance || 0)}
+            {workhardCtx?.metadata.commitSymbol || "$COMMIT"} balance:{" "}
+            {formatEther(commitBalance || 0)}
           </Form.Text>
           <Form.Group>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
-                <InputGroup.Text>$COMMIT</InputGroup.Text>
+                <InputGroup.Text>
+                  {workhardCtx?.metadata.commitSymbol || "$COMMIT"}
+                </InputGroup.Text>
               </InputGroup.Prepend>
               <Form.Control
                 value={redeemAmount}
