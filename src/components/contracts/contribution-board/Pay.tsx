@@ -22,17 +22,13 @@ import {
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 
-export interface CompensateProps {
+export interface PayProps {
   projId: BigNumberish;
   fund: BigNumberish;
   budgetOwner: string;
 }
 
-export const Compensate: React.FC<CompensateProps> = ({
-  projId,
-  budgetOwner,
-  fund,
-}) => {
+export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { dao } = useWorkhard() || {};
@@ -79,7 +75,7 @@ export const Compensate: React.FC<CompensateProps> = ({
       : contributionBoard
           .connect(signer)
           .compensate(projId, payTo, payAmountInWei);
-    handleTransaction(tx, setTxStatus, addToast, "Compensation complete!");
+    handleTransaction(tx, setTxStatus, addToast, "Paid successfully!");
   };
 
   useEffect(() => {
@@ -169,7 +165,7 @@ export const Compensate: React.FC<CompensateProps> = ({
         type="submit"
         enabledWhen={account === budgetOwner ? true : undefined}
         whyDisabled={`Only budget owner can call this function.`}
-        children={`Compensate`}
+        children={`Pay`}
       />
     </Form>
   );

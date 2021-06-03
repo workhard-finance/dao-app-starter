@@ -7,7 +7,7 @@ import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
-import { Compensate } from "../../components/contracts/contribution-board/Compensate";
+import { Pay } from "../../components/contracts/contribution-board/Pay";
 import { AddBudget } from "../../components/contracts/contribution-board/AddBudget";
 import { useHistory } from "react-router-dom";
 import {
@@ -155,7 +155,7 @@ export const Project: React.FC = () => {
               <Tab.Pane eventKey="pay">
                 <Card>
                   <Card.Body>
-                    <Compensate
+                    <Pay
                       projId={id}
                       fund={fund || 0}
                       budgetOwner={budgetOwner}
