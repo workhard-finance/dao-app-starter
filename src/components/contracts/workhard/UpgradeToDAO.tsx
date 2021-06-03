@@ -14,6 +14,7 @@ import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
 import { EmissionChart } from "../../views/EmissionChart";
 import { parseEther } from "ethers/lib/utils";
+import { useHistory } from "react-router-dom";
 
 const defaultSetting = {
   emissionStartDelay: 86400 * 7,
@@ -31,7 +32,9 @@ export const UpgradeToDAO: React.FC<{
 }> = ({ id, onUpgraded }) => {
   const { chainId, account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
+  const history = useHistory();
   const workhardCtx = useWorkhard();
+
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const { addToast } = useToasts();
 
@@ -92,7 +95,7 @@ export const UpgradeToDAO: React.FC<{
       const { workhard } = workhardCtx;
       workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
     }
-  }, [workhardCtx, id, blockNumber]);
+  }, [workhardCtx, id, blockNumber, history.location]);
 
   const upgradeToDAO = async () => {
     if (!workhardCtx) {
