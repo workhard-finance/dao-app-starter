@@ -101,7 +101,7 @@ export const getStablecoinList = (chainId?: number) => {
     return [
       {
         symbol: "Rinkeby DAI",
-        address: "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa",
+        address: "0xc7AD46e0b8a400Bb3C915120d284AafbA8fc4735",
       },
     ];
   }
