@@ -22,10 +22,10 @@ import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { FatherSays } from "../../components/views/FatherSays";
 
 const Dashboard = () => {
-  const { daoId } = useParams<{ tab?: string; daoId?: string }>();
   const { addToast } = useToasts();
 
   const workhardCtx = useWorkhard();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   const [emissionRule, setEmissionRule] = useState<{
     initialEmission: BigNumber;
@@ -59,7 +59,7 @@ const Dashboard = () => {
   const [rightSupply, setRightSupply] = useState<BigNumber>();
 
   useEffect(() => {
-    if (!daoId || parseInt(daoId) === 0) {
+    if (daoId === 0) {
       // fast load for master dao
       setMetadata({
         name: "Work Hard Finance",

@@ -23,7 +23,8 @@ const Vote: React.FC = () => {
   const [timestamp, setTimestamp] = useState<number>(0);
   const [quorum, setQuorum] = useState<BigNumber>();
   const history = useHistory();
-  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
+  const { subtab } = useParams<{ subtab?: string }>();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   useEffect(() => {
     if (!library || !chainId || !workhardCtx) {

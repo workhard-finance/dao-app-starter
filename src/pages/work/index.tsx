@@ -9,8 +9,8 @@ import { TitleButSer } from "../../components/views/TitleButSer";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 
 const Work: React.FC = () => {
-  const { daoId } = useParams<{ tab?: string; daoId?: string }>();
   const workhardCtx = useWorkhard();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   return (
     <Page>

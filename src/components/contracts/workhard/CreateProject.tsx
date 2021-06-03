@@ -22,7 +22,7 @@ export const CreateProject: React.FC<{
   const { ipfs } = useIPFS();
   const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
-  const { daoId } = useParams<{ daoId?: string }>();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   const [description, setDescription] = useState<string>();
   const [file, setFile] = useState<File>();

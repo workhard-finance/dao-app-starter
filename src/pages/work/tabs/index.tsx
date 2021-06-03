@@ -11,9 +11,10 @@ import { useParams } from "react-router-dom";
 import { prefix } from "../../../utils/utils";
 
 const Work: React.FC = () => {
-  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
+  const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
-  const { workhard, dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   const [activeProjects, setActiveProjects] = useState<string[]>(
     [] as string[]
@@ -25,10 +26,10 @@ const Work: React.FC = () => {
   // TODO listen ContributionBoard events and add dependency to useEffect()
 
   useEffect(() => {
-    if (!!dao && !!workhard) {
+    if (!!workhardCtx) {
       let stale = false;
-      const { contributionBoard } = dao;
-      workhard
+      const { contributionBoard } = workhardCtx.dao;
+      workhardCtx.workhard
         .totalSupply()
         .then((n: BigNumber) => {
           if (!stale) {
@@ -61,7 +62,7 @@ const Work: React.FC = () => {
         setInactiveProjects([]);
       };
     }
-  }, [dao]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
   return (
     <Tabs defaultActiveKey={tab || "job"}>
       <Tab

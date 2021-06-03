@@ -21,7 +21,8 @@ const Store: React.FC = () => {
   const [allProducts, setAllProducts] = useState<BigNumber[]>([]);
   const [fetchedBlock, setFetchedBlock] = useState<number>(0);
   const history = useHistory();
-  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
+  const { tab } = useParams<{ tab?: string }>();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   useEffect(() => {
     if (!library || !workhardCtx || !blockNumber) {

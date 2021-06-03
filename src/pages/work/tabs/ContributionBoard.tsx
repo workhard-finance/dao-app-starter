@@ -11,7 +11,8 @@ import { prefix } from "../../../utils/utils";
 export const ContributionBoard: React.FC = () => {
   const workhardCtx = useWorkhard();
   const history = useHistory();
-  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
+  const { subtab } = useParams<{ subtab?: string }>();
+  const { daoId } = workhardCtx || { daoId: 0 };
   // const { account, library, chainId } = useWeb3React();
 
   const [projects, setProjects] = useState<BigNumber[]>();

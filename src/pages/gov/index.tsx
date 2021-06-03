@@ -13,9 +13,10 @@ import { prefix } from "../../utils/utils";
 import { TitleButSer } from "../../components/views/TitleButSer";
 
 const Gov: React.FC = () => {
-  const { tab, daoId } = useParams<{ tab?: string; daoId?: string }>();
+  const { tab } = useParams<{ tab?: string }>();
   const history = useHistory();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   return (
     <Page>

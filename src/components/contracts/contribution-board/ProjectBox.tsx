@@ -25,9 +25,9 @@ export interface ProjectProps {
 
 export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   const { account, library, chainId } = useWeb3React();
-  const { daoId } = useParams<{ daoId?: string }>();
   const { ipfs } = useIPFS();
   const workhardCtx = useWorkhard();
+  const { daoId } = workhardCtx || { daoId: 0 };
   const { addToast } = useToasts();
 
   const [fund, setFund] = useState<BigNumber>();

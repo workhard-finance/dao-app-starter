@@ -16,21 +16,22 @@ import { prefix } from "../../../utils/utils";
 
 export const Propose: React.FC = ({}) => {
   const { account } = useWeb3React<providers.Web3Provider>();
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const [hasProposerRole, setHasProposerRole] = useState<boolean>(false);
   const [presets, setPresets] = useState<Preset[]>();
   const history = useHistory();
-  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
+  const { subtab } = useParams<{ subtab?: string }>();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      const timeLockGovernance = dao.timelock;
+    if (!!account && !!workhardCtx) {
+      const timeLockGovernance = workhardCtx.dao.timelock;
       timeLockGovernance
         .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
         .then(setHasProposerRole);
-      setPresets(buildPresets(dao));
+      setPresets(buildPresets(workhardCtx.dao));
     }
-  }, [account, dao]);
+  }, [account, workhardCtx]);
 
   return (
     <Tab.Container defaultActiveKey={subtab || "manual"}>

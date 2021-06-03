@@ -27,11 +27,10 @@ import { InitialContributorSharePool } from "../../components/contracts/mining-p
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
 
 const Mine = observer(() => {
-  const { daoId } = useParams<{ daoId?: string }>();
   const { addToast } = useToasts();
   const { account, library, chainId } = useWeb3React();
   const workhardCtx = useWorkhard();
-  const { dao, periphery } = workhardCtx || {};
+  const { daoId, dao, periphery } = workhardCtx || {};
   const mineStore: MineStore = initMineStore(
     !!dao ? dao.visionEmitter : null,
     !!periphery ? periphery.liquidityMining.address : null,

@@ -13,17 +13,18 @@ import { useParams } from "react-router-dom";
 import { prefix } from "../../../utils/utils";
 
 export const EscrowAndDividend: React.FC = () => {
-  const { dao } = useWorkhard() || {};
+  const workhardCtx = useWorkhard();
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const history = useHistory();
-  const { subtab, daoId } = useParams<{ subtab?: string; daoId?: string }>();
+  const { subtab } = useParams<{ subtab?: string }>();
   const [stakedAmount, setStakedAmount] = useState<BigNumber>();
   const [lockIds, setLockIds] = useState<BigNumber[]>();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   useEffect(() => {
-    if (!!account && !!dao) {
-      const { votingEscrow } = dao;
+    if (!!account && !!workhardCtx) {
+      const { votingEscrow } = workhardCtx.dao;
       votingEscrow.balanceOf(account).then((locks) => {
         Promise.all(
           Array(locks.toNumber())
@@ -32,10 +33,10 @@ export const EscrowAndDividend: React.FC = () => {
         ).then((lockIds) => setLockIds(lockIds));
       });
     }
-  }, [account, dao, blockNumber]);
+  }, [account, workhardCtx, blockNumber]);
   useEffect(() => {
-    if (!!account && !!dao && !!lockIds) {
-      const { votingEscrow } = dao;
+    if (!!account && !!workhardCtx && !!lockIds) {
+      const { votingEscrow } = workhardCtx.dao;
       Promise.all(lockIds.map((lockId) => votingEscrow.locks(lockId))).then(
         (locks) => {
           let totalLocked = locks.reduce(
@@ -46,7 +47,7 @@ export const EscrowAndDividend: React.FC = () => {
         }
       );
     }
-  }, [account, dao, lockIds]);
+  }, [account, workhardCtx, lockIds]);
 
   return (
     <Tab.Container defaultActiveKey={subtab || "locks"}>
