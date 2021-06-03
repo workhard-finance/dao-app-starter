@@ -13,18 +13,22 @@ export function useIPFS() {
 
 export const IPFSProvider = ({ children }: { children: any }) => {
   const [ipfs, setIPFS] = useState<IPFS>();
+  const [creating, setCreating] = useState<boolean>();
 
   useEffect(() => {
-    if (!ipfs) {
+    if (!ipfs && !creating) {
+      setCreating(true);
       create()
         .then((ipfs) => {
           setIPFS(ipfs);
+          setCreating(false);
         })
         .catch((err) => {
           console.error(err);
+          setCreating(false);
         });
     }
-  }, [ipfs]);
+  }, [ipfs, creating]);
 
   return <IPFSCtx.Provider value={{ ipfs }}>{children}</IPFSCtx.Provider>;
 };
