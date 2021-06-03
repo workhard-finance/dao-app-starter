@@ -30,6 +30,7 @@ export const ContributionBoard: React.FC = () => {
         .projectsOf(daoId)
         .then((n: BigNumber) => {
           if (n.eq(0)) {
+            setProjects([]);
             setTabKey("post");
           } else if (!stale) {
             for (let idx = lastFetched; idx < n.toNumber(); idx++) {
@@ -63,7 +64,7 @@ export const ContributionBoard: React.FC = () => {
               <Nav.Link eventKey="projects">Projects</Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link eventKey="post">Post a job</Nav.Link>
+              <Nav.Link eventKey="post">Post a project</Nav.Link>
             </Nav.Item>
           </Nav>
         </Col>
