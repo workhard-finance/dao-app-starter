@@ -1,30 +1,13 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, BigNumberish } from "ethers";
-import {
-  Button,
-  ButtonGroup,
-  Card,
-  Container,
-  Form,
-  FormControl,
-  FormLabel,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-bootstrap";
-import { isAddress } from "@ethersproject/address";
+import React, { useState } from "react";
+import { BigNumberish } from "ethers";
+import { Button, Card, Container, Form } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import {
-  errorHandler,
-  handleTransaction,
-  TxStatus,
-} from "../../../utils/utils";
+import { handleTransaction, TxStatus } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { RecordContribution } from "./RecordContribution";
-import { Grant } from "../stable-reserve/Grant";
 import { Link } from "react-router-dom";
 
 export interface ProjectAdminProps {
@@ -131,11 +114,11 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
               </Button>
             </Card.Body>
           </Card>
+          <br />
         </>
       )}
       {!ownedByMultisig && (
         <>
-          <br />
           <Card>
             <Card.Body>
               <Card.Title>Transfer to a multisig wallet</Card.Title>
@@ -156,27 +139,27 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
               <Button onClick={transferOwnership}>Transfer</Button>
             </Card.Body>
           </Card>
+          <br />
         </>
       )}
       {!fundable && (
         <>
-          <br />
           <Card>
             <Card.Body>
               <Card.Title>Record contribution</Card.Title>
               <RecordContribution projId={projId} budgetOwner={owner} />
             </Card.Body>
           </Card>
+          <br />
         </>
       )}
-      <br />
-      <Card>
+      {/* <Card>
         <Card.Body>
           <Card.Title>Grants (multisig & governance)</Card.Title>
           <Grant projId={projId} />
         </Card.Body>
       </Card>
-      <br />
+      <br /> */}
       <ConditionalButton
         as={hasAdminPermission ? Link : Button}
         to={`/dao/upgrade/${projId}`}
