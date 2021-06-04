@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 
-import { Row, Col, Tab, Nav, Card, Button, Image } from "react-bootstrap";
+import {
+  Row,
+  Col,
+  Tab,
+  Nav,
+  Card,
+  Button,
+  Image,
+  Badge,
+} from "react-bootstrap";
 import ReactHtmlParser from "react-html-parser";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "ethers";
 import { useParams } from "react-router";
 import { useWeb3React } from "@web3-react/core";
 import { Pay } from "../../components/contracts/contribution-board/Pay";
-import { AddBudget } from "../../components/contracts/contribution-board/AddBudget";
+import { FundProject } from "../../components/contracts/contribution-board/FundProject";
 import { useHistory } from "react-router-dom";
 import {
   errorHandler,
@@ -22,16 +31,18 @@ import { useIPFS } from "../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { TitleButSer } from "../../components/views/TitleButSer";
 import { SerHelpPlz } from "../../components/views/HelpSer";
-import { RecordContribution } from "../../components/contracts/contribution-board/RecordContribution";
 import { ContributorChart } from "../../components/views/ContributorChart";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Grant } from "../../components/contracts/stable-reserve/Grant";
 import { Stream } from "../../components/contracts/sablier/Stream";
+import { formatEther, getIcapAddress } from "ethers/lib/utils";
+import { getNetworkName } from "@workhard/protocol";
+import { ProjectAdmin } from "../../components/contracts/contribution-board/ProjectAdmin";
 
 export const Project: React.FC = () => {
   const { account, library, chainId } = useWeb3React();
   const history = useHistory();
-  const { workhard, dao } = useWorkhard() || { dao: undefined };
+  const workhardCtx = useWorkhard();
   const { ipfs } = useIPFS();
   const { addToast } = useToasts();
 
@@ -42,19 +53,55 @@ export const Project: React.FC = () => {
   const [exist, setExist] = useState<boolean>(true);
   const [streams, setStreams] = useState<BigNumber[]>([]);
   const [contributors, setContributors] = useState<string[]>([]);
-  const [budgets, setBudgets] = useState<
-    Array<{
-      amount: BigNumber;
-      transferred: boolean;
-    }>
-  >(new Array(0));
+  const [hasAdminPermission, setHasAdminPermission] = useState<boolean>();
+  const [minimumShare, setMinimumShare] = useState<BigNumber>();
+  const [ownedByMultisig, setOwnedByMultisig] = useState<boolean>();
+  const [totalContribution, setTotalContribution] = useState<BigNumber>();
+
   useEffect(() => {
-    if (!!dao && !!workhard && !!ipfs) {
+    if (!!workhardCtx && !!ipfs && account && !!chainId) {
+      const { dao, workhard } = workhardCtx;
       const { contributionBoard } = dao;
       workhard
         .ownerOf(id)
-        .then(setBudgetOwner)
-        .catch(errorHandler(addToast, undefined, () => setExist(false)));
+        .then((owner) => {
+          setBudgetOwner(owner);
+          if (getIcapAddress(account) === getIcapAddress(owner)) {
+            setHasAdminPermission(true);
+          } else {
+            const network = getNetworkName(chainId);
+            const gnosisAPI =
+              network === "mainnet"
+                ? `https://safe-transaction.gnosis.io/api/v1/`
+                : network === "rinkeby"
+                ? `https://safe-transaction.rinkeby.gnosis.io/api/v1/`
+                : undefined;
+
+            if (gnosisAPI) {
+              fetch(gnosisAPI + `safes/${owner}/`)
+                .then(async (response) => {
+                  const result = await response.json();
+                  if ((result.owners as string[]).length > 0) {
+                    setOwnedByMultisig(true);
+                  }
+                  if (
+                    (result.owners as string[])
+                      .map(getIcapAddress)
+                      .includes(getIcapAddress(account))
+                  ) {
+                    setHasAdminPermission(true);
+                  }
+                })
+                .catch((_) => {
+                  setOwnedByMultisig(false);
+                  setHasAdminPermission(false);
+                });
+            } else {
+              setOwnedByMultisig(false);
+            }
+          }
+        })
+        .catch(() => setExist(false));
       workhard
         .tokenURI(id)
         .then(async (uri) => {
@@ -65,38 +112,29 @@ export const Project: React.FC = () => {
         .projectFund(id)
         .then(setFund)
         .catch(errorHandler(addToast));
+      contributionBoard
+        .minimumShare(id)
+        .then(setMinimumShare)
+        .catch(errorHandler(addToast));
     }
-  }, [dao, ipfs]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [workhardCtx, ipfs, account, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   useEffect(() => {
-    if (dao) {
-      dao.contributionBoard
+    if (workhardCtx) {
+      workhardCtx.dao.contributionBoard
         .getStreams(id)
         .then(setStreams)
         .catch(errorHandler(addToast));
-      dao.contributionBoard
+      workhardCtx.dao.contributionBoard
         .getContributors(id)
         .then(setContributors)
         .catch(errorHandler(addToast));
+      workhardCtx.dao.contributionBoard
+        .totalSupplyOf(id)
+        .then(setTotalContribution)
+        .catch(errorHandler(addToast));
     }
-  }, [dao]);
-
-  useEffect(() => {
-    if (!!account && !!library && !!chainId && !!dao) {
-      const { contributionBoard } = dao;
-      contributionBoard.getTotalBudgets(id).then((len: BigNumber) => {
-        Promise.all(
-          new Array(len.toNumber())
-            .fill(0)
-            .map((_, i) => contributionBoard.projectBudgets(id, i))
-        )
-          .then((_budgets) => {
-            setBudgets(_budgets);
-          })
-          .catch(errorHandler(addToast));
-      });
-    }
-  }, [account, library, chainId]); // ensures refresh if referential identity of library doesn't change across chainIds
+  }, [workhardCtx]);
 
   const WhenNotExist = () => <p>Not exist</p>;
   const WhenExist = () => (
@@ -115,10 +153,16 @@ export const Project: React.FC = () => {
                 />
               </Card>
             </Col>
-            <Col md={10}>
-              <Card.Subtitle>Description</Card.Subtitle>
+            <Col md={4}>
+              <Card.Subtitle>Budget owner</Card.Subtitle>
               <Card.Text>
-                {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://etherscan.com/address/${budgetOwner}`}
+                >
+                  {budgetOwner}
+                </a>
               </Card.Text>
               {metadata?.url && (
                 <>
@@ -130,23 +174,43 @@ export const Project: React.FC = () => {
                   </Card.Text>
                 </>
               )}
+              <Card.Subtitle>Total contribution</Card.Subtitle>
+              <Card.Text>
+                {formatEther(totalContribution || 0)}{" "}
+                {workhardCtx?.metadata.commitSymbol || "COMMIT"}(s)
+              </Card.Text>
+            </Col>
+            <Col md={6}>
+              <Card.Subtitle>Description</Card.Subtitle>
+              <Card.Text>
+                {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
+              </Card.Text>
+              {minimumShare && minimumShare.gt(0) && (
+                <Badge variant={`success`}>initial contributor program</Badge>
+              )}{" "}
+              <Badge variant={ownedByMultisig ? `success` : "danger"}>
+                {ownedByMultisig ? `managed by multisig` : "managed by EOA"}
+              </Badge>
             </Col>
           </Row>
         </Card.Body>
       </Card>
       <br />
-      <Tab.Container defaultActiveKey="pay">
+      <Tab.Container defaultActiveKey="funding">
         <Row>
           <Col sm={3}>
             <Nav variant="pills" className="flex-column">
               <Nav.Item>
-                <Nav.Link eventKey="budget">Add budget</Nav.Link>
+                <Nav.Link eventKey="funding">Funding</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link eventKey="pay">Pay</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="record">History</Nav.Link>
+                <Nav.Link eventKey="contributors">Contributors</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="admin">Admin</Nav.Link>
               </Nav.Item>
             </Nav>
           </Col>
@@ -162,8 +226,6 @@ export const Project: React.FC = () => {
                     />
                   </Card.Body>
                 </Card>
-              </Tab.Pane>
-              <Tab.Pane eventKey="record">
                 {streams.length > 0 && (
                   <>
                     <h5>Streamings</h5>
@@ -182,7 +244,9 @@ export const Project: React.FC = () => {
                     <br />
                   </>
                 )}
-                {contributors.length > 0 && (
+              </Tab.Pane>
+              <Tab.Pane eventKey="contributors">
+                {contributors.length > 0 ? (
                   <>
                     <h5>
                       Contributors
@@ -194,63 +258,38 @@ export const Project: React.FC = () => {
                       />
                     </h5>
                     <ContributorChart id={id} />
-                    <hr />
                   </>
+                ) : (
+                  <p>
+                    Hey there, we're looking forward to your contributions :)
+                  </p>
                 )}
-                <h5>
-                  Manual Record of Contributions{" "}
-                  <OverlayTooltip
-                    tip={
-                      "Contributions are automatically recorded when budget owner pays to the contributor. Otherwise, budget owner can record contributions manually using this form."
-                    }
-                    text={`❔`}
-                  />
-                </h5>
-                <RecordContribution projId={id} budgetOwner={budgetOwner} />
-                <br />
               </Tab.Pane>
-              <Tab.Pane eventKey="budget">
+              <Tab.Pane eventKey="funding">
                 <Card>
                   <Card.Body>
-                    <Card.Title>Fund to accelerate this project!</Card.Title>
-                    <AddBudget
+                    <Card.Title>Fund this project!</Card.Title>
+                    <FundProject
                       projId={id}
                       fund={fund || 0}
                       budgetOwner={budgetOwner}
+                      minimumShare={minimumShare}
                     />
                   </Card.Body>
                 </Card>
-                <br />
-                <Card>
-                  <Card.Body>
-                    <Card.Title>Grants (multisig & governance)</Card.Title>
-                    <Grant projId={id} />
-                  </Card.Body>
-                </Card>
-
-                {budgets.length > 0 && (
-                  <>
-                    <hr />
-                    <h2>History</h2>
-                  </>
+              </Tab.Pane>
+              <Tab.Pane eventKey="admin">
+                {!hasAdminPermission ? (
+                  <p>You are not authorized to access this functions.</p>
+                ) : (
+                  <ProjectAdmin
+                    projId={id}
+                    owner={budgetOwner}
+                    fundable={(minimumShare && minimumShare.gt(0)) || false}
+                    ownedByMultisig={ownedByMultisig || false}
+                    hasAdminPermission={hasAdminPermission || false}
+                  />
                 )}
-                {budgets
-                  .map((budget, i) => {
-                    if (!!budget) {
-                      return (
-                        <>
-                          <br />
-                          <ExecuteBudget
-                            projId={id}
-                            budgetIndex={i}
-                            budgetOwner={budgetOwner}
-                            {...budget}
-                          />
-                        </>
-                      );
-                    }
-                  })
-                  .reverse()}
               </Tab.Pane>
             </Tab.Content>
           </Col>

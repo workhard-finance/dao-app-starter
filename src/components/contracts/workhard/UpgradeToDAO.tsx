@@ -405,7 +405,7 @@ export const UpgradeToDAO: React.FC<{
               <Col md={10}>
                 <Form.Control
                   type="range"
-                  min={0}
+                  min={500}
                   max={3000}
                   value={founderShare}
                   step={1}
@@ -417,7 +417,7 @@ export const UpgradeToDAO: React.FC<{
               <Col md={2}>
                 <Form.Control
                   type="number"
-                  min={0}
+                  min={500}
                   max={3000}
                   value={founderShare}
                   step={1}

@@ -1,30 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, BigNumberish, constants } from "ethers";
-import { Form } from "react-bootstrap";
-import { isAddress } from "@ethersproject/address";
+import { Button, Form } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { IERC20__factory } from "@workhard/protocol";
 import {
-  acceptableTokenList,
   errorHandler,
   handleTransaction,
   isApproved,
   TxStatus,
 } from "../../../utils/utils";
-import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
 
-export interface AddBudgetProps {
+export interface FundProjectProps {
   projId: BigNumberish;
   fund: BigNumberish;
   budgetOwner: string;
+  minimumShare?: BigNumber;
+  ownedByMultisig?: boolean;
 }
 
-export const AddBudget: React.FC<AddBudgetProps> = ({
+export const FundProject: React.FC<FundProjectProps> = ({
   projId,
   budgetOwner,
+  minimumShare,
+  ownedByMultisig,
 }) => {
   const { account, chainId, library } = useWeb3React();
   const workhardCtx = useWorkhard();
@@ -33,7 +34,6 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
   const [balance, setBalance] = useState<BigNumber>();
   const [amount, setAmount] = useState("0");
   const [allowance, setAllowance] = useState<BigNumber>();
-  const [projectApproved, setProjectApproved] = useState(false);
 
   useEffect(() => {
     if (!!account && !!workhardCtx) {
@@ -44,10 +44,6 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       workhardCtx.dao.commit
         .allowance(account, workhardCtx.dao.contributionBoard.address)
         .then(setAllowance)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.contributionBoard
-        .approvedProjects(projId)
-        .then(setProjectApproved)
         .catch(errorHandler(addToast));
     }
   }, [account, workhardCtx, txStatus]);
@@ -99,6 +95,16 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
       "Successfully funded project."
     );
   };
+
+  const getSharePercent = () => {
+    if (minimumShare && minimumShare.gt(0)) {
+      const val = parseFloat(formatEther(minimumShare));
+      return ((val / (val + 10000)) * 100).toFixed(2);
+    } else {
+      return 0;
+    }
+  };
+
   return (
     <Form>
       <Form.Group>
@@ -118,16 +124,27 @@ export const AddBudget: React.FC<AddBudgetProps> = ({
           value={amount}
         />
       </Form.Group>
-      <ConditionalButton
-        variant="primary"
-        enabledWhen={account === budgetOwner ? true : undefined}
-        whyDisabled={`Only the project owner can call this function.`}
+      {getSharePercent() !== 0 ? (
+        <p>
+          Thank you for your funding. Your contribution will be recorded
+          automatically. Contributors will share the {getSharePercent()}% of the
+          emission when this project gets forked.
+        </p>
+      ) : (
+        <p>
+          Thank you for your funding. Please note that this project is not
+          running the initial contributor program. Your funding may not be
+          recorded for its future shares when this project becomes a new DAO.
+        </p>
+      )}
+      <Button
+        variant="success"
         onClick={addBudgetWithCommit}
         children={
           isApproved(allowance, amount)
-            ? projectApproved
-              ? "Add and execute"
-              : "Add"
+            ? getSharePercent() !== 0
+              ? "Fund project with contribution record"
+              : "Fund project without contribution record"
             : "Approve token usage"
         }
       />
