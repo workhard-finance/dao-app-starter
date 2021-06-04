@@ -31,13 +31,11 @@ export interface InitialContributorSharePoolProps {
   poolAddress: string;
   totalEmission: BigNumber;
   emissionWeightSum: BigNumber;
-  collapsible?: boolean;
 }
 
 export const InitialContributorSharePool: React.FC<InitialContributorSharePoolProps> = ({
   poolAddress,
   totalEmission,
-  collapsible,
   emissionWeightSum,
 }) => {
   const { account, library } = useWeb3React();
@@ -45,9 +43,6 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
   const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
 
-  const [collapsed, setCollapsed] = useState<boolean>(
-    collapsible ? true : false
-  );
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [tokenBalance, setTokenBalance] = useState<BigNumber>();
   const [burnedAmount, setBurnedAmount] = useState<BigNumber>();
@@ -189,79 +184,80 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
     );
   };
 
-  const collapsedDetails = () => (
-    <>
-      <hr />
-      <Card.Title>Burn your contribution proof</Card.Title>
-      <Form>
-        <Form.Group>
-          <InputGroup className="mb-2">
-            <InputGroup.Prepend>
-              <InputGroup.Text>Burn</InputGroup.Text>
-            </InputGroup.Prepend>
-            <Form.Control
-              value={amount}
-              onChange={({ target: { value } }) => setAmount(value)}
-              placeholder={getMaxAmount()}
-            />
-            <InputGroup.Append
-              style={{ cursor: "pointer" }}
-              onClick={() => setAmount(getMaxAmount())}
-            >
-              <InputGroup.Text>MAX</InputGroup.Text>
-            </InputGroup.Append>
-          </InputGroup>
-        </Form.Group>
-        <ProgressBar
-          variant={getVariantForProgressBar(burnPercent || 0)}
-          animated
-          now={burnPercent}
-        />
-        <Card.Text>
-          Burned: {formatEther(burnedAmount || 0)} / Balance:{" "}
-          {formatEther(
-            BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
-          )}
-        </Card.Text>
-        <Row>
-          <Col>
-            <Button variant="outline-warning" onClick={exit}>
-              Stop mining and withdraw rewards
-            </Button>
-          </Col>
-          <Col style={{ textAlign: "end" }}>
-            <Button
-              variant="warning"
-              onClick={isApprovedForAll ? burn : approve}
-            >
-              {isApprovedForAll ? "Burn" : "Approve"}
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    </>
-  );
-
   return (
     <Card border="warning">
       <Card.Header className="bg-warning text-white" onClick={() => {}}>
         Early Stage Contributor Share Pool
       </Card.Header>
       <Card.Body>
-        <Card.Text>
-          {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
-          {workhardCtx?.metadata.visionSymbol || "VISION"} allocated for initial
-          contributors this week.
-        </Card.Text>
-        {collapsible && (
-          <Button
-            variant="outline-primary"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? "▼ view more" : "▲ close details"}
-          </Button>
-        )}
-        {(!collapsible || !collapsed) && collapsedDetails()}
+        <Row>
+          <Col md={4}>
+            <Card.Title>Mined</Card.Title>
+            <Card.Text style={{ fontSize: "1.5rem" }}>
+              {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.75rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+          <Col md={8}>
+            <Card.Title>Weekly allocation</Card.Title>
+            <Card.Text style={{ fontSize: "1.5rem" }}>
+              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.75rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+        </Row>
+        <hr />
+        <Card.Title>Burn your contribution proof</Card.Title>
+        <Form>
+          <Form.Group>
+            <InputGroup className="mb-2">
+              <InputGroup.Prepend>
+                <InputGroup.Text>Burn</InputGroup.Text>
+              </InputGroup.Prepend>
+              <Form.Control
+                value={amount}
+                onChange={({ target: { value } }) => setAmount(value)}
+                placeholder={getMaxAmount()}
+              />
+              <InputGroup.Append
+                style={{ cursor: "pointer" }}
+                onClick={() => setAmount(getMaxAmount())}
+              >
+                <InputGroup.Text>MAX</InputGroup.Text>
+              </InputGroup.Append>
+            </InputGroup>
+          </Form.Group>
+          <ProgressBar
+            variant={getVariantForProgressBar(burnPercent || 0)}
+            animated
+            now={burnPercent}
+          />
+          <Card.Text>
+            Burned: {formatEther(burnedAmount || 0)} / Balance:{" "}
+            {formatEther(
+              BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
+            )}
+          </Card.Text>
+          <Row>
+            <Col>
+              <Button variant="outline-warning" onClick={exit}>
+                Stop mining and withdraw rewards
+              </Button>
+            </Col>
+            <Col style={{ textAlign: "end" }}>
+              <Button
+                variant="warning"
+                onClick={isApprovedForAll ? burn : approve}
+              >
+                {isApprovedForAll ? "Burn" : "Approve"}
+              </Button>
+            </Col>
+          </Row>
+        </Form>
       </Card.Body>
     </Card>
   );
