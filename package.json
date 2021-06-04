@@ -25,7 +25,6 @@
     "@workhard/protocol": "1.0.0-rc.30",
     "bootstrap": "^4.6.0",
     "bootswatch": "^4.6.0",
-    "contract-proxy-kit": "^3.0.0",
     "deepmerge": "^4.2.2",
     "ethers": "^5.0.26",
     "ipfs-core": "^0.5.4",

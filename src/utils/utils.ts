@@ -1,21 +1,28 @@
 import { Interface, LogDescription, Result } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
-import { getAddress } from "@ethersproject/address";
+import { getAddress, getIcapAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther, parseEther } from "@ethersproject/units";
+import EthersSafe, {
+  SafeTransactionDataPartial,
+} from "@gnosis.pm/safe-core-sdk";
 import {
   IERC20__factory,
   WorkhardDAO,
   getNetworkName,
   MyNetwork,
+  GnosisSafe__factory,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
 import {
+  ethers,
   constants,
   Contract,
   ContractReceipt,
   ContractTransaction,
   Signer,
+  providers,
+  PopulatedTransaction,
 } from "ethers";
 import IPFS from "ipfs-core/src/components";
 import { Dispatch, SetStateAction } from "react";
@@ -367,4 +374,112 @@ export const prefix = (daoId: string | number | undefined, url: string) => {
 
 export const weiToEth = (wei: BigNumberish, fixed?: number): number => {
   return parseFloat(parseFloat(formatEther(wei)).toFixed(fixed || 2));
+};
+
+export const compareAddress = (a?: string, b?: string): boolean => {
+  if (!a || !b) return false;
+  return getIcapAddress(a) === getIcapAddress(b);
+};
+
+export const getGnosisAPI = (chainId?: number): string | undefined => {
+  if (!chainId) return undefined;
+  const network = getNetworkName(chainId);
+  const gnosisAPI =
+    network === "mainnet"
+      ? `https://safe-transaction.gnosis.io/api/v1/`
+      : network === "rinkeby"
+      ? `https://safe-transaction.rinkeby.gnosis.io/api/v1/`
+      : undefined;
+  return gnosisAPI;
+};
+
+export const gnosisTx = async (
+  chainId: number,
+  safe: string,
+  provider: providers.Web3Provider,
+  popTx: PopulatedTransaction,
+  signer: Signer
+) => {
+  const { to, data, value } = popTx;
+  if (!to || !data) {
+    throw Error("No target data.");
+  }
+  const partialTx: SafeTransactionDataPartial = {
+    to,
+    data,
+    value: value?.toString() || "0",
+  };
+  const safeSdk = await EthersSafe.create(ethers, safe, signer);
+  const safeTx = await safeSdk.createTransaction(partialTx);
+  await safeSdk.signTransaction(safeTx);
+  const gnosisAPI = getGnosisAPI(chainId);
+  if (!gnosisAPI) {
+    throw Error("Support only Rinkeby & Mainnet.");
+  } else {
+    const contractTransactionHash = await GnosisSafe__factory.connect(
+      safe,
+      provider
+    ).getTransactionHash(
+      safeTx.data.to,
+      safeTx.data.value,
+      safeTx.data.data,
+      safeTx.data.operation,
+      safeTx.data.safeTxGas,
+      safeTx.data.baseGas,
+      safeTx.data.gasPrice,
+      safeTx.data.gasToken,
+      safeTx.data.refundReceiver,
+      safeTx.data.nonce
+    );
+    const req = {
+      ...safeTx.data,
+      safe,
+      contractTransactionHash,
+      sender: await signer.getAddress(),
+      signature: safeTx.encodedSignatures(),
+      origin: "Workhard",
+    };
+    const response = await fetch(
+      gnosisAPI + `safes/${safe}/multisig-transactions/`,
+      {
+        method: "post",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(req),
+      }
+    );
+    if (!response.ok) {
+      throw Error(response.statusText);
+    }
+  }
+};
+
+export const safeTxHandler = async (
+  chainId: number,
+  safe: string,
+  provider: providers.Web3Provider,
+  popTx: PopulatedTransaction,
+  signer: Signer,
+  setTxStatus: React.Dispatch<React.SetStateAction<TxStatus | undefined>>,
+  addToast: AddToast,
+  msg: string,
+  callback?: (receipt?: ContractReceipt) => void
+) => {
+  const signerAddress = await signer.getAddress();
+  if (compareAddress(safe, signerAddress)) {
+    handleTransaction(
+      signer.sendTransaction(popTx),
+      setTxStatus,
+      addToast,
+      msg,
+      callback
+    );
+  } else {
+    gnosisTx(chainId, safe, provider, popTx, signer)
+      .then(() => {
+        callback && callback();
+      })
+      .catch(errorHandler(addToast));
+  }
 };

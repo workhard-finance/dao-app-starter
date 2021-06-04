@@ -8,6 +8,7 @@ import GovIcon from "../components/icons/GovIcon";
 import StoreIcon from "../components/icons/StoreIcon";
 import MineIcon from "../components/icons/MineIcon";
 import DupIcon from "../components/icons/DupIcon";
+import MultiSig from "../components/icons/DupIcon";
 import NavBar from "../components/nav/NavBar";
 import Footer from "../components/Footer";
 import { Menu } from "../contexts/menu";
@@ -19,6 +20,7 @@ import {
 import { getNetworkName } from "@workhard/protocol";
 import { useWorkhard } from "../providers/WorkhardProvider";
 import { FatherSays } from "../components/views/FatherSays";
+import MultisigIcon from "../components/icons/Multisig";
 
 export type PageProps = React.ComponentProps<any>;
 
@@ -32,6 +34,7 @@ const Page = (props: React.ComponentProps<any>) => {
   const daoId = Number.isNaN(parsed) ? 0 : parsed;
   let menus: Menu[];
   let secondary: Menu[] | undefined;
+  let adminMenus: Menu[] | undefined;
   if (daoId === 0) {
     menus = [
       {
@@ -60,6 +63,13 @@ const Page = (props: React.ComponentProps<any>) => {
         url: "/dao",
       },
     ];
+    adminMenus = [
+      {
+        Icon: MultisigIcon,
+        name: "Multisig",
+        url: prefix(daoId, "/multisig"),
+      },
+    ];
   } else {
     menus = [
       {
@@ -85,6 +95,13 @@ const Page = (props: React.ComponentProps<any>) => {
         url: prefix(daoId, "/gov"),
       },
     ];
+    adminMenus = [
+      {
+        Icon: MultisigIcon,
+        name: "Multisig",
+        url: prefix(daoId, "/multisig"),
+      },
+    ];
   }
   return (
     <Container
@@ -93,7 +110,7 @@ const Page = (props: React.ComponentProps<any>) => {
       }}
     >
       <br />
-      <NavBar menus={menus} secondary={secondary} />
+      <NavBar menus={menus} secondary={secondary} adminMenus={adminMenus} />
       <br />
       <Row>
         <Container>

@@ -13,7 +13,6 @@ import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { BigNumber } from "@ethersproject/bignumber";
-import { useParams } from "react-router-dom";
 
 export const CreateProject: React.FC<{
   onCreated?: (projId: BigNumber) => void;

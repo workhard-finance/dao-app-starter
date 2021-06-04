@@ -8,9 +8,10 @@ import { Menu } from "../../contexts/menu";
 export interface NavBarProps {
   menus: Menu[];
   secondary?: Menu[];
+  adminMenus?: Menu[];
 }
 
-const NavBar: React.FC<NavBarProps> = ({ menus, secondary }) => {
+const NavBar: React.FC<NavBarProps> = ({ menus, secondary, adminMenus }) => {
   const history = useHistory();
   return (
     <Navbar expand="lg" className="navbar-light bg-light">
@@ -43,6 +44,35 @@ const NavBar: React.FC<NavBarProps> = ({ menus, secondary }) => {
             <div style={{ borderLeft: "1px solid gray", height: "2rem" }}></div>
             <Nav>
               {secondary.map((menu) => (
+                <Nav.Link
+                  key={menu.url}
+                  as={Link}
+                  to={menu.url}
+                  style={{
+                    color: history.location.pathname.startsWith(menu.url)
+                      ? "green"
+                      : undefined,
+                    textDecoration: history.location.pathname.startsWith(
+                      menu.url
+                    )
+                      ? "underline"
+                      : undefined,
+                    textAlign: "center",
+                  }}
+                >
+                  <menu.Icon style={{ height: "2rem" }} />
+                  <br />
+                  {menu.name}
+                </Nav.Link>
+              ))}
+            </Nav>
+          </>
+        )}
+        {adminMenus && (
+          <>
+            <div style={{ borderLeft: "1px solid gray", height: "2rem" }}></div>
+            <Nav>
+              {adminMenus.map((menu) => (
                 <Nav.Link
                   key={menu.url}
                   as={Link}

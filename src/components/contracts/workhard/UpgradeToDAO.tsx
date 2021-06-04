@@ -7,15 +7,23 @@ import {
   handleTransaction,
   getStablecoinList,
   errorHandler,
+  compareAddress,
+  getGnosisAPI,
+  gnosisTx,
+  safeTxHandler,
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
-import { BigNumberish } from "ethers";
+import { ethers, BigNumberish, providers } from "ethers";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
 import { EmissionChart } from "../../views/EmissionChart";
 import { getIcapAddress, parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
-import { getNetworkName } from "@workhard/protocol";
+import { getNetworkName, GnosisSafe__factory } from "@workhard/protocol";
+import EthersSafe, {
+  SafeTransactionDataPartial,
+} from "@gnosis.pm/safe-core-sdk";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 const defaultSetting = {
   emissionStartDelay: 86400 * 7,
@@ -31,7 +39,7 @@ export const UpgradeToDAO: React.FC<{
   id?: BigNumberish;
   onUpgraded?: () => void;
 }> = ({ id, onUpgraded }) => {
-  const { chainId, account, library } = useWeb3React();
+  const { chainId, account, library } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const history = useHistory();
   const workhardCtx = useWorkhard();
@@ -110,19 +118,10 @@ export const UpgradeToDAO: React.FC<{
       !!projectOwner &&
       !!chainId
     ) {
-      const { dao, workhard } = workhardCtx;
-      const { contributionBoard } = dao;
-      if (getIcapAddress(account) === getIcapAddress(projectOwner)) {
+      if (compareAddress(account, projectOwner)) {
         setHasAdminPermission(true);
       } else {
-        const network = getNetworkName(chainId);
-        const gnosisAPI =
-          network === "mainnet"
-            ? `https://safe-transaction.gnosis.io/api/v1/`
-            : network === "rinkeby"
-            ? `https://safe-transaction.rinkeby.gnosis.io/api/v1/`
-            : undefined;
-
+        const gnosisAPI = getGnosisAPI(chainId);
         if (gnosisAPI) {
           fetch(gnosisAPI + `safes/${projectOwner}/`)
             .then(async (response) => {
@@ -144,11 +143,14 @@ export const UpgradeToDAO: React.FC<{
   }, [workhardCtx, account, chainId, projectOwner]);
 
   const upgradeToDAO = async () => {
-    if (!workhardCtx) {
+    if (!workhardCtx || !account || !library || !chainId) {
       alert("Not connected");
       return;
     } else if (!id) {
       alert("Project not exists");
+      return;
+    } else if (!projectOwner) {
+      alert("Project owner is not fetched");
       return;
     } else if (
       !multisig ||
@@ -174,8 +176,9 @@ export const UpgradeToDAO: React.FC<{
     }
     const { workhard } = workhardCtx;
     const signer = library.getSigner(account);
-    handleTransaction(
-      workhard.connect(signer).upgradeToDAO(id, {
+    const popTx = await workhard.populateTransaction.upgradeToDAO(
+      id,
+      {
         multisig,
         baseCurrency,
         projectName,
@@ -193,12 +196,23 @@ export const UpgradeToDAO: React.FC<{
         minEmissionRatePerWeek,
         emissionCutRate,
         founderShare,
-      }),
+      },
+      { gasLimit: 4500000 }
+    );
+    safeTxHandler(
+      chainId,
+      projectOwner,
+      library,
+      popTx,
+      signer,
       setTxStatus,
       addToast,
       "Successfully upgraded this project to a DAO!",
       (receipt) => {
-        alert(`You've successfully upgraded project to a DAO`);
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
         setTxStatus(undefined);
         onUpgraded && onUpgraded();
       }
@@ -552,7 +566,12 @@ export const UpgradeToDAO: React.FC<{
         onClick={upgradeToDAO}
         enabledWhen={hasAdminPermission}
         whyDisabled={id ? `Not allowed` : "This is a preview"}
-        children="Start DAO!"
+        tooltip={
+          compareAddress(projectOwner, account || undefined)
+            ? undefined
+            : "Create a multisig transaction"
+        }
+        children={`Start DAO!`}
       />
     </Form>
   );
