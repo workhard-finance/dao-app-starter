@@ -97,7 +97,10 @@ const Page = (props: React.ComponentProps<any>) => {
       <br />
       <Row>
         <Container>
-          {active && onTargetNetwork && props.children}
+          {active && onTargetNetwork && chainId !== 1 && props.children}
+          {active && onTargetNetwork && chainId === 1 && (
+            <FatherSays say={"I'm working very hard to ship it on mainnet"} />
+          )}
           {!active && <FatherSays say={"How about connect wallet ser?"} />}
           {active && !onTargetNetwork && (
             <FatherSays say={`You're not on ${targetNetwork} ser?`} />
