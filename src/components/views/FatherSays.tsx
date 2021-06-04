@@ -32,7 +32,7 @@ export const FatherSays: React.FC<FatherSaysProps> = ({ say }) => {
               position: "absolute",
               top: "5%",
               left: "10%",
-              width: "25%",
+              width: "20%",
               fontSize,
               lineHeight: "100%",
             }}

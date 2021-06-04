@@ -151,6 +151,23 @@ const Mine = observer(() => {
           </Button>
         </Alert>
       )}
+      <p>
+        Got some hard earned{" "}
+        {workhardCtx && workhardCtx.daoId !== 0
+          ? `${workhardCtx.metadata.commitName}(${workhardCtx.metadata.commitSymbol})`
+          : "$COMMIT"}{" "}
+        wages? Prove your dedication and belief by mining your project's
+        on-chain stock option,{" "}
+        {workhardCtx && workhardCtx.daoId !== 0
+          ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
+          : "$VISION"}{" "}
+        or LP{" "}
+        {workhardCtx && workhardCtx.daoId !== 0
+          ? workhardCtx.metadata.visionSymbol
+          : "$VISION"}
+        !
+      </p>
+      <hr />
       <TitleButSer link="#todo">Main pools</TitleButSer>
       <Row>
         <Col md={6}>
