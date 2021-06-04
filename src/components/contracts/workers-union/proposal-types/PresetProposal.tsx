@@ -39,6 +39,8 @@ export const PresetProposal: React.FC<Preset> = ({
   const [votingPeriod, setVotingPeriod] = useState<number>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
 
+  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
+
   /** arguments **/
   const [args, setArgs] = useState<{ [key: string]: string }>({});
 
@@ -88,13 +90,14 @@ export const PresetProposal: React.FC<Preset> = ({
     }
   }, [account, dao, txStatus]);
   useEffect(() => {
-    if (!!account && !!dao) {
-      dao.right
-        .balanceOf(account)
+    if (!!account && !!dao && !!timestamp) {
+      const { workersUnion } = dao;
+      workersUnion
+        .getVotesAt(account, timestamp)
         .then(setMyVotes)
         .catch(errorHandler(addToast));
     }
-  }, [blockNumber]);
+  }, [blockNumber, timestamp]);
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -155,63 +158,77 @@ export const PresetProposal: React.FC<Preset> = ({
             </Form.Group>
           ))}
 
-          <Form.Group>
-            <Form.Label>Predecessor</Form.Label>
-            <Form.Control
-              value={predecessor}
-              onChange={({ target: { value } }) => setPredecessor(value)}
-              defaultValue="0"
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Salt</Form.Label>
-            <InputGroup className="mb-2">
+          <a
+            className="text-warning"
+            style={{ cursor: "pointer" }}
+            onClick={() => setAdvancedMode(!advancedMode)}
+          >
+            Advanced
+          </a>
+          <br />
+          <div hidden={!advancedMode}>
+            <Form.Group>
+              <Form.Label>Predecessor</Form.Label>
               <Form.Control
-                value={salt}
-                onChange={({ target: { value } }) => setSalt(value)}
-                defaultValue={BigNumber.from(randomBytes(32)).toHexString()}
+                value={predecessor}
+                onChange={({ target: { value } }) => setPredecessor(value)}
+                defaultValue="0"
               />
-              <InputGroup.Append
-                onClick={() =>
-                  setSalt(BigNumber.from(randomBytes(32)).toHexString())
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Salt</Form.Label>
+              <InputGroup className="mb-2">
+                <Form.Control
+                  value={salt}
+                  onChange={({ target: { value } }) => setSalt(value)}
+                  defaultValue={BigNumber.from(randomBytes(32)).toHexString()}
+                />
+                <InputGroup.Append
+                  onClick={() =>
+                    setSalt(BigNumber.from(randomBytes(32)).toHexString())
+                  }
+                >
+                  <InputGroup.Text>RAND</InputGroup.Text>
+                </InputGroup.Append>
+              </InputGroup>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>
+                Starts in {((startsIn || 0) / 86400).toFixed(1)} day(s) (={" "}
+                {startsIn || 0} seconds)
+              </Form.Label>
+              <Form.Control
+                type="number"
+                value={startsIn}
+                min={BigNumber.from(minimumPending || 0).toNumber()}
+                max={BigNumber.from(maximumPending || 0).toNumber()}
+                step={86400}
+                onChange={({ target: { value } }) =>
+                  setStartsIn(parseInt(value))
                 }
-              >
-                <InputGroup.Text>RAND</InputGroup.Text>
-              </InputGroup.Append>
-            </InputGroup>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>
-              Starts in {((startsIn || 0) / 86400).toFixed(1)} day(s) (={" "}
-              {startsIn || 0} seconds)
-            </Form.Label>
-            <Form.Control
-              type="number"
-              value={startsIn}
-              min={BigNumber.from(minimumPending || 0).toNumber()}
-              max={BigNumber.from(maximumPending || 0).toNumber()}
-              step={86400}
-              onChange={({ target: { value } }) => setStartsIn(parseInt(value))}
-              placeholder={BigNumber.from(minimumPending || 0).toString()}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>
-              Voting period {((votingPeriod || 0) / 86400).toFixed(1)} day(s) (={" "}
-              {votingPeriod || 0} seconds)
-            </Form.Label>
-            <Form.Control
-              type="number"
-              value={votingPeriod}
-              min={BigNumber.from(minimumVotingPeriod || 0).toNumber()}
-              max={BigNumber.from(maximumVotingPeriod || 0).toNumber()}
-              step={86400}
-              onChange={({ target: { value } }) =>
-                setVotingPeriod(parseInt(value))
-              }
-              placeholder={BigNumber.from(minimumVotingPeriod || 0).toString()}
-            />
-          </Form.Group>
+                placeholder={BigNumber.from(minimumPending || 0).toString()}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>
+                Voting period {((votingPeriod || 0) / 86400).toFixed(1)} day(s)
+                (= {votingPeriod || 0} seconds)
+              </Form.Label>
+              <Form.Control
+                type="number"
+                value={votingPeriod}
+                min={BigNumber.from(minimumVotingPeriod || 0).toNumber()}
+                max={BigNumber.from(maximumVotingPeriod || 0).toNumber()}
+                step={86400}
+                onChange={({ target: { value } }) =>
+                  setVotingPeriod(parseInt(value))
+                }
+                placeholder={BigNumber.from(
+                  minimumVotingPeriod || 0
+                ).toString()}
+              />
+            </Form.Group>
+          </div>
           <ConditionalButton
             variant="primary"
             type="submit"

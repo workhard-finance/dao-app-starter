@@ -37,6 +37,8 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
   const [delay, setDelay] = useState<number>(86400);
   const [txStatus, setTxStatus] = useState<TxStatus>();
 
+  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
+
   /** arguments **/
   const [args, setArgs] = useState<{ [key: string]: string }>({});
 
@@ -150,44 +152,54 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
               />
             </Form.Group>
           ))}
+          <a
+            className="text-warning"
+            style={{ cursor: "pointer" }}
+            onClick={() => setAdvancedMode(!advancedMode)}
+          >
+            Advanced
+          </a>
+          <br />
 
-          <Form.Group>
-            <Form.Label>Predecessor</Form.Label>
-            <Form.Control
-              value={predecessor}
-              onChange={({ target: { value } }) => setPredecessor(value)}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Salt</Form.Label>
-            <InputGroup className="mb-2">
+          <div hidden={!advancedMode}>
+            <Form.Group>
+              <Form.Label>Predecessor</Form.Label>
               <Form.Control
-                value={salt}
-                onChange={({ target: { value } }) => setSalt(value)}
+                value={predecessor}
+                onChange={({ target: { value } }) => setPredecessor(value)}
               />
-              <InputGroup.Append
-                onClick={() =>
-                  setSalt(BigNumber.from(randomBytes(32)).toHexString())
-                }
-              >
-                <InputGroup.Text>RAND</InputGroup.Text>
-              </InputGroup.Append>
-            </InputGroup>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>
-              Delay: {((delay || 0) / 86400).toFixed(1)} day(s) (= {delay || 0}{" "}
-              seconds)
-            </Form.Label>
-            <Form.Control
-              type="number"
-              value={delay}
-              min={BigNumber.from(delay || 0).toNumber()}
-              step={86400}
-              onChange={({ target: { value } }) => setDelay(parseInt(value))}
-              placeholder={(delay || 86400).toString()}
-            />
-          </Form.Group>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Salt</Form.Label>
+              <InputGroup className="mb-2">
+                <Form.Control
+                  value={salt}
+                  onChange={({ target: { value } }) => setSalt(value)}
+                />
+                <InputGroup.Append
+                  onClick={() =>
+                    setSalt(BigNumber.from(randomBytes(32)).toHexString())
+                  }
+                >
+                  <InputGroup.Text>RAND</InputGroup.Text>
+                </InputGroup.Append>
+              </InputGroup>
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>
+                Delay: {((delay || 0) / 86400).toFixed(1)} day(s) (={" "}
+                {delay || 0} seconds)
+              </Form.Label>
+              <Form.Control
+                type="number"
+                value={delay}
+                min={BigNumber.from(delay || 0).toNumber()}
+                step={86400}
+                onChange={({ target: { value } }) => setDelay(parseInt(value))}
+                placeholder={(delay || 86400).toString()}
+              />
+            </Form.Group>
+          </div>
           <ConditionalButton
             variant="primary"
             type="submit"
