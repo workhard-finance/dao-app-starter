@@ -13,8 +13,9 @@ import { BigNumberish } from "ethers";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
 import { EmissionChart } from "../../views/EmissionChart";
-import { parseEther } from "ethers/lib/utils";
+import { getIcapAddress, parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
+import { getNetworkName } from "@workhard/protocol";
 
 const defaultSetting = {
   emissionStartDelay: 86400 * 7,
@@ -82,6 +83,8 @@ export const UpgradeToDAO: React.FC<{
     defaultSetting.founderShare
   );
 
+  const [hasAdminPermission, setHasAdminPermission] = useState<boolean>();
+
   useEffect(() => {
     const list = getStablecoinList(chainId);
     if (!list) return;
@@ -90,12 +93,55 @@ export const UpgradeToDAO: React.FC<{
       setBaseCurrency(list[0].address);
     }
   }, [chainId]);
+
   useEffect(() => {
     if (workhardCtx && id) {
       const { workhard } = workhardCtx;
       workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
     }
   }, [workhardCtx, id, blockNumber, history.location]);
+
+  useEffect(() => {
+    if (
+      !!workhardCtx &&
+      !!account &&
+      !!chainId &&
+      id &&
+      !!projectOwner &&
+      !!chainId
+    ) {
+      const { dao, workhard } = workhardCtx;
+      const { contributionBoard } = dao;
+      if (getIcapAddress(account) === getIcapAddress(projectOwner)) {
+        setHasAdminPermission(true);
+      } else {
+        const network = getNetworkName(chainId);
+        const gnosisAPI =
+          network === "mainnet"
+            ? `https://safe-transaction.gnosis.io/api/v1/`
+            : network === "rinkeby"
+            ? `https://safe-transaction.rinkeby.gnosis.io/api/v1/`
+            : undefined;
+
+        if (gnosisAPI) {
+          fetch(gnosisAPI + `safes/${projectOwner}/`)
+            .then(async (response) => {
+              const result = await response.json();
+              if (
+                (result.owners as string[])
+                  .map(getIcapAddress)
+                  .includes(getIcapAddress(account))
+              ) {
+                setHasAdminPermission(true);
+              }
+            })
+            .catch((_) => {
+              setHasAdminPermission(false);
+            });
+        }
+      }
+    }
+  }, [workhardCtx, account, chainId, projectOwner]);
 
   const upgradeToDAO = async () => {
     if (!workhardCtx) {
@@ -504,7 +550,7 @@ export const UpgradeToDAO: React.FC<{
       <ConditionalButton
         variant="info"
         onClick={upgradeToDAO}
-        enabledWhen={account === projectOwner}
+        enabledWhen={hasAdminPermission}
         whyDisabled={id ? `Not allowed` : "This is a preview"}
         children="Start DAO!"
       />
