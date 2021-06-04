@@ -5,7 +5,6 @@ import { TimelockTxs } from "./tabs/TimelockTxs";
 import { Propose } from "./tabs/Propose";
 import Vote from "./tabs/Vote";
 import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
-import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -20,13 +19,11 @@ const Gov: React.FC = () => {
 
   return (
     <Page>
-      {!daoId && (
-        <Image
-          className="jumbotron"
-          src={process.env.PUBLIC_URL + "/images/vote.jpg"}
-          style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-        />
-      )}
+      <Image
+        className="jumbotron"
+        src={process.env.PUBLIC_URL + "/images/vote.jpg"}
+        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
+      />
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}

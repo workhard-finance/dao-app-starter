@@ -12,8 +12,6 @@ import {
   prefix,
   TxStatus,
 } from "../../utils/utils";
-import { useHistory } from "react-router-dom";
-import { useParams } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
 import { initMineStore, MineStore } from "../../store/mineStore";
 import { observer } from "mobx-react";
@@ -137,13 +135,11 @@ const Mine = observer(() => {
 
   return (
     <Page>
-      {!daoId && (
-        <Image
-          className="jumbotron"
-          src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
-          style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-        />
-      )}
+      <Image
+        className="jumbotron"
+        src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
+        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
+      />
       {mineStore.distributable && (
         <Alert variant={"info"}>
           You just discovered a{" "}

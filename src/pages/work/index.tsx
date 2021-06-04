@@ -1,7 +1,6 @@
 import React from "react";
 import Page from "../../layouts/Page";
 import { Image } from "react-bootstrap";
-import { useParams } from "react-router-dom";
 import StableReserve from "./tabs/StableReserve";
 import { ContributionBoard } from "./tabs/ContributionBoard";
 import { SerHelpPlz } from "../../components/views/HelpSer";
@@ -10,21 +9,18 @@ import { useWorkhard } from "../../providers/WorkhardProvider";
 
 const Work: React.FC = () => {
   const workhardCtx = useWorkhard();
-  const { daoId } = workhardCtx || { daoId: 0 };
 
   return (
     <Page>
-      {!daoId && (
-        <Image
-          className="jumbotron"
-          src={process.env.PUBLIC_URL + "/images/work.jpg"}
-          style={{
-            width: "100%",
-            padding: "0px",
-            borderWidth: "5px",
-          }}
-        />
-      )}
+      <Image
+        className="jumbotron"
+        src={process.env.PUBLIC_URL + "/images/work.jpg"}
+        style={{
+          width: "100%",
+          padding: "0px",
+          borderWidth: "5px",
+        }}
+      />
       <p>
         Put your back into it fellow Worker! Earn some honest{" "}
         {workhardCtx && workhardCtx.daoId !== 0
