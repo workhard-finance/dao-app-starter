@@ -1,6 +1,6 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumber, constants, ContractTransaction } from "ethers";
-import { Card, Button, Form, InputGroup } from "react-bootstrap";
+import { Card, Button, Form, InputGroup, Row, Col } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -95,23 +95,32 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
     }
   }, [account, workhardCtx, blockNumber]);
   return (
-    <Card>
+    <Card border={"success"}>
       <Card.Body>
-        <Card.Title>
-          Redeem {workhardCtx?.metadata.commitSymbol || "$COMMIT"} for $DAI at a
-          1:1 exchange
-        </Card.Title>
-        <Card.Text>
-          <span style={{ fontSize: "2rem" }}>
-            1 {workhardCtx?.metadata.commitSymbol || "$COMMIT"}
-          </span>{" "}
-          per $DAI
-        </Card.Text>
+        <Row>
+          <Col md={5}>
+            <Card.Title>
+              {workhardCtx?.metadata.commitSymbol || `$COMMIT`} balance
+            </Card.Title>
+            <Card.Text>
+              <span style={{ fontSize: "2rem" }}>
+                {formatEther(commitBalance || 0)}
+              </span>{" "}
+              {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
+            </Card.Text>
+          </Col>
+          <Col md={7}>
+            <Card.Title>Redeem rate</Card.Title>
+            <Card.Text>
+              <span style={{ fontSize: "2rem" }}>
+                1 {workhardCtx?.metadata.baseCurrencySymbol || `DAI`}
+              </span>{" "}
+              per {workhardCtx?.metadata.commitSymbol || `COMMIT`}
+            </Card.Text>
+          </Col>
+        </Row>
+        <br />
         <Form>
-          <Form.Text>
-            {workhardCtx?.metadata.commitSymbol || "$COMMIT"} balance:{" "}
-            {formatEther(commitBalance || 0)}
-          </Form.Text>
           <Form.Group>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
@@ -136,7 +145,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
             {`= ${formatEther(parseEther(redeemAmount || "0"))} $DAI`}
           </Card.Text>
           <ConditionalButton
-            variant="primary"
+            variant="success"
             onClick={
               isApproved(allowance, redeemAmount) ? redeem : approveAndRedeem
             }
@@ -155,7 +164,9 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
                 : isApproved(allowance, redeemAmount)
                 ? redeemTxStatus === TxStatus.PENDING
                   ? "Redeeming..."
-                  : "Redeem"
+                  : `Redeem ${
+                      workhardCtx?.metadata.commitSymbol || "$COMMIT"
+                    } for $DAI`
                 : "Approve"
             }
           />

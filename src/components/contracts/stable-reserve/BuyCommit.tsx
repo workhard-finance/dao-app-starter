@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants, ContractTransaction } from "ethers";
-import { Card, Form, InputGroup } from "react-bootstrap";
+import { Card, Col, Form, InputGroup, Row } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -95,17 +95,30 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   }, [account, workhardCtx, approveTxStatus, blockNumber]);
 
   return (
-    <Card>
+    <Card border={"danger"}>
       <Card.Body>
-        <Card.Title>
-          Buy {workhardCtx?.metadata.commitSymbol || `$COMMIT`} at a premium
-        </Card.Title>
-        <Card.Text>
-          <span style={{ fontSize: "2rem" }}>2 DAI</span> per{" "}
-          {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
-        </Card.Text>
+        <Row>
+          <Col md={5}>
+            <Card.Title>Stable balance</Card.Title>
+            <Card.Text>
+              <span style={{ fontSize: "2rem" }}>
+                {formatEther(daiBalance || 0)}
+              </span>{" "}
+              {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`}
+            </Card.Text>
+          </Col>
+          <Col md={7}>
+            <Card.Title>Premium rate</Card.Title>
+            <Card.Text>
+              <span style={{ fontSize: "2rem" }}>
+                2 {workhardCtx?.metadata.baseCurrencySymbol || `DAI`}
+              </span>{" "}
+              per {workhardCtx?.metadata.commitSymbol || `COMMIT`}
+            </Card.Text>
+          </Col>
+        </Row>
+        <br />
         <Form>
-          <Form.Text>$DAI balance: {formatEther(daiBalance || 0)}</Form.Text>
           <Form.Group>
             <InputGroup className="mb-2">
               <InputGroup.Prepend>
@@ -130,7 +143,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
             }`}
           </Card.Text>
           <ConditionalButton
-            variant="primary"
+            variant="danger"
             onClick={
               isApproved(allowance, spendingDai) ? buyCommit : approveAndBuy
             }
@@ -149,7 +162,9 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
                 : isApproved(allowance, spendingDai)
                 ? buyTxStatus === TxStatus.PENDING
                   ? "Buying..."
-                  : "Buy"
+                  : `Buy ${
+                      workhardCtx?.metadata.commitSymbol || `$COMMIT`
+                    } at a premium`
                 : "Approve"
             }
           />
