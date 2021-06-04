@@ -161,6 +161,15 @@ const Mine = observer(() => {
               <ERC20StakeMiningV1
                 poolIdx={mineStore.liquidityMiningIdx()}
                 title={"Liquidity Mining"}
+                description={`Provide more liquidity for your project's on-chain stock options. LP your ${
+                  workhardCtx && workhardCtx.daoId !== 0
+                    ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
+                    : "$VISION"
+                } to earn more ${
+                  workhardCtx && workhardCtx.daoId !== 0
+                    ? workhardCtx.metadata.visionSymbol
+                    : "$VISION"
+                }`}
                 tokenName={`${
                   workhardCtx?.metadata.visionSymbol || "VISION"
                 }/ETH LP`}
@@ -185,6 +194,15 @@ const Mine = observer(() => {
                 poolIdx={mineStore.commitMiningIdx()}
                 title={"Commit Mining"}
                 tokenName={workhardCtx.metadata.commitSymbol}
+                description={`Show your true, long-term belief in your project. Burn ${
+                  workhardCtx && workhardCtx.daoId !== 0
+                    ? `${workhardCtx.metadata.commitName}(${workhardCtx.metadata.commitSymbol})`
+                    : "$COMMIT"
+                } to earn ${
+                  workhardCtx && workhardCtx.daoId !== 0
+                    ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
+                    : "$VISION"
+                }`}
                 link={prefix(daoId, "/work")}
                 poolAddress={workhardCtx.periphery.commitMining.address}
                 totalEmission={mineStore.emission || BigNumber.from(0)}
@@ -197,7 +215,7 @@ const Mine = observer(() => {
       {initialContributor && initialContributorPool && (
         <>
           <br />
-          <TitleButSer>Initial Contributors Pool!</TitleButSer>
+          <TitleButSer>Early Stage Contributors Pool!</TitleButSer>
           <InitialContributorSharePool
             poolAddress={initialContributorPool}
             totalEmission={mineStore.emission || BigNumber.from(0)}

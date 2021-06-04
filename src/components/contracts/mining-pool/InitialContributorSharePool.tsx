@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
-import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Form,
+  InputGroup,
+  ProgressBar,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -184,7 +192,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
   const collapsedDetails = () => (
     <>
       <hr />
-      <Card.Title>Burn your initial contribution</Card.Title>
+      <Card.Title>Burn your contribution proof</Card.Title>
       <Form>
         <Form.Group>
           <InputGroup className="mb-2">
@@ -215,32 +223,34 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
             BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
           )}
         </Card.Text>
-        <Button variant="warning" onClick={isApprovedForAll ? burn : approve}>
-          {isApprovedForAll ? "Burn" : "Approve"}
-        </Button>
+        <Row>
+          <Col>
+            <Button variant="outline-warning" onClick={exit}>
+              Stop mining and withdraw rewards
+            </Button>
+          </Col>
+          <Col style={{ textAlign: "end" }}>
+            <Button
+              variant="warning"
+              onClick={isApprovedForAll ? burn : approve}
+            >
+              {isApprovedForAll ? "Burn" : "Approve"}
+            </Button>
+          </Col>
+        </Row>
       </Form>
-      <hr />
-      <Card.Title>Mine</Card.Title>
-      <Card.Text>
-        You mined {formatEther(mined || "0")}{" "}
-        {workhardCtx?.metadata.visionSymbol || "$VISION"}
-      </Card.Text>
-      <Button variant="outline-warning" onClick={exit}>
-        Stop mining and withdraw rewards
-      </Button>
     </>
   );
 
   return (
     <Card border="warning">
       <Card.Header className="bg-warning text-white" onClick={() => {}}>
-        Initial Contributor Share Pool
+        Early Stage Contributor Share Pool
       </Card.Header>
       <Card.Body>
         <Card.Text>
-          You are one of the initial Contributor! Thanks for your hard
-          commitment for this project's early stages. Enjoy this special
-          rewards!
+          You are one of the early stage contributors! Thanks for your hard
+          commitment for this project. Enjoy this special rewards!
         </Card.Text>
         <Card.Text>
           {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}

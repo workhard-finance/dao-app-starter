@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
-import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Form,
+  InputGroup,
+  ProgressBar,
+  Row,
+} from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -23,6 +30,7 @@ import {
 } from "../../../utils/coingecko";
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
+import { Col } from "react-bootstrap";
 
 export interface ERC20StakeMiningV1Props {
   poolIdx: number;
@@ -32,6 +40,7 @@ export interface ERC20StakeMiningV1Props {
   totalEmission: BigNumber;
   visionPrice: number;
   emissionWeightSum: BigNumber;
+  description?: string;
   collapsible?: boolean;
   link?: string;
 }
@@ -43,6 +52,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   poolAddress,
   visionPrice,
   collapsible,
+  description,
   totalEmission,
   emissionWeightSum,
   link,
@@ -345,35 +355,35 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           {formatEther(stakedAmount?.add(tokenBalance || 0) || 0)} of your{" "}
           {tokenName || tokenDetails?.name} is staked.
         </Card.Text>
-        <Button
-          variant="success"
-          onClick={
-            stakeOrWithdraw
-              ? isApproved(allowance, amount)
-                ? stake
-                : approve
-              : withdraw
-          }
-        >
-          {stakeOrWithdraw
-            ? isApproved(allowance, amount)
-              ? "Stake"
-              : "Approve"
-            : "Withdraw"}
-        </Button>
+        <Row>
+          <Col>
+            <Button variant="outline-success" onClick={mine}>
+              Mine
+            </Button>{" "}
+            <Button variant="outline-success" onClick={exit}>
+              Mine & Exit
+            </Button>
+          </Col>
+          <Col style={{ textAlign: "end" }}>
+            <Button
+              variant="success"
+              onClick={
+                stakeOrWithdraw
+                  ? isApproved(allowance, amount)
+                    ? stake
+                    : approve
+                  : withdraw
+              }
+            >
+              {stakeOrWithdraw
+                ? isApproved(allowance, amount)
+                  ? "Stake"
+                  : "Approve"
+                : "Withdraw"}
+            </Button>
+          </Col>
+        </Row>
       </Form>
-      <hr />
-      <Card.Title>Mine</Card.Title>
-      <Card.Text>
-        You mined {formatEther(mined || "0")}{" "}
-        {workhardCtx?.metadata.visionSymbol || "$VISION"}
-      </Card.Text>
-      <Button variant="outline-success" onClick={mine}>
-        Mine
-      </Button>{" "}
-      <Button variant="outline-success" onClick={exit}>
-        Mine & Exit
-      </Button>
     </>
   );
 
@@ -381,12 +391,36 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
     <Card border="success">
       <Card.Header className="bg-success text-white">{title}</Card.Header>
       <Card.Body>
-        <Card.Title>APY</Card.Title>
-        <Card.Text style={{ fontSize: "2rem" }}>{apy}%</Card.Text>
-        <Card.Text>
-          {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
-          {workhardCtx?.metadata.visionSymbol || "VISION"} allocated this week.
-        </Card.Text>
+        {description && (
+          <>
+            <p style={{ height: "3rem" }}>{description}</p>
+            <hr />
+          </>
+        )}
+        <Row>
+          <Col md={3}>
+            <Card.Title>APY</Card.Title>
+            <Card.Text style={{ fontSize: "1.7rem" }}>{apy}%</Card.Text>
+          </Col>
+          <Col md={5}>
+            <Card.Title>Weekly allocation</Card.Title>
+            <Card.Text style={{ fontSize: "1.7rem" }}>
+              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.8rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+          <Col md={4}>
+            <Card.Title>Mined</Card.Title>
+            <Card.Text style={{ fontSize: "1.7rem" }}>
+              {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.8rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+        </Row>
         {collapsible && (
           <Button
             variant="outline-primary"

@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
-import { Card, Button, Form, InputGroup, ProgressBar } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Form,
+  InputGroup,
+  ProgressBar,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -33,6 +41,7 @@ export interface ERC20BurnMiningV1Props {
   totalEmission: BigNumber;
   visionPrice: number;
   emissionWeightSum: BigNumber;
+  description?: string;
   collapsible?: boolean;
   link?: string;
 }
@@ -44,6 +53,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   poolAddress,
   totalEmission,
   visionPrice,
+  description,
   collapsible,
   emissionWeightSum,
   link,
@@ -266,22 +276,22 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
             BigNumber.from(tokenBalance || 0).add(burnedAmount || 0)
           )}
         </Card.Text>
-        <Button
-          variant="danger"
-          onClick={isApproved(allowance, amount) ? burn : approve}
-        >
-          {isApproved(allowance, amount) ? "Burn" : "Approve"}
-        </Button>
+        <Row>
+          <Col>
+            <Button variant="outline-danger" onClick={exit}>
+              Stop mining and withdraw rewards
+            </Button>
+          </Col>
+          <Col style={{ textAlign: "end" }}>
+            <Button
+              variant="danger"
+              onClick={isApproved(allowance, amount) ? burn : approve}
+            >
+              {isApproved(allowance, amount) ? "Burn" : "Approve"}
+            </Button>
+          </Col>
+        </Row>
       </Form>
-      <hr />
-      <Card.Title>Mine</Card.Title>
-      <Card.Text>
-        You mined {formatEther(mined || "0")}{" "}
-        {workhardCtx?.metadata.visionSymbol || "$VISION"}
-      </Card.Text>
-      <Button variant="outline-danger" onClick={exit}>
-        Stop mining and withdraw rewards
-      </Button>
     </>
   );
 
@@ -289,20 +299,46 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
     <Card border="danger">
       <Card.Header className="bg-danger text-white">{title}</Card.Header>
       <Card.Body>
-        <Card.Title>
-          ARR
-          <OverlayTooltip
-            tip={
-              "Annual Revenue Run Rate = (earned vision - burned commit) * 12 months / burned commit"
-            }
-            text="❔"
-          />
-        </Card.Title>
-        <Card.Text style={{ fontSize: "2rem" }}>{annualRevenue}%</Card.Text>
-        <Card.Text>
-          {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
-          {workhardCtx?.metadata.visionSymbol || "VISION"} allocated this week.
-        </Card.Text>
+        {description && (
+          <>
+            <p style={{ height: "3rem" }}>{description}</p>
+            <hr />
+          </>
+        )}
+        <Row>
+          <Col md={3}>
+            <Card.Title>
+              ARR
+              <OverlayTooltip
+                tip={
+                  "Annual Revenue Run Rate = (earned vision - burned commit) * 12 months / burned commit"
+                }
+                text="❔"
+              />
+            </Card.Title>
+            <Card.Text style={{ fontSize: "1.7rem" }}>
+              {annualRevenue}%
+            </Card.Text>
+          </Col>
+          <Col md={5}>
+            <Card.Title>Weekly allocation</Card.Title>
+            <Card.Text style={{ fontSize: "1.7rem" }}>
+              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.8rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+          <Col md={4}>
+            <Card.Title>Mined</Card.Title>
+            <Card.Text style={{ fontSize: "1.7rem" }}>
+              {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.8rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+        </Row>
         {collapsible && (
           <Button
             variant="outline-primary"
