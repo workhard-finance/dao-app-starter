@@ -4,26 +4,19 @@ import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import {
   TxStatus,
-  handleTransaction,
   getStablecoinList,
   errorHandler,
   compareAddress,
   getGnosisAPI,
-  gnosisTx,
   safeTxHandler,
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
-import { ethers, BigNumberish, providers } from "ethers";
+import { BigNumberish, providers } from "ethers";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
 import { EmissionChart } from "../../views/EmissionChart";
 import { getIcapAddress, parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
-import { getNetworkName, GnosisSafe__factory } from "@workhard/protocol";
-import EthersSafe, {
-  SafeTransactionDataPartial,
-} from "@gnosis.pm/safe-core-sdk";
-import { OverlayTooltip } from "../../OverlayTooltip";
 
 const defaultSetting = {
   emissionStartDelay: 86400 * 7,
@@ -114,7 +107,7 @@ export const UpgradeToDAO: React.FC<{
       !!workhardCtx &&
       !!account &&
       !!chainId &&
-      id &&
+      !!id &&
       !!projectOwner &&
       !!chainId
     ) {
@@ -176,29 +169,25 @@ export const UpgradeToDAO: React.FC<{
     }
     const { workhard } = workhardCtx;
     const signer = library.getSigner(account);
-    const popTx = await workhard.populateTransaction.upgradeToDAO(
-      id,
-      {
-        multisig,
-        baseCurrency,
-        projectName,
-        projectSymbol,
-        visionName,
-        visionSymbol,
-        commitName,
-        commitSymbol,
-        rightName,
-        rightSymbol,
-        emissionStartDelay,
-        minDelay,
-        voteLaunchDelay,
-        initialEmission: parseEther(`${initialEmission}`),
-        minEmissionRatePerWeek,
-        emissionCutRate,
-        founderShare,
-      },
-      { gasLimit: 4500000 }
-    );
+    const popTx = await workhard.populateTransaction.upgradeToDAO(id, {
+      multisig,
+      baseCurrency,
+      projectName,
+      projectSymbol,
+      visionName,
+      visionSymbol,
+      commitName,
+      commitSymbol,
+      rightName,
+      rightSymbol,
+      emissionStartDelay,
+      minDelay,
+      voteLaunchDelay,
+      initialEmission: parseEther(`${initialEmission}`),
+      minEmissionRatePerWeek,
+      emissionCutRate,
+      founderShare,
+    });
     safeTxHandler(
       chainId,
       projectOwner,
@@ -215,7 +204,8 @@ export const UpgradeToDAO: React.FC<{
         }
         setTxStatus(undefined);
         onUpgraded && onUpgraded();
-      }
+      },
+      4100000
     );
   };
   return (

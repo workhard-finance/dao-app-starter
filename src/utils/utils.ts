@@ -398,7 +398,8 @@ export const gnosisTx = async (
   safe: string,
   provider: providers.Web3Provider,
   popTx: PopulatedTransaction,
-  signer: Signer
+  signer: Signer,
+  safeTxGas?: number
 ) => {
   const { to, data, value } = popTx;
   if (!to || !data) {
@@ -408,6 +409,7 @@ export const gnosisTx = async (
     to,
     data,
     value: value?.toString() || "0",
+    safeTxGas,
   };
   const safeSdk = await EthersSafe.create(ethers, safe, signer);
   const safeTx = await safeSdk.createTransaction(partialTx);
@@ -424,7 +426,7 @@ export const gnosisTx = async (
       safeTx.data.value,
       safeTx.data.data,
       safeTx.data.operation,
-      safeTx.data.safeTxGas,
+      safeTxGas || safeTx.data.safeTxGas,
       safeTx.data.baseGas,
       safeTx.data.gasPrice,
       safeTx.data.gasToken,
@@ -433,12 +435,14 @@ export const gnosisTx = async (
     );
     const req = {
       ...safeTx.data,
+      safeTxGas: safeTxGas || safeTx.data.safeTxGas,
       safe,
       contractTransactionHash,
       sender: await signer.getAddress(),
       signature: safeTx.encodedSignatures(),
       origin: "Workhard",
     };
+    console.log(req);
     const response = await fetch(
       gnosisAPI + `safes/${safe}/multisig-transactions/`,
       {
@@ -464,7 +468,8 @@ export const safeTxHandler = async (
   setTxStatus: React.Dispatch<React.SetStateAction<TxStatus | undefined>>,
   addToast: AddToast,
   msg: string,
-  callback?: (receipt?: ContractReceipt) => void
+  callback?: (receipt?: ContractReceipt) => void,
+  safeTxGas?: number
 ) => {
   const signerAddress = await signer.getAddress();
   if (compareAddress(safe, signerAddress)) {
@@ -476,7 +481,7 @@ export const safeTxHandler = async (
       callback
     );
   } else {
-    gnosisTx(chainId, safe, provider, popTx, signer)
+    gnosisTx(chainId, safe, provider, popTx, signer, safeTxGas)
       .then(() => {
         callback && callback();
       })

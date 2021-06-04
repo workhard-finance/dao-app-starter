@@ -222,13 +222,14 @@ export const Project: React.FC = () => {
                     <Pay
                       projId={id}
                       fund={fund || 0}
-                      budgetOwner={budgetOwner}
+                      projectOwner={budgetOwner}
                     />
                   </Card.Body>
                 </Card>
                 {streams.length > 0 && (
                   <>
-                    <h5>Streamings</h5>
+                    <hr />
+                    <h1>Streamings</h1>
                     <Row>
                       {streams.map((stream) => (
                         <Col md={4}>

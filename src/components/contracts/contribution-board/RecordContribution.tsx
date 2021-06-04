@@ -1,8 +1,8 @@
-import React, { FormEventHandler, useState } from "react";
+import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumberish } from "ethers";
 import { Form, FormControl, FormLabel } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
-import { useWorkhard } from "../../../providers/WorkhardProvider";
+import { useWorkhard, WorkhardCtx } from "../../../providers/WorkhardProvider";
 import { parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
@@ -23,7 +23,17 @@ export const RecordContribution: React.FC<RecordContributionProps> = ({
   const { addToast } = useToasts();
   const [contributor, setContributor] = useState("");
   const [contributionAmount, setContributionAmount] = useState<number>();
+  const [recordAllowed, setRecordAllowed] = useState<boolean>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
+  const workhardCtx = useWorkhard();
+
+  useEffect(() => {
+    if (workhardCtx) {
+      workhardCtx.dao.contributionBoard.minimumShare(projId).then((min) => {
+        setRecordAllowed(min.eq(0));
+      });
+    }
+  }, [WorkhardCtx, projId]);
 
   const handleSubmit: FormEventHandler = (event) => {
     event.preventDefault();
@@ -75,8 +85,12 @@ export const RecordContribution: React.FC<RecordContributionProps> = ({
       <ConditionalButton
         variant="primary"
         type="submit"
-        enabledWhen={account === budgetOwner ? true : undefined}
-        whyDisabled={`Only the project owner can call this function.`}
+        enabledWhen={account === budgetOwner ? recordAllowed : undefined}
+        whyDisabled={
+          recordAllowed
+            ? `Only the project owner can call this function.`
+            : `Funding exists. Cannot manually record contributions.`
+        }
         children={`Record contribution`}
       />
     </Form>

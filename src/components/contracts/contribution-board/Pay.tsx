@@ -1,5 +1,5 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumberish, providers, ethers } from "ethers";
 import {
   ButtonGroup,
   Card,
@@ -11,12 +11,15 @@ import {
 } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { formatEther, parseEther } from "ethers/lib/utils";
+import { formatEther, getIcapAddress, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import {
+  compareAddress,
   errorHandler,
+  getGnosisAPI,
   handleTransaction,
+  safeTxHandler,
   TxStatus,
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
@@ -25,11 +28,11 @@ import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 export interface PayProps {
   projId: BigNumberish;
   fund: BigNumberish;
-  budgetOwner: string;
+  projectOwner: string;
 }
 
-export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
-  const { account, library } = useWeb3React();
+export const Pay: React.FC<PayProps> = ({ projId, projectOwner, fund }) => {
+  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
@@ -39,12 +42,13 @@ export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [moneyStreaming, setMoneyStreaming] = useState<boolean>(true);
   const [streamingPeriod, setStreamingPeriod] = useState<number>(86400 * 28);
+  const [hasAdminPermission, setHasAdminPermission] = useState<boolean>();
 
-  const handleSubmit: FormEventHandler = (event) => {
+  const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
     const contributionBoard = workhardCtx?.dao.contributionBoard;
-    if (!contributionBoard) {
+    if (!contributionBoard || !library || !account || !chainId) {
       alert("Not connected");
       return;
     }
@@ -57,25 +61,46 @@ export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
       alert("Not enough amount of $COMMIT tokens");
       return;
     }
-    setPayAmount(
-      parseFloat(
-        formatEther(payAmountInWei.div(streamingPeriod).mul(streamingPeriod))
-      )
-    );
+    if (moneyStreaming) {
+      setPayAmount(
+        parseFloat(
+          formatEther(payAmountInWei.div(streamingPeriod).mul(streamingPeriod))
+        )
+      );
+    }
+
     const signer = library.getSigner(account);
-    const tx = moneyStreaming
-      ? contributionBoard
-          .connect(signer)
-          .compensateInStream(
-            projId,
-            payTo,
-            payAmountInWei.div(streamingPeriod).mul(streamingPeriod),
-            streamingPeriod
-          )
-      : contributionBoard
-          .connect(signer)
-          .compensate(projId, payTo, payAmountInWei);
-    handleTransaction(tx, setTxStatus, addToast, "Paid successfully!");
+    const tx = await (moneyStreaming
+      ? contributionBoard.populateTransaction.compensateInStream(
+          projId,
+          payTo,
+          payAmountInWei.div(streamingPeriod).mul(streamingPeriod),
+          streamingPeriod
+        )
+      : contributionBoard.populateTransaction.compensate(
+          projId,
+          payTo,
+          payAmountInWei
+        ));
+
+    safeTxHandler(
+      chainId,
+      projectOwner,
+      library,
+      tx,
+      signer,
+      setTxStatus,
+      addToast,
+      "Paid successfully!",
+      (receipt) => {
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
+        setTxStatus(undefined);
+        setPayAmount(0);
+      }
+    );
   };
 
   useEffect(() => {
@@ -87,6 +112,38 @@ export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
         .catch(errorHandler(addToast));
     }
   }, [txStatus, blockNumber, workhardCtx]);
+
+  useEffect(() => {
+    if (
+      !!workhardCtx &&
+      !!account &&
+      !!chainId &&
+      !!projectOwner &&
+      !!chainId
+    ) {
+      if (compareAddress(account, projectOwner)) {
+        setHasAdminPermission(true);
+      } else {
+        const gnosisAPI = getGnosisAPI(chainId);
+        if (gnosisAPI) {
+          fetch(gnosisAPI + `safes/${projectOwner}/`)
+            .then(async (response) => {
+              const result = await response.json();
+              if (
+                (result.owners as string[])
+                  .map(getIcapAddress)
+                  .includes(getIcapAddress(account))
+              ) {
+                setHasAdminPermission(true);
+              }
+            })
+            .catch((_) => {
+              setHasAdminPermission(false);
+            });
+        }
+      }
+    }
+  }, [workhardCtx, account, chainId, projectOwner]);
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -164,8 +221,13 @@ export const Pay: React.FC<PayProps> = ({ projId, budgetOwner, fund }) => {
       <ConditionalButton
         variant="primary"
         type="submit"
-        enabledWhen={account === budgetOwner ? true : undefined}
+        enabledWhen={hasAdminPermission}
         whyDisabled={`Only budget owner can call this function.`}
+        tooltip={
+          compareAddress(projectOwner, account || undefined)
+            ? undefined
+            : "Create a multisig transaction"
+        }
         children={`Pay`}
       />
     </Form>

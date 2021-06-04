@@ -6,18 +6,22 @@ import {
   TxStatus,
   handleTransaction,
   errorHandler,
+  compareAddress,
+  getGnosisAPI,
+  safeTxHandler,
 } from "../../../utils/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { useToasts } from "react-toast-notifications";
 import { BigNumber, BigNumberish, PopulatedTransaction } from "ethers";
 import { AllocationChart } from "../../views/AllocationChart";
 import { OverlayTooltip } from "../../OverlayTooltip";
+import { getIcapAddress } from "ethers/lib/utils";
 
 export const LaunchDAO: React.FC<{
   id?: BigNumberish;
   onLaunched?: () => void;
 }> = ({ id, onLaunched }) => {
-  const { account, library } = useWeb3React();
+  const { account, library, chainId } = useWeb3React();
   const workhardCtx = useWorkhard();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const { addToast } = useToasts();
@@ -29,6 +33,9 @@ export const LaunchDAO: React.FC<{
   const [projectName, setProjectName] = useState<string>();
   const [visionSymbol, setVisionSymbol] = useState<string>();
   const [commitSymbol, setCommitSymbol] = useState<string>();
+  const [growth, setGrowth] = useState<BigNumber>();
+  const [hasAdminPermission, setHasAdminPermission] = useState<boolean>();
+
   const [
     founderShareDenominator,
     setFounderShareDenominator,
@@ -62,6 +69,7 @@ export const LaunchDAO: React.FC<{
         .catch(errorHandler(addToast));
       dao.vision.symbol().then(setVisionSymbol).catch(errorHandler(addToast));
       dao.commit.symbol().then(setCommitSymbol).catch(errorHandler(addToast));
+      workhard.growth(id).then(setGrowth).catch(errorHandler(addToast));
     }
   }, [workhardCtx, id]);
 
@@ -74,28 +82,82 @@ export const LaunchDAO: React.FC<{
     }
   }, [workhardCtx, liquidityMining, commitMining, treasury, caller]);
 
+  useEffect(() => {
+    if (
+      !!workhardCtx &&
+      !!account &&
+      !!chainId &&
+      !!id &&
+      !!projectOwner &&
+      !!chainId
+    ) {
+      if (compareAddress(account, projectOwner)) {
+        setHasAdminPermission(true);
+      } else {
+        const gnosisAPI = getGnosisAPI(chainId);
+        if (gnosisAPI) {
+          fetch(gnosisAPI + `safes/${projectOwner}/`)
+            .then(async (response) => {
+              const result = await response.json();
+              if (
+                (result.owners as string[])
+                  .map(getIcapAddress)
+                  .includes(getIcapAddress(account))
+              ) {
+                setHasAdminPermission(true);
+              }
+            })
+            .catch((_) => {
+              setHasAdminPermission(false);
+            });
+        }
+      }
+    }
+  }, [workhardCtx, account, chainId, projectOwner]);
+
   const launchDAO = async () => {
-    if (!workhardCtx) {
-      alert("Not connected");
+    if (!workhardCtx || !chainId) {
+      alert("Not connected.");
       return;
     } else if (!id) {
-      alert("Project not exists");
+      alert("Project not exists.");
+      return;
+    } else if (!projectOwner) {
+      alert("Failed to fetch project owner.");
       return;
     }
     const { workhard } = workhardCtx;
     const signer = library.getSigner(account);
-    handleTransaction(
-      workhard
-        .connect(signer)
-        .launch(id, liquidityMining, commitMining, treasury, caller),
+    console.log(liquidityMining);
+    console.log(commitMining);
+    console.log(treasury);
+    console.log(caller);
+    const popTx = await workhard.populateTransaction.launch(
+      id,
+      liquidityMining,
+      commitMining,
+      treasury,
+      caller
+    );
+
+    safeTxHandler(
+      chainId,
+      projectOwner,
+      library,
+      popTx,
+      signer,
       setTxStatus,
       addToast,
-      "Posted a new job",
+      "Successfully setup initial emission!",
       (receipt) => {
-        alert(`DAO is successfully launched!`);
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
         setTxStatus(undefined);
         onLaunched && onLaunched();
-      }
+      },
+      4000000
     );
   };
   const poolSum = liquidityMining + commitMining + treasury + caller;
@@ -129,9 +191,22 @@ export const LaunchDAO: React.FC<{
       <ConditionalButton
         variant="success"
         onClick={launchDAO}
-        enabledWhen={account === projectOwner}
-        whyDisabled={id ? `Not allowed` : "This is a preview"}
+        enabledWhen={hasAdminPermission && growth?.eq(3)}
+        whyDisabled={
+          id
+            ? hasAdminPermission
+              ? growth?.gt(3)
+                ? "Already launched"
+                : "Not deployed yet"
+              : `Not allowed`
+            : "This is a preview"
+        }
         children="Start Emission!"
+        tooltip={
+          compareAddress(projectOwner, account || undefined)
+            ? undefined
+            : "Create a multisig transaction"
+        }
       />{" "}
       <OverlayTooltip tip={`Data for Gnosis Safe Multisig Wallet.`}>
         <Button variant="outline" onClick={handleShow}>

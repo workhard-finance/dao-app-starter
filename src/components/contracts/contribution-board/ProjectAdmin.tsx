@@ -4,11 +4,16 @@ import { Button, Card, Container, Form } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import { handleTransaction, TxStatus } from "../../../utils/utils";
+import {
+  handleTransaction,
+  safeTxHandler,
+  TxStatus,
+} from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { RecordContribution } from "./RecordContribution";
 import { Link } from "react-router-dom";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export interface ProjectAdminProps {
   projId: BigNumberish;
@@ -25,7 +30,7 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
   ownedByMultisig,
   hasAdminPermission,
 }) => {
-  const { account, library } = useWeb3React();
+  const { account, library, chainId } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
@@ -58,18 +63,31 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
   };
 
   const startInitialContributorProgram = async () => {
-    if (!workhardCtx || !account || !library) {
+    if (!workhardCtx || !account || !library || !chainId) {
       alert("Not connected.");
       return;
     }
     const signer = library.getSigner(account);
-    handleTransaction(
-      workhardCtx.dao.contributionBoard
-        .connect(signer)
-        .enableFunding(projId, minimumShare),
+    const popTx = await workhardCtx.dao.contributionBoard.populateTransaction.enableFunding(
+      projId,
+      minimumShare
+    );
+    safeTxHandler(
+      chainId,
+      owner,
+      library,
+      popTx,
+      signer,
       setTxStatus,
       addToast,
-      "Successfully started initial contribution sharing program"
+      "Successfully started initial contribution sharing program",
+      (receipt) => {
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
+        setTxStatus(undefined);
+      }
     );
   };
 
