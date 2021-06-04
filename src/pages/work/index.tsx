@@ -25,6 +25,22 @@ const Work: React.FC = () => {
           }}
         />
       )}
+      <p>
+        Put your back into it fellow Worker! Earn some honest{" "}
+        {workhardCtx && workhardCtx.daoId !== 0
+          ? `${workhardCtx.metadata.commitName}(COMMIT)`
+          : `$COMMIT`}{" "}
+        wages from a JOB or spend your precious{" "}
+        {workhardCtx && workhardCtx.daoId !== 0
+          ? `${workhardCtx.metadata.baseCurrencySymbol}`
+          : `$DAI`}{" "}
+        to buy{" "}
+        {workhardCtx && workhardCtx.daoId !== 0
+          ? `${workhardCtx.metadata.commitName}(COMMIT)`
+          : `$COMMIT`}{" "}
+        at a premium.
+      </p>
+      <hr />
       <TitleButSer link="#todo">Job Board</TitleButSer>
       <br />
       <ContributionBoard />
