@@ -23,10 +23,10 @@ const StableReserve: React.FC = () => {
   }, [workhardCtx, blockNumber]);
   return (
     <Row>
-      <Col md={5} style={{ marginTop: "1rem" }}>
+      <Col md={4} style={{ marginTop: "1rem" }}>
         <RedeemCommit />
       </Col>
-      <Col md={2} style={{ marginTop: "1rem", height: "inherit" }}>
+      <Col md={3} style={{ marginTop: "1rem", height: "inherit" }}>
         <Card style={{ height: "100%" }} border={`warning`}>
           <Card.Body>
             {commitPrice && commitPrice !== NaN && (

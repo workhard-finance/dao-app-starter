@@ -151,6 +151,7 @@ const Mine = observer(() => {
           </Button>
         </Alert>
       )}
+      <TitleButSer link="#todo">Main pools</TitleButSer>
       <p>
         Got some hard earned{" "}
         {workhardCtx && workhardCtx.daoId !== 0
@@ -167,8 +168,6 @@ const Mine = observer(() => {
           : "$VISION"}
         !
       </p>
-      <hr />
-      <TitleButSer link="#todo">Main pools</TitleButSer>
       <Row>
         <Col md={6}>
           {mineStore.pools &&
@@ -233,6 +232,10 @@ const Mine = observer(() => {
         <>
           <br />
           <TitleButSer>Early Stage Contributors Pool!</TitleButSer>
+          <p>
+            You are one of the early stage contributors! Thanks for your hard
+            commitment for this project. Enjoy this special rewards!
+          </p>
           <InitialContributorSharePool
             poolAddress={initialContributorPool}
             totalEmission={mineStore.emission || BigNumber.from(0)}

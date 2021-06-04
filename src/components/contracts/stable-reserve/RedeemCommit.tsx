@@ -100,7 +100,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
         <Row>
           <Col md={5}>
             <Card.Title>
-              {workhardCtx?.metadata.commitSymbol || `$COMMIT`} balance
+              {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
             </Card.Title>
             <Card.Text>
               <span style={{ fontSize: "2rem" }}>

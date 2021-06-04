@@ -316,24 +316,24 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
                 text="❔"
               />
             </Card.Title>
-            <Card.Text style={{ fontSize: "1.7rem" }}>
-              {annualRevenue}%
-            </Card.Text>
-          </Col>
-          <Col md={5}>
-            <Card.Title>Weekly allocation</Card.Title>
-            <Card.Text style={{ fontSize: "1.7rem" }}>
-              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
-              <span style={{ fontSize: "0.8rem" }}>
-                {workhardCtx?.metadata.visionSymbol || "VISION"}
-              </span>
+            <Card.Text>
+              <span style={{ fontSize: "1.5rem" }}>{annualRevenue}</span> %
             </Card.Text>
           </Col>
           <Col md={4}>
             <Card.Title>Mined</Card.Title>
-            <Card.Text style={{ fontSize: "1.7rem" }}>
+            <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
-              <span style={{ fontSize: "0.8rem" }}>
+              <span style={{ fontSize: "0.75rem" }}>
+                {workhardCtx?.metadata.visionSymbol || "VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+          <Col md={5}>
+            <Card.Title>Weekly allocation</Card.Title>
+            <Card.Text style={{ fontSize: "1.5rem" }}>
+              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+              <span style={{ fontSize: "0.75rem" }}>
                 {workhardCtx?.metadata.visionSymbol || "VISION"}
               </span>
             </Card.Text>

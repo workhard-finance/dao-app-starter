@@ -249,10 +249,6 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
       </Card.Header>
       <Card.Body>
         <Card.Text>
-          You are one of the early stage contributors! Thanks for your hard
-          commitment for this project. Enjoy this special rewards!
-        </Card.Text>
-        <Card.Text>
           {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
           {workhardCtx?.metadata.visionSymbol || "VISION"} allocated for initial
           contributors this week.
