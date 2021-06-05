@@ -23,11 +23,14 @@ const StableReserve: React.FC = () => {
   }, [workhardCtx, blockNumber]);
   return (
     <Row>
-      <Col md={4} style={{ marginTop: "1rem" }}>
+      <Col md={5} style={{ marginTop: "1rem" }}>
         <RedeemCommit />
       </Col>
-      <Col md={3} style={{ marginTop: "1rem", height: "inherit" }}>
+      <Col md={2} style={{ marginTop: "1rem", height: "inherit" }}>
         <Card style={{ height: "100%" }} border={`warning`}>
+          <Card.Header className={"bg-warning text-white"}>
+            Market Price
+          </Card.Header>
           <Card.Body>
             {commitPrice && commitPrice !== NaN && (
               <p>
@@ -36,13 +39,12 @@ const StableReserve: React.FC = () => {
                 {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
               </p>
             )}
-            <Card.Title>Market price</Card.Title>
+            <Card.Title>Market Price</Card.Title>
             <Card.Text>
-              <span style={{ fontSize: "2rem" }}>
-                {commitPrice || `???`}{" "}
-                {workhardCtx?.metadata.baseCurrencySymbol || `DAI`}
-              </span>{" "}
-              per {workhardCtx?.metadata.commitSymbol || `COMMIT`}
+              <span style={{ fontSize: "2rem" }}>{commitPrice || `???`}</span>
+              <br />
+              {workhardCtx?.metadata.baseCurrencySymbol || `DAI`} per{" "}
+              {workhardCtx?.metadata.commitSymbol || `COMMIT`}
             </Card.Text>
             <br />
             <br />
@@ -57,8 +59,8 @@ const StableReserve: React.FC = () => {
           </Card.Body>
         </Card>
       </Col>
-      <Col md={5} style={{ marginTop: "1rem" }}>
-        <BuyCommit />
+      <Col md={5} style={{ marginTop: "1rem", height: "inherit" }}>
+        <BuyCommit style={{ height: "100%" }} />
       </Col>
     </Row>
   );

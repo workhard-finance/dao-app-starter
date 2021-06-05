@@ -96,26 +96,26 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   }, [account, workhardCtx, blockNumber]);
   return (
     <Card border={"success"}>
+      <Card.Header className="bg-success text-white">Redeem</Card.Header>
       <Card.Body>
         <Row>
-          <Col md={5}>
+          <Col md={7}>
             <Card.Title>
-              {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
+              {workhardCtx?.metadata.commitSymbol || `$COMMIT`} balance
             </Card.Title>
             <Card.Text>
               <span style={{ fontSize: "2rem" }}>
-                {formatEther(commitBalance || 0)}
+                {parseFloat(formatEther(commitBalance || 0)).toFixed(2)}
               </span>{" "}
               {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
             </Card.Text>
           </Col>
-          <Col md={7}>
-            <Card.Title>Redeem rate</Card.Title>
+          <Col md={5}>
+            <Card.Title>Rate</Card.Title>
             <Card.Text>
-              <span style={{ fontSize: "2rem" }}>
-                1 {workhardCtx?.metadata.baseCurrencySymbol || `DAI`}
-              </span>{" "}
-              per {workhardCtx?.metadata.commitSymbol || `COMMIT`}
+              <span style={{ fontSize: "2rem" }}>1</span>{" "}
+              {workhardCtx?.metadata.baseCurrencySymbol || `DAI`} per{" "}
+              {workhardCtx?.metadata.commitSymbol || `COMMIT`}
             </Card.Text>
           </Col>
         </Row>

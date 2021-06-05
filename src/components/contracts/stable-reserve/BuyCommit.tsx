@@ -16,9 +16,11 @@ import {
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 
-export interface BuyCommitProps {}
+export interface BuyCommitProps {
+  style?: React.CSSProperties;
+}
 
-export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
+export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
@@ -95,10 +97,11 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
   }, [account, workhardCtx, approveTxStatus, blockNumber]);
 
   return (
-    <Card border={"danger"}>
+    <Card border={"danger"} style={style}>
+      <Card.Header className="bg-danger text-white">Buy</Card.Header>
       <Card.Body>
         <Row>
-          <Col md={5}>
+          <Col md={7}>
             <Card.Title>Stable balance</Card.Title>
             <Card.Text>
               <span style={{ fontSize: "2rem" }}>
@@ -107,13 +110,12 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({}) => {
               {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`}
             </Card.Text>
           </Col>
-          <Col md={7}>
-            <Card.Title>Premium rate</Card.Title>
+          <Col md={5}>
+            <Card.Title>Rate</Card.Title>
             <Card.Text>
-              <span style={{ fontSize: "2rem" }}>
-                2 {workhardCtx?.metadata.baseCurrencySymbol || `DAI`}
-              </span>{" "}
-              per {workhardCtx?.metadata.commitSymbol || `COMMIT`}
+              <span style={{ fontSize: "2rem" }}>2</span>{" "}
+              {workhardCtx?.metadata.baseCurrencySymbol || `DAI`} per{" "}
+              {workhardCtx?.metadata.commitSymbol || `COMMIT`}
             </Card.Text>
           </Col>
         </Row>
