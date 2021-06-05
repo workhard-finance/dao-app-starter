@@ -163,5 +163,17 @@ export const buildPresets = (dao: WorkhardDAO): Preset[] => {
       contract: dao.visionEmitter,
       contractName: "VisionEmitter",
     },
+    {
+      paramArray: [],
+      methodName: "proposeTx",
+      contract: dao.workersUnion,
+      contractName: "Manual",
+    },
+    {
+      paramArray: [],
+      methodName: "proposeBatchTx",
+      contract: dao.workersUnion,
+      contractName: "Manual",
+    },
   ];
 };

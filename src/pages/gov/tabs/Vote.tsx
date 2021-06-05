@@ -12,6 +12,7 @@ import { BigNumber, providers } from "ethers";
 import { altWhenEmptyList, prefix } from "../../../utils/utils";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { WorkersUnionProposal } from "./WorkersUnionProposal";
 
 const Vote: React.FC = () => {
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
@@ -94,8 +95,11 @@ const Vote: React.FC = () => {
               <Nav.Link eventKey="pending">Pending</Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link eventKey="faq">FAQ</Nav.Link>
+              <Nav.Link eventKey="proposal">Proposal</Nav.Link>
             </Nav.Item>
+            {/* <Nav.Item>
+              <Nav.Link eventKey="faq">FAQ</Nav.Link>
+            </Nav.Item> */}
           </Nav>
         </Col>
         <Col sm={9}>
@@ -174,6 +178,13 @@ const Vote: React.FC = () => {
               )}
             </Tab.Pane>
             <Tab.Pane
+              eventKey="proposal"
+              style={{ marginTop: "1rem" }}
+              onEnter={() => history.push(prefix(daoId, "/gov/vote/proposal"))}
+            >
+              <WorkersUnionProposal />
+            </Tab.Pane>
+            {/* <Tab.Pane
               eventKey="faq"
               style={{ marginTop: "1rem" }}
               onEnter={() => history.push(prefix(daoId, "/gov/vote/faq"))}
@@ -254,7 +265,7 @@ const Vote: React.FC = () => {
                 <strong>What happens if a proposal passed?</strong>
               </h5>
               <p>Once a proposal passed,</p>
-            </Tab.Pane>
+            </Tab.Pane> */}
           </Tab.Content>
         </Col>
       </Row>

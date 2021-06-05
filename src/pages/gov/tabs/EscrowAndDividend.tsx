@@ -63,9 +63,9 @@ export const EscrowAndDividend: React.FC = () => {
             <Nav.Item>
               <Nav.Link eventKey="distribute">Distribute</Nav.Link>
             </Nav.Item>
-            <Nav.Item>
+            {/* <Nav.Item>
               <Nav.Link eventKey="faq">FAQ</Nav.Link>
-            </Nav.Item>
+            </Nav.Item> */}
           </Nav>
         </Col>
         <Col sm={9}>
@@ -104,7 +104,7 @@ export const EscrowAndDividend: React.FC = () => {
             >
               <Distribute />
             </Tab.Pane>
-            <Tab.Pane
+            {/* <Tab.Pane
               eventKey="faq"
               onEnter={() => history.push(prefix(daoId, "/gov/dividend/faq"))}
             >
@@ -198,7 +198,7 @@ export const EscrowAndDividend: React.FC = () => {
                 solidity with two additional features: NFTization and vote
                 delegation.
               </p>
-            </Tab.Pane>
+            </Tab.Pane> */}
           </Tab.Content>
         </Col>
       </Row>

@@ -24,6 +24,17 @@ const Gov: React.FC = () => {
         src={process.env.PUBLIC_URL + "/images/vote.jpg"}
         style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
       />
+      <p>
+        True believers who stake & lock the project’s{" "}
+        {workhardCtx ? `$${workhardCtx.metadata.visionSymbol}` : "$VISION"}{" "}
+        tokens unlock non-transferable{" "}
+        {workhardCtx ? `$${workhardCtx.metadata.rightSymbol}` : "$RIGHT"}{" "}
+        tokens. Claim your project’s revenue dividends with{" "}
+        {workhardCtx ? `$${workhardCtx.metadata.rightSymbol}` : "$RIGHT"} and
+        vote with{" "}
+        {workhardCtx ? `$${workhardCtx.metadata.rightSymbol}` : "$RIGHT"} in the
+        WORKER’S UNION.
+      </p>
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
@@ -52,14 +63,6 @@ const Gov: React.FC = () => {
           onEnter={() => history.push(prefix(daoId, "/gov/vote"))}
         >
           <Vote />
-        </Tab>
-        <Tab
-          eventKey="proposal"
-          title="Proposal"
-          style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/gov/proposal"))}
-        >
-          <Propose />
         </Tab>
       </Tabs>
     </Page>
