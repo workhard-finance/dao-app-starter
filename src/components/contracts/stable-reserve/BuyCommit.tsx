@@ -105,7 +105,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
             <Card.Title>Stable balance</Card.Title>
             <Card.Text>
               <span style={{ fontSize: "2rem" }}>
-                {formatEther(daiBalance || 0)}
+                {parseFloat(formatEther(daiBalance || 0)).toFixed(2)}
               </span>{" "}
               {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`}
             </Card.Text>
