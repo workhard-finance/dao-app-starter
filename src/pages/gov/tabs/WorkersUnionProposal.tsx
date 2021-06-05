@@ -46,15 +46,6 @@ export const WorkersUnionProposal: React.FC = ({}) => {
   }, [account, workhardCtx]);
 
   useEffect(() => {
-    if (presets && contractName) {
-      const candidates = presets.filter((p) => p.contractName === contractName);
-      if (candidates.length > 0) {
-        setPreset(candidates[0]);
-      }
-    }
-  }, [presets, contractName]);
-
-  useEffect(() => {
     if (preset) {
       setContractName(preset.contractName);
       setFunctionName(preset.methodName);
@@ -67,9 +58,10 @@ export const WorkersUnionProposal: React.FC = ({}) => {
       {presets ? (
         [
           "StableReserve",
-          "ContributionBoard",
           "DividendPool",
           "VisionEmitter",
+          "Marketplace",
+          "VotingEscrowLock",
           "Manual",
         ].map((name) => (
           <Button

@@ -23,7 +23,9 @@ import { useToasts } from "react-toast-notifications";
 export const PresetProposal: React.FC<Preset> = ({
   paramArray,
   methodName,
+  contractName,
   contract,
+  handler,
 }) => {
   const { account, library } = useWeb3React<providers.Web3Provider>();
   const { dao } = useWorkhard() || {};
@@ -113,7 +115,10 @@ export const PresetProposal: React.FC<Preset> = ({
     const params = Object.entries(args).map((x) =>
       convertType(getType(x[0]), x[1])
     );
-    const { data } = await contract.populateTransaction[methodName](...params);
+    const popTx = handler
+      ? await handler(params)
+      : await contract.populateTransaction[methodName](...params);
+    const { data } = popTx;
     if (!predecessor) return alert("Predecessor is not set");
     if (!data) return alert("data is not set");
     if (!salt) return alert("Salt is not set");
@@ -139,7 +144,9 @@ export const PresetProposal: React.FC<Preset> = ({
   };
   return (
     <Card>
-      <Card.Header>preset proposal: {methodName}</Card.Header>
+      <Card.Header>
+        {contractName}.{methodName}()
+      </Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
           {paramArray.map((arg, i) => (
