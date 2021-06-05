@@ -20,7 +20,6 @@ import {
   safeTxHandler,
   TxStatus,
 } from "../../../utils/utils";
-import { PoolWeight } from "../../views/PoolWeight";
 import { AllocationChart } from "../../views/AllocationChart";
 import { useToasts } from "react-toast-notifications";
 import { BigNumber, providers, constants } from "ethers";
@@ -28,7 +27,7 @@ import { MiningPool__factory } from "@workhard/protocol";
 import { useWeb3React } from "@web3-react/core";
 import { randomBytes } from "ethers/lib/utils";
 
-export const SetEmission = () => {
+export const Allocation = () => {
   const workhardCtx = useWorkhard();
   const { library, account, chainId } = useWeb3React<providers.Web3Provider>();
   const { addToast } = useToasts();
@@ -204,148 +203,23 @@ export const SetEmission = () => {
   };
 
   return (
-    <Container>
-      <h2>Pools</h2>
-      <Row>
-        {pools?.map((pool, i) => (
-          <Col md={6}>
-            <Card>
-              <Card.Body>
-                <PoolWeight
-                  preset={pool}
-                  onChange={(_pool) => {
-                    const newPools = [...pools];
-                    newPools[i] = _pool;
-                    setPools(newPools);
-                  }}
-                />
-                <Button
-                  onClick={() => {
-                    setPools([...pools.slice(0, i), ...pools.slice(i + 1)]);
-                  }}
-                >
-                  Remove
-                </Button>
-              </Card.Body>
-            </Card>
-            <br />
-          </Col>
-        ))}
-      </Row>
-      <Card>
-        <Card.Body>
-          <Card.Title>Basic configuration</Card.Title>
-          <Form>
-            <Row>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Treasury</Form.Label>
-                  <Row>
-                    <Col md={8}>
-                      <Form.Control
-                        type="range"
-                        min={0}
-                        max={9999}
-                        step={1}
-                        value={treasuryWeight || 0}
-                        onChange={(event) => {
-                          setTreasuryWeight(parseInt(event.target.value));
-                        }}
-                      />
-                    </Col>
-                    <Col md={4}>
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        max={9999}
-                        step={1}
-                        value={treasuryWeight || 0}
-                        onChange={(event) => {
-                          setTreasuryWeight(parseInt(event.target.value));
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Caller</Form.Label>
-                  <Row>
-                    <Col md={8}>
-                      <Form.Control
-                        type="range"
-                        min={0}
-                        max={10}
-                        step={1}
-                        value={callerWeight || 0}
-                        onChange={(event) => {
-                          setCallerWeight(parseInt(event.target.value));
-                        }}
-                      />
-                    </Col>
-                    <Col md={4}>
-                      <Form.Control
-                        type="number"
-                        min={0}
-                        max={10}
-                        step={1}
-                        value={callerWeight || 0}
-                        onChange={(event) => {
-                          setCallerWeight(parseInt(event.target.value));
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Form.Group>
-              </Col>
-            </Row>
-          </Form>
-        </Card.Body>
-      </Card>
-      <br />
-      {pools && (
-        <>
-          <Button
-            onClick={() => {
-              const emptyPreset = {
-                baseToken: "",
-                poolType: "",
-                weight: 0,
-              };
-              const newPools = pools ? [...pools, emptyPreset] : [emptyPreset];
-              setPools(newPools);
-            }}
-          >
-            Add a pool
-          </Button>{" "}
-          <Button variant="info" onClick={multisigSetEmission}>
-            Create Multisig Transaction
-          </Button>
-        </>
-      )}
-      <hr />
-      <h2>Expected Emission</h2>
-      {emissionWeightForChart && (
-        <AllocationChart
-          pools={
-            pools
-              ? pools.map((pool) => ({
-                  name: `${humanReadablePoolType(pool.poolType)} - ${
-                    pool.name || pool.baseToken
-                  }`,
-                  weight: pool.weight,
-                  poolType: pool.poolType,
-                }))
-              : []
-          }
-          treasury={emissionWeightForChart.treasury || 1}
-          caller={emissionWeightForChart.caller || 0}
-          protocol={emissionWeightForChart.protocol || 0}
-          founder={emissionWeightForChart.dev || 0}
-          sum={emissionWeightForChart.sum || 1}
-        />
-      )}
-    </Container>
+    <AllocationChart
+      pools={
+        pools
+          ? pools.map((pool) => ({
+              name: `${humanReadablePoolType(pool.poolType)} - ${
+                pool.name || pool.baseToken
+              }`,
+              weight: pool.weight,
+              poolType: pool.poolType,
+            }))
+          : []
+      }
+      treasury={emissionWeightForChart?.treasury || 1}
+      caller={emissionWeightForChart?.caller || 0}
+      protocol={emissionWeightForChart?.protocol || 0}
+      founder={emissionWeightForChart?.dev || 0}
+      sum={emissionWeightForChart?.sum || 1}
+    />
   );
 };

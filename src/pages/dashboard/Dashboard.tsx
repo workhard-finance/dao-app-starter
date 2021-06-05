@@ -15,7 +15,6 @@ import {
   uriToURL,
 } from "../../utils/utils";
 import { getIcapAddress } from "ethers/lib/utils";
-import { AllocationChart } from "../../components/views/AllocationChart";
 import { useIPFS } from "../../providers/IPFSProvider";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
@@ -23,6 +22,7 @@ import { FatherSays } from "../../components/views/FatherSays";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { Allocation } from "../../components/contracts/vision-emitter/Allocation";
 
 const Dashboard = () => {
   const { addToast } = useToasts();
@@ -42,17 +42,7 @@ const Dashboard = () => {
     currentWeek: 0,
   });
 
-  const [emissionWeight, setEmissionWeight] = useState<{
-    treasury: BigNumber;
-    caller: BigNumber;
-    protocol: BigNumber;
-    dev: BigNumber;
-    sum: BigNumber;
-  }>();
-
-  const [poolNum, setPoolNum] = useState<number>();
   const { ipfs } = useIPFS();
-  const [pools, setPools] = useState<{ name: string; weight: number }[]>();
   const [metadata, setMetadata] = useState<ProjectMetadata>();
   const [emissionStarted, setEmissionStarted] = useState<number>();
   const [reserved, setReserved] = useState<BigNumber>();
@@ -90,14 +80,6 @@ const Dashboard = () => {
         })
         .catch(errorHandler(addToast));
       workhardCtx.dao.visionEmitter
-        .emissionWeight()
-        .then(setEmissionWeight)
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.visionEmitter
-        .getNumberOfPools()
-        .then((num) => setPoolNum(num.toNumber()))
-        .catch(errorHandler(addToast));
-      workhardCtx.dao.visionEmitter
         .emissionStarted()
         .then((num) => setEmissionStarted(num.toNumber()))
         .catch(errorHandler(addToast));
@@ -123,32 +105,6 @@ const Dashboard = () => {
         .catch(errorHandler(addToast));
     }
   }, [workhardCtx, daoId]);
-
-  useEffect(() => {
-    if (!!workhardCtx && !!poolNum) {
-      Promise.all([
-        Promise.all(
-          Array(poolNum)
-            .fill(workhardCtx.dao.visionEmitter)
-            .map((emitter, i) => emitter.getPoolWeight(i))
-        ),
-        Promise.all(
-          Array(poolNum)
-            .fill(workhardCtx.dao.visionEmitter)
-            .map((emitter, i) => emitter.pools(i))
-        ),
-      ])
-        .then(([weights, pools]) =>
-          setPools(
-            weights.map((w, i) => ({
-              weight: w.toNumber(),
-              name: poolName(pools[i]),
-            }))
-          )
-        )
-        .catch(errorHandler(addToast));
-    }
-  }, [workhardCtx, daoId, poolNum]);
 
   useEffect(() => {
     if (!!workhardCtx && !!ipfs) {
@@ -269,14 +225,7 @@ const Dashboard = () => {
           <h2>
             <b>Allocation</b>
           </h2>
-          <AllocationChart
-            pools={pools || []}
-            treasury={emissionWeight?.treasury.toNumber() || 1}
-            caller={emissionWeight?.caller.toNumber() || 0}
-            protocol={emissionWeight?.protocol.toNumber() || 0}
-            founder={emissionWeight?.dev.toNumber() || 0}
-            sum={emissionWeight?.sum.toNumber() || 1}
-          />
+          <Allocation />
         </Col>
       </Row>
       <h2>
