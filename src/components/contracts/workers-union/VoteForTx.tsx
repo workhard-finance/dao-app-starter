@@ -109,7 +109,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
         target.reduce(
           (arr, _target, i) => [
             ...arr,
-            decodeTxDetails(workhardCtx.dao, _target, data[i], value[i]),
+            decodeTxDetails(workhardCtx, _target, data[i], value[i]),
           ],
           [] as DecodedTxData[]
         )
@@ -119,7 +119,7 @@ export const VoteForTx: React.FC<VoteForTxProps> = ({
       !Array.isArray(data) &&
       !Array.isArray(value)
     ) {
-      setDecodedTxData([decodeTxDetails(workhardCtx.dao, target, data, value)]);
+      setDecodedTxData([decodeTxDetails(workhardCtx, target, data, value)]);
     }
   }, [workhardCtx, proposal]);
 

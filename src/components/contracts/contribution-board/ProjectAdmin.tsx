@@ -75,7 +75,6 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
     safeTxHandler(
       chainId,
       owner,
-      library,
       popTx,
       signer,
       setTxStatus,

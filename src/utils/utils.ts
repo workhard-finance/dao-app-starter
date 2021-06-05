@@ -12,6 +12,9 @@ import {
   getNetworkName,
   MyNetwork,
   GnosisSafe__factory,
+  ERC721__factory,
+  ERC1155__factory,
+  WorkhardClient,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
 import {
@@ -27,6 +30,8 @@ import {
 import IPFS from "ipfs-core/src/components";
 import { Dispatch, SetStateAction } from "react";
 import { AddToast } from "react-toast-notifications";
+import { WorkhardLibrary } from "../providers/WorkhardProvider";
+import { ERC165, PoolType } from "./ERC165Interfaces";
 // import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
@@ -165,14 +170,19 @@ export interface DecodedTxData {
 }
 
 export function decodeTxDetails(
-  dao: WorkhardDAO,
+  workhard: WorkhardLibrary,
   target: string,
   data: string,
   value: BigNumber
 ): DecodedTxData {
-  const targetContract = (Object.entries(dao) as Array<
-    [string, Contract]
-  >).find(
+  const contracts = [
+    ...(Object.entries(workhard.dao) as Array<[string, Contract]>),
+    ...(Object.entries(workhard.commons) as Array<[string, Contract]>),
+    ...(Object.entries({ Workhard: workhard.workhard }) as Array<
+      [string, Contract]
+    >),
+  ];
+  const targetContract = contracts.find(
     ([_, contract]) => getAddress(target) === getAddress(contract.address)
   );
   if (targetContract) {
@@ -274,7 +284,9 @@ export const errorHandler = (
   fn?: (_err?: Error) => void
 ) => (err: Error) => {
   let errMsg: string;
-  if ((err as any).data?.message) {
+  if ((err as any).error) {
+    errMsg = `${(err as any).reason} - ${(err as any).error.message}`;
+  } else if ((err as any).data?.message) {
     errMsg = (err as any).data?.message;
   } else {
     errMsg = err.message;
@@ -396,7 +408,6 @@ export const getGnosisAPI = (chainId?: number): string | undefined => {
 export const gnosisTx = async (
   chainId: number,
   safe: string,
-  provider: providers.Web3Provider,
   popTx: PopulatedTransaction,
   signer: Signer,
   safeTxGas?: number
@@ -418,21 +429,7 @@ export const gnosisTx = async (
   if (!gnosisAPI) {
     throw Error("Support only Rinkeby & Mainnet.");
   } else {
-    const contractTransactionHash = await GnosisSafe__factory.connect(
-      safe,
-      provider
-    ).getTransactionHash(
-      safeTx.data.to,
-      safeTx.data.value,
-      safeTx.data.data,
-      safeTx.data.operation,
-      safeTxGas || safeTx.data.safeTxGas,
-      safeTx.data.baseGas,
-      safeTx.data.gasPrice,
-      safeTx.data.gasToken,
-      safeTx.data.refundReceiver,
-      safeTx.data.nonce
-    );
+    const contractTransactionHash = await safeSdk.getTransactionHash(safeTx);
     const req = {
       ...safeTx.data,
       safeTxGas: safeTxGas || safeTx.data.safeTxGas,
@@ -442,7 +439,6 @@ export const gnosisTx = async (
       signature: safeTx.encodedSignatures(),
       origin: "Workhard",
     };
-    console.log(req);
     const response = await fetch(
       gnosisAPI + `safes/${safe}/multisig-transactions/`,
       {
@@ -462,7 +458,6 @@ export const gnosisTx = async (
 export const safeTxHandler = async (
   chainId: number,
   safe: string,
-  provider: providers.Web3Provider,
   popTx: PopulatedTransaction,
   signer: Signer,
   setTxStatus: React.Dispatch<React.SetStateAction<TxStatus | undefined>>,
@@ -481,10 +476,64 @@ export const safeTxHandler = async (
       callback
     );
   } else {
-    gnosisTx(chainId, safe, provider, popTx, signer, safeTxGas)
+    gnosisTx(chainId, safe, popTx, signer, safeTxGas)
       .then(() => {
         callback && callback();
       })
       .catch(errorHandler(addToast));
   }
+};
+
+export enum TokenType {
+  ERC20 = "ERC20",
+  ERC721 = "ERC721",
+  ERC1155 = "ERC1155",
+}
+
+export const isERC1155 = async (
+  address: string,
+  provider: providers.Provider
+): Promise<boolean> => {
+  try {
+    const support = await ERC1155__factory.connect(
+      address,
+      provider
+    ).supportsInterface(ERC165.ERC1155);
+    return support;
+  } catch (_err) {
+    return false;
+  }
+};
+
+export const isERC721 = async (
+  address: string,
+  provider: providers.Provider
+): Promise<boolean> => {
+  try {
+    const support = await ERC721__factory.connect(
+      address,
+      provider
+    ).supportsInterface(ERC165.ERC721);
+    return support;
+  } catch (_err) {
+    return false;
+  }
+};
+
+export const getTokenType = async (
+  address: string,
+  provider: providers.Provider
+): Promise<TokenType> => {
+  if (await isERC1155(address, provider)) return TokenType.ERC1155;
+  if (await isERC721(address, provider)) return TokenType.ERC721;
+  return TokenType.ERC20;
+};
+
+export const humanReadablePoolType = (poolType: string): string => {
+  if (poolType === PoolType.ERC20BurnV1) return "ERC20 Burn";
+  if (poolType === PoolType.ERC20StakeV1) return "ERC20 Stake";
+  if (poolType === PoolType.ERC721StakeV1) return "ERC721 Stake";
+  if (poolType === PoolType.ERC1155BurnV1) return "ERC1155 Burn";
+  if (poolType === PoolType.ERC1155StakeV1) return "ERC1155 Stake";
+  return "unknown";
 };

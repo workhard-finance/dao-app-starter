@@ -191,7 +191,6 @@ export const UpgradeToDAO: React.FC<{
     safeTxHandler(
       chainId,
       projectOwner,
-      library,
       popTx,
       signer,
       setTxStatus,

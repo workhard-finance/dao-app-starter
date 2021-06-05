@@ -1,11 +1,13 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import { Pie, Cell, PieChart, Label, ResponsiveContainer } from "recharts";
+import { PoolType } from "../../utils/ERC165Interfaces";
 
 export interface AllocationChartProps {
   pools: {
     name: string;
     weight: number;
+    poolType?: string;
   }[];
   treasury: number;
   caller: number;
@@ -28,6 +30,7 @@ export const AllocationChart: React.FC<AllocationChartProps> = ({
       title: pool.name,
       value: (pool.weight / sum) * 100,
       color: `#17a2b8${Math.floor(Math.random() * 200 + 55).toString(16)}`,
+      poolType: pool.poolType,
     })),
     {
       title: "Treasury",
@@ -70,12 +73,26 @@ export const AllocationChart: React.FC<AllocationChartProps> = ({
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
+    const poolType = (data[index] as any).poolType;
     return (
       <text
         x={x}
         y={y}
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
+        fill={
+          poolType
+            ? [PoolType.ERC20BurnV1, PoolType.ERC1155BurnV1].includes(poolType)
+              ? "#dc3545"
+              : [
+                  PoolType.ERC20StakeV1,
+                  PoolType.ERC721StakeV1,
+                  PoolType.ERC1155StakeV1,
+                ].includes(poolType)
+              ? "#28a745"
+              : undefined
+            : undefined
+        }
       >
         {data[index].title} {`${(percent * 100).toFixed(2)}%`}
       </text>

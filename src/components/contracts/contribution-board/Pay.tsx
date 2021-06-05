@@ -86,7 +86,6 @@ export const Pay: React.FC<PayProps> = ({ projId, projectOwner, fund }) => {
     safeTxHandler(
       chainId,
       projectOwner,
-      library,
       tx,
       signer,
       setTxStatus,
@@ -114,13 +113,7 @@ export const Pay: React.FC<PayProps> = ({ projId, projectOwner, fund }) => {
   }, [txStatus, blockNumber, workhardCtx]);
 
   useEffect(() => {
-    if (
-      !!workhardCtx &&
-      !!account &&
-      !!chainId &&
-      !!projectOwner &&
-      !!chainId
-    ) {
+    if (!!workhardCtx && !!account && !!projectOwner && !!chainId) {
       if (compareAddress(account, projectOwner)) {
         setHasAdminPermission(true);
       } else {

@@ -127,6 +127,7 @@ const Mine = observer(() => {
               totalEmission={mineStore.emission}
               emissionWeightSum={mineStore.emissionWeightSum}
               visionPrice={mineStore.visionPrice || 0}
+              collapsible
             />
           </div>
         );
@@ -228,6 +229,19 @@ const Mine = observer(() => {
             )}
         </Col>
       </Row>
+
+      {subPools.length > 0 && (
+        <>
+          <br />
+          <br />
+          <TitleButSer link="#todo">Sub pools</TitleButSer>
+          <Row>
+            {subPools.map((subPool) => (
+              <Col md={6}>{subPool}</Col>
+            ))}
+          </Row>
+        </>
+      )}
       {initialContributor && initialContributorPool && (
         <>
           <br />
@@ -303,14 +317,6 @@ const Mine = observer(() => {
           ’s profit.
         </p>
       </SerHelpPlz>
-
-      {subPools.length > 0 && (
-        <>
-          <hr />
-          <TitleButSer link="#todo">Sub pools</TitleButSer>
-          {subPools}
-        </>
-      )}
     </Page>
   );
 });

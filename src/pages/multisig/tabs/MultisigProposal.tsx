@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { ProposeTx } from "../../../components/contracts/workers-union/proposal-types/ProposeTx";
-import { ProposeBatchTx } from "../../../components/contracts/workers-union/proposal-types/ProposeBatchTx";
+import { TimelockPresetProposal } from "../../../components/contracts/timelocked-governance/TimelockPresetProposal";
 import { buildPresets, Preset } from "../../../utils/preset";
-import { PresetProposal } from "../../../components/contracts/workers-union/proposal-types/PresetProposal";
 import { useWeb3React } from "@web3-react/core";
 import { providers } from "ethers";
 
-export const WorkersUnionProposal: React.FC = ({}) => {
+export const MultisigProposal: React.FC = ({}) => {
   const { account } = useWeb3React<providers.Web3Provider>();
   const workhardCtx = useWorkhard();
   const [presets, setPresets] = useState<Preset[]>();
@@ -18,6 +16,9 @@ export const WorkersUnionProposal: React.FC = ({}) => {
 
   useEffect(() => {
     if (!!account && !!workhardCtx) {
+      // timeLockGovernance
+      //   .hasRole(solidityKeccak256(["string"], ["PROPOSER_ROLE"]), account)
+      //   .then(setHasProposerRole);
       const presets = buildPresets(workhardCtx.dao);
       setPresets(presets);
       setPreset(presets[0]);
@@ -41,7 +42,6 @@ export const WorkersUnionProposal: React.FC = ({}) => {
           "VisionEmitter",
           "Marketplace",
           "VotingEscrowLock",
-          "Manual",
         ].map((name) => (
           <Button
             style={{ margin: "0.2rem" }}
@@ -86,18 +86,13 @@ export const WorkersUnionProposal: React.FC = ({}) => {
       <br />
       <h5>Submit proposal</h5>
       {preset ? (
-        preset.contractName !== "Manual" ? (
-          <PresetProposal
-            paramArray={preset.paramArray}
-            methodName={preset.methodName}
-            contract={preset.contract}
-            contractName={preset.contractName}
-          />
-        ) : preset.methodName === "proposeTx" ? (
-          <ProposeTx />
-        ) : (
-          <ProposeBatchTx />
-        )
+        <TimelockPresetProposal
+          paramArray={preset.paramArray}
+          methodName={preset.methodName}
+          contract={preset.contract}
+          contractName={preset.contractName}
+          handler={preset.handler}
+        />
       ) : (
         <p>Select contract and method name</p>
       )}

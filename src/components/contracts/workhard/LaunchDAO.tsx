@@ -143,7 +143,6 @@ export const LaunchDAO: React.FC<{
     safeTxHandler(
       chainId,
       projectOwner,
-      library,
       popTx,
       signer,
       setTxStatus,

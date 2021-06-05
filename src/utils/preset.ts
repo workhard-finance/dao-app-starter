@@ -7,6 +7,7 @@ import {
   Contract,
   PopulatedTransaction,
 } from "ethers";
+import { defaultAbiCoder } from "ethers/lib/utils";
 
 export enum PARAM_TYPE {
   ARRAY = "Array",
@@ -56,11 +57,14 @@ export const buildPresets = (dao: WorkhardDAO): Preset[] => {
       ],
       contract: dao.stableReserve,
       handler: async (params: any[]) => {
+        console.log("hi");
+        console.log(params);
         const popTx = await dao.stableReserve.populateTransaction.grant(
           dao.contributionBoard.address,
-          params[0] as BigNumberish,
-          params[1] as BytesLike
+          params[1] as BytesLike, // amount
+          defaultAbiCoder.encode(["uint256"], [params[0] as BigNumberish]) // projId
         );
+        console.log("resulting", popTx);
         return popTx;
       },
     },

@@ -11,13 +11,15 @@ import { Accordion, Button, Card, Modal } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import { formatEther, Result, solidityKeccak256 } from "ethers/lib/utils";
+import { formatEther, getIcapAddress, Result } from "ethers/lib/utils";
 import {
+  compareAddress,
   DecodedTxData,
   decodeTxDetails,
   errorHandler,
   flatten,
-  handleTransaction,
+  getGnosisAPI,
+  safeTxHandler,
   TxStatus,
 } from "../../../utils/utils";
 import { OverlayTooltip } from "../../OverlayTooltip";
@@ -34,6 +36,7 @@ enum TimelockTxStatus {
   PENDING,
   READY,
   DONE,
+  CANCELED,
 }
 
 enum TxProposer {
@@ -60,8 +63,8 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   blockNumber,
   index,
 }) => {
-  const { account, library } = useWeb3React<providers.Web3Provider>();
-  const { dao } = useWorkhard() || {};
+  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
+  const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
   const [scheduledTx, setScheduledTx] = useState<ScheduledTx>();
   const [decodedTxData, setDecodedTxData] = useState<DecodedTxData[]>();
@@ -79,111 +82,156 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
   const handleShow = () => setShow(true);
 
   useEffect(() => {
-    if (!!dao && !!library) {
-      const timelock = dao.timelock;
-      const workersUnion = dao.workersUnion;
-      library
-        .getBlock(blockNumber)
-        .then((block) => {
-          setTimestamp(block.timestamp);
-        })
-        .catch(errorHandler(addToast));
-      if (tx.to) {
-        const txDetails = decodeTxDetails(dao, tx.to, tx.data, tx.value);
-        let proposer: TxProposer | undefined;
-        let forced: boolean | undefined;
-        if (tx.to === timelock.address) {
-          proposer = TxProposer.DEV;
-          if (
-            tx.data.startsWith(
-              timelock.interface.getSighash(
-                timelock.interface.functions[
-                  "forceSchedule(address,uint256,bytes,bytes32,bytes32,uint256)"
-                ]
+    if (!!workhardCtx && !!library) {
+      try {
+        const timelock = workhardCtx.dao.timelock;
+        const workersUnion = workhardCtx.dao.workersUnion;
+        library
+          .getBlock(blockNumber)
+          .then((block) => {
+            setTimestamp(block.timestamp);
+          })
+          .catch(errorHandler(addToast));
+        if (tx.to) {
+          let proposer: TxProposer | undefined;
+          let forced: boolean | undefined;
+          if (tx.to === timelock.address) {
+            proposer = TxProposer.DEV;
+            if (
+              tx.data.startsWith(
+                timelock.interface.getSighash(
+                  timelock.interface.functions[
+                    "forceSchedule(address,uint256,bytes,bytes32,bytes32,uint256)"
+                  ]
+                )
               )
-            )
-          ) {
-            forced = true;
+            ) {
+              forced = true;
+            }
+          } else if (tx.to === workersUnion.address) {
+            proposer = TxProposer.WORKERS_UNION;
+          } else if (tx.to === workhardCtx.dao.multisig.address) {
+            proposer = TxProposer.DEV;
+          } else {
+            proposer = TxProposer.UNKNOWN;
           }
-        } else if (tx.to === workersUnion.address) {
-          proposer = TxProposer.WORKERS_UNION;
-        } else if (tx.to === dao.multisig.address) {
-          proposer = TxProposer.DEV;
-        } else {
-          proposer = TxProposer.UNKNOWN;
-        }
 
-        let result: Result;
-        if (tx.to === dao.multisig.address) {
-          const decodedGnosisSafeTx = decodeTxDetails(
-            dao,
-            txDetails.result.to,
-            txDetails.result.data,
-            txDetails.result.value
-          );
-          result = decodedGnosisSafeTx.result;
-        } else {
-          result = txDetails.result;
+          let result: Result;
+          if (tx.to === workhardCtx.dao.multisig.address) {
+            const txDetails = decodeTxDetails(
+              workhardCtx,
+              tx.to,
+              tx.data,
+              tx.value
+            );
+            const decodedGnosisSafeTx = decodeTxDetails(
+              workhardCtx,
+              txDetails.result.to,
+              txDetails.result.data,
+              txDetails.result.value
+            );
+            result = decodedGnosisSafeTx.result;
+          } else {
+            const txDetails = decodeTxDetails(
+              workhardCtx,
+              tx.to,
+              tx.data,
+              tx.value
+            );
+            result = txDetails.result;
+          }
+          setScheduledTx({
+            target: result.target,
+            value: result.value,
+            data: result.data,
+            predecessor: result.predecessor,
+            salt: result.salt,
+            delay: result.delay || 86400,
+            forced: forced,
+            proposer,
+          });
+          const fn = Array.isArray(result.target)
+            ? timelock.populateTransaction.executeBatch
+            : timelock.populateTransaction.execute;
+          fn(
+            result.target,
+            result.value,
+            result.data,
+            result.predecessor,
+            result.salt
+          ).then((populated) => {
+            setExecutionTx(populated);
+          });
         }
-        setScheduledTx({
-          target: result.target,
-          value: result.value,
-          data: result.data,
-          predecessor: result.predecessor,
-          salt: result.salt,
-          delay: result.delay || 86400,
-          forced: forced,
-          proposer,
-        });
-        const fn = Array.isArray(result.target)
-          ? timelock.populateTransaction.executeBatch
-          : timelock.populateTransaction.execute;
-        fn(
-          result.target,
-          result.value,
-          result.data,
-          result.predecessor,
-          result.salt
-        ).then((populated) => {
-          setExecutionTx(populated);
-        });
+      } catch (_err) {
+        /// invalid tx. falied to decode
       }
     }
-  }, [library, dao, lastTx]);
+  }, [library, workhardCtx, lastTx]);
 
   useEffect(() => {
-    if (!!dao && !!scheduledTx) {
-      const { target, data, value } = scheduledTx;
-      if (
-        Array.isArray(target) &&
-        Array.isArray(data) &&
-        Array.isArray(value)
-      ) {
-        setDecodedTxData(
-          target.map((_target: string, i: number) => {
-            return decodeTxDetails(dao, _target, data[i], value[i]);
-          })
-        );
-      } else if (
-        !Array.isArray(target) &&
-        !Array.isArray(data) &&
-        !Array.isArray(value)
-      ) {
-        setDecodedTxData([decodeTxDetails(dao, target, data, value)]);
-      } else {
-        throw Error("decoding error");
+    if (!!workhardCtx && !!scheduledTx) {
+      try {
+        const { target, data, value } = scheduledTx;
+        if (
+          Array.isArray(target) &&
+          Array.isArray(data) &&
+          Array.isArray(value)
+        ) {
+          setDecodedTxData(
+            target.map((_target: string, i: number) => {
+              return decodeTxDetails(workhardCtx, _target, data[i], value[i]);
+            })
+          );
+        } else if (
+          !Array.isArray(target) &&
+          !Array.isArray(data) &&
+          !Array.isArray(value)
+        ) {
+          setDecodedTxData([decodeTxDetails(workhardCtx, target, data, value)]);
+        } else {
+          throw Error("decoding error");
+        }
+      } catch (_err) {
+        /// invalid tx. falied to decode
       }
     }
-  }, [dao, scheduledTx]);
+  }, [workhardCtx, scheduledTx]);
 
+  useEffect(() => {
+    if (!!workhardCtx && !!account && !!chainId) {
+      const safe = workhardCtx.dao.multisig.address;
+      if (compareAddress(account, safe)) {
+        setHasExecutorRole(true);
+      } else {
+        const gnosisAPI = getGnosisAPI(chainId);
+        if (gnosisAPI) {
+          fetch(gnosisAPI + `safes/${safe}/`)
+            .then(async (response) => {
+              const result = await response.json();
+              if (
+                (result.owners as string[])
+                  .map(getIcapAddress)
+                  .includes(getIcapAddress(account))
+              ) {
+                setHasExecutorRole(true);
+              }
+            })
+            .catch((_) => {
+              setHasExecutorRole(false);
+            });
+        }
+      }
+    }
+  }, [workhardCtx, account, chainId]);
   const execute = async () => {
-    if (!account || !dao || !library || !scheduledTx) {
+    if (!account || !workhardCtx || !library || !scheduledTx || !chainId) {
       alert("Not connected");
       return;
     }
 
     const signer: Signer = library.getSigner(account);
-    const timeLockGovernance = dao.timelock;
+    const timeLockGovernance = workhardCtx.dao.timelock;
 
     switch (timelockTxStatus) {
       case TimelockTxStatus.PENDING:
@@ -194,31 +242,48 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         break;
       case TimelockTxStatus.READY:
         const { target, value, data, predecessor, salt } = scheduledTx;
+        let tx: PopulatedTransaction | undefined = undefined;
         if (
           !Array.isArray(target) &&
           !Array.isArray(value) &&
           !Array.isArray(data)
         ) {
-          handleTransaction(
-            timeLockGovernance
-              .connect(signer)
-              .execute(target, value, data, predecessor, salt),
-            setTxStatus,
-            addToast,
-            "Executed transaction"
+          tx = await timeLockGovernance.populateTransaction.execute(
+            target,
+            value,
+            data,
+            predecessor,
+            salt
           );
         } else if (
           Array.isArray(target) &&
           Array.isArray(value) &&
           Array.isArray(data)
         ) {
-          handleTransaction(
-            timeLockGovernance
-              .connect(signer)
-              .executeBatch(target, value, data, predecessor, salt),
+          tx = await timeLockGovernance.populateTransaction.executeBatch(
+            target,
+            value,
+            data,
+            predecessor,
+            salt
+          );
+        }
+        if (tx) {
+          safeTxHandler(
+            chainId,
+            workhardCtx.dao.multisig.address,
+            tx,
+            signer,
             setTxStatus,
             addToast,
-            "Executed batch transaction"
+            "Executed transaction",
+            (receipt) => {
+              if (receipt) {
+              } else {
+                alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+              }
+              setTxStatus(undefined);
+            }
           );
         }
         break;
@@ -227,14 +292,41 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (!!account && !!dao) {
-      const { timelock } = dao;
-      timelock
-        .hasRole(solidityKeccak256(["string"], ["EXECUTOR_ROLE"]), account)
-        .then(setHasExecutorRole)
-        .catch(errorHandler(addToast));
+  const cancel = async () => {
+    if (!account || !workhardCtx || !library || !scheduledTx || !chainId) {
+      alert("Not connected");
+      return;
+    }
 
+    const signer: Signer = library.getSigner(account);
+
+    if (timelockTxStatus === TimelockTxStatus.DONE) {
+      alert("Already executed");
+      return;
+    }
+
+    const { target, value, data, predecessor, salt } = scheduledTx;
+    const tx = await workhardCtx.dao.timelock.populateTransaction.cancel(id);
+    safeTxHandler(
+      chainId,
+      workhardCtx.dao.multisig.address,
+      tx,
+      signer,
+      setTxStatus,
+      addToast,
+      "Executed transaction",
+      (receipt) => {
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
+        setTxStatus(undefined);
+      }
+    );
+  };
+  useEffect(() => {
+    if (!!account && !!workhardCtx) {
+      const { timelock } = workhardCtx.dao;
       timelock
         .isOperationDone(id)
         .then(async (done) => {
@@ -250,12 +342,15 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
             if (pending) {
               setTimelockTxStatus(TimelockTxStatus.PENDING);
               return;
+            } else {
+              setTimelockTxStatus(TimelockTxStatus.CANCELED);
+              return;
             }
           }
         })
         .catch(errorHandler(addToast));
     }
-  }, [account, dao, scheduledTx, lastTx]);
+  }, [account, workhardCtx, scheduledTx, lastTx]);
 
   const buttonText = (status: TimelockTxStatus) => {
     switch (status) {
@@ -265,11 +360,16 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         return "Execute";
       case TimelockTxStatus.DONE:
         return "Already executed";
+      case TimelockTxStatus.CANCELED:
+        return "Canceled";
     }
   };
   // TODO: decode data to method name & args
   const delay = parseInt(scheduledTx?.delay.toString() || "0");
-  const remaining = timestamp + delay - Math.floor(new Date().getTime() / 1000);
+  const remaining = Math.max(
+    0,
+    timestamp + delay - Math.floor(new Date().getTime() / 1000)
+  );
   return (
     <Card>
       <Card.Header>
@@ -298,6 +398,7 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           <li key={`${index}-${id}-salt`}>salt: {scheduledTx?.salt}</li>
         </ul>
         <Card.Text>Transaction:</Card.Text>
+        {!decodedTxData && <p>Invalid transaction. Failed to decode.</p>}
         <Accordion>
           {decodedTxData?.map((decoded, i) => (
             <Card key={`timelock-tx-${i}`}>
@@ -332,7 +433,6 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
         <br />
         <ConditionalButton
           variant="primary"
-          type="submit"
           enabledWhen={
             hasExecutorRole && timelockTxStatus === TimelockTxStatus.READY
           }
@@ -340,11 +440,18 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
           whyDisabled="Only the timelock admin can call this function for now. Open an issue on Github and ping the admin via Discord. This permission will be moved to WorkersUnion."
           children={buttonText(timelockTxStatus)}
         />{" "}
-        <OverlayTooltip tip={`Data for Gnosis Safe Multisig Wallet.`}>
-          <Button variant="outline" onClick={handleShow}>
-            ABI?
-          </Button>
-        </OverlayTooltip>
+        {(timelockTxStatus === TimelockTxStatus.PENDING ||
+          timelockTxStatus === TimelockTxStatus.READY) && (
+          <ConditionalButton
+            variant="outline-danger"
+            enabledWhen={hasExecutorRole}
+            onClick={cancel}
+            whyDisabled={
+              "Only multisig owners or workers union can cancel this transaction."
+            }
+            children={"cancel"}
+          />
+        )}
       </Card.Body>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>

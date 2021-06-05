@@ -136,25 +136,26 @@ export const Propose: React.FC = ({}) => {
             >
               <ProposeBatchTx />
             </Tab.Pane>
-            {presets?.map((prop) => {
+            {presets?.map((preset) => {
               return (
                 <Tab.Pane
-                  key={`${prop.contractName}-${prop.methodName}`}
-                  eventKey={`${prop.contractName}-${prop.methodName}`}
+                  key={`${preset.contractName}-${preset.methodName}`}
+                  eventKey={`${preset.contractName}-${preset.methodName}`}
                   onEnter={() =>
                     history.push(
                       prefix(
                         daoId,
-                        `/gov/propose/${`${prop.contractName}-${prop.methodName}`}`
+                        `/gov/propose/${`${preset.contractName}-${preset.methodName}`}`
                       )
                     )
                   }
                 >
                   <PresetProposal
-                    paramArray={prop.paramArray}
-                    methodName={prop.methodName}
-                    contract={prop.contract}
-                    contractName={prop.contractName}
+                    paramArray={preset.paramArray}
+                    methodName={preset.methodName}
+                    contract={preset.contract}
+                    contractName={preset.contractName}
+                    handler={preset.handler}
                   />
                 </Tab.Pane>
               );
@@ -178,6 +179,7 @@ export const Propose: React.FC = ({}) => {
                     methodName={prop.methodName}
                     contract={prop.contract}
                     contractName={prop.contractName}
+                    handler={prop.handler}
                   />
                 </Tab.Pane>
               );

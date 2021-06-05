@@ -25,7 +25,7 @@ const Work: React.FC = () => {
       <p></p>
       <hr />
       <TitleButSer link="#todo">
-        Job Board
+        Projects
         <OverlayTooltip
           tip={`Put your back into it fellow Worker! Earn some honest ${
             workhardCtx && workhardCtx.daoId !== 0

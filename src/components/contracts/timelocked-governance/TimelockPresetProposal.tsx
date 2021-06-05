@@ -1,30 +1,21 @@
 import React, { FormEventHandler, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { BigNumber, constants, PopulatedTransaction } from "ethers";
-import { Card, Form, InputGroup, Modal } from "react-bootstrap";
-import {
-  getIcapAddress,
-  randomBytes,
-  solidityKeccak256,
-} from "ethers/lib/utils";
+import { BigNumber, constants } from "ethers";
+import { Card, Form, InputGroup } from "react-bootstrap";
+import { getIcapAddress, randomBytes } from "ethers/lib/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { convertType, Param, Preset } from "../../../utils/preset";
 import { useToasts } from "react-toast-notifications";
-import EthersSafe, {
-  SafeTransactionDataPartial,
-} from "@gnosis.pm/safe-core-sdk";
-import {
-  errorHandler,
-  handleTransaction,
-  TxStatus,
-} from "../../../utils/utils";
+import { errorHandler, safeTxHandler, TxStatus } from "../../../utils/utils";
 import { getNetworkName } from "@workhard/protocol";
 
 export const TimelockPresetProposal: React.FC<Preset> = ({
   paramArray,
   methodName,
+  contractName,
   contract,
+  handler,
 }) => {
   const { account, chainId, library } = useWeb3React();
   const workhardCtx = useWorkhard();
@@ -94,7 +85,7 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
   const handleSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!account || !workhardCtx || !contract) {
+    if (!account || !workhardCtx || !contract || !chainId) {
       alert("Not connected");
       return;
     }
@@ -105,7 +96,9 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
     const params = Object.entries(args).map((x) =>
       convertType(getType(x[0]), x[1])
     );
-    const { data } = await contract.populateTransaction[methodName](...params);
+    const { data } = handler
+      ? await handler(params)
+      : await contract.populateTransaction[methodName](...params);
     if (!data) return alert("data is not set");
     const signer = library.getSigner(account);
     const popScheduledTx = await workhardCtx.dao.timelock.populateTransaction.schedule(
@@ -116,25 +109,31 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
       salt,
       delay
     );
-    if (!popScheduledTx.to || !popScheduledTx.value || !popScheduledTx.data) {
+    if (!popScheduledTx.to || !popScheduledTx.data) {
       throw Error("Populated transaction doesn't have any value");
     }
-    const safe = await EthersSafe.create(
-      library,
+    safeTxHandler(
+      chainId,
       workhardCtx.dao.multisig.address,
-      signer
+      popScheduledTx,
+      signer,
+      setTxStatus,
+      addToast,
+      "Successfully scheduled a tx.",
+      (receipt) => {
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
+        setTxStatus(undefined);
+      }
     );
-    const safeTx = await safe.createTransaction({
-      to: popScheduledTx.to,
-      value: popScheduledTx.value.toString(),
-      data: popScheduledTx.data,
-    });
-    const safeTxHash = await safe.getTransactionHash(safeTx);
-    alert(`Safe tx id: ${safeTxHash}`);
   };
   return (
     <Card>
-      <Card.Header>preset proposal(timelock): {methodName}</Card.Header>
+      <Card.Header>
+        {contractName}.{methodName}()
+      </Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
           {paramArray.map((arg, i) => (
@@ -160,7 +159,7 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
             Advanced
           </a>
           <br />
-
+          <br />
           <div hidden={!advancedMode}>
             <Form.Group>
               <Form.Label>Predecessor</Form.Label>
@@ -203,7 +202,7 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
           <ConditionalButton
             variant="primary"
             type="submit"
-            children="Submit"
+            children="Create a Gnosis Safe Multisig Transaction"
             enabledWhen={multisigOwner}
             whyDisabled={"You don't have the proposer role."}
           />

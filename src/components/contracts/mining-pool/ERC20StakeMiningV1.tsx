@@ -424,12 +424,15 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           </Col>
         </Row>
         {collapsible && (
-          <Button
-            variant="outline-primary"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? "▼ view more" : "▲ close details"}
-          </Button>
+          <>
+            <br />
+            <Button
+              variant="outline-primary"
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              {collapsed ? "▼ view more" : "▲ close details"}
+            </Button>
+          </>
         )}
         {(!collapsible || !collapsed) && collapsedDetails()}
       </Card.Body>

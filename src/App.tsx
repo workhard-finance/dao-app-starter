@@ -19,8 +19,9 @@ import { ForkAndLaunch } from "./pages/dao/ForkAndLaunch";
 import { ProductPage } from "./pages/store/tabs/ProductPage";
 import { IPFSProvider } from "./providers/IPFSProvider";
 import { ToastProvider } from "react-toast-notifications";
-import DefaultToast from "./components/Toast";
+import { MultisigAdmin } from "./pages/multisig/MultisigAdmin";
 import Dashboard from "./pages/dashboard/Dashboard";
+import DefaultToast from "./components/Toast";
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
       <ToastProvider
         components={{ Toast: DefaultToast }}
         autoDismiss={true}
-        autoDismissTimeout={60000}
+        autoDismissTimeout={5000}
       >
         <IPFSProvider>
           <BlockNumberProvider>
@@ -61,6 +62,10 @@ function App() {
                     <Route
                       path="/:daoId?/manufacturer/new"
                       children={<Manufacture />}
+                    />
+                    <Route
+                      path="/:daoId?/multisig"
+                      children={<MultisigAdmin />}
                     />
                     <Route
                       path="/docs"

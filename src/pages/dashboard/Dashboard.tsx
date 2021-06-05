@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Image, Col, Row, Card, Button } from "react-bootstrap";
+import { Image, Col, Row, Card, Button, Table } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { EmissionChart } from "../../components/views/EmissionChart";
 import { useWorkhard } from "../../providers/WorkhardProvider";
@@ -20,6 +20,9 @@ import { useIPFS } from "../../providers/IPFSProvider";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
 import { FatherSays } from "../../components/views/FatherSays";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from "@fortawesome/free-regular-svg-icons";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const Dashboard = () => {
   const { addToast } = useToasts();
@@ -245,7 +248,7 @@ const Dashboard = () => {
           </Erc20Balance>
         </Col>
       </Row>
-      <hr />
+      <br />
       <Row>
         <Col md={6}>
           <h2>
@@ -367,6 +370,97 @@ const Dashboard = () => {
               </Card.Text>
             </Card.Body>
           </Card>
+        </Col>
+      </Row>
+      <br />
+      <br />
+      <h2>
+        <b>Contracts</b>
+      </h2>
+      <Row>
+        <Col md={7}>
+          <Table>
+            <thead>
+              <tr>
+                <th scope="col">Contract Name</th>
+                <th scope="col">Address</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Workhard Project Contract", workhardCtx?.workhard.address],
+                ["Multisig", workhardCtx?.dao.multisig.address],
+                ["Timelock", workhardCtx?.dao.timelock.address],
+                [
+                  workhardCtx?.metadata.visionName,
+                  workhardCtx?.dao.vision.address,
+                ],
+                [
+                  workhardCtx?.metadata.commitName,
+                  workhardCtx?.dao.commit.address,
+                ],
+                [
+                  workhardCtx?.metadata.rightName,
+                  workhardCtx?.dao.right.address,
+                ],
+                [
+                  workhardCtx?.metadata.baseCurrencySymbol,
+                  workhardCtx?.dao.baseCurrency.address,
+                ],
+                ["Stable Reserve", workhardCtx?.dao.stableReserve.address],
+                ["Contribution Board", workhardCtx?.dao.stableReserve.address],
+                ["Marketplace", workhardCtx?.dao.marketplace.address],
+                ["Dividend Pool", workhardCtx?.dao.dividendPool.address],
+                ["Vote Counter", workhardCtx?.dao.voteCounter.address],
+                ["Workers Union", workhardCtx?.dao.workersUnion.address],
+                ["Token Emitter", workhardCtx?.dao.visionEmitter.address],
+                ["Voting Escrow", workhardCtx?.dao.votingEscrow.address],
+                [
+                  "Commit Mining Pool",
+                  workhardCtx?.periphery.commitMining.address,
+                ],
+                [
+                  "Liquidity Mining Pool",
+                  workhardCtx?.periphery.liquidityMining.address,
+                ],
+                [
+                  `${workhardCtx?.metadata.visionSymbol}/ETH LP`,
+                  workhardCtx?.periphery.visionLP.address,
+                ],
+              ].map((contract) => (
+                <tr>
+                  <td>{contract[0]}</td>
+                  <td>
+                    <>
+                      <a
+                        href={`https://etherscan.io/address/${contract[1]}`}
+                        target="_blank"
+                      >
+                        {contract[1]}
+                      </a>
+                    </>
+                  </td>
+                  <td>
+                    <CopyToClipboard
+                      text={workhardCtx?.workhard.address || ""}
+                      onCopy={() =>
+                        addToast({
+                          variant: "info",
+                          content: "copied!",
+                        })
+                      }
+                    >
+                      <FontAwesomeIcon
+                        icon={faCopy}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </CopyToClipboard>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </Col>
       </Row>
     </Page>

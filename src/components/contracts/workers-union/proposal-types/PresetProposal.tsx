@@ -173,6 +173,7 @@ export const PresetProposal: React.FC<Preset> = ({
             Advanced
           </a>
           <br />
+          <br />
           <div hidden={!advancedMode}>
             <Form.Group>
               <Form.Label>Predecessor</Form.Label>
