@@ -34,13 +34,16 @@ export const ContributionBoard: React.FC = () => {
             setProjects([]);
             setTabKey("post");
           } else if (!stale) {
-            for (let idx = lastFetched; idx < n.toNumber(); idx++) {
-              workhard.projectsOfDAOByIndex(daoId, idx).then((projId) => {
-                if (!projects?.find((v) => v.eq(projId))) {
-                  setProjects([...(projects || []), projId]);
-                }
-              });
-            }
+            const last = lastFetched;
+            Promise.all(
+              Array(n.toNumber() - last)
+                .fill(undefined)
+                .map((_, idx) =>
+                  workhard.projectsOfDAOByIndex(daoId, idx + last)
+                )
+            ).then((fetched) => {
+              setProjects([...(projects || []), ...fetched]);
+            });
             setLastFetched(n.toNumber());
           }
         })
