@@ -26,7 +26,6 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
   const { addToast } = useToasts();
   const workhardCtx = useWorkhard();
   const [daiBalance, setDaiBalance] = useState<BigNumber>();
-  const [commitBalance, setCommitBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
   const [spendingDai, setSpendingDai] = useState<string>();
   const [approveTxStatus, setApproveTxStatus] = useState<TxStatus>();
@@ -80,14 +79,9 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
   useEffect(() => {
     if (!!account && !!workhardCtx) {
       const baseCurrency = workhardCtx.dao.baseCurrency;
-      const commitToken = workhardCtx.dao.commit;
       baseCurrency
         .balanceOf(account)
         .then(setDaiBalance)
-        .catch(errorHandler(addToast));
-      commitToken
-        .balanceOf(account)
-        .then(setCommitBalance)
         .catch(errorHandler(addToast));
       baseCurrency
         .allowance(account, workhardCtx.dao.stableReserve.address)

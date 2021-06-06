@@ -23,7 +23,6 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
   const workhardCtx = useWorkhard();
-  const [daiBalance, setDaiBalance] = useState<BigNumber>();
   const [commitBalance, setCommitBalance] = useState<BigNumber>();
   const [allowance, setAllowance] = useState<BigNumber>();
   const [redeemAmount, setRedeemAmount] = useState<string>();
@@ -57,10 +56,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
     const signer = library.getSigner(account);
     const stableReserve = workhardCtx.dao.stableReserve;
     const redeemAmountInWei = parseEther(redeemAmount || "0");
-    if (!daiBalance) {
-      alert("Fetching balance..");
-      return;
-    } else if (commitBalance && redeemAmountInWei.gt(commitBalance)) {
+    if (commitBalance && redeemAmountInWei.gt(commitBalance)) {
       alert("Not enough amount of commit balance");
       return;
     }
@@ -78,12 +74,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
 
   useEffect(() => {
     if (!!account && !!workhardCtx) {
-      const baseCurrency = workhardCtx.dao.baseCurrency;
       const commitToken = workhardCtx.dao.commit;
-      baseCurrency
-        .balanceOf(account)
-        .then(setDaiBalance)
-        .catch(errorHandler(addToast));
       commitToken
         .balanceOf(account)
         .then(setCommitBalance)
