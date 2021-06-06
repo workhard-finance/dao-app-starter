@@ -19,6 +19,7 @@ import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { getNetworkName } from "@workhard/protocol";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export interface ProjectProps {
   projId: BigNumber;
@@ -121,9 +122,13 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
               {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
             </Card.Text>
             {minimumShare && minimumShare.gt(0) && (
-              <Badge variant={`success`} style={{ marginBottom: "0.2rem" }}>
-                initial contributor program
-              </Badge>
+              <OverlayTooltip
+                tip={`This project will share its emission with who contributed or funded.`}
+              >
+                <Badge variant={`success`} style={{ marginBottom: "0.2rem" }}>
+                  initial contributor program
+                </Badge>
+              </OverlayTooltip>
             )}
             {"  "}
             <Badge variant={ownedByMultisig ? `success` : "danger"}>
