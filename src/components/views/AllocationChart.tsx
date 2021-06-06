@@ -1,7 +1,15 @@
 import React from "react";
-import { Container } from "react-bootstrap";
-import { Pie, Cell, PieChart, Label, ResponsiveContainer } from "recharts";
-import { PoolType } from "../../utils/ERC165Interfaces";
+import { Button, Card, Container } from "react-bootstrap";
+import {
+  Pie,
+  Cell,
+  PieChart,
+  Label,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+import { PoolType, PoolTypeHash } from "../../utils/ERC165Interfaces";
+import { humanReadablePoolType } from "../../utils/utils";
 
 export interface AllocationChartProps {
   pools: {
@@ -51,6 +59,21 @@ export const AllocationChart: React.FC<AllocationChartProps> = ({
       color: "#868e96",
     });
   }
+
+  const getPoolColor = (poolType?: PoolTypeHash): string => {
+    return poolType
+      ? [PoolType.ERC20BurnV1, PoolType.ERC1155BurnV1].includes(poolType)
+        ? "#dc3545"
+        : [
+            PoolType.ERC20StakeV1,
+            PoolType.ERC721StakeV1,
+            PoolType.ERC1155StakeV1,
+          ].includes(poolType)
+        ? "#28a745"
+        : "#17a2b8"
+      : "#17a2b8";
+  };
+
   const renderCustomizedLabel = ({
     cx,
     cy,
@@ -80,21 +103,8 @@ export const AllocationChart: React.FC<AllocationChartProps> = ({
         y={y}
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
-        fill={
-          poolType
-            ? [PoolType.ERC20BurnV1, PoolType.ERC1155BurnV1].includes(poolType)
-              ? "#dc3545"
-              : [
-                  PoolType.ERC20StakeV1,
-                  PoolType.ERC721StakeV1,
-                  PoolType.ERC1155StakeV1,
-                ].includes(poolType)
-              ? "#28a745"
-              : undefined
-            : undefined
-        }
       >
-        {data[index].title} {`${(percent * 100).toFixed(2)}%`}
+        {data[index].title}
       </text>
     );
   };
@@ -120,6 +130,34 @@ export const AllocationChart: React.FC<AllocationChartProps> = ({
               />
             ))}
           </Pie>
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (active && payload && payload.length) {
+                return (
+                  <Card>
+                    <Card.Body>
+                      <Card.Text>
+                        Pool type:{" "}
+                        <span
+                          style={{
+                            color: getPoolColor(payload[0].payload?.poolType),
+                          }}
+                        >
+                          {humanReadablePoolType(payload[0].payload?.poolType)}
+                        </span>
+                      </Card.Text>
+                      <Card.Text>
+                        {payload[0].name}:{" "}
+                        {parseFloat(`${payload[0].value}`).toFixed(2)}%
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                );
+              }
+
+              return null;
+            }}
+          />
           <Label value="Pages of my website" offset={0} position="center" />
         </PieChart>
       </ResponsiveContainer>

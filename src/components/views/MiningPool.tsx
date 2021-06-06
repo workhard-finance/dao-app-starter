@@ -14,6 +14,7 @@ import { PoolType, PoolTypeHash } from "../../utils/ERC165Interfaces";
 import {
   errorHandler,
   getTokenLogo,
+  getTokenSymbol,
   getTokenType,
   TokenType,
 } from "../../utils/utils";
@@ -67,23 +68,9 @@ export const MiningPool: React.FC<MiningPoolProps> = (props) => {
 
   useEffect(() => {
     if (workhardCtx && baseToken && tokenType) {
-      if (!props.tokenSymbol) {
-        if (tokenType === TokenType.ERC20) {
-          ERC20__factory.connect(baseToken, workhardCtx.web3.library)
-            .symbol()
-            .then(setTokenSymbol)
-            .catch(errorHandler(addToast));
-        } else if (tokenType === TokenType.ERC721) {
-          ERC721__factory.connect(baseToken, workhardCtx.web3.library)
-            .symbol()
-            .then(setTokenSymbol)
-            .catch(errorHandler(addToast));
-        } else if (tokenType === TokenType.ERC1155) {
-          setTokenSymbol(
-            `ERC1155(${baseToken.slice(0, 6)}...${baseToken.slice(-2)})`
-          );
-        }
-      }
+      getTokenSymbol(baseToken, tokenType, workhardCtx.web3.library)
+        .then(setTokenSymbol)
+        .catch(errorHandler(addToast));
     }
   }, [workhardCtx, baseToken, tokenType]);
 
@@ -101,12 +88,6 @@ export const MiningPool: React.FC<MiningPoolProps> = (props) => {
           ).token1(),
         ]).then(([token0, token1]) => {
           setLogos([token0, token1].map(getTokenLogo));
-          Promise.all([
-            ERC20__factory.connect(token0, workhardCtx.web3.library).symbol(),
-            ERC20__factory.connect(token1, workhardCtx.web3.library).symbol(),
-          ]).then(([token0Symbol, token1Symbol]) => {
-            setTokenSymbol(`${token0Symbol}/${token1Symbol}`);
-          });
         });
       } else {
         setLogos([getTokenLogo(baseToken)]);

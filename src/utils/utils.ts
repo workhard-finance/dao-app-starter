@@ -15,8 +15,10 @@ import {
   ERC721__factory,
   ERC1155__factory,
   WorkhardClient,
+  ERC20__factory,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
+import { UniswapV2Pair__factory } from "@workhard/protocol/dist/build/@uniswap";
 import {
   ethers,
   constants,
@@ -132,21 +134,6 @@ export const getTargetNetworkName = (): MyNetwork | undefined => {
   if (hostname.includes("localhost")) return undefined;
   else if (hostname === "app.workhard.finance") return "mainnet";
   else return "rinkeby";
-};
-
-export const getTokenSymbol = (
-  address: string,
-  chainId?: number
-): string | undefined => {
-  if (!chainId) return undefined;
-  const token = acceptableTokenList(chainId).find(
-    (a) => getAddress(a.address) === getAddress(address)
-  );
-  if (token) {
-    return token.symbol;
-  } else {
-    return undefined;
-  }
 };
 
 export const getVariantForProgressBar = (percent: number) => {
@@ -529,12 +516,13 @@ export const getTokenType = async (
   return TokenType.ERC20;
 };
 
-export const humanReadablePoolType = (poolType: string): string => {
-  if (poolType === PoolType.ERC20BurnV1) return "ERC20 Burn";
-  if (poolType === PoolType.ERC20StakeV1) return "ERC20 Stake";
-  if (poolType === PoolType.ERC721StakeV1) return "ERC721 Stake";
-  if (poolType === PoolType.ERC1155BurnV1) return "ERC1155 Burn";
-  if (poolType === PoolType.ERC1155StakeV1) return "ERC1155 Stake";
+export const humanReadablePoolType = (poolType?: string): string => {
+  if (poolType === PoolType.ERC20BurnV1) return "ERC20 Burn Mining";
+  if (poolType === PoolType.ERC20StakeV1) return "ERC20 Stake Mining";
+  if (poolType === PoolType.ERC721StakeV1) return "ERC721 Stake Mining";
+  if (poolType === PoolType.ERC1155BurnV1) return "ERC1155 Burn Mining";
+  if (poolType === PoolType.ERC1155StakeV1) return "ERC1155 Stake Mining";
+  if (poolType === undefined) return "Etc";
   return "unknown";
 };
 
@@ -542,4 +530,51 @@ export const getTokenLogo = (address: string): string => {
   return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(
     address
   )}/logo.png`;
+};
+
+export const getLPTokenSymbols = async (
+  lp: string,
+  provider: providers.Web3Provider
+): Promise<{
+  token0: string;
+  token1: string;
+  symbol0: string;
+  symbol1: string;
+}> => {
+  const [token0, token1] = await Promise.all([
+    UniswapV2Pair__factory.connect(lp, provider).token0(),
+    UniswapV2Pair__factory.connect(lp, provider).token1(),
+  ]);
+  const [symbol0, symbol1] = await Promise.all([
+    ERC20__factory.connect(token0, provider).symbol(),
+    ERC20__factory.connect(token1, provider).symbol(),
+  ]);
+  return {
+    token0,
+    token1,
+    symbol0,
+    symbol1,
+  };
+};
+
+export const getTokenSymbol = async (
+  address: string,
+  tokenType: TokenType,
+  provider: providers.Web3Provider
+): Promise<string> => {
+  if (tokenType === TokenType.ERC20) {
+    const symbol = await ERC20__factory.connect(address, provider).symbol();
+    if (symbol === "UNI-V2") {
+      const { symbol0, symbol1 } = await getLPTokenSymbols(address, provider);
+      return `${symbol0}/${symbol1} LP`;
+    } else {
+      return symbol;
+    }
+  } else if (tokenType === TokenType.ERC721) {
+    return await ERC721__factory.connect(address, provider).symbol();
+  } else if (tokenType === TokenType.ERC1155) {
+    return `ERC1155 ${address.slice(0, 6)}...${address.slice(0, 4)}`;
+  } else {
+    return `Unknown Type ${address.slice(0, 6)}...${address.slice(0, 4)}`;
+  }
 };

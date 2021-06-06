@@ -1,26 +1,16 @@
 import { isAddress } from "@ethersproject/address";
 import { useWeb3React } from "@web3-react/core";
-import {
-  ERC1155__factory,
-  ERC20__factory,
-  ERC721__factory,
-} from "@workhard/protocol";
 import { providers } from "ethers";
 import React, { useEffect, useState } from "react";
-import {
-  Col,
-  Row,
-  Nav,
-  Tab,
-  Container,
-  Card,
-  Form,
-  Button,
-} from "react-bootstrap";
-import { useHistory, useParams } from "react-router-dom";
+import { Col, Row, Form, Button } from "react-bootstrap";
 import { useToasts } from "react-toast-notifications";
-import { ERC165, PoolType } from "../../utils/ERC165Interfaces";
-import { errorHandler, getTokenType, TokenType } from "../../utils/utils";
+import { PoolType } from "../../utils/ERC165Interfaces";
+import {
+  errorHandler,
+  getTokenSymbol,
+  getTokenType,
+  TokenType,
+} from "../../utils/utils";
 
 export const PoolWeight: React.FC<{
   preset?: {
@@ -64,26 +54,9 @@ export const PoolWeight: React.FC<{
 
   useEffect(() => {
     if (baseToken && library && isAddress(baseToken) && tokenType) {
-      if (tokenType === TokenType.ERC20) {
-        if (!poolType) setPoolType(PoolType.ERC20StakeV1);
-        ERC20__factory.connect(baseToken, library)
-          .symbol()
-          .then(setTitle)
-          .catch(errorHandler(addToast));
-      } else if (tokenType === TokenType.ERC721) {
-        if (!poolType) setPoolType(PoolType.ERC721StakeV1);
-        ERC721__factory.connect(baseToken, library)
-          .symbol()
-          .then(setTitle)
-          .catch(errorHandler(addToast));
-      } else if (tokenType === TokenType.ERC1155) {
-        if (!poolType) setPoolType(PoolType.ERC1155StakeV1);
-        setTitle(`ERC1155 ${baseToken.slice(0, 6)}...${baseToken.slice(0, 4)}`);
-      } else {
-        setTitle(
-          `Unknown Type ${baseToken.slice(0, 6)}...${baseToken.slice(0, 4)}`
-        );
-      }
+      getTokenSymbol(baseToken, tokenType, library)
+        .then(setTitle)
+        .catch(errorHandler(addToast));
     }
   }, [baseToken, tokenType]);
 

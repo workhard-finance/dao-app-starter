@@ -23,6 +23,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Allocation } from "../../components/contracts/vision-emitter/Allocation";
+import { SetEmission } from "../../components/contracts/vision-emitter/SetEmission";
 
 const Dashboard = () => {
   const { addToast } = useToasts();

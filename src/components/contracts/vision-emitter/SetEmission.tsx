@@ -1,22 +1,9 @@
 import React, { useEffect, useState } from "react";
-import Page from "../../../layouts/Page";
-import {
-  Col,
-  Row,
-  Nav,
-  Tab,
-  Container,
-  Button,
-  Card,
-  Form,
-} from "react-bootstrap";
-import { useHistory, useParams } from "react-router-dom";
+import { Col, Row, Container, Button, Card, Form } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import {
   compareAddress,
   errorHandler,
-  humanReadablePoolType,
-  prefix,
   safeTxHandler,
   TxStatus,
 } from "../../../utils/utils";
@@ -347,9 +334,7 @@ export const SetEmission = () => {
           pools={
             pools
               ? pools.map((pool) => ({
-                  name: `${humanReadablePoolType(pool.poolType)} - ${
-                    pool.name || pool.baseToken
-                  }`,
+                  name: `${pool.name || pool.baseToken}`,
                   weight: pool.weight,
                   poolType: pool.poolType,
                 }))
