@@ -51,6 +51,11 @@ export interface WorkhardLibrary {
   commons: WorkhardCommons;
   client: WorkhardClient;
   metadata: DAOMetadata;
+  web3: {
+    active: boolean;
+    library: ethers.providers.Web3Provider;
+    chainId: number;
+  };
 }
 
 export const WorkhardCtx = React.createContext<WorkhardLibrary | undefined>(
@@ -126,6 +131,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
         rightSymbol,
         baseCurrencySymbol,
       },
+      web3: { active, library, chainId },
     };
   };
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { Interface, LogDescription, Result } from "@ethersproject/abi";
 import { Log } from "@ethersproject/abstract-provider";
-import { getAddress, getIcapAddress } from "@ethersproject/address";
+import { getAddress } from "@ethersproject/address";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { formatEther, parseEther } from "@ethersproject/units";
 import EthersSafe, {
@@ -390,7 +390,7 @@ export const weiToEth = (wei: BigNumberish, fixed?: number): number => {
 
 export const compareAddress = (a?: string, b?: string): boolean => {
   if (!a || !b) return false;
-  return getIcapAddress(a) === getIcapAddress(b);
+  return getAddress(a) === getAddress(b);
 };
 
 export const getGnosisAPI = (chainId?: number): string | undefined => {
@@ -536,4 +536,10 @@ export const humanReadablePoolType = (poolType: string): string => {
   if (poolType === PoolType.ERC1155BurnV1) return "ERC1155 Burn";
   if (poolType === PoolType.ERC1155StakeV1) return "ERC1155 Stake";
   return "unknown";
+};
+
+export const getTokenLogo = (address: string): string => {
+  return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${getAddress(
+    address
+  )}/logo.png`;
 };

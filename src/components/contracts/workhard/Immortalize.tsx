@@ -2,7 +2,7 @@ import React, { FormEventHandler, useEffect, useState } from "react";
 import { BigNumberish, providers, ethers, constants, BigNumber } from "ethers";
 import { Form } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { getIcapAddress, randomBytes } from "ethers/lib/utils";
+import { getAddress, randomBytes } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import {
@@ -32,8 +32,8 @@ export const Immortalize: React.FC<Immortalize> = ({}) => {
             const result = await response.json();
             if (
               (result.owners as string[])
-                .map(getIcapAddress)
-                .includes(getIcapAddress(account))
+                .map(getAddress)
+                .includes(getAddress(account))
             ) {
               setHasPermission(true);
             }

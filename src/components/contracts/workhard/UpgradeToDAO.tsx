@@ -15,7 +15,7 @@ import { BigNumberish, providers } from "ethers";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { ConditionalButton } from "../../ConditionalButton";
 import { EmissionChart } from "../../views/EmissionChart";
-import { getIcapAddress, parseEther } from "ethers/lib/utils";
+import { getAddress, parseEther } from "ethers/lib/utils";
 import { useHistory } from "react-router-dom";
 
 const defaultSetting = {
@@ -121,8 +121,8 @@ export const UpgradeToDAO: React.FC<{
               const result = await response.json();
               if (
                 (result.owners as string[])
-                  .map(getIcapAddress)
-                  .includes(getIcapAddress(account))
+                  .map(getAddress)
+                  .includes(getAddress(account))
               ) {
                 setHasAdminPermission(true);
               }

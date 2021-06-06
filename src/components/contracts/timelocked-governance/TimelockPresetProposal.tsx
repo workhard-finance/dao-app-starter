@@ -3,7 +3,7 @@ import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { BigNumber, constants } from "ethers";
 import { Card, Form, InputGroup } from "react-bootstrap";
-import { getIcapAddress, randomBytes } from "ethers/lib/utils";
+import { getAddress, randomBytes } from "ethers/lib/utils";
 import { ConditionalButton } from "../../ConditionalButton";
 import { convertType, Param, Preset } from "../../../utils/preset";
 import { useToasts } from "react-toast-notifications";
@@ -70,8 +70,8 @@ export const TimelockPresetProposal: React.FC<Preset> = ({
               const result = await response.json();
               if (
                 (result.owners as string[])
-                  .map(getIcapAddress)
-                  .includes(getIcapAddress(account))
+                  .map(getAddress)
+                  .includes(getAddress(account))
               ) {
                 setMultisigOwner(true);
               }

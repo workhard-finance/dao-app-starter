@@ -5,6 +5,7 @@ import {
   Button,
   Form,
   InputGroup,
+  Image,
   ProgressBar,
   Row,
 } from "react-bootstrap";
@@ -18,6 +19,7 @@ import {
 } from "@workhard/protocol";
 import {
   errorHandler,
+  getTokenLogo,
   getVariantForProgressBar,
   handleTransaction,
   isApproved,
@@ -43,6 +45,7 @@ export interface ERC20StakeMiningV1Props {
   description?: string;
   collapsible?: boolean;
   link?: string;
+  logos?: string[];
 }
 
 export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
@@ -56,6 +59,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   totalEmission,
   emissionWeightSum,
   link,
+  logos,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -293,6 +297,18 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
 
   const collapsedDetails = () => (
     <>
+      {collapsible && (
+        <>
+          <hr />
+          <Card.Title>Weekly allocation</Card.Title>
+          <Card.Text style={{ fontSize: "1.5rem" }}>
+            {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+            <span style={{ fontSize: "0.75rem" }}>
+              {workhardCtx?.metadata.visionSymbol || "VISION"}
+            </span>
+          </Card.Text>
+        </>
+      )}
       <hr />
       <Card.Title>
         Stake{" "}
@@ -389,7 +405,16 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
 
   return (
     <Card border="success">
-      <Card.Header className="bg-success text-white">{title}</Card.Header>
+      <Card.Header className="bg-success text-white">
+        {title}{" "}
+        {logos &&
+          logos.map((logo) => (
+            <>
+              {" "}
+              <Image style={{ height: "1.5rem" }} src={logo} alt={""} />
+            </>
+          ))}{" "}
+      </Card.Header>
       <Card.Body>
         {description && (
           <>
@@ -398,13 +423,13 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           </>
         )}
         <Row>
-          <Col md={3}>
+          <Col style={{ marginBottom: "1rem" }}>
             <Card.Title>APY</Card.Title>
             <Card.Text>
               <span style={{ fontSize: "1.5rem" }}>{apy}</span> %
             </Card.Text>
           </Col>
-          <Col md={4}>
+          <Col style={{ marginBottom: "1rem" }}>
             <Card.Title>Mined</Card.Title>
             <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
@@ -413,15 +438,17 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
               </span>
             </Card.Text>
           </Col>
-          <Col md={5}>
-            <Card.Title>Weekly allocation</Card.Title>
-            <Card.Text style={{ fontSize: "1.5rem" }}>
-              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
-              <span style={{ fontSize: "0.75rem" }}>
-                {workhardCtx?.metadata.visionSymbol || "VISION"}
-              </span>
-            </Card.Text>
-          </Col>
+          {!collapsible && (
+            <Col style={{ marginBottom: "1rem", minWidth: "16rem" }}>
+              <Card.Title>Weekly allocation</Card.Title>
+              <Card.Text style={{ fontSize: "1.5rem" }}>
+                {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+                <span style={{ fontSize: "0.75rem" }}>
+                  {workhardCtx?.metadata.visionSymbol || "VISION"}
+                </span>
+              </Card.Text>
+            </Col>
+          )}
         </Row>
         {collapsible && (
           <>

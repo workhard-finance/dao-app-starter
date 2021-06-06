@@ -11,7 +11,7 @@ import { Accordion, Button, Card, Modal } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
-import { formatEther, getIcapAddress, Result } from "ethers/lib/utils";
+import { formatEther, getAddress, Result } from "ethers/lib/utils";
 import {
   compareAddress,
   DecodedTxData,
@@ -211,8 +211,8 @@ export const TimelockTx: React.FC<TimelockTxProps> = ({
               const result = await response.json();
               if (
                 (result.owners as string[])
-                  .map(getIcapAddress)
-                  .includes(getIcapAddress(account))
+                  .map(getAddress)
+                  .includes(getAddress(account))
               ) {
                 setHasExecutorRole(true);
               }

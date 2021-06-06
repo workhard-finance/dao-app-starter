@@ -23,6 +23,7 @@ import {
 } from "@workhard/protocol";
 import { InitialContributorSharePool } from "../../components/contracts/mining-pool/InitialContributorSharePool";
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
+import { MiningPool } from "../../components/views/MiningPool";
 
 const Mine = observer(() => {
   const { addToast } = useToasts();
@@ -120,9 +121,8 @@ const Mine = observer(() => {
         return (
           <div key={`mine-${addr}-${idx}`}>
             <br />
-            <ERC20StakeMiningV1
+            <MiningPool
               poolIdx={idx}
-              title={"Stake"}
               poolAddress={addr}
               totalEmission={mineStore.emission}
               emissionWeightSum={mineStore.emissionWeightSum}
@@ -237,7 +237,7 @@ const Mine = observer(() => {
           <TitleButSer link="#todo">Sub pools</TitleButSer>
           <Row>
             {subPools.map((subPool) => (
-              <Col md={6}>{subPool}</Col>
+              <Col md={4}>{subPool}</Col>
             ))}
           </Row>
         </>

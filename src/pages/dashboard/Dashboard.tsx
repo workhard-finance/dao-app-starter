@@ -14,7 +14,7 @@ import {
   ProjectMetadata,
   uriToURL,
 } from "../../utils/utils";
-import { getIcapAddress } from "ethers/lib/utils";
+import { getAddress } from "ethers/lib/utils";
 import { useIPFS } from "../../providers/IPFSProvider";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Erc20Balance } from "../../components/contracts/erc20/Erc20Balance";
@@ -121,13 +121,13 @@ const Dashboard = () => {
   const poolName = (address: string): string => {
     if (workhardCtx) {
       if (
-        getIcapAddress(address) ===
-        getIcapAddress(workhardCtx.periphery.liquidityMining.address)
+        getAddress(address) ===
+        getAddress(workhardCtx.periphery.liquidityMining.address)
       ) {
         return "Liquidity Providers";
       } else if (
-        getIcapAddress(address) ===
-        getIcapAddress(workhardCtx.periphery.commitMining.address)
+        getAddress(address) ===
+        getAddress(workhardCtx.periphery.commitMining.address)
       ) {
         return "Commit Burners";
       }

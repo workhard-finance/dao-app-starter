@@ -11,10 +11,30 @@ export const ERC165 = {
   ERC721,
 };
 
-export const PoolType = {
+export type Pool =
+  | "ERC20BurnV1"
+  | "ERC20StakeV1"
+  | "ERC721StakeV1"
+  | "ERC1155StakeV1"
+  | "ERC1155BurnV1";
+
+export type PoolTypeHash =
+  | "0xb69f83e1"
+  | "0xe6b7a159"
+  | "0x13bed0bb"
+  | "0x3173499d"
+  | "0x4025cdec";
+
+export const PoolType: {
+  [pool in Pool]: PoolTypeHash;
+} = {
   ERC20BurnV1,
   ERC20StakeV1,
   ERC721StakeV1,
   ERC1155StakeV1,
   ERC1155BurnV1,
+};
+
+export const getPoolTypeHash = (poolType: Pool): PoolTypeHash => {
+  return PoolType[poolType];
 };

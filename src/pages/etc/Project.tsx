@@ -35,7 +35,7 @@ import { ContributorChart } from "../../components/views/ContributorChart";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Grant } from "../../components/contracts/stable-reserve/Grant";
 import { Stream } from "../../components/contracts/sablier/Stream";
-import { formatEther, getIcapAddress } from "ethers/lib/utils";
+import { formatEther, getAddress } from "ethers/lib/utils";
 import { getNetworkName } from "@workhard/protocol";
 import { ProjectAdmin } from "../../components/contracts/contribution-board/ProjectAdmin";
 
@@ -66,7 +66,7 @@ export const Project: React.FC = () => {
         .ownerOf(id)
         .then((owner) => {
           setBudgetOwner(owner);
-          if (getIcapAddress(account) === getIcapAddress(owner)) {
+          if (getAddress(account) === getAddress(owner)) {
             setHasAdminPermission(true);
           } else {
             const network = getNetworkName(chainId);
@@ -86,8 +86,8 @@ export const Project: React.FC = () => {
                   }
                   if (
                     (result.owners as string[])
-                      .map(getIcapAddress)
-                      .includes(getIcapAddress(account))
+                      .map(getAddress)
+                      .includes(getAddress(account))
                   ) {
                     setHasAdminPermission(true);
                   }

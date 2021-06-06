@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap";
 import { isAddress } from "@ethersproject/address";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { formatEther, getIcapAddress, parseEther } from "ethers/lib/utils";
+import { formatEther, getAddress, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
 import {
@@ -124,8 +124,8 @@ export const Pay: React.FC<PayProps> = ({ projId, projectOwner, fund }) => {
               const result = await response.json();
               if (
                 (result.owners as string[])
-                  .map(getIcapAddress)
-                  .includes(getIcapAddress(account))
+                  .map(getAddress)
+                  .includes(getAddress(account))
               ) {
                 setHasAdminPermission(true);
               }

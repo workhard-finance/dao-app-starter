@@ -11,7 +11,7 @@ import { useWorkhard } from "../../../providers/WorkhardProvider";
 import {
   defaultAbiCoder,
   formatEther,
-  getIcapAddress,
+  getAddress,
   parseEther,
 } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
@@ -69,8 +69,8 @@ export const Grant: React.FC<GrantProps> = ({ projId }) => {
               const result = await response.json();
               if (
                 (result.owners as string[])
-                  .map(getIcapAddress)
-                  .includes(getIcapAddress(account))
+                  .map(getAddress)
+                  .includes(getAddress(account))
               ) {
                 setMultisigOwner(true);
               }

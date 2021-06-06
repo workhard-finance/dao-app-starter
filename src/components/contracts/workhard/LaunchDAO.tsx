@@ -15,7 +15,7 @@ import { useToasts } from "react-toast-notifications";
 import { BigNumber, BigNumberish, PopulatedTransaction } from "ethers";
 import { AllocationChart } from "../../views/AllocationChart";
 import { OverlayTooltip } from "../../OverlayTooltip";
-import { getIcapAddress } from "ethers/lib/utils";
+import { getAddress } from "ethers/lib/utils";
 
 export const LaunchDAO: React.FC<{
   id?: BigNumberish;
@@ -101,8 +101,8 @@ export const LaunchDAO: React.FC<{
               const result = await response.json();
               if (
                 (result.owners as string[])
-                  .map(getIcapAddress)
-                  .includes(getIcapAddress(account))
+                  .map(getAddress)
+                  .includes(getAddress(account))
               ) {
                 setHasAdminPermission(true);
               }

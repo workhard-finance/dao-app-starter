@@ -5,6 +5,7 @@ import {
   Button,
   Form,
   InputGroup,
+  Image,
   ProgressBar,
   Row,
   Col,
@@ -19,6 +20,7 @@ import {
 } from "@workhard/protocol";
 import {
   errorHandler,
+  getTokenLogo,
   getVariantForProgressBar,
   handleTransaction,
   isApproved,
@@ -44,6 +46,7 @@ export interface ERC20BurnMiningV1Props {
   description?: string;
   collapsible?: boolean;
   link?: string;
+  logos?: string[];
 }
 
 export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
@@ -57,6 +60,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   collapsible,
   emissionWeightSum,
   link,
+  logos,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -239,6 +243,18 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
 
   const collapsedDetails = () => (
     <>
+      {collapsible && (
+        <>
+          <hr />
+          <Card.Title>Weekly allocation</Card.Title>
+          <Card.Text style={{ fontSize: "1.5rem" }}>
+            {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+            <span style={{ fontSize: "0.75rem" }}>
+              {workhardCtx?.metadata.visionSymbol || "VISION"}
+            </span>
+          </Card.Text>
+        </>
+      )}
       <hr />
       <Card.Title>
         Burn{" "}
@@ -297,7 +313,17 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
 
   return (
     <Card border="danger">
-      <Card.Header className="bg-danger text-white">{title}</Card.Header>
+      <Card.Header className="bg-danger text-white">
+        {title}{" "}
+        {logos &&
+          logos.map((logo) => (
+            <>
+              {" "}
+              <Image style={{ height: "1.5rem" }} src={logo} alt={""} />
+            </>
+          ))}
+      </Card.Header>
+
       <Card.Body>
         {description && (
           <>
@@ -306,7 +332,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
           </>
         )}
         <Row>
-          <Col md={3}>
+          <Col style={{ marginBottom: "1rem" }}>
             <Card.Title>
               ARR
               <OverlayTooltip
@@ -320,7 +346,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
               <span style={{ fontSize: "1.5rem" }}>{annualRevenue}</span> %
             </Card.Text>
           </Col>
-          <Col md={4}>
+          <Col style={{ marginBottom: "1rem" }}>
             <Card.Title>Mined</Card.Title>
             <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
@@ -329,15 +355,17 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
               </span>
             </Card.Text>
           </Col>
-          <Col md={5}>
-            <Card.Title>Weekly allocation</Card.Title>
-            <Card.Text style={{ fontSize: "1.5rem" }}>
-              {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
-              <span style={{ fontSize: "0.75rem" }}>
-                {workhardCtx?.metadata.visionSymbol || "VISION"}
-              </span>
-            </Card.Text>
-          </Col>
+          {!collapsible && (
+            <Col style={{ marginBottom: "1rem", minWidth: "16rem" }}>
+              <Card.Title>Weekly allocation</Card.Title>
+              <Card.Text style={{ fontSize: "1.5rem" }}>
+                {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
+                <span style={{ fontSize: "0.75rem" }}>
+                  {workhardCtx?.metadata.visionSymbol || "VISION"}
+                </span>
+              </Card.Text>
+            </Col>
+          )}
         </Row>
         {collapsible && (
           <Button

@@ -20,7 +20,7 @@ import { useIPFS } from "../../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { BigNumber } from "@ethersproject/bignumber";
 import { constants, providers } from "ethers";
-import { getIcapAddress, randomBytes } from "ethers/lib/utils";
+import { getAddress, randomBytes } from "ethers/lib/utils";
 
 export const UpdateDAO: React.FC<{
   onUpdated?: () => void;
@@ -63,8 +63,8 @@ export const UpdateDAO: React.FC<{
             const result = await response.json();
             if (
               (result.owners as string[])
-                .map(getIcapAddress)
-                .includes(getIcapAddress(account))
+                .map(getAddress)
+                .includes(getAddress(account))
             ) {
               setHasPermission(true);
             }

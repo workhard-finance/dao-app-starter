@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
-import { formatEther, getIcapAddress } from "ethers/lib/utils";
+import { formatEther, getAddress } from "ethers/lib/utils";
 import ReactHtmlParser from "react-html-parser";
 import { Card, Button, Row, Col, Image, Badge } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
