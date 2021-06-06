@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Col, Row, Nav, Tab, Button } from "react-bootstrap";
+import { Col, Row, Nav, Tab, Button, Container } from "react-bootstrap";
 import { useHistory, useParams } from "react-router-dom";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { prefix } from "../../utils/utils";
@@ -11,6 +11,7 @@ import { getNetworkName } from "@workhard/protocol";
 import { useWeb3React } from "@web3-react/core";
 import { providers } from "ethers";
 import { ProjectDetails } from "./tabs/ProjectDetails";
+import { SerHelpPlz } from "../../components/views/HelpSer";
 
 export const MultisigAdmin = () => {
   const history = useHistory();
@@ -97,6 +98,17 @@ export const MultisigAdmin = () => {
                 <MultisigProposal />
               </Tab.Pane>
             </Tab.Content>
+            <hr />
+            <Container>
+              <SerHelpPlz>
+                <p>
+                  Here, you are scheduling a governance transaction to the
+                  timelock contract using Gnosis Multisig Wallet. Confirm the
+                  scheduling on Gnosis and go to transaction tab in Gov menu.
+                  You will be able to execute them after the timelock delay.
+                </p>
+              </SerHelpPlz>
+            </Container>
           </Col>
         </Row>
       </Tab.Container>
