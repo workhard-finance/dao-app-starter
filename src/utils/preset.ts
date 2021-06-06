@@ -19,6 +19,7 @@ export enum PARAM_TYPE {
 export interface Param {
   name: string;
   type: PARAM_TYPE;
+  hint?: string;
 }
 
 export interface Preset {
@@ -145,6 +146,20 @@ export const buildPresets = (dao: WorkhardDAO): Preset[] => {
       methodName: "updateBaseUri",
       paramArray: [{ name: "baseURI", type: PARAM_TYPE.STRING }],
       contract: dao.votingEscrow,
+    },
+    {
+      contractName: "WorkersUnion",
+      methodName: "changeVotingRule",
+      paramArray: [
+        { name: "minimumPendingPeriod", type: PARAM_TYPE.NUMBER },
+        { name: "maximumPendingPeriod", type: PARAM_TYPE.NUMBER },
+        { name: "minimumVotingPeriod", type: PARAM_TYPE.NUMBER },
+        { name: "maximumVotingPeriod", type: PARAM_TYPE.NUMBER },
+        { name: "minimumVotesForProposing", type: PARAM_TYPE.NUMBER },
+        { name: "minimumVotes", type: PARAM_TYPE.NUMBER },
+        { name: "voteCounter", type: PARAM_TYPE.STRING },
+      ],
+      contract: dao.workersUnion,
     },
     {
       contractName: "Manual",

@@ -41,6 +41,7 @@ export const WorkersUnionProposal: React.FC = ({}) => {
           "VisionEmitter",
           "Marketplace",
           "VotingEscrowLock",
+          "WorkersUnion",
           "Manual",
         ].map((name) => (
           <Button

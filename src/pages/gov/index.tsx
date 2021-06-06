@@ -2,7 +2,6 @@ import React from "react";
 import Page from "../../layouts/Page";
 import { Image, Tab, Tabs } from "react-bootstrap";
 import { TimelockTxs } from "./tabs/TimelockTxs";
-import { Propose } from "./tabs/Propose";
 import Vote from "./tabs/Vote";
 import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
 import { useWorkhard } from "../../providers/WorkhardProvider";
