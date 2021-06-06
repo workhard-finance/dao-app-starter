@@ -71,6 +71,17 @@ export const ContributionBoard: React.FC = () => {
               <Nav.Link eventKey="post">Post a project</Nav.Link>
             </Nav.Item>
           </Nav>
+          <hr />
+          <Button
+            variant="outline-info"
+            as={"a"}
+            href={"https://forum.workhard.finance"}
+            target="_blank"
+          >
+            Do you have a project idea?
+            <br />
+            Go to workhard forum!
+          </Button>
         </Col>
         <Col sm={9}>
           <Tab.Content>
