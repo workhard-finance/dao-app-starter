@@ -306,25 +306,33 @@ export const SetEmission = () => {
       <br />
       {pools && (
         <>
-          <Button
-            onClick={() => {
-              const emptyPreset = {
-                baseToken: "",
-                poolType: "",
-                weight: 0,
-              };
-              const newPools = pools ? [...pools, emptyPreset] : [emptyPreset];
-              setPools(newPools);
-            }}
-          >
-            Add a pool
-          </Button>{" "}
-          <Button variant="info" onClick={multisigSetEmission}>
-            Create Multisig Transaction
-          </Button>{" "}
-          <Button variant="warning" onClick={reset}>
-            Reset
-          </Button>
+          <Row>
+            <Col>
+              <Button variant="info" onClick={multisigSetEmission}>
+                Gnosis Multisig Tx
+              </Button>{" "}
+            </Col>
+            <Col style={{ textAlign: "end" }}>
+              <Button
+                onClick={() => {
+                  const emptyPreset = {
+                    baseToken: "",
+                    poolType: "",
+                    weight: 0,
+                  };
+                  const newPools = pools
+                    ? [...pools, emptyPreset]
+                    : [emptyPreset];
+                  setPools(newPools);
+                }}
+              >
+                Add a pool
+              </Button>{" "}
+              <Button variant="warning" onClick={reset}>
+                Reset
+              </Button>
+            </Col>
+          </Row>
         </>
       )}
       <hr />
