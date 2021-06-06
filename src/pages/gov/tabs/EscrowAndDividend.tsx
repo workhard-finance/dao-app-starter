@@ -23,13 +23,13 @@ export const EscrowAndDividend: React.FC = () => {
   const { daoId } = workhardCtx || { daoId: 0 };
 
   useEffect(() => {
-    if (!!account && !!workhardCtx) {
+    if (!!account && !!workhardCtx && !!account) {
       const { votingEscrow } = workhardCtx.dao;
       votingEscrow.balanceOf(account).then((locks) => {
         Promise.all(
           Array(locks.toNumber())
             .fill(undefined)
-            .map((_, idx) => votingEscrow.tokenByIndex(idx))
+            .map((_, idx) => votingEscrow.tokenOfOwnerByIndex(account, idx))
         ).then((lockIds) => setLockIds(lockIds));
       });
     }
