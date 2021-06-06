@@ -7,6 +7,8 @@ import {
   ProgressBar,
   Accordion,
   Tooltip,
+  Row,
+  Col,
 } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, isAddress, parseEther } from "ethers/lib/utils";
@@ -43,6 +45,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const [lockPeriod, setLockPeriod] = useState<number>();
   const [allowance, setAllowance] = useState<BigNumber>();
   // lock
+  const [rightBalance, setRightBalance] = useState<BigNumber>();
   const [lockedAmount, setLockedAmount] = useState<BigNumber>();
   const [lockedUntil, setLockedUntil] = useState<BigNumber>();
   const [lockedFrom, setLockedFrom] = useState<BigNumber>();
@@ -74,7 +77,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
 
   useEffect(() => {
     if (!!account && !!workhardCtx) {
-      const { vision, dividendPool } = workhardCtx.dao;
+      const { vision, dividendPool, right } = workhardCtx.dao;
       vision
         .balanceOf(account)
         .then(setTokenBalance)
@@ -86,6 +89,10 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
       vision
         .allowance(account, dividendPool.address)
         .then(setAllowance)
+        .catch(errorHandler(addToast));
+      right
+        .balanceOfLock(lockId)
+        .then(setRightBalance)
         .catch(errorHandler(addToast));
     }
   }, [account, workhardCtx, txStatus, blockNumber]);
@@ -226,21 +233,36 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
         </Card.Text>
       </Card.Header>
       <Card.Body>
-        <Card.Title>You locked</Card.Title>
-        <Card.Text style={{ fontSize: "3rem" }}>
-          {bigNumToFixed(lockedAmount || 0)}
-          <span style={{ fontSize: "1rem" }}>
-            {" "}
-            {workhardCtx?.metadata.visionSymbol || "$VISION"}
-          </span>
-        </Card.Text>
+        <Row>
+          <Col md={6}>
+            <Card.Title>Right</Card.Title>
+            <Card.Text style={{ fontSize: "3rem" }}>
+              {bigNumToFixed(rightBalance || 0)}
+              <span style={{ fontSize: "1rem" }}>
+                {" "}
+                {workhardCtx?.metadata.rightSymbol || "$RIGHT"}
+              </span>
+            </Card.Text>
+          </Col>
+          <Col md={6}>
+            <Card.Title>Locked</Card.Title>
+            <Card.Text style={{ fontSize: "3rem" }}>
+              {bigNumToFixed(lockedAmount || 0)}
+              <span style={{ fontSize: "1rem" }}>
+                {" "}
+                {workhardCtx?.metadata.visionSymbol || "$VISION"}
+              </span>
+            </Card.Text>
+          </Col>
+        </Row>
         <ProgressBar
           variant={getVariantForProgressBar(getLockedPercent())}
           animated
           now={getLockedPercent()}
         />
         <Card.Text>
-          Locked {(getLockedPeriod() / (86400 * 365)).toFixed(2)}/ 4 years
+          Locked {(getLockedPeriod() / (86400 * 365)).toFixed(2)}/{" "}
+          {(getTotalLockPeriod() / (86400 * 365)).toFixed(2)} years
         </Card.Text>
         <Accordion>
           <ExtendedAccordionToggle
