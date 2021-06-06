@@ -19,6 +19,7 @@ import {
   ProjectMetadata,
   uriToURL,
 } from "../../../utils/utils";
+import { OverlayTooltip } from "../../../components/OverlayTooltip";
 
 export const ProjectDetails: React.FC = () => {
   const { ipfs } = useIPFS();
@@ -28,6 +29,13 @@ export const ProjectDetails: React.FC = () => {
   const [metadata, setMetadata] = useState<ProjectMetadata>();
   const [immortalized, setImmortalized] = useState<boolean>();
   const [projectOwner, setProjectOwner] = useState<string>();
+  const [preview, setPreview] = useState<{
+    name?: string;
+    description?: string;
+    file?: File;
+    url?: string;
+  }>();
+  const [previewImg, setPreviewImg] = useState<string>();
 
   useEffect(() => {
     if (!!workhardCtx && !!ipfs) {
@@ -54,6 +62,30 @@ export const ProjectDetails: React.FC = () => {
         .catch(errorHandler(addToast));
     }
   }, [workhardCtx]);
+
+  useEffect(() => {
+    if (preview?.file) {
+      getPreviewFromFile(preview.file)
+        .then(setPreviewImg)
+        .catch(errorHandler(addToast));
+    }
+  }, [preview?.file]);
+
+  const getPreviewFromFile = (file: File): Promise<string> => {
+    return new Promise<string>((res, err) => {
+      let reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          res(reader.result);
+        } else {
+          err("Failed to read file");
+        }
+      };
+      reader.onerror = err;
+      reader.readAsDataURL(file);
+    });
+  };
+
   return (
     <Container>
       <Card>
@@ -63,24 +95,25 @@ export const ProjectDetails: React.FC = () => {
             <Col md={5}>
               <Image
                 src={
-                  metadata
+                  previewImg ||
+                  (metadata
                     ? uriToURL(metadata.image)
-                    : process.env.PUBLIC_URL + "/images/daily-life.jpeg"
+                    : process.env.PUBLIC_URL + "/images/daily-life.jpeg")
                 }
                 style={{ maxWidth: "100%" }}
               />
             </Col>
             <Col md={7}>
               <h2>
-                What is <b>{metadata?.name}?</b>
+                What is <b>{preview?.name || metadata?.name}?</b>
               </h2>
-              <p>{metadata?.description}</p>
+              <p>{preview?.description || metadata?.description}</p>
               {immortalized && <Badge variant={`success`}>immortalized</Badge>}
               <br />
-              {(daoId || 0) !== 0 && metadata?.url && (
+              {(daoId || 0) !== 0 && (preview?.url || metadata?.url) && (
                 <Button
                   as={"a"}
-                  href={metadata.url}
+                  href={preview?.url || metadata?.url}
                   target="_blank"
                   variant="info"
                 >
@@ -93,18 +126,26 @@ export const ProjectDetails: React.FC = () => {
       </Card>
       <br />
       {!immortalized && (
-        <Card>
-          <Card.Body>
-            <Card.Title>Owner</Card.Title>
-            <Card.Text>{projectOwner}</Card.Text>
-            <br />
-            <Card.Title>Immortalize URI</Card.Title>
-            <Immortalize />
-            <br />
-            <Card.Title>Update URI</Card.Title>
-            <UpdateDAO />
-          </Card.Body>
-        </Card>
+        <>
+          <Card>
+            <Card.Body>
+              <Card.Title>Owner</Card.Title>
+              <Card.Text>{projectOwner}</Card.Text>
+              <hr />
+              <Card.Title>Update URI</Card.Title>
+              <UpdateDAO onPreview={setPreview} />
+              <hr />
+              <Card.Title>
+                Immortalize URI
+                <OverlayTooltip
+                  tip={`You'll never be able to change the information once you immortalize it.`}
+                  text={`❔`}
+                />
+              </Card.Title>
+              <Immortalize />
+            </Card.Body>
+          </Card>
+        </>
       )}
     </Container>
   );

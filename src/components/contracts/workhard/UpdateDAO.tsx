@@ -24,7 +24,13 @@ import { getAddress, randomBytes } from "ethers/lib/utils";
 
 export const UpdateDAO: React.FC<{
   onUpdated?: () => void;
-}> = ({ onUpdated }) => {
+  onPreview?: (preview: {
+    name?: string;
+    description?: string;
+    file?: File;
+    url?: string;
+  }) => void;
+}> = ({ onUpdated, onPreview }) => {
   const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { ipfs } = useIPFS();
   const workhardCtx = useWorkhard();
@@ -32,7 +38,7 @@ export const UpdateDAO: React.FC<{
 
   const [description, setDescription] = useState<string>();
   const [file, setFile] = useState<File>();
-  const [title, setTitle] = useState<string>();
+  const [name, setName] = useState<string>();
   const [metadata, setMetadata] = useState<ProjectMetadata>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [url, setURL] = useState<string | undefined>();
@@ -48,11 +54,22 @@ export const UpdateDAO: React.FC<{
       workhardCtx.workhard
         .tokenURI(workhardCtx.daoId)
         .then(async (uri) => {
-          setMetadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
+          const metadata = await fetchProjectMetadataFromIPFS(ipfs, uri);
+          setMetadata(metadata);
+          setName(metadata.name);
+          setImageURI(metadata.image);
+          setDescription(metadata.description);
+          setURL(metadata.url);
         })
         .catch(errorHandler(addToast));
     }
   }, [workhardCtx, ipfs]);
+
+  useEffect(() => {
+    if (onPreview) {
+      onPreview({ name, description, file, url });
+    }
+  }, [name, description, file, url]);
 
   useEffect(() => {
     if (!!workhardCtx && !!account && !!chainId) {
@@ -109,7 +126,7 @@ export const UpdateDAO: React.FC<{
     return cid;
   };
   const update = async () => {
-    if (!title || !description) {
+    if (!name || !description || !imageURI) {
       alert("Fill out the form.");
       return;
     }
@@ -117,7 +134,7 @@ export const UpdateDAO: React.FC<{
     if (file) {
       uploadImageToIPFS(file)
         .then((imageURI) => {
-          uploadMetadataToIPFS(title, description, imageURI, url)
+          uploadMetadataToIPFS(name, description, imageURI, url)
             .then((uri) => {
               setImageURI(imageURI);
               setUploaded(true);
@@ -135,12 +152,7 @@ export const UpdateDAO: React.FC<{
           setUploading(undefined);
         });
     } else {
-      uploadMetadataToIPFS(
-        title,
-        description,
-        "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1",
-        url
-      )
+      uploadMetadataToIPFS(name, description, imageURI, url)
         .then((uri) => {
           setImageURI(imageURI);
           setUploaded(true);
@@ -192,11 +204,6 @@ export const UpdateDAO: React.FC<{
           alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
         }
         setTxStatus(undefined);
-        setTitle("");
-        setURL("");
-        setDescription("");
-        setFile(undefined);
-        setImageURI("");
         setUploaded(false);
         onUpdated && onUpdated();
       }
@@ -210,8 +217,8 @@ export const UpdateDAO: React.FC<{
         <Form.Control
           type="text"
           placeholder="Workhard Core Dev"
-          onChange={({ target: { value } }) => setTitle(value)}
-          value={title}
+          onChange={({ target: { value } }) => setName(value)}
+          value={name}
         />
       </Form.Group>
       <Form.Group>
