@@ -20,6 +20,7 @@ import { Pay } from "../../components/contracts/contribution-board/Pay";
 import { FundProject } from "../../components/contracts/contribution-board/FundProject";
 import { useHistory } from "react-router-dom";
 import {
+  bigNumToFixed,
   errorHandler,
   fetchProjectMetadataFromIPFS,
   ProjectMetadata,
@@ -174,9 +175,9 @@ export const Project: React.FC = () => {
                   </Card.Text>
                 </>
               )}
-              <Card.Subtitle>Total contribution</Card.Subtitle>
+              <Card.Subtitle>Total contributions</Card.Subtitle>
               <Card.Text>
-                {formatEther(totalContribution || 0)}{" "}
+                {bigNumToFixed(totalContribution || 0)}{" "}
                 {workhardCtx?.metadata.commitSymbol || "COMMIT"}(s)
               </Card.Text>
             </Col>

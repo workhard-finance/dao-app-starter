@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
+import { Button, Card, Col, Nav, Row, Tab } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../../../components/contracts/contribution-board/ProjectBox";
@@ -80,20 +80,28 @@ export const ContributionBoard: React.FC = () => {
                 history.push(prefix(daoId, "/work/job/projects"));
               }}
             >
-              {projects ? (
-                projects.length === 0 ? (
-                  <p>No project exists! Post a new one :)</p>
+              <Row>
+                {projects ? (
+                  projects.length === 0 ? (
+                    <p>No project exists! Post a new one :)</p>
+                  ) : (
+                    projects.map((id) => (
+                      <Col
+                        md={4}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          history.push(prefix(daoId, `/proj/${id}`))
+                        }
+                      >
+                        <ProjectBox projId={id} active={true} />
+                        <br />
+                      </Col>
+                    ))
+                  )
                 ) : (
-                  projects.map((id) => (
-                    <div key={id.toString()}>
-                      <ProjectBox projId={id} active={true} />
-                      <br />
-                    </div>
-                  ))
-                )
-              ) : (
-                <p>Fetching...</p>
-              )}
+                  <p>Fetching...</p>
+                )}
+              </Row>
             </Tab.Pane>
             <Tab.Pane
               eventKey="post"

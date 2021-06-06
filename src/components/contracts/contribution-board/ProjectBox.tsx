@@ -7,6 +7,7 @@ import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Link, useParams } from "react-router-dom";
 import {
+  bigNumToFixed,
   errorHandler,
   fetchProjectMetadataFromIPFS,
   prefix,
@@ -83,47 +84,51 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   }, [account, library, chainId, workhardCtx]); // ensures refresh if referential identity of library doesn't change across chainIds
 
   return (
-    <Card>
+    <Card style={{ height: "22.5rem" }}>
       <Card.Header>
         #{projId.toNumber()} {metadata?.name}
       </Card.Header>
       <Card.Body>
         <Row>
-          <Col md={8}>
+          <Col md={12} style={{ marginBottom: "1rem" }}>
             <Card.Title>Fund</Card.Title>
-            <Card.Text style={{ fontSize: "2rem" }}>
-              {formatEther(fund || 0)}{" "}
+            <Card.Text>
+              <span style={{ fontSize: "1.4rem" }}>
+                {bigNumToFixed(fund || 0)}
+              </span>{" "}
               {workhardCtx?.metadata.commitSymbol || `$COMMIT`}{" "}
               {/*TODO compute in USD ($163710)*/}
             </Card.Text>
+          </Col>
+          <Card
+            style={{
+              position: "absolute",
+              right: "1rem",
+              top: "4rem",
+              width: "5rem",
+            }}
+          >
+            <Image
+              src={uriToURL(
+                metadata?.image ||
+                  "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1"
+              )}
+            />
+          </Card>
+          <Col md={12} style={{ marginBottom: "1rem" }}>
             <Card.Title>Details</Card.Title>
-            <Card.Text>
+            <Card.Text style={{ overflow: "auto", height: "5rem" }}>
               {ReactHtmlParser(wrapUrl(metadata?.description || ""))}
             </Card.Text>
             {minimumShare && minimumShare.gt(0) && (
-              <Badge variant={`success`}>initial contributor program</Badge>
-            )}{" "}
+              <Badge variant={`success`} style={{ marginBottom: "0.2rem" }}>
+                initial contributor program
+              </Badge>
+            )}
+            {"  "}
             <Badge variant={ownedByMultisig ? `success` : "danger"}>
               {ownedByMultisig ? `managed by multisig` : "managed by EOA"}
             </Badge>
-            <br />
-            <br />
-            <Button
-              as={Link}
-              to={prefix(daoId, `/proj/${projId}`)}
-              variant={"primary"}
-              children={"Go to project"}
-            />
-          </Col>
-          <Col md={4}>
-            <Card>
-              <Image
-                src={uriToURL(
-                  metadata?.image ||
-                    "QmZ6WAhrUArQPQHQZFJBaQnHDcu5MhcrnfyfX4uwLHWMj1"
-                )}
-              />
-            </Card>
           </Col>
         </Row>
       </Card.Body>
