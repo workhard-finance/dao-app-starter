@@ -61,6 +61,7 @@ export const SetEmission = () => {
 
   const [treasuryWeight, setTreasuryWeight] = useState<number>();
   const [callerWeight, setCallerWeight] = useState<number>();
+  const [resetCounter, setResetCounter] = useState<number>(0);
 
   const getPresetTokenName = (address: string): string | undefined => {
     if (compareAddress(address, workhardCtx?.periphery.visionLP.address)) {
@@ -118,7 +119,7 @@ export const SetEmission = () => {
         })
         .catch(errorHandler(addToast));
     }
-  }, [workhardCtx, library]);
+  }, [workhardCtx, library, resetCounter]);
 
   useEffect(() => {
     if (pools && emissionWeight && founderShareDenom) {
@@ -144,6 +145,12 @@ export const SetEmission = () => {
     }
   }, [pools, emissionWeight, founderShareDenom]);
 
+  const reset = async () => {
+    const _emissionWeight = Object.assign({}, emissionWeight);
+    setEmissionWeight(undefined);
+    setEmissionWeight(_emissionWeight);
+    setResetCounter(resetCounter + 1);
+  };
   const multisigSetEmission = async () => {
     if (!workhardCtx || !library || !account || !chainId) {
       alert("Not connected");
@@ -220,11 +227,17 @@ export const SetEmission = () => {
                   }}
                 />
                 <Button
+                  variant={"light"}
+                  style={{
+                    position: "absolute",
+                    top: "0.5rem",
+                    right: "0.5rem",
+                  }}
                   onClick={() => {
                     setPools([...pools.slice(0, i), ...pools.slice(i + 1)]);
                   }}
                 >
-                  Remove
+                  X
                 </Button>
               </Card.Body>
             </Card>
@@ -321,6 +334,9 @@ export const SetEmission = () => {
           </Button>{" "}
           <Button variant="info" onClick={multisigSetEmission}>
             Create Multisig Transaction
+          </Button>{" "}
+          <Button variant="warning" onClick={reset}>
+            Reset
           </Button>
         </>
       )}
