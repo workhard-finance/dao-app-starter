@@ -7,6 +7,7 @@ import { BigNumber } from "ethers";
 import { ProjectBox } from "../../../components/contracts/contribution-board/ProjectBox";
 import { CreateProject } from "../../../components/contracts/workhard/CreateProject";
 import { prefix } from "../../../utils/utils";
+import config from "../../../config.json";
 
 export const ContributionBoard: React.FC = () => {
   const workhardCtx = useWorkhard();
@@ -42,7 +43,15 @@ export const ContributionBoard: React.FC = () => {
                   workhard.projectsOfDAOByIndex(daoId, idx + last)
                 )
             ).then((fetched) => {
-              setProjects([...(projects || []), ...fetched]);
+              setProjects([
+                ...(projects || []),
+                ...fetched.filter(
+                  (projId) =>
+                    !config.projects.banned.find((v) =>
+                      BigNumber.from(v).eq(projId)
+                    )
+                ),
+              ]);
             });
             setLastFetched(n.toNumber());
           }

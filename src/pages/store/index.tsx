@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 import { prefix } from "../../utils/utils";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
+import config from "../../config.json";
 
 const featured: BigNumber[] = [];
 const Store: React.FC = () => {
@@ -81,12 +82,18 @@ const Store: React.FC = () => {
           style={{ marginTop: "1rem" }}
           onEnter={() => history.push(prefix(daoId, "/store/featured"))}
         >
-          {featured.length === 0 && (
+          {config.nfts.featured.length === 0 && (
             <p>Coming soon :) We won't let you wait too long.</p>
           )}
           <Row>
             {allProducts
-              .filter((tokenId) => featured.includes(tokenId))
+              .filter(
+                (tokenId) =>
+                  !!config.nfts.featured.find((v) =>
+                    BigNumber.from(v).eq(tokenId)
+                  ) &&
+                  !config.nfts.banned.find((v) => BigNumber.from(v).eq(tokenId))
+              )
               .map((tokenId) => (
                 <Col key={`featured-${tokenId}`} md={4}>
                   <Product tokenId={tokenId} />
@@ -109,12 +116,17 @@ const Store: React.FC = () => {
             registered here.
           </Alert>
           <Row>
-            {allProducts.map((tokenId) => (
-              <Col key={`all-${tokenId}`} md={4}>
-                <Product tokenId={tokenId} />
-                <br />
-              </Col>
-            ))}
+            {allProducts
+              .filter(
+                (tokenId) =>
+                  !config.nfts.banned.find((v) => BigNumber.from(v).eq(tokenId))
+              )
+              .map((tokenId) => (
+                <Col key={`featured-${tokenId}`} md={4}>
+                  <Product tokenId={tokenId} />
+                  <br />
+                </Col>
+              ))}
           </Row>
         </Tab>
       </Tabs>
