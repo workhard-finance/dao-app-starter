@@ -42,7 +42,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   // form
   const [amount, setAmount] = useState<string>();
   const [delegateTo, setDelegateTo] = useState<string>();
-  const [lockPeriod, setLockPeriod] = useState<number>();
+  const [lockEpochs, setLockEpochs] = useState<number>();
   const [allowance, setAllowance] = useState<BigNumber>();
   // lock
   const [rightBalance, setRightBalance] = useState<BigNumber>();
@@ -76,6 +76,12 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   }, [library, blockNumber]);
 
   useEffect(() => {
+    if (lockedUntil) {
+      setLockEpochs(getLockedEpoch());
+    }
+  }, [lockedUntil]);
+
+  useEffect(() => {
     if (!!account && !!workhardCtx) {
       const { vision, dividendPool, right } = workhardCtx.dao;
       vision
@@ -100,14 +106,18 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
   const extendableEpochs = () => {
-    const remaining = getTotalLockPeriod() - getLockedPeriod();
-    return remaining > 0 ? Math.floor(remaining / (86400 * 7)) : 0;
+    const extendable = 86400 * 7 * MAX_LOCK_EPOCHS - getLockedPeriod();
+    return extendable > 0 ? Math.floor(extendable / (86400 * 7)) : 0;
   };
 
   const getLockedPeriod = () => {
     if (!lockedUntil) return 0;
     const locked = lockedUntil.sub(timestamp || 0).toNumber();
     return locked > 0 ? locked : 0;
+  };
+
+  const getLockedEpoch = () => {
+    return Math.ceil(getLockedPeriod() / (86400 * 7));
   };
 
   const getTotalLockPeriod = () => {
@@ -117,7 +127,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
   };
 
   const getLockedPercent = () => {
-    return (getLockedPeriod() * 100) / getTotalLockPeriod();
+    return (getLockedEpoch() * 100) / MAX_LOCK_EPOCHS;
   };
 
   const increaseAmount = () => {
@@ -151,12 +161,8 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
       return;
     }
     if (!!workhardCtx && !!library && !!account) {
-      if (!amount || getLockedPeriod() !== 0) {
+      if (getLockedPeriod() === 0) {
         alert("Expired");
-        return;
-      }
-      if (BigNumber.from(amount).lt(tokenBalance || 0)) {
-        alert("Not enough balance");
         return;
       }
       const signer = library.getSigner(account);
@@ -261,8 +267,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
           now={getLockedPercent()}
         />
         <Card.Text>
-          Locked {(getLockedPeriod() / (86400 * 365)).toFixed(2)}/{" "}
-          {(getTotalLockPeriod() / (86400 * 365)).toFixed(2)} years
+          Locked {(getLockedPeriod() / (86400 * 365)).toFixed(2)}/ 4 years
         </Card.Text>
         <Accordion>
           <ExtendedAccordionToggle
@@ -317,16 +322,16 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
               <Form.Control
                 placeholder={`min: ${1} epoch(s) ~= 1 week / max: 208 epoch(s) ~= 4 years`}
                 type="range"
-                min={1}
-                max={MAX_LOCK_EPOCHS - getLockedPeriod()}
-                value={lockPeriod}
+                min={getLockedEpoch()}
+                max={MAX_LOCK_EPOCHS}
+                value={lockEpochs}
                 step={1}
                 onChange={({ target: { value } }) =>
-                  setLockPeriod(parseInt(value))
+                  setLockEpochs(parseInt(value))
                 }
               />
               <Form.Text>
-                You can extend {lockPeriod || "0"} weeks / {extendableEpochs()}{" "}
+                Your current lock: {lockEpochs || "0"} weeks / {MAX_LOCK_EPOCHS}{" "}
                 weeks
               </Form.Text>
               <ConditionalButton
@@ -337,7 +342,7 @@ export const MyLock: React.FC<MyLockProps> = ({ index, lockId }) => {
                   extendableEpochs() !== 0 && getLockedPeriod() !== 0
                 }
                 children="Extend lock"
-                onClick={() => extendLock(lockPeriod)}
+                onClick={() => extendLock(lockEpochs)}
               />
             </Form.Group>
           </Accordion.Collapse>
