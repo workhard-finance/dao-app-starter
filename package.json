@@ -85,6 +85,7 @@
     "@storybook/node-logger": "6.1.21",
     "@storybook/preset-create-react-app": "3.1.7",
     "@storybook/react": "6.1.21",
+    "@types/react-helmet": "^6.1.1",
     "@types/react-html-parser": "^2.0.1",
     "@types/react-router-dom": "^5.1.7",
     "@types/styled-components": "^5.1.7",

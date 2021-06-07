@@ -14,6 +14,7 @@ import {
 import deployed from "@workhard/protocol/deployed.json";
 import { useRouteMatch } from "react-router-dom";
 import { ethers } from "ethers";
+import { Helmet } from "react-helmet";
 
 let deployedContracts: Deployed;
 if (process.env.NODE_ENV === "development") {
@@ -147,6 +148,11 @@ export const WorkhardProvider: React.FC = ({ children }) => {
   }, [active, library, chainId, daoId]);
 
   return (
-    <WorkhardCtx.Provider value={context}>{children}</WorkhardCtx.Provider>
+    <WorkhardCtx.Provider value={context}>
+      {context?.daoId !== 0 && (
+        <Helmet>{context && <title>{context?.metadata.daoName}</title>}</Helmet>
+      )}
+      {children}
+    </WorkhardCtx.Provider>
   );
 };

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Helmet } from "react-helmet";
 import "./index.css";
 import "./custom.scss";
 import App from "./App";
