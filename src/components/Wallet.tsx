@@ -43,7 +43,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const { userConfigStore } = useStores();
+  const { userStore } = useStores();
 
   enum ConnectorNames {
     Injected = "Metamask",
@@ -106,7 +106,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
   // register default assets.
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-747.md for metamask
   try {
-    if (!userConfigStore.tokenAdded && library?.provider.isMetaMask) {
+    if (!userStore.tokenAdded && library?.provider.isMetaMask) {
       const TOKENS = [
         {
           address: ctx?.dao.vision.address,
@@ -145,7 +145,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
           }
         );
       });
-      userConfigStore.setTokenAdded(true);
+      userStore.setTokenAdded(true);
     }
   } catch (e) {}
   return (

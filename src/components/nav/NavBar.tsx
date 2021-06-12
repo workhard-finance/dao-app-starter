@@ -4,6 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import NavBarBrand from "./NavBarBrand";
 import Wallet from "../Wallet";
 import { Menu } from "../../contexts/menu";
+import Assets from "./Assets";
 
 export interface NavBarProps {
   menus: Menu[];
@@ -98,6 +99,8 @@ const NavBar: React.FC<NavBarProps> = ({ menus, secondary, adminMenus }) => {
           </>
         )}
       </Navbar.Collapse>
+
+      <Assets></Assets>
       <Row className="justify-content-end">
         <Navbar.Toggle
           aria-controls="basic-navbar-nav"
@@ -109,6 +112,7 @@ const NavBar: React.FC<NavBarProps> = ({ menus, secondary, adminMenus }) => {
             Go to Work Hard
           </Button>
         )}
+
         <Wallet className="justify-content-end" style={{ margin: 10 }} />
       </Row>
     </Navbar>
