@@ -34,6 +34,7 @@ import {
 import { OverlayTooltip } from "../../OverlayTooltip";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useToasts } from "react-toast-notifications";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export interface ERC20BurnMiningV1Props {
   poolIdx: number;
@@ -240,6 +241,16 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
       "Successfully exited!"
     );
   };
+  const isBurnableCommitAmount = () => {
+    try {
+      if (amount) {
+        return tokenBalance?.gte(parseEther(amount));
+      }
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  };
 
   const collapsedDetails = () => (
     <>
@@ -299,12 +310,14 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
             </Button>
           </Col>
           <Col style={{ textAlign: "end" }}>
-            <Button
+            <ConditionalButton
               variant="danger"
+              enabledWhen={isBurnableCommitAmount()}
+              whyDisabled="not enough balance"
               onClick={isApproved(allowance, amount) ? burn : approve}
             >
               {isApproved(allowance, amount) ? "Burn" : "Approve"}
-            </Button>
+            </ConditionalButton>
           </Col>
         </Row>
       </Form>
