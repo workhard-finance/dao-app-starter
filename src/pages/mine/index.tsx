@@ -215,7 +215,7 @@ const Mine = observer(() => {
                   workhardCtx && workhardCtx.daoId !== 0
                     ? `${workhardCtx.metadata.commitName}(${workhardCtx.metadata.commitSymbol})`
                     : "$COMMIT"
-                } to earn ${
+                } to continuously mine ${
                   workhardCtx && workhardCtx.daoId !== 0
                     ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
                     : "$VISION"
