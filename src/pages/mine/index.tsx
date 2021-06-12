@@ -247,8 +247,10 @@ const Mine = observer(() => {
           <br />
           <TitleButSer>Early Stage Contributors Pool!</TitleButSer>
           <p>
-            You are one of the early stage contributors! Thanks for your hard
-            commitment for this project. Enjoy this special rewards!
+            Congratulations! You can mine for more $VISION here with your
+            special early stage contributor tokens! Keep in mind that if you
+            completely withdraw, you will lose out on more $VISION emission
+            rewards.
           </p>
           <InitialContributorSharePool
             poolAddress={initialContributorPool}
