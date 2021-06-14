@@ -392,7 +392,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           <Col style={{ textAlign: "end" }}>
             <ConditionalButton
               variant="success"
-              enabledWhen={isStakableAmount()}
+              enabledWhen={isStakableAmount() && txStatus !== TxStatus.PENDING}
               whyDisabled="not enough balance"
               onClick={
                 stakeOrWithdraw

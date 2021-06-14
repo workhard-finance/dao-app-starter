@@ -1,26 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
 import {
-  Card,
   Button,
+  Card,
+  Col,
   Form,
-  InputGroup,
   Image,
+  InputGroup,
   ProgressBar,
   Row,
-  Col,
 } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
-  ERC20BurnMiningV1__factory,
   ERC20__factory,
+  ERC20BurnMiningV1__factory,
   MiningPool__factory,
 } from "@workhard/protocol";
 import {
   errorHandler,
-  getTokenLogo,
   getVariantForProgressBar,
   handleTransaction,
   isApproved,
@@ -312,8 +311,12 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
           <Col style={{ textAlign: "end" }}>
             <ConditionalButton
               variant="danger"
-              enabledWhen={isBurnableCommitAmount()}
-              whyDisabled="not enough balance"
+              enabledWhen={
+                isBurnableCommitAmount() && txStatus !== TxStatus.PENDING
+              }
+              whyDisabled={
+                isBurnableCommitAmount() ? "not enough balance" : "pending"
+              }
               onClick={isApproved(allowance, amount) ? burn : approve}
             >
               {isApproved(allowance, amount) ? "Burn" : "Approve"}
