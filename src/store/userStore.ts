@@ -6,18 +6,21 @@ export class UserStore {
   @observable public visionTokenBalance: BigNumber = BigNumber.from(0);
   @observable public commitTokenBalance: BigNumber = BigNumber.from(0);
   @observable public baseTokenBalance: BigNumber = BigNumber.from(0);
+  constructor() {
+    // console.log("created");
+  }
 
   @action setTokenAdded = (v: boolean) => {
     this.tokenAdded = v;
   };
 
   @action setVisionTokenBalance = (v: BigNumber) => {
-    console.log(v);
+    // console.log("vision balance",v);
     this.visionTokenBalance = v;
   };
 
   @action setCommitBalance = (v: BigNumber) => {
-    console.log(v);
+    // console.log(v);
     this.commitTokenBalance = v;
   };
 
