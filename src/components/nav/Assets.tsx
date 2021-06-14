@@ -5,6 +5,7 @@ import { observer } from "mobx-react";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { formatEther } from "ethers/lib/utils";
+import { bigNumToFixed } from "../../utils/utils";
 
 const Assets: React.FC = observer(() => {
   const { userStore } = useStores();
@@ -13,21 +14,27 @@ const Assets: React.FC = observer(() => {
   useEffect(() => {
     if (ctx && account) {
       ctx.dao.vision.balanceOf(account).then(userStore.setVisionTokenBalance);
-      ctx.dao.commit.balanceOf(account).then(userStore.setVisionTokenBalance);
+      ctx.dao.commit.balanceOf(account).then(userStore.setCommitBalance);
     }
   }, [ctx, account]);
 
   return (
     <div style={{ marginRight: "2rem" }}>
       <Row style={{ padding: "0.3rem" }}>
-        <Badge pill variant="info">{`${parseFloat(
-          formatEther(userStore.visionTokenBalance)
-        )} VISION`}</Badge>
+        <Badge pill variant="info">
+          {`${bigNumToFixed(userStore.visionTokenBalance)} `}
+          <span style={{ fontSize: "0.5rem" }}>
+            {ctx?.metadata.visionSymbol}
+          </span>
+        </Badge>
       </Row>
       <Row style={{ padding: "0.3rem" }}>
-        <Badge pill variant="success">{`${parseFloat(
-          formatEther(userStore.commitTokenBalance)
-        )} $COMMIT`}</Badge>
+        <Badge pill variant="success">
+          {`${bigNumToFixed(userStore.commitTokenBalance)} `}
+          <span style={{ fontSize: "0.5rem" }}>
+            {ctx?.metadata.commitSymbol}
+          </span>
+        </Badge>
       </Row>
     </div>
   );
