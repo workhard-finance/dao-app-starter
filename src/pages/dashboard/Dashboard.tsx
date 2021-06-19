@@ -261,9 +261,7 @@ const Dashboard = () => {
               <Card.Title>
                 Burned Commits
                 <OverlayTooltip
-                  tip={`Governance can mint more ${
-                    workhardCtx?.metadata.commitSymbol || "COMMIT"
-                  } and give grants to contributors.`}
+                  tip={`A stablecoin to tokenize your revenue stream. Pay your workers with value-added money.`}
                   text={`❔`}
                 />
               </Card.Title>
@@ -283,9 +281,9 @@ const Dashboard = () => {
               <Card.Title>
                 Total Vision
                 <OverlayTooltip
-                  tip={`Governance can mint more ${
-                    workhardCtx?.metadata.commitSymbol || "COMMIT"
-                  } and give grants to contributors.`}
+                  tip={`Liquid stock options for your project. Believers are ${
+                    workhardCtx?.metadata.visionSymbol || "VISION"
+                  } long term HODLers. Unbelievers can easily exit.`}
                   text={`❔`}
                 />
               </Card.Title>
@@ -305,9 +303,10 @@ const Dashboard = () => {
               <Card.Title>
                 Total Rights
                 <OverlayTooltip
-                  tip={`Governance can mint more ${
-                    workhardCtx?.metadata.commitSymbol || "COMMIT"
-                  } and give grants to contributors.`}
+                  tip={`
+                  Reward your long term ${
+                    workhardCtx?.metadata.visionSymbol || "VISION"
+                  } believers with access to devidends and voting power.`}
                   text={`❔`}
                 />
               </Card.Title>
