@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BigNumberish } from "ethers";
+import { BigNumberish, constants } from "ethers";
 import { Button, Card, Container, Form } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
@@ -49,7 +49,7 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
     }
     const signer = library.getSigner(account);
     handleTransaction(
-      workhardCtx.workhard
+      workhardCtx.project
         .connect(signer)
         ["safeTransferFrom(address,address,uint256)"](
           owner,
@@ -68,9 +68,10 @@ export const ProjectAdmin: React.FC<ProjectAdminProps> = ({
       return;
     }
     const signer = library.getSigner(account);
-    const popTx = await workhardCtx.dao.contributionBoard.populateTransaction.enableFunding(
+    const popTx = await workhardCtx.dao.contributionBoard.populateTransaction.startInitialContributorShareProgram(
       projId,
-      minimumShare
+      minimumShare,
+      constants.MaxUint256
     );
     safeTxHandler(
       chainId,

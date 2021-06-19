@@ -97,8 +97,8 @@ export const UpgradeToDAO: React.FC<{
 
   useEffect(() => {
     if (workhardCtx && id) {
-      const { workhard } = workhardCtx;
-      workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
+      const { project } = workhardCtx;
+      project.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
     }
   }, [workhardCtx, id, blockNumber, history.location]);
 
@@ -167,10 +167,11 @@ export const UpgradeToDAO: React.FC<{
       alert("Please fill out the form.");
       return;
     }
-    const { workhard } = workhardCtx;
+    const { project } = workhardCtx;
     const signer = library.getSigner(account);
-    const popTx = await workhard.populateTransaction.upgradeToDAO(id, {
+    const popTx = await project.populateTransaction.upgradeToDAO(id, {
       multisig,
+      treasury: multisig, // TODO: should designate treasury
       baseCurrency,
       projectName,
       projectSymbol,

@@ -42,7 +42,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
   useEffect(() => {
     if (!!account && !!library && !!chainId && !!workhardCtx && !!ipfs) {
       const { contributionBoard } = workhardCtx.dao;
-      workhardCtx.workhard
+      workhardCtx.project
         .tokenURI(projId)
         .then(async (uri) => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
@@ -56,7 +56,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
         .minimumShare(projId)
         .then(setMinimumShare)
         .catch(errorHandler(addToast));
-      workhardCtx.workhard.ownerOf(projId).then((owner) => {
+      workhardCtx.project.ownerOf(projId).then((owner) => {
         setBudgetOwner(owner);
         const network = getNetworkName(chainId);
         const gnosisAPI =

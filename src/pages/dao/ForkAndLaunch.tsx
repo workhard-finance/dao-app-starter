@@ -18,8 +18,8 @@ export const ForkAndLaunch: React.FC = () => {
 
   useEffect(() => {
     if (workhardCtx && projId && !Number.isNaN(parseInt(projId))) {
-      const { workhard } = workhardCtx;
-      workhard
+      const { project } = workhardCtx;
+      project
         .ownerOf(projId)
         .then(() => {
           setId(projId);

@@ -110,7 +110,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!!workhardCtx && !!ipfs) {
       const projId = daoId || 0;
-      workhardCtx.workhard
+      workhardCtx.project
         .tokenURI(projId)
         .then(async (uri) => {
           setMetadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
@@ -339,7 +339,7 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {[
-                ["Workhard Project Contract", workhardCtx?.workhard.address],
+                ["Workhard Project Contract", workhardCtx?.project.address],
                 ["Multisig", workhardCtx?.dao.multisig.address],
                 ["Timelock", workhardCtx?.dao.timelock.address],
                 [
@@ -393,7 +393,7 @@ const Dashboard = () => {
                   </td>
                   <td>
                     <CopyToClipboard
-                      text={workhardCtx?.workhard.address || ""}
+                      text={workhardCtx?.project.address || ""}
                       onCopy={() =>
                         addToast({
                           variant: "info",

@@ -40,11 +40,11 @@ export const DAOThumbnail: React.FC<DAOThumbnailProps> = ({
 
   useEffect(() => {
     if (workhardCtx && daoId) {
-      const { workhard } = workhardCtx;
+      const { project } = workhardCtx;
       Promise.all([
-        workhard.nameOf(daoId),
-        workhard.symbolOf(daoId),
-        workhard.tokenURI(daoId),
+        project.nameOf(daoId),
+        project.symbolOf(daoId),
+        project.tokenURI(daoId),
       ])
         .then(([name, symbol, uri]) => {
           setDAOMetadata({

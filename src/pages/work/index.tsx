@@ -7,9 +7,12 @@ import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
+import { Link } from "react-router-dom";
+import { prefix } from "../../utils/utils";
 
 const Work: React.FC = () => {
   const workhardCtx = useWorkhard();
+  const { daoId } = workhardCtx || { daoId: 0 };
 
   return (
     <Page>
@@ -24,7 +27,7 @@ const Work: React.FC = () => {
       />
       <p></p>
       <hr />
-      <TitleButSer link="#todo">
+      <TitleButSer link="https://whf.gitbook.io/docs/work#projects">
         Projects
         <OverlayTooltip
           tip={`Put your back into it fellow Worker! Earn some honest ${
@@ -38,7 +41,7 @@ const Work: React.FC = () => {
       <br />
       <ContributionBoard />
       <hr />
-      <TitleButSer link="#todo">
+      <TitleButSer link="https://whf.gitbook.io/docs/work#stable-reserve">
         Stable Reserve
         <OverlayTooltip
           tip={
@@ -51,23 +54,45 @@ const Work: React.FC = () => {
       <hr />
       <SerHelpPlz>
         <p>
-          Employers <a href="#">post jobs</a> on the JOB BOARD and Workers get
-          paid in{" "}
-          <a href="#">{workhardCtx?.metadata.commitSymbol || `$COMMIT`}</a>{" "}
+          Employers{" "}
+          <a href={`https://whf.gitbook.io/docs/work#projects`} target="_blank">
+            post jobs
+          </a>{" "}
+          on the JOB BOARD and Workers get paid in{" "}
+          <a
+            href={`https://whf.gitbook.io/docs/tokens#usdcommit`}
+            target="_blank"
+          >
+            {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
+          </a>{" "}
           tokens for completing jobs from the JOB BOARD.
         </p>
         <p>
-          The <a href="#">STABLE RESERVE</a> is a vault that allows anyone to
-          redeem hard-earned {workhardCtx?.metadata.commitSymbol || `$COMMIT`}{" "}
-          for $DAI at a 1:1 exchange or buy{" "}
-          {workhardCtx?.metadata.commitSymbol || `$COMMIT`} directly for{" "}
-          {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`} at a premium.
+          The{" "}
+          <a
+            href="https://whf.gitbook.io/docs/work#stable-reserve"
+            target="_blank"
+          >
+            STABLE RESERVE
+          </a>{" "}
+          is a vault that allows anyone to redeem hard-earned{" "}
+          {workhardCtx?.metadata.commitSymbol || `$COMMIT`} for $DAI at a 1:1
+          exchange or buy {workhardCtx?.metadata.commitSymbol || `$COMMIT`}{" "}
+          directly for {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`} at a
+          premium.
         </p>
         <p>
           Workers can burn their hard earned{" "}
           {workhardCtx?.metadata.commitSymbol || `$COMMIT`} by{" "}
-          <a href="#">mine</a>{" "}
-          <a href="#">{workhardCtx?.metadata.visionSymbol || `$VISION`}</a>
+          <Link to={prefix(daoId, "/mine")} target="_blank">
+            mine
+          </Link>{" "}
+          <a
+            href="https://whf.gitbook.io/docs/tokens#usdvision"
+            target="_blank"
+          >
+            {workhardCtx?.metadata.visionSymbol || `$VISION`}
+          </a>
         </p>
       </SerHelpPlz>
     </Page>

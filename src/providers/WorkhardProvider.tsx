@@ -5,11 +5,11 @@ import {
   // deployed,
   Deployed,
   getNetworkName,
+  Project,
   Workhard,
-  WorkhardClient,
-  WorkhardCommons,
-  WorkhardDAO,
-  WorkhardPeriphery,
+  CommonContracts,
+  DAO,
+  Periphery,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
 import { useRouteMatch } from "react-router-dom";
@@ -45,12 +45,12 @@ export interface DAOMetadata {
 }
 
 export interface WorkhardLibrary {
-  workhard: Workhard;
   daoId: number;
-  dao: WorkhardDAO;
-  periphery: WorkhardPeriphery;
-  commons: WorkhardCommons;
-  client: WorkhardClient;
+  project: Project;
+  dao: DAO;
+  periphery: Periphery;
+  commons: CommonContracts;
+  workhard: Workhard;
   metadata: DAOMetadata;
   web3: {
     active: boolean;
@@ -85,15 +85,16 @@ export const WorkhardProvider: React.FC = ({ children }) => {
     if (!library) return undefined;
     if (!chainId) return undefined;
     const contracts = deployedContracts[getNetworkName(chainId)];
-    const workhardAddress = contracts?.Workhard;
+    const workhardAddress = contracts?.Project;
 
+    console.log("hi??");
     if (!workhardAddress) return undefined;
-    const client = await WorkhardClient.from(library, workhardAddress);
+    const workhard = await Workhard.from(library, workhardAddress);
     const [dao, periphery, daoName, daoSymbol] = await Promise.all([
-      client.getDAO(daoId),
-      client.getPeriphery(daoId),
-      client.workhard.nameOf(daoId),
-      client.workhard.symbolOf(daoId),
+      workhard.getDAO(daoId),
+      workhard.getPeriphery(daoId),
+      workhard.project.nameOf(daoId),
+      workhard.project.symbolOf(daoId),
     ]);
 
     if (!dao || !periphery) return undefined;
@@ -116,11 +117,11 @@ export const WorkhardProvider: React.FC = ({ children }) => {
     ]);
     return {
       daoId,
-      client,
+      workhard,
       dao,
       periphery,
-      commons: client.commons,
-      workhard: client.workhard,
+      commons: workhard.commons,
+      project: workhard.project,
       metadata: {
         daoName,
         daoSymbol,

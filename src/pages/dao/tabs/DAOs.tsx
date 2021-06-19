@@ -22,8 +22,8 @@ const DAOs: React.FC = () => {
 
   useEffect(() => {
     if (workhardCtx) {
-      const { workhard } = workhardCtx;
-      workhard
+      const { project } = workhardCtx;
+      project
         .getAllDAOs()
         .then((daos) => {
           setProjects(daos.filter((id) => !id.eq(0)));

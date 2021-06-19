@@ -8,13 +8,13 @@ import EthersSafe, {
 } from "@gnosis.pm/safe-core-sdk";
 import {
   IERC20__factory,
-  WorkhardDAO,
+  DAO,
   getNetworkName,
   MyNetwork,
   GnosisSafe__factory,
   ERC721__factory,
   ERC1155__factory,
-  WorkhardClient,
+  Workhard,
   ERC20__factory,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
@@ -34,7 +34,6 @@ import { Dispatch, SetStateAction } from "react";
 import { AddToast } from "react-toast-notifications";
 import { WorkhardLibrary } from "../providers/WorkhardProvider";
 import { ERC165, PoolType } from "./ERC165Interfaces";
-// import { WorkhardContracts } from "../providers/WorkhardContractProvider";
 
 export const parseLog = (
   contract: {
@@ -92,7 +91,7 @@ export const getStablecoinList = (chainId?: number) => {
     const dao = require("../deployed.dev.json");
     return [
       {
-        symbol: "DAI",
+        symbol: "Mock",
         address: dao[getNetworkName(chainId)].BaseCurrency as string,
       },
     ];
@@ -165,7 +164,7 @@ export function decodeTxDetails(
   const contracts = [
     ...(Object.entries(workhard.dao) as Array<[string, Contract]>),
     ...(Object.entries(workhard.commons) as Array<[string, Contract]>),
-    ...(Object.entries({ Workhard: workhard.workhard }) as Array<
+    ...(Object.entries({ Project: workhard.project }) as Array<
       [string, Contract]
     >),
   ];

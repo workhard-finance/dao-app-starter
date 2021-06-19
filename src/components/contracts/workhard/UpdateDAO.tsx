@@ -51,7 +51,7 @@ export const UpdateDAO: React.FC<{
 
   useEffect(() => {
     if (!!workhardCtx && !!ipfs) {
-      workhardCtx.workhard
+      workhardCtx.project
         .tokenURI(workhardCtx.daoId)
         .then(async (uri) => {
           const metadata = await fetchProjectMetadataFromIPFS(ipfs, uri);
@@ -172,9 +172,9 @@ export const UpdateDAO: React.FC<{
       alert("Not connected");
       return;
     }
-    const { workhard } = workhardCtx;
+    const { project } = workhardCtx;
     const signer = library.getSigner(account);
-    const tx = await workhard.populateTransaction.updateURI(
+    const tx = await project.populateTransaction.updateURI(
       workhardCtx.daoId,
       uri
     );
@@ -183,7 +183,7 @@ export const UpdateDAO: React.FC<{
       return;
     }
     const popScheduledTx = await workhardCtx.dao.timelock.populateTransaction.schedule(
-      workhardCtx.workhard.address,
+      workhardCtx.project.address,
       0,
       tx.data,
       constants.HashZero,
