@@ -15,23 +15,25 @@ import {
   TxStatus,
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
+import { StableReserveStore } from "../../../store/stableReserveStore";
+import { observer } from "mobx-react";
+import { useStores } from "../../../hooks/user-stores";
 
 export interface BuyCommitProps {
   style?: React.CSSProperties;
 }
 
-export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
+export const BuyCommit: React.FC<BuyCommitProps> = observer(({ style }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
   const workhardCtx = useWorkhard();
-  const [daiBalance, setDaiBalance] = useState<BigNumber>();
-  const [allowance, setAllowance] = useState<BigNumber>();
   const [spendingDai, setSpendingDai] = useState<string>();
   const [approveTxStatus, setApproveTxStatus] = useState<TxStatus>();
   const [buyTxStatus, setBuyTxStatus] = useState<TxStatus>();
+  const { stableReserveStore: store } = useStores();
 
-  const getMaxSpending = () => formatEther(daiBalance || "0");
+  const getMaxSpending = () => formatEther(store.daiBalance || "0");
 
   const approveAndBuy = () => {
     if (!account || !workhardCtx || !library) {
@@ -58,10 +60,13 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
     const signer = library.getSigner(account);
     const stableReserve = workhardCtx.dao.stableReserve;
     const buyAmountInWei = parseEther(spendingDai || "0").div(2);
-    if (!daiBalance) {
+    if (!store.daiBalance) {
       alert("Fetching balance..");
       return;
-    } else if (daiBalance && parseEther(spendingDai || "0").gt(daiBalance)) {
+    } else if (
+      store.daiBalance &&
+      parseEther(spendingDai || "0").gt(store.daiBalance)
+    ) {
       alert("Not enough amount of base currency");
       return;
     }
@@ -71,6 +76,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
       addToast,
       `Successfully bought ${workhardCtx.metadata.commitSymbol}`,
       () => {
+        workhardCtx.dao.commit.balanceOf(account).then(store.setCommitBalance);
         setSpendingDai("");
       }
     );
@@ -81,11 +87,11 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
       const baseCurrency = workhardCtx.dao.baseCurrency;
       baseCurrency
         .balanceOf(account)
-        .then(setDaiBalance)
+        .then(store.setDaiBalance)
         .catch(errorHandler(addToast));
       baseCurrency
         .allowance(account, workhardCtx.dao.stableReserve.address)
-        .then(setAllowance)
+        .then(store.setAllowance)
         .catch(errorHandler(addToast));
     }
   }, [account, workhardCtx, approveTxStatus, blockNumber]);
@@ -99,7 +105,7 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
             <Card.Title>Stable balance</Card.Title>
             <Card.Text>
               <span style={{ fontSize: "2rem" }}>
-                {parseFloat(formatEther(daiBalance || 0)).toFixed(2)}
+                {parseFloat(formatEther(store.daiBalance)).toFixed(2)}
               </span>{" "}
               {workhardCtx?.metadata.baseCurrencySymbol || `$DAI`}
             </Card.Text>
@@ -141,21 +147,23 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
           <ConditionalButton
             variant="danger"
             onClick={
-              isApproved(allowance, spendingDai) ? buyCommit : approveAndBuy
+              isApproved(store.allowance, spendingDai)
+                ? buyCommit
+                : approveAndBuy
             }
             enabledWhen={
               buyTxStatus !== TxStatus.PENDING &&
               approveTxStatus !== TxStatus.PENDING
             }
             whyDisabled={
-              isApproved(allowance, spendingDai)
+              isApproved(store.allowance, spendingDai)
                 ? "Approving contract"
                 : "Buying"
             }
             children={
               approveTxStatus === TxStatus.PENDING
                 ? "Approving..."
-                : isApproved(allowance, spendingDai)
+                : isApproved(store.allowance, spendingDai)
                 ? buyTxStatus === TxStatus.PENDING
                   ? "Buying..."
                   : `Buy ${
@@ -168,4 +176,4 @@ export const BuyCommit: React.FC<BuyCommitProps> = ({ style }) => {
       </Card.Body>
     </Card>
   );
-};
+});

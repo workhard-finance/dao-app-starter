@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, constants } from "ethers";
 import {
-  Card,
   Button,
+  Card,
+  Col,
   Form,
   InputGroup,
   ProgressBar,
   Row,
-  Col,
 } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { formatEther, parseEther } from "ethers/lib/utils";
@@ -26,6 +26,7 @@ import {
 } from "../../../utils/utils";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useToasts } from "react-toast-notifications";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export interface InitialContributorSharePoolProps {
   poolAddress: string;
@@ -249,12 +250,14 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
               </Button>
             </Col>
             <Col style={{ textAlign: "end" }}>
-              <Button
+              <ConditionalButton
                 variant="warning"
                 onClick={isApprovedForAll ? burn : approve}
+                enabledWhen={txStatus !== TxStatus.PENDING}
+                whyDisabled={"pending"}
               >
                 {isApprovedForAll ? "Burn" : "Approve"}
-              </Button>
+              </ConditionalButton>
             </Col>
           </Row>
         </Form>

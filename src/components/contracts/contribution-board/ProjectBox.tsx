@@ -52,6 +52,7 @@ export const ProjectBox: React.FC<ProjectProps> = ({ projId, active }) => {
         .projectFund(projId)
         .then(setFund)
         .catch(errorHandler(addToast));
+
       contributionBoard
         .minimumShare(projId)
         .then(setMinimumShare)

@@ -218,7 +218,7 @@ const Mine = observer(() => {
                   workhardCtx && workhardCtx.daoId !== 0
                     ? `${workhardCtx.metadata.commitName}(${workhardCtx.metadata.commitSymbol})`
                     : "$COMMIT"
-                } to earn ${
+                } to continuously mine ${
                   workhardCtx && workhardCtx.daoId !== 0
                     ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
                     : "$VISION"
@@ -254,8 +254,10 @@ const Mine = observer(() => {
             Early Stage Contributors Pool!
           </TitleButSer>
           <p>
-            You are one of the early stage contributors! Thanks for your hard
-            commitment for this project. Enjoy this special rewards!
+            Congratulations! You can mine for more $VISION here with your
+            special early stage contributor tokens! Keep in mind that if you
+            completely withdraw, you will lose out on more $VISION emission
+            rewards.
           </p>
           <InitialContributorSharePool
             poolAddress={initialContributorPool}
