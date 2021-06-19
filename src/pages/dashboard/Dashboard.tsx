@@ -392,7 +392,7 @@ const Dashboard = () => {
                   </td>
                   <td>
                     <CopyToClipboard
-                      text={workhardCtx?.project.address || ""}
+                      text={contract[1] || ""}
                       onCopy={() =>
                         addToast({
                           variant: "info",
