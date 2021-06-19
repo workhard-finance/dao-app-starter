@@ -19,8 +19,8 @@ export const InitialContribution: React.FC<{
 
   useEffect(() => {
     if (workhardCtx) {
-      const { workhard } = workhardCtx;
-      workhard
+      const { project } = workhardCtx;
+      project
         .ownerOf(projId)
         .then(setProjectOwner)
         .catch(errorHandler(addToast));

@@ -119,16 +119,16 @@ export const CreateProject: React.FC<{
       alert("Not connected");
       return;
     }
-    const { workhard } = workhardCtx;
+    const { project } = workhardCtx;
     const signer = library.getSigner(account);
     handleTransaction(
-      workhard.connect(signer).createProject(daoId || 0, uri),
+      project.connect(signer).createProject(daoId || 0, uri),
       setTxStatus,
       addToast,
       "Posted a new job",
       (receipt) => {
         const parsed = parseLog(
-          workhard,
+          project,
           receipt.logs,
           "NewProject(uint256,uint256)"
         );

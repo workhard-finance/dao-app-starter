@@ -52,16 +52,14 @@ export const Immortalize: React.FC<Immortalize> = ({}) => {
     }
 
     const signer = library.getSigner(account);
-    const { workhard } = workhardCtx;
-    const tx = await workhard.populateTransaction.immortalize(
-      workhardCtx.daoId
-    );
+    const { project } = workhardCtx;
+    const tx = await project.populateTransaction.immortalize(workhardCtx.daoId);
     if (!tx.data) {
       alert("Failed to created tx");
       return;
     }
     const popScheduledTx = await workhardCtx.dao.timelock.populateTransaction.schedule(
-      workhardCtx.workhard.address,
+      workhardCtx.project.address,
       0,
       tx.data,
       constants.HashZero,

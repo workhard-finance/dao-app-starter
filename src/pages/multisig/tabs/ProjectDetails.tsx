@@ -40,12 +40,12 @@ export const ProjectDetails: React.FC = () => {
   useEffect(() => {
     if (!!workhardCtx && !!ipfs) {
       const projId = daoId || 0;
-      workhardCtx.workhard
+      workhardCtx.project
         .immortalized(projId)
         .then(setImmortalized)
         .catch(errorHandler(addToast));
 
-      workhardCtx.workhard
+      workhardCtx.project
         .tokenURI(projId)
         .then(async (uri) => {
           setMetadata(await fetchProjectMetadataFromIPFS(ipfs, uri));
@@ -56,7 +56,7 @@ export const ProjectDetails: React.FC = () => {
 
   useEffect(() => {
     if (workhardCtx) {
-      workhardCtx.workhard
+      workhardCtx.project
         .ownerOf(daoId)
         .then(setProjectOwner)
         .catch(errorHandler(addToast));

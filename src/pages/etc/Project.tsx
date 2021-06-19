@@ -61,9 +61,9 @@ export const Project: React.FC = () => {
 
   useEffect(() => {
     if (!!workhardCtx && !!ipfs && account && !!chainId) {
-      const { dao, workhard } = workhardCtx;
+      const { dao, project } = workhardCtx;
       const { contributionBoard } = dao;
-      workhard
+      project
         .ownerOf(id)
         .then((owner) => {
           setBudgetOwner(owner);
@@ -103,7 +103,7 @@ export const Project: React.FC = () => {
           }
         })
         .catch(() => setExist(false));
-      workhard
+      project
         .tokenURI(id)
         .then(async (uri) => {
           setMeatadata(await fetchProjectMetadataFromIPFS(ipfs, uri));

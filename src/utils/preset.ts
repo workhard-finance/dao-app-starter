@@ -1,5 +1,5 @@
 import { parseEther } from "@ethersproject/units";
-import { WorkhardDAO } from "@workhard/protocol";
+import { DAO } from "@workhard/protocol";
 import {
   BigNumber,
   BigNumberish,
@@ -47,7 +47,7 @@ export const convertType = (type: PARAM_TYPE, value: string) => {
   }
 };
 
-export const buildPresets = (dao: WorkhardDAO): Preset[] => {
+export const buildPresets = (dao: DAO): Preset[] => {
   return [
     {
       contractName: "StableReserve",

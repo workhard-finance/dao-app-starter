@@ -41,8 +41,8 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
 
   useEffect(() => {
     if (!!workhardCtx && !!library) {
-      const { workhard, dao } = workhardCtx;
-      workhard
+      const { project, dao } = workhardCtx;
+      project
         .getDAO(id)
         .then((contracts) => {
           if (contracts.visionEmitter === constants.AddressZero) {
@@ -57,7 +57,7 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
           }
         })
         .catch(() => {
-          setShareAddress(workhard.dao.contributionBoard.address);
+          setShareAddress(dao.contributionBoard.address);
         });
     }
   }, [library, workhardCtx]);

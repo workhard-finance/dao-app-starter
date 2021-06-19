@@ -26,9 +26,9 @@ export const ContributionBoard: React.FC = () => {
 
   useEffect(() => {
     if (workhardCtx) {
-      const { daoId, workhard } = workhardCtx;
+      const { daoId, project } = workhardCtx;
       let stale = false;
-      workhard
+      project
         .projectsOf(daoId)
         .then((n: BigNumber) => {
           if (n.eq(0)) {
@@ -40,7 +40,7 @@ export const ContributionBoard: React.FC = () => {
               Array(n.toNumber() - last)
                 .fill(undefined)
                 .map((_, idx) =>
-                  workhard.projectsOfDAOByIndex(daoId, idx + last)
+                  project.projectsOfDAOByIndex(daoId, idx + last)
                 )
             ).then((fetched) => {
               setProjects([

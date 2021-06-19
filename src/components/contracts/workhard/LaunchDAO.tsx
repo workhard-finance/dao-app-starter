@@ -60,23 +60,23 @@ export const LaunchDAO: React.FC<{
 
   useEffect(() => {
     if (workhardCtx && id) {
-      const { workhard, dao } = workhardCtx;
-      workhard.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
-      workhard.nameOf(id).then(setProjectName).catch(errorHandler(addToast));
+      const { project, dao } = workhardCtx;
+      project.ownerOf(id).then(setProjectOwner).catch(errorHandler(addToast));
+      project.nameOf(id).then(setProjectName).catch(errorHandler(addToast));
       dao.visionEmitter
         .FOUNDER_SHARE_DENOMINATOR()
         .then(setFounderShareDenominator)
         .catch(errorHandler(addToast));
       dao.vision.symbol().then(setVisionSymbol).catch(errorHandler(addToast));
       dao.commit.symbol().then(setCommitSymbol).catch(errorHandler(addToast));
-      workhard.growth(id).then(setGrowth).catch(errorHandler(addToast));
+      project.growth(id).then(setGrowth).catch(errorHandler(addToast));
     }
   }, [workhardCtx, id]);
 
   useEffect(() => {
     if (workhardCtx && id) {
-      const { workhard } = workhardCtx;
-      workhard.populateTransaction
+      const { project } = workhardCtx;
+      project.populateTransaction
         .launch(id, liquidityMining, commitMining, treasury, caller)
         .then(setPopTx);
     }
@@ -126,13 +126,13 @@ export const LaunchDAO: React.FC<{
       alert("Failed to fetch project owner.");
       return;
     }
-    const { workhard } = workhardCtx;
+    const { project } = workhardCtx;
     const signer = library.getSigner(account);
     console.log(liquidityMining);
     console.log(commitMining);
     console.log(treasury);
     console.log(caller);
-    const popTx = await workhard.populateTransaction.launch(
+    const popTx = await project.populateTransaction.launch(
       id,
       liquidityMining,
       commitMining,
