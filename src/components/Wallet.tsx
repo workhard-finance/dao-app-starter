@@ -6,7 +6,7 @@ import {
   UserRejectedRequestError as UserRejectedRequestErrorInjected,
 } from "@web3-react/injected-connector";
 import { UserRejectedRequestError as UserRejectedRequestErrorWalletConnect } from "@web3-react/walletconnect-connector";
-import { providers } from "ethers";
+import { ethers, providers } from "ethers";
 import { Spinner } from "./Spinner";
 import { useInactiveListener } from "../hooks/InactivListener";
 import { useEagerConnect } from "../hooks/EagerConnect";
@@ -19,6 +19,8 @@ import {
   walletconnect,
   walletlink,
 } from "../web3/connectors";
+import { useWorkhard } from "../providers/WorkhardProvider";
+import { useStores } from "../hooks/user-stores";
 
 function getErrorMessage(error: Error) {
   if (error instanceof NoEthereumProviderError) {
@@ -41,6 +43,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const { userStore } = useStores();
 
   enum ConnectorNames {
     Injected = "Metamask",
@@ -57,6 +60,7 @@ const Wallet = (props: React.ComponentProps<any>) => {
     // Portis = "Portis",
     // Torus = "Torus",
   }
+
   const connectorsByName: {
     [connectorName in ConnectorNames]: AbstractConnector;
   } = {
@@ -75,7 +79,15 @@ const Wallet = (props: React.ComponentProps<any>) => {
     // [ConnectorNames.Torus]: torus,
   };
   const context = useWeb3React<providers.Web3Provider>();
-  const { connector, account, activate, deactivate, active, error } = context;
+  const {
+    connector,
+    account,
+    activate,
+    deactivate,
+    active,
+    error,
+    library,
+  } = context;
   // handle logic to recognize the connector currently being activated
   const [activatingConnector, setActivatingConnector] = React.useState<any>();
   React.useEffect(() => {
@@ -86,9 +98,56 @@ const Wallet = (props: React.ComponentProps<any>) => {
 
   // handle logic to eagerly connect to the injected ethereum provider, if it exists and has granted access already
   const triedEager = useEagerConnect();
+  const ctx = useWorkhard();
 
   // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
   useInactiveListener(!triedEager || !!activatingConnector);
+
+  // register default assets.
+  // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-747.md for metamask
+  try {
+    if (!userStore.tokenAdded && library?.provider.isMetaMask) {
+      const TOKENS = [
+        {
+          address: ctx?.dao.vision.address,
+          symbol: "VISION",
+          decimals: 18,
+          // todo: add
+          image: "",
+        },
+        {
+          address: ctx?.dao.commit.address,
+          symbol: "COMMIT",
+          decimals: 18,
+          // todo: add
+          image: "",
+        },
+      ];
+      TOKENS.forEach((token) => {
+        // @ts-ignore
+        library.provider.send(
+          {
+            method: "wallet_watchAsset",
+            params: {
+              // Initially only supports ERC20, but eventually more!
+              // @ts-ignore
+              type: "ERC20",
+              options: {
+                address: token.address, // The address that the token is at.
+                symbol: token.symbol, // A ticker symbol or shorthand, up to 5 chars.
+                decimals: token.decimals, // The number of decimals in the token
+                image: "http", // A string url of the token logo
+              },
+            },
+          },
+          (error, response) => {
+            console.log(response);
+          }
+        );
+      });
+      userStore.setTokenAdded(true);
+    }
+  } catch (e) {}
   return (
     <div {...props}>
       <Button

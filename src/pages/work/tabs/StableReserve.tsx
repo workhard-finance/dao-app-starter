@@ -7,6 +7,7 @@ import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { getPriceFromCoingecko } from "../../../utils/coingecko";
 import { errorHandler } from "../../../utils/utils";
+import { StableReserveStore } from "../../../store/stableReserveStore";
 
 const StableReserve: React.FC = () => {
   const workhardCtx = useWorkhard();

@@ -15,21 +15,21 @@ import {
 import { ConditionalButton } from "../../ConditionalButton";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useToasts } from "react-toast-notifications";
+import { StableReserveStore } from "../../../store/stableReserveStore";
+import { observer } from "mobx-react";
+import { useStores } from "../../../hooks/user-stores";
 
-export interface RedeemCommitProps {}
-
-export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
+export const RedeemCommit: React.FC = observer(() => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
   const { addToast } = useToasts();
   const workhardCtx = useWorkhard();
-  const [commitBalance, setCommitBalance] = useState<BigNumber>();
-  const [allowance, setAllowance] = useState<BigNumber>();
   const [redeemAmount, setRedeemAmount] = useState<string>();
   const [approveTxStatus, setApproveTxStatus] = useState<TxStatus>();
   const [redeemTxStatus, setRedeemTxStatus] = useState<TxStatus>();
+  const { stableReserveStore: store } = useStores();
 
-  const getMaxRedeem = () => formatEther(commitBalance || "0");
+  const getMaxRedeem = () => formatEther(store.commitBalance || "0");
 
   const approveAndRedeem = () => {
     if (!account || !workhardCtx || !library) {
@@ -56,7 +56,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
     const signer = library.getSigner(account);
     const stableReserve = workhardCtx.dao.stableReserve;
     const redeemAmountInWei = parseEther(redeemAmount || "0");
-    if (commitBalance && redeemAmountInWei.gt(commitBalance)) {
+    if (store.commitBalance && redeemAmountInWei.gt(store.commitBalance)) {
       alert("Not enough amount of commit balance");
       return;
     }
@@ -77,11 +77,11 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
       const commitToken = workhardCtx.dao.commit;
       commitToken
         .balanceOf(account)
-        .then(setCommitBalance)
+        .then(store.setCommitBalance)
         .catch(errorHandler(addToast));
       commitToken
         .allowance(account, workhardCtx.dao.stableReserve.address)
-        .then(setAllowance)
+        .then(store.setAllowance)
         .catch(errorHandler(addToast));
     }
   }, [account, workhardCtx, blockNumber]);
@@ -96,7 +96,7 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
             </Card.Title>
             <Card.Text>
               <span style={{ fontSize: "2rem" }}>
-                {parseFloat(formatEther(commitBalance || 0)).toFixed(2)}
+                {parseFloat(formatEther(store.commitBalance)).toFixed(2)}
               </span>{" "}
               {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
             </Card.Text>
@@ -138,21 +138,23 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
           <ConditionalButton
             variant="success"
             onClick={
-              isApproved(allowance, redeemAmount) ? redeem : approveAndRedeem
+              isApproved(store.allowance, redeemAmount)
+                ? redeem
+                : approveAndRedeem
             }
             enabledWhen={
               redeemTxStatus !== TxStatus.PENDING &&
               approveTxStatus !== TxStatus.PENDING
             }
             whyDisabled={
-              isApproved(allowance, redeemAmount)
+              isApproved(store.allowance, redeemAmount)
                 ? "Approving contract"
                 : "Redeeming..."
             }
             children={
               approveTxStatus === TxStatus.PENDING
                 ? "Approving..."
-                : isApproved(allowance, redeemAmount)
+                : isApproved(store.allowance, redeemAmount)
                 ? redeemTxStatus === TxStatus.PENDING
                   ? "Redeeming..."
                   : `Redeem ${
@@ -165,4 +167,4 @@ export const RedeemCommit: React.FC<RedeemCommitProps> = ({}) => {
       </Card.Body>
     </Card>
   );
-};
+});

@@ -33,6 +33,7 @@ import {
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { Col } from "react-bootstrap";
+import { ConditionalButton } from "../../ConditionalButton";
 
 export interface ERC20StakeMiningV1Props {
   poolIdx: number;
@@ -84,7 +85,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   const [stakePercent, setStakePercent] = useState<number>();
   const [allowance, setAllowance] = useState<BigNumber>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
-  const [amount, setAmount] = useState<string>();
+  const [amount, setAmount] = useState<string>("0");
   const [mined, setMined] = useState<BigNumber>();
   const [apy, setAPY] = useState<number>();
 
@@ -294,6 +295,14 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
       `Successfully exited!`
     );
   };
+  const isStakableAmount = () => {
+    try {
+      return tokenBalance?.gte(parseEther(amount));
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  };
 
   const collapsedDetails = () => (
     <>
@@ -381,8 +390,10 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
             </Button>
           </Col>
           <Col style={{ textAlign: "end" }}>
-            <Button
+            <ConditionalButton
               variant="success"
+              enabledWhen={isStakableAmount() && txStatus !== TxStatus.PENDING}
+              whyDisabled="not enough balance"
               onClick={
                 stakeOrWithdraw
                   ? isApproved(allowance, amount)
@@ -396,7 +407,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
                   ? "Stake"
                   : "Approve"
                 : "Withdraw"}
-            </Button>
+            </ConditionalButton>
           </Col>
         </Row>
       </Form>
