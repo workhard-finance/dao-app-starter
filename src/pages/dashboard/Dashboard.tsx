@@ -259,7 +259,7 @@ const Dashboard = () => {
           <Card bg={"danger"} text={"white"}>
             <Card.Body>
               <Card.Title>
-                Burned Commits
+                Burned {workhardCtx?.metadata.commitSymbol || "COMMIT"}
                 <OverlayTooltip
                   tip={`A stablecoin to tokenize your revenue stream. Pay your workers with value-added money.`}
                   text={`❔`}
@@ -279,7 +279,7 @@ const Dashboard = () => {
           <Card bg={"warning"} text={"white"}>
             <Card.Body>
               <Card.Title>
-                Total Vision
+                Total {workhardCtx?.metadata.visionSymbol || "VISION"}
                 <OverlayTooltip
                   tip={`Liquid stock options for your project. Believers are ${
                     workhardCtx?.metadata.visionSymbol || "VISION"
@@ -301,7 +301,7 @@ const Dashboard = () => {
           <Card bg={"info"} text={"white"}>
             <Card.Body>
               <Card.Title>
-                Total Rights
+                Total {workhardCtx?.metadata.rightSymbol || "RIGHT"}
                 <OverlayTooltip
                   tip={`
                   Reward your long term ${
