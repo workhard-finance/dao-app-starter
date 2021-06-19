@@ -24,6 +24,7 @@ import {
 import { InitialContributorSharePool } from "../../components/contracts/mining-pool/InitialContributorSharePool";
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
 import { MiningPool } from "../../components/views/MiningPool";
+import { Link } from "react-router-dom";
 
 const Mine = observer(() => {
   const { addToast } = useToasts();
@@ -152,7 +153,9 @@ const Mine = observer(() => {
           </Button>
         </Alert>
       )}
-      <TitleButSer link="#todo">Main pools</TitleButSer>
+      <TitleButSer link="https://whf.gitbook.io/docs/mine#main-pools">
+        Main pools
+      </TitleButSer>
       <p>
         Got some hard earned{" "}
         {workhardCtx && workhardCtx.daoId !== 0
@@ -234,7 +237,9 @@ const Mine = observer(() => {
         <>
           <br />
           <br />
-          <TitleButSer link="#todo">Sub pools</TitleButSer>
+          <TitleButSer link="https://whf.gitbook.io/docs/mine#sub-pools">
+            Sub pools
+          </TitleButSer>
           <Row>
             {subPools.map((subPool) => (
               <Col md={4}>{subPool}</Col>
@@ -245,7 +250,9 @@ const Mine = observer(() => {
       {initialContributor && initialContributorPool && (
         <>
           <br />
-          <TitleButSer>Early Stage Contributors Pool!</TitleButSer>
+          <TitleButSer link="https://whf.gitbook.io/docs/mine#icsp">
+            Early Stage Contributors Pool!
+          </TitleButSer>
           <p>
             Congratulations! You can mine for more $VISION here with your
             special early stage contributor tokens! Keep in mind that if you
@@ -267,9 +274,9 @@ const Mine = observer(() => {
           {workhardCtx && workhardCtx.daoId !== 0
             ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
             : "$VISION"}{" "}
-          <a href="#" className="text-info">
+          <Link to={prefix(daoId, "/#emission-schedule")} className="text-info">
             (Emission Detail)
-          </a>
+          </Link>
           :
           <ol>
             <li>
@@ -282,7 +289,10 @@ const Mine = observer(() => {
                 ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
                 : "$VISION"}{" "}
               through COMMIT MINING.
-              <a href="#" className="text-info">
+              <a
+                href="https://whf.gitbook.io/docs/mine#needs-updated"
+                className="text-info"
+              >
                 (Example)
               </a>
             </li>
@@ -297,7 +307,10 @@ const Mine = observer(() => {
             ? workhardCtx.metadata.visionName
             : "$VISION"}{" "}
           to receive{" "}
-          <a href="#" className="text-info">
+          <a
+            href="https://whf.gitbook.io/docs/tokens#usdright"
+            className="text-info"
+          >
             {workhardCtx && workhardCtx.daoId !== 0
               ? workhardCtx.metadata.rightName
               : "$RIGHT"}
@@ -307,9 +320,13 @@ const Mine = observer(() => {
             ? workhardCtx.metadata.rightSymbol
             : "$veVISION"}
           ) and join to{" "}
-          <a href="#" className="text-info">
+          <Link
+            to={prefix(daoId, "/gov")}
+            target="_blank"
+            className="text-info"
+          >
             govern
-          </a>{" "}
+          </Link>{" "}
           the WORKER’S UNION. With{" "}
           {workhardCtx?.metadata.rightSymbol || "$RIGHT"} you can claim a share
           of the{" "}

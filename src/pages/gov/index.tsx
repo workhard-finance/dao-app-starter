@@ -37,7 +37,7 @@ const Gov: React.FC = () => {
       {/* <Alert variant={"warning"}>
         All men must work, even the rich, because to work was the will of God
       </Alert> */}
-      <TitleButSer link="#todo" />
+      <TitleButSer link="https://whf.gitbook.io/docs/governance" />
       <Tabs defaultActiveKey={tab || "dividend"}>
         <Tab
           eventKey="dividend"

@@ -74,7 +74,7 @@ const Store: React.FC = () => {
           style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
         />
       )}
-      <TitleButSer link="#todo" />
+      <TitleButSer link="https://whf.gitbook.io/docs/store" />
       <Tabs defaultActiveKey={tab || "featured"}>
         <Tab
           eventKey="featured"
