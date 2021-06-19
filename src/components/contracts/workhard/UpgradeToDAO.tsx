@@ -133,7 +133,7 @@ export const UpgradeToDAO: React.FC<{
         }
       }
     }
-  }, [workhardCtx, account, chainId, projectOwner]);
+  }, [id, workhardCtx, account, chainId, projectOwner]);
 
   const upgradeToDAO = async () => {
     if (!workhardCtx || !account || !library || !chainId) {
