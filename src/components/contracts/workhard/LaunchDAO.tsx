@@ -128,10 +128,6 @@ export const LaunchDAO: React.FC<{
     }
     const { project } = workhardCtx;
     const signer = library.getSigner(account);
-    console.log(liquidityMining);
-    console.log(commitMining);
-    console.log(treasury);
-    console.log(caller);
     const popTx = await project.populateTransaction.launch(
       id,
       liquidityMining,

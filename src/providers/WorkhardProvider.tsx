@@ -87,7 +87,6 @@ export const WorkhardProvider: React.FC = ({ children }) => {
     const contracts = deployedContracts[getNetworkName(chainId)];
     const workhardAddress = contracts?.Project;
 
-    console.log("hi??");
     if (!workhardAddress) return undefined;
     const workhard = await Workhard.from(library, workhardAddress);
     const [dao, periphery, daoName, daoSymbol] = await Promise.all([

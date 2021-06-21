@@ -58,14 +58,11 @@ export const buildPresets = (dao: DAO): Preset[] => {
       ],
       contract: dao.stableReserve,
       handler: async (params: any[]) => {
-        console.log("hi");
-        console.log(params);
         const popTx = await dao.stableReserve.populateTransaction.grant(
           dao.contributionBoard.address,
           params[1] as BytesLike, // amount
           defaultAbiCoder.encode(["uint256"], [params[0] as BigNumberish]) // projId
         );
-        console.log("resulting", popTx);
         return popTx;
       },
     },
