@@ -31,7 +31,7 @@ export class MineStore {
   @get
   liquidityMiningIdx = () => {
     return this.pools.findIndex(
-      (v) => getAddress(v) === getAddress(this.liquidityMiningAddress)
+      (v) => !!v && getAddress(v) === getAddress(this.liquidityMiningAddress)
     );
   };
 

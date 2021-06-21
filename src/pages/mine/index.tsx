@@ -113,6 +113,7 @@ const Mine = observer(() => {
   const subPools = mineStore.pools
     ?.map((addr, idx) => {
       if (
+        !addr ||
         idx === mineStore.liquidityMiningIdx() ||
         idx === mineStore.commitMiningIdx() ||
         !mineStore.emissionWeightSum
