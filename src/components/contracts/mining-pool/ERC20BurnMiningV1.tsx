@@ -41,8 +41,9 @@ export interface ERC20BurnMiningV1Props {
   tokenName?: string;
   poolAddress: string;
   totalEmission: BigNumber;
-  visionPrice: number;
   emissionWeightSum: BigNumber;
+  apy: number;
+  maxAPY?: number;
   description?: string;
   collapsible?: boolean;
   link?: string;
@@ -55,7 +56,8 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   tokenName,
   poolAddress,
   totalEmission,
-  visionPrice,
+  apy,
+  maxAPY,
   description,
   collapsible,
   emissionWeightSum,
@@ -86,7 +88,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   const [amount, setAmount] = useState<string>();
   const [mined, setMined] = useState<BigNumber>();
   const [txStatus, setTxStatus] = useState<TxStatus>();
-  const [annualRevenue, setAnnualRevenue] = useState<number>();
+  // const [annualRevenue, setAnnualRevenue] = useState<number>();
 
   const getMaxAmount = () => formatEther(tokenBalance || "0");
 
@@ -155,22 +157,22 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
     }
   }, [burnedAmount, tokenBalance]);
 
-  useEffect(() => {
-    if (weight && tokenPrice && totalBurn) {
-      const visionPerWeek = parseFloat(
-        formatEther(totalEmission.mul(weight).div(emissionWeightSum))
-      );
-      const totalBurnedToken = parseFloat(formatEther(totalBurn));
-      setAnnualRevenue(
-        100 *
-          ((visionPerWeek * visionPrice * 52) /
-            (totalBurnedToken * tokenPrice) -
-            1)
-      );
-    } else {
-      setAnnualRevenue(NaN);
-    }
-  }, [weight, tokenPrice, totalBurn]);
+  // useEffect(() => {
+  //   if (weight && tokenPrice && totalBurn) {
+  //     const visionPerWeek = parseFloat(
+  //       formatEther(totalEmission.mul(weight).div(emissionWeightSum))
+  //     );
+  //     const totalBurnedToken = parseFloat(formatEther(totalBurn));
+  //     setAnnualRevenue(
+  //       100 *
+  //         ((visionPerWeek * visionPrice * 52) /
+  //           (totalBurnedToken * tokenPrice) -
+  //           1)
+  //     );
+  //   } else {
+  //     setAnnualRevenue(NaN);
+  //   }
+  // }, [weight, tokenPrice, totalBurn]);
 
   const approve = () => {
     if (!account || !tokenAddress) {
@@ -359,7 +361,11 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
               />
             </Card.Title>
             <Card.Text>
-              <span style={{ fontSize: "1.5rem" }}>{annualRevenue}</span> %
+              <span style={{ fontSize: "1.5rem" }}>
+                {apy.toFixed(0)}
+                {maxAPY && ` ~ ${maxAPY.toFixed(0)}`}
+              </span>{" "}
+              %
             </Card.Text>
           </Col>
           <Col style={{ marginBottom: "1rem", minWidth: "12rem" }}>

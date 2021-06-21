@@ -32,12 +32,14 @@ export interface InitialContributorSharePoolProps {
   poolAddress: string;
   totalEmission: BigNumber;
   emissionWeightSum: BigNumber;
+  apy: number;
 }
 
 export const InitialContributorSharePool: React.FC<InitialContributorSharePoolProps> = ({
   poolAddress,
   totalEmission,
   emissionWeightSum,
+  apy,
 }) => {
   const { account, library } = useWeb3React();
   const { blockNumber } = useBlockNumber();
@@ -193,6 +195,12 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
       <Card.Body>
         <Row>
           <Col md={4}>
+            <Card.Title>APY</Card.Title>
+            <Card.Text style={{ fontSize: "1.5rem" }}>
+              {apy.toFixed(0)}%
+            </Card.Text>
+          </Col>
+          <Col md={4}>
             <Card.Title>Mined</Card.Title>
             <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
@@ -201,7 +209,7 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
               </span>
             </Card.Text>
           </Col>
-          <Col md={8}>
+          <Col md={4}>
             <Card.Title>Weekly allocation</Card.Title>
             <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}

@@ -1,23 +1,19 @@
 export const getPriceFromCoingecko = (
   address: string,
-  currency?: "USD"
+  currency?: "usd"
 ): Promise<number | undefined> => {
-  const vsCurrency = currency || "USD";
+  const vsCurrency = currency || "usd";
   return new Promise<number | undefined>((resolve) => {
-    if (process.env.NODE_ENV === "development") {
-      resolve(undefined);
-    } else {
-      fetch(
-        `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${address}&vs_currencies=${vsCurrency}`
-      )
-        .then((res) => res.json())
-        .then((json) => {
-          const tokenPrice = json[address];
-          const price = tokenPrice && tokenPrice[vsCurrency];
-          resolve(price);
-        })
-        .catch(() => resolve(undefined));
-    }
+    fetch(
+      `https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=${address}&vs_currencies=${vsCurrency}`
+    )
+      .then((res) => res.json())
+      .then((json) => {
+        const tokenPrice = json[address.toLowerCase()];
+        const price = tokenPrice && tokenPrice[vsCurrency];
+        resolve(price);
+      })
+      .catch(() => resolve(undefined));
   });
 };
 

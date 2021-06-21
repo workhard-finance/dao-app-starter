@@ -1,8 +1,4 @@
-import {
-  ERC20__factory,
-  ERC721__factory,
-  MiningPool__factory,
-} from "@workhard/protocol";
+import { MiningPool__factory } from "@workhard/protocol";
 import { UniswapV2Pair__factory } from "@workhard/protocol/dist/build/@uniswap";
 import { BigNumber } from "ethers";
 import { isAddress } from "ethers/lib/utils";
@@ -27,7 +23,7 @@ export interface MiningPoolProps {
   title?: string;
   tokenSymbol?: string;
   totalEmission: BigNumber;
-  visionPrice: number;
+  apy: number;
   emissionWeightSum: BigNumber;
   description?: string;
   collapsible?: boolean;
@@ -103,7 +99,7 @@ export const MiningPool: React.FC<MiningPoolProps> = (props) => {
         poolAddress={props.poolAddress}
         totalEmission={props.totalEmission}
         emissionWeightSum={props.emissionWeightSum}
-        visionPrice={props.visionPrice || 0}
+        apy={props.apy || 0}
         collapsible={props.collapsible}
         logos={logos}
       />
@@ -117,7 +113,7 @@ export const MiningPool: React.FC<MiningPoolProps> = (props) => {
         poolAddress={props.poolAddress}
         totalEmission={props.totalEmission}
         emissionWeightSum={props.emissionWeightSum}
-        visionPrice={props.visionPrice || 0}
+        apy={props.apy || 0}
         collapsible={props.collapsible}
         logos={logos}
       />

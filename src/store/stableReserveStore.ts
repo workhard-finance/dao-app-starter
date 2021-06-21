@@ -1,7 +1,5 @@
 import { action, observable } from "mobx";
 import { BigNumber } from "ethers";
-import { TxStatus } from "../utils/utils";
-import React from "react";
 
 export class StableReserveStore {
   @observable public daiBalance: BigNumber = BigNumber.from(0);
@@ -20,13 +18,3 @@ export class StableReserveStore {
     this.allowance = v;
   };
 }
-
-const storeContext = React.createContext<StableReserveStore | null>(null);
-export const useStableReserveStore = () => {
-  const store = React.useContext(storeContext);
-  if (!store) {
-    // this is especially useful in TypeScript so you don't need to be checking for null all the time
-    throw new Error("useStore must be used within a StoreProvider.");
-  }
-  return store;
-};

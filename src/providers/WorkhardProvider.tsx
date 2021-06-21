@@ -15,6 +15,7 @@ import deployed from "@workhard/protocol/deployed.json";
 import { useRouteMatch } from "react-router-dom";
 import { ethers } from "ethers";
 import { Helmet } from "react-helmet";
+import { useStores } from "../hooks/user-stores";
 
 let deployedContracts: Deployed;
 if (process.env.NODE_ENV === "development") {
@@ -78,6 +79,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
   const parsed = parseInt(match?.params.daoId || "0");
   const daoId = Number.isNaN(parsed) ? 0 : parsed;
   const [context, setContext] = useState<WorkhardLibrary>();
+  const { mineStore } = useStores();
   const getContext = async (
     daoId: number
   ): Promise<WorkhardLibrary | undefined> => {
@@ -143,6 +145,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
       }
     }
     getContext(daoId).then((ctx) => {
+      mineStore.init(ctx);
       setContext(ctx);
     });
   }, [active, library, chainId, daoId]);

@@ -13,7 +13,6 @@ import {
   TxStatus,
 } from "../../utils/utils";
 import { useToasts } from "react-toast-notifications";
-import { initMineStore, MineStore } from "../../store/mineStore";
 import { observer } from "mobx-react";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
@@ -25,18 +24,14 @@ import { InitialContributorSharePool } from "../../components/contracts/mining-p
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
 import { MiningPool } from "../../components/views/MiningPool";
 import { Link } from "react-router-dom";
+import { useStores } from "../../hooks/user-stores";
 
 const Mine = observer(() => {
   const { addToast } = useToasts();
   const { account, library, chainId } = useWeb3React();
   const workhardCtx = useWorkhard();
   const { daoId, dao, periphery } = workhardCtx || {};
-  const mineStore: MineStore = initMineStore(
-    !!dao ? dao.visionEmitter : null,
-    !!periphery ? periphery.liquidityMining.address : null,
-    !!periphery ? periphery.commitMining.address : null,
-    !!dao ? dao.vision.address : null
-  );
+  const { mineStore } = useStores();
   const { blockNumber } = useBlockNumber();
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [initialContributor, setInitialContributor] = useState<boolean>();
@@ -52,7 +47,10 @@ const Mine = observer(() => {
   useEffect(() => {
     if (!!dao && account && library) {
       const signer = library.getSigner(account);
-      mineStore.loadPools().then();
+      mineStore.loadPools().then(async () => {
+        await mineStore.loadVisionPrice();
+        await mineStore.loadAPYs();
+      });
       mineStore.isDistributable(signer);
       dao.visionEmitter
         .initialContributorShare()
@@ -93,7 +91,6 @@ const Mine = observer(() => {
     if (!!dao && !!mineStore.pools) {
       mineStore.loadEmission();
       mineStore.loadEmissionWeightSum();
-      mineStore.loadVisionPrice();
     }
   }, [library, dao, txStatus]);
 
@@ -128,7 +125,7 @@ const Mine = observer(() => {
               poolAddress={addr}
               totalEmission={mineStore.emission}
               emissionWeightSum={mineStore.emissionWeightSum}
-              visionPrice={mineStore.visionPrice || 0}
+              apy={mineStore.apy(addr)}
               collapsible
             />
           </div>
@@ -202,7 +199,9 @@ const Mine = observer(() => {
                 poolAddress={workhardCtx.periphery.liquidityMining.address}
                 totalEmission={mineStore.emission}
                 emissionWeightSum={mineStore.emissionWeightSum}
-                visionPrice={mineStore.visionPrice || 0}
+                apy={mineStore.apy(
+                  workhardCtx.periphery.liquidityMining.address
+                )}
               />
             )}
         </Col>
@@ -228,7 +227,15 @@ const Mine = observer(() => {
                 poolAddress={workhardCtx.periphery.commitMining.address}
                 totalEmission={mineStore.emission || BigNumber.from(0)}
                 emissionWeightSum={mineStore.emissionWeightSum}
-                visionPrice={mineStore.visionPrice || 0}
+                apy={
+                  mineStore.apy(workhardCtx.periphery.commitMining.address) ||
+                  NaN
+                }
+                maxAPY={
+                  mineStore.maxAPY(
+                    workhardCtx.periphery.commitMining.address
+                  ) || 123123231
+                }
               />
             )}
         </Col>
@@ -264,6 +271,7 @@ const Mine = observer(() => {
             poolAddress={initialContributorPool}
             totalEmission={mineStore.emission || BigNumber.from(0)}
             emissionWeightSum={mineStore.emissionWeightSum}
+            apy={mineStore.apy(initialContributorPool)}
           />
         </>
       )}

@@ -9,8 +9,11 @@ import {
   ProgressBar,
   Row,
 } from "react-bootstrap";
-import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { formatEther, parseEther } from "ethers/lib/utils";
+import {
+  useWorkhard,
+  WorkhardLibrary,
+} from "../../../providers/WorkhardProvider";
+import { formatEther, getAddress, parseEther } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import {
   ERC20StakeMiningV1__factory,
@@ -24,6 +27,7 @@ import {
   handleTransaction,
   isApproved,
   TxStatus,
+  weiToEth,
 } from "../../../utils/utils";
 import {
   CoingeckoTokenDetails,
@@ -34,6 +38,7 @@ import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { Col } from "react-bootstrap";
 import { ConditionalButton } from "../../ConditionalButton";
+import { UniswapV2Pair__factory } from "@workhard/protocol/dist/build/@uniswap";
 
 export interface ERC20StakeMiningV1Props {
   poolIdx: number;
@@ -41,7 +46,7 @@ export interface ERC20StakeMiningV1Props {
   tokenName?: string;
   poolAddress: string;
   totalEmission: BigNumber;
-  visionPrice: number;
+  apy: number;
   emissionWeightSum: BigNumber;
   description?: string;
   collapsible?: boolean;
@@ -49,12 +54,36 @@ export interface ERC20StakeMiningV1Props {
   logos?: string[];
 }
 
+const getAPY = async (
+  whfLibrary: WorkhardLibrary,
+  totalEmission: BigNumber,
+  weight: BigNumber,
+  emissionWeightSum: BigNumber,
+  totalStake: BigNumber,
+  baseToken: string
+) => {
+  const visionPerWeek = parseFloat(
+    formatEther(totalEmission.mul(weight).div(emissionWeightSum))
+  );
+  const totalStakedToken = parseFloat(formatEther(totalStake));
+  const {
+    reserve0: reservedVISION,
+    reserve1: reservedETH,
+  } = await whfLibrary.periphery.visionLP.getReserves();
+  const ethPerVision = weiToEth(reservedETH) / weiToEth(reservedVISION);
+  if (baseToken === whfLibrary.periphery.visionLP.address) {
+    const rate = ethPerVision ** 0.5;
+    return (100 * (visionPerWeek * rate * 0.5 * 52)) / totalStakedToken;
+  } else {
+  }
+};
+
 export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   poolIdx,
   title,
   tokenName,
   poolAddress,
-  visionPrice,
+  apy,
   collapsible,
   description,
   totalEmission,
@@ -87,7 +116,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [amount, setAmount] = useState<string>("0");
   const [mined, setMined] = useState<BigNumber>();
-  const [apy, setAPY] = useState<number>();
+  // const [apy, setAPY] = useState<number>();
 
   const getMaxAmount = () =>
     stakeOrWithdraw
@@ -123,9 +152,6 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         .balanceOf(account)
         .then(setTokenBalance)
         .catch(errorHandler(addToast));
-      getPriceFromCoingecko(tokenAddress)
-        .then(setTokenPrice)
-        .catch(errorHandler(addToast));
       getTokenDetailsFromCoingecko(tokenAddress)
         .then(setTokenDetails)
         .catch(errorHandler(addToast));
@@ -160,19 +186,58 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
     }
   }, [tokenAddress, library]);
 
-  useEffect(() => {
-    if (weight && tokenPrice && totalStake) {
-      const visionPerWeek = parseFloat(
-        formatEther(totalEmission.mul(weight).div(emissionWeightSum))
-      );
-      const totalStakedToken = parseFloat(formatEther(totalStake));
-      setAPY(
-        (visionPerWeek * visionPrice * 52) / (totalStakedToken * tokenPrice)
-      );
-    } else {
-      setAPY(NaN);
-    }
-  }, [weight, tokenPrice, totalStake, txStatus]);
+  // useEffect(() => {
+  //   if (weight && tokenPrice && totalStake) {
+  //     const visionPerWeek = parseFloat(
+  //       formatEther(totalEmission.mul(weight).div(emissionWeightSum))
+  //     );
+  //     const totalStakedToken = parseFloat(formatEther(totalStake));
+  //     if (!isLP) {
+  //       setAPY(
+  //         (visionPerWeek * visionPrice * 52) / (totalStakedToken * tokenPrice)
+  //       );
+  //     }
+  //   } else {
+  //     setAPY(NaN);
+  //   }
+  // }, [weight, tokenPrice, totalStake, txStatus]);
+
+  // useEffect(() => {
+  //   if (!!weight && !!totalStake && !!tokenAddress && isLP) {
+  //     UniswapV2Pair__factory.connect(tokenAddress, library)
+  //       .getReserves()
+  //       .then(async (result) => {
+  //         const token0 = await UniswapV2Pair__factory.connect(
+  //           tokenAddress,
+  //           library
+  //         ).token0();
+  //         const token1 = await UniswapV2Pair__factory.connect(
+  //           tokenAddress,
+  //           library
+  //         ).token1();
+  //         let rate: number;
+  //         if (token0 === workhardCtx?.dao.vision.address) {
+  //           rate =
+  //             (parseFloat(formatEther(result._reserve1)) /
+  //               parseFloat(formatEther(result._reserve0))) **
+  //             0.5;
+  //         } else if (token1 === workhardCtx?.dao.vision.address) {
+  //           rate =
+  //             (parseFloat(formatEther(result._reserve0)) /
+  //               parseFloat(formatEther(result._reserve1))) **
+  //             0.5;
+  //         } else {
+  //           rate = NaN;
+  //         }
+  //         const totalStakedToken = parseFloat(formatEther(totalStake));
+  //         const visionPerWeek = parseFloat(
+  //           formatEther(totalEmission.mul(weight).div(emissionWeightSum))
+  //         );
+  //         setAPY((100 * (visionPerWeek * rate * 0.5 * 52)) / totalStakedToken);
+  //       })
+  //       .catch(errorHandler(addToast));
+  //   }
+  // }, [isLP, weight, totalStake, tokenAddress, library]);
 
   const approve = () => {
     if (!account || !tokenAddress) {
@@ -376,8 +441,8 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           now={stakePercent}
         />
         <Card.Text>
-          {formatEther(stakedAmount || 0)} /
-          {formatEther(stakedAmount?.add(tokenBalance || 0) || 0)} of your{" "}
+          {weiToEth(stakedAmount || 0, 2)} /
+          {weiToEth(stakedAmount?.add(tokenBalance || 0) || 0, 2)} of your{" "}
           {tokenName || tokenDetails?.name} is staked.
         </Card.Text>
         <Row>
@@ -437,10 +502,10 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           <Col style={{ marginBottom: "1rem" }}>
             <Card.Title>APY</Card.Title>
             <Card.Text>
-              <span style={{ fontSize: "1.5rem" }}>{apy}</span> %
+              <span style={{ fontSize: "1.5rem" }}>{apy?.toFixed(0)}</span> %
             </Card.Text>
           </Col>
-          <Col style={{ marginBottom: "1rem", minWidth: "12rem" }}>
+          <Col style={{ marginBottom: "1rem", minWidth: "11rem" }}>
             <Card.Title>Mined</Card.Title>
             <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
@@ -450,7 +515,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
             </Card.Text>
           </Col>
           {!collapsible && (
-            <Col style={{ marginBottom: "1rem", minWidth: "14rem" }}>
+            <Col style={{ marginBottom: "1rem", minWidth: "12rem" }}>
               <Card.Title>Weekly allocation</Card.Title>
               <Card.Text style={{ fontSize: "1.5rem" }}>
                 {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
