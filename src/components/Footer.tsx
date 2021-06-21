@@ -12,6 +12,9 @@ const Footer = () => (
             <a href="#top">Back to top</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
+            <a href="https://forum.workhard.finance">Forum</a>
+          </li>
+          <li className="float-lg-left" style={{ marginRight: 10 }}>
             <a href="https://discord.gg/eYCcusjXUr">Discord</a>
           </li>
           <li className="float-lg-left" style={{ marginRight: 10 }}>
@@ -23,9 +26,9 @@ const Footer = () => (
           <li className="float-lg-left" style={{ marginRight: 10 }}>
             <a href="https://medium.com/@Cutshamache">Medium</a>
           </li>
-          <li className="float-lg-left" style={{ marginRight: 10 }}>
+          {/* <li className="float-lg-left" style={{ marginRight: 10 }}>
             <Link to={"/res"}>Resources</Link>
-          </li>
+          </li> */}
         </ul>
         <br />
         <br />
