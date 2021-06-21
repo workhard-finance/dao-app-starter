@@ -368,7 +368,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
               %
             </Card.Text>
           </Col>
-          <Col style={{ marginBottom: "1rem", minWidth: "12rem" }}>
+          <Col style={{ marginBottom: "1rem", minWidth: "11rem" }}>
             <Card.Title>Mined</Card.Title>
             <Card.Text style={{ fontSize: "1.5rem" }}>
               {parseFloat(formatEther(mined || 0)).toFixed(2)}{" "}
@@ -378,7 +378,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
             </Card.Text>
           </Col>
           {!collapsible && (
-            <Col style={{ marginBottom: "1rem", minWidth: "14rem" }}>
+            <Col style={{ marginBottom: "1rem", minWidth: "12rem" }}>
               <Card.Title>Weekly allocation</Card.Title>
               <Card.Text style={{ fontSize: "1.5rem" }}>
                 {parseFloat(formatEther(allocatedVISION)).toFixed(2)}{" "}
