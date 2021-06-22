@@ -358,7 +358,10 @@ const Dashboard = () => {
                   workhardCtx?.dao.baseCurrency.address,
                 ],
                 ["Stable Reserve", workhardCtx?.dao.stableReserve.address],
-                ["Contribution Board", workhardCtx?.dao.stableReserve.address],
+                [
+                  "Contribution Board",
+                  workhardCtx?.dao.contributionBoard.address,
+                ],
                 ["Marketplace", workhardCtx?.dao.marketplace.address],
                 ["Dividend Pool", workhardCtx?.dao.dividendPool.address],
                 ["Vote Counter", workhardCtx?.dao.voteCounter.address],
