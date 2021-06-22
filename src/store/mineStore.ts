@@ -181,9 +181,7 @@ export class MineStore {
       const commitPrice =
         this.commitPrice ||
         (await getPriceFromCoingecko(this.lib.dao.commit.address));
-      console.log("commit price is", this.commitPrice);
       if (commitPrice) {
-        console.log("commit price is", commitPrice);
         const apy =
           100 *
             ((visionPerYear * (this.visionPrice || 0)) / (commitPrice || NaN)) -
@@ -191,7 +189,6 @@ export class MineStore {
         this.apys[this.lib.periphery.commitMining.address] = apy;
         this.maxApys[this.lib.periphery.commitMining.address] = undefined;
       } else {
-        console.log("but..");
         const apy = 100 * (visionPerYear * (this.visionPrice || 0)) - 100;
         this.apys[this.lib.periphery.commitMining.address] = apy * 0.5;
         this.maxApys[this.lib.periphery.commitMining.address] = apy;
