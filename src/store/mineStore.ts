@@ -162,11 +162,13 @@ export class MineStore {
   @action
   loadLiquidityMiningAPY = async () => {
     if (this.lib) {
-      const visionPerYear = weiToEth(
-        (await this.lib.periphery.liquidityMining.tokenPerMiner())
-          .mul(365)
-          .div(7)
-      );
+      const totalMiners = await this.lib.periphery.liquidityMining.totalMiners();
+      const visionPerYear = (
+        await this.lib.periphery.liquidityMining.miningRate()
+      )
+        .mul(86400 * 365)
+        .div(totalMiners)
+        .toNumber();
       const apy = 100 * (visionPerYear / this.visionPerLP);
       this.apys[this.lib.periphery.liquidityMining.address] = apy;
     }
@@ -175,9 +177,12 @@ export class MineStore {
   @action
   loadCommitMiningAPY = async () => {
     if (this.lib) {
-      const visionPerYear = weiToEth(
-        (await this.lib.periphery.commitMining.tokenPerMiner()).mul(365).div(7)
-      );
+      const totalMiners = await this.lib.periphery.commitMining.totalMiners();
+      const visionPerYear = (await this.lib.periphery.commitMining.miningRate())
+        .mul(86400 * 365)
+        .div(totalMiners)
+        .toNumber();
+
       let commitPrice =
         this.commitPrice ||
         (await getPriceFromCoingecko(this.lib.dao.commit.address));
@@ -200,16 +205,16 @@ export class MineStore {
   @action
   loadInitialContributorSharePoolAPY = async () => {
     if (this.lib && this.initialContributorPool) {
-      const visionPerYear = weiToEth(
-        (
-          await MiningPool__factory.connect(
-            this.initialContributorPool,
-            this.lib.web3.library
-          ).tokenPerMiner()
-        )
-          .mul(365)
-          .div(7)
+      const initialContributorPool = MiningPool__factory.connect(
+        this.initialContributorPool,
+        this.lib.web3.library
       );
+      const totalMiners = await initialContributorPool.totalMiners();
+      const visionPerYear = (await initialContributorPool.miningRate())
+        .mul(86400 * 365)
+        .div(totalMiners)
+        .toNumber();
+
       const apy = 100 * (visionPerYear * (this.visionPrice || 0)) - 100;
       this.apys[this.initialContributorPool] = apy;
     }
@@ -218,54 +223,46 @@ export class MineStore {
   @action
   loadERC20StakingAPY = async (poolAddress: string) => {
     if (this.lib) {
-      const initialContributorPool = await this.lib.dao.visionEmitter.initialContributorPool();
-      const visionPerYear = weiToEth(
-        (
-          await MiningPool__factory.connect(
-            initialContributorPool,
-            this.lib.web3.library
-          ).tokenPerMiner()
-        )
-          .mul(365)
-          .div(7)
-      );
-      const baseToken = await MiningPool__factory.connect(
+      const miningPool = MiningPool__factory.connect(
         poolAddress,
         this.lib.web3.library
-      ).baseToken();
+      );
+      const totalMiners = await miningPool.totalMiners();
+      const miningRate = await miningPool.miningRate();
+      const visionPerYear = miningRate
+        .mul(86400 * 365)
+        .div(totalMiners)
+        .toNumber();
+      const baseToken = await miningPool.baseToken();
       const baseTokenPrice = await getPriceFromCoingecko(baseToken);
       const apy =
         100 *
         ((visionPerYear * (this.visionPrice || 0)) / (baseTokenPrice || NaN));
-      this.apys[initialContributorPool] = apy;
+      this.apys[poolAddress] = apy;
     }
   };
 
   @action
   loadERC20BurnAPY = async (poolAddress: string) => {
     if (this.lib) {
-      const initialContributorPool = await this.lib.dao.visionEmitter.initialContributorPool();
-      const visionPerYear = weiToEth(
-        (
-          await MiningPool__factory.connect(
-            initialContributorPool,
-            this.lib.web3.library
-          ).tokenPerMiner()
-        )
-          .mul(365)
-          .div(7)
-      );
-      const baseToken = await MiningPool__factory.connect(
+      const miningPool = MiningPool__factory.connect(
         poolAddress,
         this.lib.web3.library
-      ).baseToken();
+      );
+      const totalMiners = await miningPool.totalMiners();
+      const miningRate = await miningPool.miningRate();
+      const visionPerYear = miningRate
+        .mul(86400 * 365)
+        .div(totalMiners)
+        .toNumber();
+      const baseToken = await miningPool.baseToken();
       const baseTokenPrice = await getPriceFromCoingecko(baseToken);
       const apy =
         100 *
           ((visionPerYear * (this.visionPrice || 0)) /
             (baseTokenPrice || NaN)) -
         100;
-      this.apys[initialContributorPool] = apy;
+      this.apys[poolAddress] = apy;
     }
   };
 }
