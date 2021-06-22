@@ -163,9 +163,9 @@ export class MineStore {
   loadLiquidityMiningAPY = async () => {
     if (this.lib) {
       const visionPerYear = weiToEth(
-        (await this.lib.periphery.liquidityMining.tokenPerMiner()).mul(
-          86400 * 365
-        )
+        (await this.lib.periphery.liquidityMining.tokenPerMiner())
+          .div(86400 * 7)
+          .mul(86400 * 365)
       );
       const apy = 100 * (visionPerYear / this.visionPerLP);
       this.apys[this.lib.periphery.liquidityMining.address] = apy;
@@ -176,7 +176,9 @@ export class MineStore {
   loadCommitMiningAPY = async () => {
     if (this.lib) {
       const visionPerYear = weiToEth(
-        (await this.lib.periphery.commitMining.tokenPerMiner()).mul(86400 * 365)
+        (await this.lib.periphery.commitMining.tokenPerMiner())
+          .div(86400 * 7)
+          .mul(86400 * 365)
       );
       let commitPrice =
         this.commitPrice ||
@@ -206,7 +208,9 @@ export class MineStore {
             this.initialContributorPool,
             this.lib.web3.library
           ).tokenPerMiner()
-        ).mul(86400 * 365)
+        )
+          .div(86400 * 7)
+          .mul(86400 * 365)
       );
       const apy = 100 * (visionPerYear * (this.visionPrice || 0)) - 100;
       this.apys[this.initialContributorPool] = apy;
@@ -223,7 +227,9 @@ export class MineStore {
             initialContributorPool,
             this.lib.web3.library
           ).tokenPerMiner()
-        ).mul(86400 * 365)
+        )
+          .div(86400 * 7)
+          .mul(86400 * 365)
       );
       const baseToken = await MiningPool__factory.connect(
         poolAddress,
@@ -247,7 +253,9 @@ export class MineStore {
             initialContributorPool,
             this.lib.web3.library
           ).tokenPerMiner()
-        ).mul(86400 * 365)
+        )
+          .div(86400 * 7)
+          .mul(86400 * 365)
       );
       const baseToken = await MiningPool__factory.connect(
         poolAddress,
