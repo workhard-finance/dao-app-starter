@@ -99,7 +99,7 @@ export const FundProject: React.FC<FundProjectProps> = ({
 
   useEffect(() => {
     if (minimumShare && minimumShare.gt(0)) {
-      const val = parseFloat(formatEther(minimumShare));
+      const val = minimumShare.toNumber();
       setSharePercent((val / (val + 10000)) * 100);
     } else {
       setSharePercent(0);
