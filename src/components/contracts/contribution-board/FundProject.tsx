@@ -33,6 +33,7 @@ export const FundProject: React.FC<FundProjectProps> = ({
   const [txStatus, setTxStatus] = useState<TxStatus>();
   const [balance, setBalance] = useState<BigNumber>();
   const [amount, setAmount] = useState("0");
+  const [sharePercent, setSharePercent] = useState<number>();
   const [allowance, setAllowance] = useState<BigNumber>();
 
   useEffect(() => {
@@ -96,14 +97,14 @@ export const FundProject: React.FC<FundProjectProps> = ({
     );
   };
 
-  const getSharePercent = () => {
+  useEffect(() => {
     if (minimumShare && minimumShare.gt(0)) {
       const val = parseFloat(formatEther(minimumShare));
-      return ((val / (val + 10000)) * 100).toFixed(2);
+      setSharePercent((val / (val + 10000)) * 100);
     } else {
-      return 0;
+      setSharePercent(0);
     }
-  };
+  }, [minimumShare]);
 
   return (
     <Form>
@@ -124,11 +125,11 @@ export const FundProject: React.FC<FundProjectProps> = ({
           value={amount}
         />
       </Form.Group>
-      {getSharePercent() !== 0 ? (
+      {sharePercent !== 0 ? (
         <p>
           Thank you for your funding. Your contribution will be recorded
-          automatically. Contributors will share the {getSharePercent()}% of the
-          emission when this project gets forked.
+          automatically. Contributors will share the {sharePercent?.toFixed(2)}%
+          of the emission when this project gets forked.
         </p>
       ) : (
         <p>
@@ -142,7 +143,7 @@ export const FundProject: React.FC<FundProjectProps> = ({
         onClick={addBudgetWithCommit}
         children={
           isApproved(allowance, amount)
-            ? getSharePercent() !== 0
+            ? sharePercent !== 0
               ? "Fund project with contribution record"
               : "Fund project without contribution record"
             : "Approve token usage"
