@@ -178,9 +178,10 @@ export class MineStore {
       const visionPerYear = weiToEth(
         (await this.lib.periphery.commitMining.tokenPerMiner()).mul(86400 * 365)
       );
-      const commitPrice =
+      let commitPrice =
         this.commitPrice ||
         (await getPriceFromCoingecko(this.lib.dao.commit.address));
+      commitPrice = Math.min(commitPrice || 1, 2);
       if (commitPrice) {
         const apy =
           100 *
