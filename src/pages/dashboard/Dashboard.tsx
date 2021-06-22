@@ -46,7 +46,7 @@ const Dashboard = () => {
   const { ipfs } = useIPFS();
   const [metadata, setMetadata] = useState<ProjectMetadata>();
   const [emissionStarted, setEmissionStarted] = useState<number>();
-  const [reserved, setReserved] = useState<BigNumber>();
+  const [mintable, setMintable] = useState<BigNumber>();
   const [burnedCommit, setBurnedCommit] = useState<BigNumber>();
   const [baseCurrencySymbol, setBaseCurrencySymbol] = useState<string>();
   const [visionSupply, setVisionSupply] = useState<BigNumber>();
@@ -84,9 +84,9 @@ const Dashboard = () => {
         .emissionStarted()
         .then((num) => setEmissionStarted(num.toNumber()))
         .catch(errorHandler(addToast));
-      workhardCtx.dao.baseCurrency
-        .balanceOf(workhardCtx.dao.stableReserve.address)
-        .then(setReserved)
+      workhardCtx.dao.stableReserve
+        .mintable()
+        .then(setMintable)
         .catch(errorHandler(addToast));
       workhardCtx.dao.baseCurrency
         .symbol()
@@ -237,7 +237,7 @@ const Dashboard = () => {
           <Card bg={"success"} text={"white"}>
             <Card.Body>
               <Card.Title>
-                Reserved Stables
+                Mintable COMMIT
                 <OverlayTooltip
                   tip={`Governance can mint more ${
                     workhardCtx?.metadata.commitSymbol || "COMMIT"
@@ -246,7 +246,7 @@ const Dashboard = () => {
                 />
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
-                {bigNumToFixed(reserved || 0)}
+                {bigNumToFixed(mintable || 0)}
                 <span style={{ fontSize: "1rem" }}>
                   {" "}
                   {`$${baseCurrencySymbol}`}
