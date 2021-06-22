@@ -363,7 +363,7 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
             <Card.Text>
               <span style={{ fontSize: "1.5rem" }}>
                 {apy.toFixed(0)}
-                {maxAPY && ` ~ ${maxAPY.toFixed(0)}`}
+                {maxAPY ? ` ~ ${maxAPY.toFixed(0)}` : ""}
               </span>{" "}
               %
             </Card.Text>

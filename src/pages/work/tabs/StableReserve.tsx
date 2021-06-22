@@ -1,56 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Button, Card, Col, Row } from "react-bootstrap";
 import { useToasts } from "react-toast-notifications";
-import { constants, Contract, ethers } from "ethers";
 import { BuyCommit } from "../../../components/contracts/stable-reserve/BuyCommit";
 import { RedeemCommit } from "../../../components/contracts/stable-reserve/RedeemCommit";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { errorHandler } from "../../../utils/utils";
-import { getPool, getPoolAddress, getPoolContract } from "../../../utils/uniV3";
+import { useStores } from "../../../hooks/user-stores";
 
 const StableReserve: React.FC = () => {
   const workhardCtx = useWorkhard();
   const [commitPrice, setCommitPrice] = useState<number>();
   const { blockNumber } = useBlockNumber();
-  const { addToast } = useToasts();
-  const [uniV3Pool, setUniV3Pool] = useState<Contract | undefined>();
+  const { mineStore } = useStores();
 
   useEffect(() => {
-    if (!!workhardCtx && workhardCtx.web3.chainId === 1) {
-      Promise.all(
-        [10000, 3000, 500].map((fee) =>
-          getPoolAddress(
-            workhardCtx.web3.library,
-            workhardCtx.dao.baseCurrency.address,
-            workhardCtx.dao.commit.address,
-            fee
-          )
-        )
-      ).then(async (pools) => {
-        const poolAddress = pools.find((p) => p !== constants.AddressZero);
-        if (poolAddress) {
-          const pool = await getPoolContract(
-            poolAddress,
-            workhardCtx.web3.library
-          );
-          setUniV3Pool(pool);
-        }
+    if (!!workhardCtx) {
+      mineStore.loadCommitPrice().then(() => {
+        setCommitPrice(mineStore.commitPrice);
       });
-    } else {
-      setUniV3Pool(undefined);
     }
-  }, [workhardCtx, workhardCtx?.web3.chainId]);
-
-  useEffect(() => {
-    if (!!uniV3Pool) {
-      getPool(uniV3Pool)
-        .then(async (pool) => {
-          setCommitPrice(parseFloat(pool.token1Price.toFixed()));
-        })
-        .catch(errorHandler(addToast));
-    }
-  }, [uniV3Pool, blockNumber]);
+  }, [workhardCtx, blockNumber]);
 
   return (
     <Row>

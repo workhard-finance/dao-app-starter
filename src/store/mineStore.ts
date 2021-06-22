@@ -2,25 +2,28 @@ import React from "react";
 import { action, get, observable } from "mobx";
 import { formatEther, getAddress } from "ethers/lib/utils";
 import { getPriceFromCoingecko } from "../utils/coingecko";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber, Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/abstract-provider";
 import { WorkhardLibrary } from "../providers/WorkhardProvider";
 import { weiToEth } from "../utils/utils";
 import { MiningPool__factory } from "@workhard/protocol";
+import { getPool, getPoolAddress, getPoolContract } from "../utils/uniV3";
 
 export class MineStore {
   @observable public lib: WorkhardLibrary | undefined;
   @observable public pools: string[] = [];
   @observable public apys: { [poolAddr: string]: number } = {};
-  @observable public maxApys: { [poolAddr: string]: number } = {};
+  @observable public maxApys: { [poolAddr: string]: number | undefined } = {};
   @observable public distributable: boolean = false;
   @observable public visionPrice: number | undefined = 0;
+  @observable public commitPrice: number | undefined = 0;
   @observable public ethPerVision: number | undefined = 0;
   @observable public visionPerLP: number = 0;
   @observable public ethPrice: number | undefined = 0;
   @observable public emission: BigNumber = BigNumber.from(0);
   @observable public emissionWeightSum: BigNumber = BigNumber.from(0);
   @observable private initialContributorPool: string | undefined;
+  @observable private commitDaiUniV3Pool: Contract | undefined;
 
   @get
   liquidityMiningIdx = () => {
@@ -50,8 +53,8 @@ export class MineStore {
   @action
   init = async (whfLibrary: WorkhardLibrary | undefined) => {
     this.lib = whfLibrary;
-    await this.loadPools();
-    await this.loadEthPrice();
+    this.loadPools();
+    this.loadEthPrice();
   };
 
   @action
@@ -91,6 +94,25 @@ export class MineStore {
       this.visionPerLP = visionPerLP;
       this.ethPerVision = ethPerVision;
       this.visionPrice = this.ethPrice * ethPerVision;
+    }
+  };
+
+  @action
+  loadCommitPrice = async () => {
+    if (!this.commitDaiUniV3Pool && !!this.lib) {
+      const poolAddress = await getPoolAddress(
+        this.lib.web3.library,
+        this.lib.dao.baseCurrency.address,
+        this.lib.dao.commit.address
+      );
+      if (poolAddress) {
+        const pool = await getPoolContract(poolAddress, this.lib.web3.library);
+        this.commitDaiUniV3Pool = pool;
+      }
+      if (this.commitDaiUniV3Pool) {
+        const pool = await getPool(this.commitDaiUniV3Pool);
+        this.commitPrice = parseFloat(pool.token1Price.toFixed());
+      }
     }
   };
 
@@ -156,16 +178,20 @@ export class MineStore {
       const visionPerYear = weiToEth(
         (await this.lib.periphery.commitMining.tokenPerMiner()).mul(86400 * 365)
       );
-      const commitPrice = await getPriceFromCoingecko(
-        this.lib.dao.commit.address
-      );
+      const commitPrice =
+        this.commitPrice ||
+        (await getPriceFromCoingecko(this.lib.dao.commit.address));
+      console.log("commit price is", this.commitPrice);
       if (commitPrice) {
+        console.log("commit price is", commitPrice);
         const apy =
           100 *
             ((visionPerYear * (this.visionPrice || 0)) / (commitPrice || NaN)) -
           100;
         this.apys[this.lib.periphery.commitMining.address] = apy;
+        this.maxApys[this.lib.periphery.commitMining.address] = undefined;
       } else {
+        console.log("but..");
         const apy = 100 * (visionPerYear * (this.visionPrice || 0)) - 100;
         this.apys[this.lib.periphery.commitMining.address] = apy * 0.5;
         this.maxApys[this.lib.periphery.commitMining.address] = apy;

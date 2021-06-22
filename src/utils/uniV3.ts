@@ -1,4 +1,4 @@
-import { Contract, ethers, providers } from "ethers";
+import { constants, Contract, ethers, providers } from "ethers";
 import { Pool } from "@uniswap/v3-sdk";
 import { Token } from "@uniswap/sdk-core";
 import { abi as IUniswapV3PoolABI } from "@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json";
@@ -24,7 +24,7 @@ interface State {
   unlocked: boolean;
 }
 
-export async function getPoolAddress(
+export async function getExactPoolAddress(
   provider: providers.Provider,
   token0: string,
   token1: string,
@@ -38,6 +38,19 @@ export async function getPoolAddress(
   );
   const poolAddr = await factory.getPool(token0, token1, fee);
   return poolAddr;
+}
+
+export async function getPoolAddress(
+  provider: providers.Provider,
+  token0: string,
+  token1: string
+): Promise<string | undefined> {
+  const pools = await Promise.all(
+    [10000, 3000, 500].map((fee) =>
+      getExactPoolAddress(provider, token0, token1, fee)
+    )
+  );
+  return pools.find((p) => p !== constants.AddressZero);
 }
 
 export async function getPoolContract(

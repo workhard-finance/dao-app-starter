@@ -49,7 +49,8 @@ const Mine = observer(() => {
       const signer = library.getSigner(account);
       mineStore.loadPools().then(async () => {
         await mineStore.loadVisionPrice();
-        await mineStore.loadAPYs();
+        await mineStore.loadCommitPrice();
+        mineStore.loadAPYs();
       });
       mineStore.isDistributable(signer);
       dao.visionEmitter
@@ -231,11 +232,9 @@ const Mine = observer(() => {
                   mineStore.apy(workhardCtx.periphery.commitMining.address) ||
                   NaN
                 }
-                maxAPY={
-                  mineStore.maxAPY(
-                    workhardCtx.periphery.commitMining.address
-                  ) || 123123231
-                }
+                maxAPY={mineStore.maxAPY(
+                  workhardCtx.periphery.commitMining.address
+                )}
               />
             )}
         </Col>
