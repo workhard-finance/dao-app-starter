@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { BigNumber, BigNumberish, providers } from "ethers";
-import { Form, ProgressBar } from "react-bootstrap";
+import { Button, Form, ProgressBar } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { useWeb3React } from "@web3-react/core";
 import { ConditionalButton } from "../../ConditionalButton";
@@ -8,18 +8,26 @@ import {
   errorHandler,
   getVariantForProgressBar,
   handleTransaction,
+  safeTxHandler,
   TxStatus,
 } from "../../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 import { useBlockNumber } from "../../../providers/BlockNumberProvider";
 import { formatEther } from "ethers/lib/utils";
+import { OverlayTooltip } from "../../OverlayTooltip";
 
 export interface StreamProps {
   streamId: BigNumberish;
+  projectId: BigNumberish;
+  admin?: boolean;
 }
 
-export const Stream: React.FC<StreamProps> = ({ streamId }) => {
-  const { account, library } = useWeb3React<providers.Web3Provider>();
+export const Stream: React.FC<StreamProps> = ({
+  streamId,
+  projectId,
+  admin,
+}) => {
+  const { account, library, chainId } = useWeb3React<providers.Web3Provider>();
   const { blockNumber } = useBlockNumber();
   const workhardCtx = useWorkhard();
   const { addToast } = useToasts();
@@ -35,11 +43,15 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
     remainingBalance: BigNumber;
     ratePerSecond: BigNumber;
   }>();
+  const [cancelled, setCancelled] = useState<boolean>();
 
   useEffect(() => {
-    if (!!account && !!library && !!streamId && !!workhardCtx) {
+    if (!!account && !!library && !!streamId && !!workhardCtx && !cancelled) {
       const sablier = workhardCtx.commons.sablier;
-      sablier.getStream(streamId).then(setStream).catch(errorHandler(addToast));
+      sablier
+        .getStream(streamId)
+        .then(setStream)
+        .catch(() => setCancelled(true));
       library.getBlock("latest").then((block) => setTimestamp(block.timestamp));
     }
   }, [txStatus, blockNumber]);
@@ -62,6 +74,35 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
       setTxStatus,
       addToast,
       `Successfully withdrew ${workhardCtx.metadata.commitSymbol}!`
+    );
+  };
+
+  const cancel = async () => {
+    if (!account || !workhardCtx || !library || !chainId) {
+      alert("Not connected");
+      return;
+    }
+    const { contributionBoard } = workhardCtx.dao;
+    const signer = library.getSigner(account);
+
+    const popTx = await contributionBoard
+      .connect(signer)
+      .populateTransaction.cancelStream(projectId, streamId);
+    safeTxHandler(
+      chainId,
+      workhardCtx.dao.multisig.address,
+      popTx,
+      signer,
+      setTxStatus,
+      addToast,
+      "Successfully updated project",
+      (receipt) => {
+        if (receipt) {
+        } else {
+          alert("Created Multisig Tx. Go to Gnosis wallet and confirm.");
+        }
+        setTxStatus(undefined);
+      }
     );
   };
 
@@ -131,21 +172,18 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
           animated
           now={getProgress()}
         />
-        {stream && timestamp && (
-          <Form.Text>
-            {(
-              Math.min(
-                BigNumber.from(timestamp).sub(stream.startTime).toNumber(),
-                stream.stopTime.sub(stream.startTime).toNumber()
-              ) / 86400
-            ).toFixed(1)}{" "}
-            /{" "}
-            {(stream.stopTime.sub(stream.startTime).toNumber() / 86400).toFixed(
-              1
-            )}{" "}
-            day(s)
-          </Form.Text>
-        )}
+        <Form.Text>
+          {!!stream && !!timestamp
+            ? `${(
+                Math.min(
+                  BigNumber.from(timestamp).sub(stream.startTime).toNumber(),
+                  stream.stopTime.sub(stream.startTime).toNumber()
+                ) / 86400
+              ).toFixed(1)} / ${(
+                stream.stopTime.sub(stream.startTime).toNumber() / 86400
+              ).toFixed(1)} day(s)`
+            : `Cancelled`}
+        </Form.Text>
       </Form.Group>
       <ConditionalButton
         enabledWhen={account === stream?.recipient}
@@ -155,6 +193,19 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
         Withdraw: {parseFloat(formatEther(getWithdrawable() || 0)).toFixed(2)}{" "}
         {workhardCtx?.metadata.commitSymbol || `$COMMIT`}
       </ConditionalButton>
+      {getProgress() < 100 && !!admin && stream != null && (
+        <div style={{ position: "absolute", right: "1rem", top: "1rem" }}>
+          <OverlayTooltip tip={`Do you want to cancel this stream?`}>
+            <Button
+              variant={`outline`}
+              onClick={cancel}
+              className={`text-danger`}
+            >
+              X
+            </Button>
+          </OverlayTooltip>
+        </div>
+      )}
     </Form>
   );
 };

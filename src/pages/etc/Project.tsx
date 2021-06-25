@@ -236,7 +236,11 @@ export const Project: React.FC = () => {
                         <Col md={4}>
                           <Card>
                             <Card.Body>
-                              <Stream streamId={stream.toNumber()} />
+                              <Stream
+                                streamId={stream.toNumber()}
+                                projectId={id}
+                                admin={hasAdminPermission}
+                              />
                             </Card.Body>
                           </Card>
                           <br />
