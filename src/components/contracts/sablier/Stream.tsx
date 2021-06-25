@@ -69,7 +69,7 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
     if (!stream) return undefined;
     if (!library) return undefined;
     if (!timestamp) return undefined;
-    if (stream.stopTime.lte(timestamp)) return stream.remainingBalance;
+    if (stream.stopTime.lte(timestamp)) return stream.deposit;
     const unlocked = stream.ratePerSecond.mul(
       timestamp - stream.startTime.toNumber()
     );
@@ -85,10 +85,11 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
 
   const getProgress = (): number => {
     if (!stream) return 0;
-    if (!library) return 0;
-    const unlocked = getUnlocked();
-    if (!unlocked) return 0;
-    return unlocked.mul(100).div(stream.deposit).toNumber() / 100;
+    if (!timestamp) return 0;
+    const stopTime = stream.stopTime.toNumber();
+    const startTime = stream.startTime.toNumber();
+    const progressed = Math.min(stopTime, timestamp) - startTime;
+    return (100 * progressed) / (stopTime - startTime);
   };
 
   const toFix3 = (val?: BigNumber): string => {
@@ -133,7 +134,10 @@ export const Stream: React.FC<StreamProps> = ({ streamId }) => {
         {stream && timestamp && (
           <Form.Text>
             {(
-              BigNumber.from(timestamp).sub(stream.startTime).toNumber() / 86400
+              Math.min(
+                BigNumber.from(timestamp).sub(stream.startTime).toNumber(),
+                stream.stopTime.sub(stream.startTime).toNumber()
+              ) / 86400
             ).toFixed(1)}{" "}
             /{" "}
             {(stream.stopTime.sub(stream.startTime).toNumber() / 86400).toFixed(
