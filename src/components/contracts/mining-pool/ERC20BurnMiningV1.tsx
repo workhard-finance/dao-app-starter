@@ -306,9 +306,14 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
         </Card.Text>
         <Row>
           <Col>
-            <Button variant="outline-danger" onClick={exit}>
+            <ConditionalButton
+              enabledWhen={!burnedAmount?.isZero()}
+              whyDisabled="you are not mining"
+              variant="outline-danger"
+              onClick={exit}
+            >
               Stop mining and withdraw rewards
-            </Button>
+            </ConditionalButton>
           </Col>
           <Col style={{ textAlign: "end" }}>
             <ConditionalButton
