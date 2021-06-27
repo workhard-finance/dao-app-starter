@@ -253,9 +253,14 @@ export const InitialContributorSharePool: React.FC<InitialContributorSharePoolPr
           </Card.Text>
           <Row>
             <Col>
-              <Button variant="outline-warning" onClick={exit}>
+              <ConditionalButton
+                enabledWhen={!burnedAmount?.isZero()}
+                whyDisabled="you are not mining."
+                variant="outline-warning"
+                onClick={exit}
+              >
                 Stop mining and withdraw rewards
-              </Button>
+              </ConditionalButton>
             </Col>
             <Col style={{ textAlign: "end" }}>
               <ConditionalButton

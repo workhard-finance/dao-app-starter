@@ -368,12 +368,22 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
         </Card.Text>
         <Row>
           <Col>
-            <Button variant="outline-success" onClick={mine}>
+            <ConditionalButton
+              enabledWhen={!stakedAmount?.isZero()}
+              whyDisabled="you are not mining."
+              variant="outline-success"
+              onClick={mine}
+            >
               Mine
-            </Button>{" "}
-            <Button variant="outline-success" onClick={exit}>
+            </ConditionalButton>{" "}
+            <ConditionalButton
+              enabledWhen={!stakedAmount?.isZero()}
+              whyDisabled="you are not mining."
+              variant="outline-success"
+              onClick={exit}
+            >
               Mine & Exit
-            </Button>
+            </ConditionalButton>
           </Col>
           <Col style={{ textAlign: "end" }}>
             <ConditionalButton
