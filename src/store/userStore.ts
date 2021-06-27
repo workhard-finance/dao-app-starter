@@ -2,16 +2,17 @@ import { action, observable } from "mobx";
 import { BigNumber } from "ethers";
 
 export class UserStore {
-  @observable public tokenAdded = false;
+  TOKEN_ADDED_KEY = "workhard_token_added";
   @observable public visionTokenBalance: BigNumber = BigNumber.from(0);
   @observable public commitTokenBalance: BigNumber = BigNumber.from(0);
   @observable public baseTokenBalance: BigNumber = BigNumber.from(0);
+
   constructor() {
     // console.log("created");
   }
 
   @action setTokenAdded = (v: boolean) => {
-    this.tokenAdded = v;
+    localStorage.setItem(this.TOKEN_ADDED_KEY, v ? "true" : "false");
   };
 
   @action setVisionTokenBalance = (v: BigNumber) => {
@@ -27,4 +28,10 @@ export class UserStore {
   @action setBaseTokenBalance = (v: BigNumber) => {
     this.baseTokenBalance = v;
   };
+
+  get tokenAdded() {
+    return localStorage.getItem("workhard_token_added") == "true"
+      ? true
+      : false;
+  }
 }
