@@ -58,6 +58,15 @@ export const LaunchDAO: React.FC<{
   const [popTx, setPopTx] = useState<PopulatedTransaction>();
   const [show, setShow] = useState(false);
 
+  const reloadPopTx = () => {
+    if (workhardCtx && id) {
+      const { project } = workhardCtx;
+      project.populateTransaction
+        .launch(id, liquidityMining, commitMining, treasury, caller)
+        .then(setPopTx);
+    }
+  };
+
   useEffect(() => {
     if (workhardCtx && id) {
       const { project, dao } = workhardCtx;
@@ -74,12 +83,7 @@ export const LaunchDAO: React.FC<{
   }, [workhardCtx, id]);
 
   useEffect(() => {
-    if (workhardCtx && id) {
-      const { project } = workhardCtx;
-      project.populateTransaction
-        .launch(id, liquidityMining, commitMining, treasury, caller)
-        .then(setPopTx);
-    }
+    reloadPopTx();
   }, [workhardCtx, liquidityMining, commitMining, treasury, caller]);
 
   useEffect(() => {
@@ -163,7 +167,10 @@ export const LaunchDAO: React.FC<{
   const sum = poolSum + founderWeight + protocolWeight;
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleShow = async () => {
+    reloadPopTx();
+    setShow(true);
+  };
   return (
     <Form>
       <AllocationChart
@@ -204,9 +211,7 @@ export const LaunchDAO: React.FC<{
         }
       />{" "}
       <OverlayTooltip tip={`Data for Gnosis Safe Multisig Wallet.`}>
-        <Button variant="outline" onClick={handleShow}>
-          ABI?
-        </Button>
+        <Button onClick={handleShow}>ABI?</Button>
       </OverlayTooltip>
       <br />
       <br />
