@@ -107,45 +107,47 @@ const Wallet = (props: React.ComponentProps<any>) => {
   // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-747.md for metamask
   try {
     if (!userStore.tokenAdded && library?.provider.isMetaMask) {
-      const TOKENS = [
-        {
-          address: ctx?.dao.vision.address,
-          symbol: "VISION",
-          decimals: 18,
-          // todo: add
-          image: "",
-        },
-        {
-          address: ctx?.dao.commit.address,
-          symbol: "COMMIT",
-          decimals: 18,
-          // todo: add
-          image: "",
-        },
-      ];
-      TOKENS.forEach((token) => {
-        // @ts-ignore
-        library.provider.send(
+      ctx?.workhard.getMasterDAO().then((masterDao) => {
+        const TOKENS = [
           {
-            method: "wallet_watchAsset",
-            params: {
-              // Initially only supports ERC20, but eventually more!
-              // @ts-ignore
-              type: "ERC20",
-              options: {
-                address: token.address, // The address that the token is at.
-                symbol: token.symbol, // A ticker symbol or shorthand, up to 5 chars.
-                decimals: token.decimals, // The number of decimals in the token
-                image: "http", // A string url of the token logo
+            address: masterDao?.vision.address,
+            symbol: "VISION",
+            decimals: 18,
+            // todo: add
+            image: "",
+          },
+          {
+            address: masterDao?.commit.address,
+            symbol: "COMMIT",
+            decimals: 18,
+            // todo: add
+            image: "",
+          },
+        ];
+        TOKENS.forEach((token) => {
+          // @ts-ignore
+          library.provider.send(
+            {
+              method: "wallet_watchAsset",
+              params: {
+                // Initially only supports ERC20, but eventually more!
+                // @ts-ignore
+                type: "ERC20",
+                options: {
+                  address: token.address, // The address that the token is at.
+                  symbol: token.symbol, // A ticker symbol or shorthand, up to 5 chars.
+                  decimals: token.decimals, // The number of decimals in the token
+                  image: "http", // A string url of the token logo
+                },
               },
             },
-          },
-          (error, response) => {
-            console.log(response);
-          }
-        );
+            (error, response) => {
+              console.log(response);
+            }
+          );
+        });
+        userStore.setTokenAdded(true);
       });
-      userStore.setTokenAdded(true);
     }
   } catch (e) {}
   return (
