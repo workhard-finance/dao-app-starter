@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
-import { formatEther, getAddress } from "ethers/lib/utils";
 import ReactHtmlParser from "react-html-parser";
-import { Card, Button, Row, Col, Image, Badge } from "react-bootstrap";
+import { Card, Row, Col, Image, Badge } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { Link, useParams } from "react-router-dom";
 import {
   bigNumToFixed,
   errorHandler,
   fetchProjectMetadataFromIPFS,
-  prefix,
   ProjectMetadata,
   uriToURL,
   wrapUrl,
 } from "../../../utils/utils";
-import { ConditionalButton } from "../../ConditionalButton";
 import { useIPFS } from "../../../providers/IPFSProvider";
 import { useToasts } from "react-toast-notifications";
 import { getNetworkName } from "@workhard/protocol";

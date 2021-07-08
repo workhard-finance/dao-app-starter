@@ -7,7 +7,7 @@ import { useIPFS } from "../../../../providers/IPFSProvider";
 import { Link, useParams } from "react-router-dom";
 import { CID, IPFS } from "ipfs-core/src";
 import { useWeb3React } from "@web3-react/core";
-import { prefix, uriToURL } from "../../../../utils/utils";
+import { uriToURL } from "../../../../utils/utils";
 import { useWorkhard } from "../../../../providers/WorkhardProvider";
 
 export interface ProductMetadata {
@@ -153,7 +153,7 @@ export const ProductView: React.FC<ProductViewProps> = ({
             <br />
             <Button
               as={Link}
-              to={prefix(daoId, `/product/${product.id}`)}
+              to={`/product/${product.id}`}
               variant="warning"
               block
               disabled={stock.eq(0)}

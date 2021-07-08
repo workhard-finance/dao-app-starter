@@ -153,7 +153,8 @@ const Wallet = (props: React.ComponentProps<any>) => {
   return (
     <div {...props}>
       <Button
-        variant={active ? "outline-success" : "success"}
+        variant={active ? "outline-light" : "light"}
+        className={active ? "text-white" : "text-primary"}
         onClick={active ? handleShow : handleShow}
       >
         {active ? `${account?.slice(0, 6)}...${account?.slice(-4)}` : "Connect"}

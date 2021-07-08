@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Page from "../../layouts/Page";
 import { Col, Row, Nav, Tab, Button, Container } from "react-bootstrap";
 import { useHistory, useParams } from "react-router-dom";
 import { useWorkhard } from "../../providers/WorkhardProvider";
-import { prefix } from "../../utils/utils";
 import { FatherSays } from "../../components/views/FatherSays";
 import { SetEmission } from "../../components/contracts/vision-emitter/SetEmission";
 import { MultisigProposal } from "./tabs/MultisigProposal";
@@ -76,7 +75,7 @@ export const MultisigAdmin = () => {
               <Tab.Pane
                 eventKey="project-details"
                 onEnter={() => {
-                  history.push(prefix(daoId, "/multisig/project-details"));
+                  history.push("/multisig/project-details");
                 }}
               >
                 <ProjectDetails />
@@ -84,7 +83,7 @@ export const MultisigAdmin = () => {
               <Tab.Pane
                 eventKey="emission"
                 onEnter={() => {
-                  history.push(prefix(daoId, "/multisig/emission"));
+                  history.push("/multisig/emission");
                 }}
               >
                 <SetEmission />
@@ -92,7 +91,7 @@ export const MultisigAdmin = () => {
               <Tab.Pane
                 eventKey="transaction"
                 onEnter={() => {
-                  history.push(prefix(daoId, "/multisig/transaction"));
+                  history.push("/multisig/transaction");
                 }}
               >
                 <MultisigProposal />

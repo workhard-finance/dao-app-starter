@@ -362,14 +362,6 @@ export const altWhenEmptyList = (alt: JSX.Element, list?: any[]) => {
   }
 };
 
-export const prefix = (daoId: string | number | undefined, url: string) => {
-  if (daoId && `${daoId}` !== "0") {
-    return `/${daoId}` + url;
-  } else {
-    return url;
-  }
-};
-
 export const weiToEth = (wei: BigNumberish, fixed?: number): number => {
   return parseFloat(parseFloat(formatEther(wei)).toFixed(fixed || 2));
 };

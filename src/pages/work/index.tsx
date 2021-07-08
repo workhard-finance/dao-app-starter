@@ -1,6 +1,5 @@
 import React from "react";
 import Page from "../../layouts/Page";
-import { Image } from "react-bootstrap";
 import StableReserve from "./tabs/StableReserve";
 import { ContributionBoard } from "./tabs/ContributionBoard";
 import { SerHelpPlz } from "../../components/views/HelpSer";
@@ -8,7 +7,6 @@ import { TitleButSer } from "../../components/views/TitleButSer";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { OverlayTooltip } from "../../components/OverlayTooltip";
 import { Link } from "react-router-dom";
-import { prefix } from "../../utils/utils";
 
 const Work: React.FC = () => {
   const workhardCtx = useWorkhard();
@@ -16,17 +14,6 @@ const Work: React.FC = () => {
 
   return (
     <Page>
-      <Image
-        className="jumbotron"
-        src={process.env.PUBLIC_URL + "/images/work.jpg"}
-        style={{
-          width: "100%",
-          padding: "0px",
-          borderWidth: "5px",
-        }}
-      />
-      <p></p>
-      <hr />
       <TitleButSer link="https://whf.gitbook.io/docs/work#projects">
         Projects
         <OverlayTooltip
@@ -84,7 +71,7 @@ const Work: React.FC = () => {
         <p>
           Workers can burn their hard earned{" "}
           {workhardCtx?.metadata.commitSymbol || `$COMMIT`} by{" "}
-          <Link to={prefix(daoId, "/mine")} target="_blank">
+          <Link to={"/mine"} target="_blank">
             mine
           </Link>{" "}
           <a

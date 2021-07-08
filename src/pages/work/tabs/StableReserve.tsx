@@ -27,8 +27,8 @@ const StableReserve: React.FC = () => {
         <RedeemCommit />
       </Col>
       <Col md={2} style={{ marginTop: "1rem", height: "inherit" }}>
-        <Card style={{ height: "100%" }} border={`warning`}>
-          <Card.Header className={"bg-warning text-white"}>
+        <Card style={{ height: "100%" }} border={`primary`}>
+          <Card.Header className="text-primary border-primary bg-white">
             Market Price
           </Card.Header>
           <Card.Body>
@@ -43,7 +43,8 @@ const StableReserve: React.FC = () => {
             <br />
             <Button
               as={`a`}
-              variant={"warning"}
+              variant={"outline-warning"}
+              className={"text-warning"}
               children={`Go to Uniswap`}
               style={{
                 position: "absolute",

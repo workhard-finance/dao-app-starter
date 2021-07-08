@@ -15,7 +15,7 @@ import { useWorkhard } from "../../providers/WorkhardProvider";
 import { errorHandler } from "../../utils/utils";
 import { formatEther } from "ethers/lib/utils";
 import { constants } from "ethers";
-import { OverlayTooltip } from "../OverlayTooltip";
+import vars from "../../custom.module.scss";
 
 export interface ERC1155HolderChartProps {
   id: BigNumberish;
@@ -90,8 +90,12 @@ export const ContributorChart: React.FC<ERC1155HolderChartProps> = ({ id }) => {
         .catch(errorHandler(addToast));
     }
   }, [library, shareAddress, contributors, blockNumber]);
-
-  const COLORS = ["#28a745", "#17a2b8", "#ffc107", "#dc3545"];
+  const COLORS = [
+    `${vars.primary}ff`,
+    `${vars.primary}dd`,
+    `${vars.primary}bb`,
+    `${vars.primary}99`,
+  ];
   useEffect(() => {
     if (balances && contributors && balances.length === contributors.length) {
       setData(

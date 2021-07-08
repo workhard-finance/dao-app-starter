@@ -1,13 +1,12 @@
 import React from "react";
 import Page from "../../layouts/Page";
-import { Image, Tab, Tabs } from "react-bootstrap";
+import { Tab, Tabs } from "react-bootstrap";
 import { TimelockTxs } from "./tabs/TimelockTxs";
 import Vote from "./tabs/Vote";
 import { EscrowAndDividend } from "./tabs/EscrowAndDividend";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { prefix } from "../../utils/utils";
 import { TitleButSer } from "../../components/views/TitleButSer";
 
 const Gov: React.FC = () => {
@@ -18,11 +17,6 @@ const Gov: React.FC = () => {
 
   return (
     <Page>
-      <Image
-        className="jumbotron"
-        src={process.env.PUBLIC_URL + "/images/vote.jpg"}
-        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-      />
       <p>
         True believers who stake & lock the project’s{" "}
         {workhardCtx ? `$${workhardCtx.metadata.visionSymbol}` : "$VISION"}{" "}
@@ -43,7 +37,7 @@ const Gov: React.FC = () => {
           eventKey="dividend"
           title="Escrow & Dividend"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/gov/dividend"))}
+          onEnter={() => history.push("/gov/dividend")}
         >
           <EscrowAndDividend />
         </Tab>
@@ -51,7 +45,7 @@ const Gov: React.FC = () => {
           eventKey="timelock"
           title="Transactions"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/gov/timelock"))}
+          onEnter={() => history.push("/gov/timelock")}
         >
           <TimelockTxs />
         </Tab>
@@ -59,7 +53,7 @@ const Gov: React.FC = () => {
           eventKey="vote"
           title="Vote"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/gov/vote"))}
+          onEnter={() => history.push("/gov/vote")}
         >
           <Vote />
         </Tab>

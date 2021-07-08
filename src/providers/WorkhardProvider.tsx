@@ -12,10 +12,11 @@ import {
   Periphery,
 } from "@workhard/protocol";
 import deployed from "@workhard/protocol/deployed.json";
-import { useRouteMatch } from "react-router-dom";
 import { ethers } from "ethers";
 import { Helmet } from "react-helmet";
 import { useStores } from "../hooks/user-stores";
+import config from "../config.json";
+import { WHFAppConfig } from "../types/config";
 
 let deployedContracts: Deployed;
 if (process.env.NODE_ENV === "development") {
@@ -70,14 +71,12 @@ export function useWorkhard() {
 }
 
 export const WorkhardProvider: React.FC = ({ children }) => {
+  const daoId = ((config as any) as WHFAppConfig).daoId;
   const {
     active,
     library,
     chainId,
   } = useWeb3React<ethers.providers.Web3Provider>();
-  const match = useRouteMatch<{ daoId?: string }>("/:daoId?/");
-  const parsed = parseInt(match?.params.daoId || "0");
-  const daoId = Number.isNaN(parsed) ? 0 : parsed;
   const [context, setContext] = useState<WorkhardLibrary>();
   const { mineStore } = useStores();
   const getContext = async (

@@ -411,8 +411,8 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
   );
 
   return (
-    <Card border="success">
-      <Card.Header className="bg-success text-white">
+    <Card border="primary">
+      <Card.Header className="bg-white border-primary text-primary">
         {title}{" "}
         {logos &&
           logos.map((logo) => (

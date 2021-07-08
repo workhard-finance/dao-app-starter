@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Alert, Button, Col, Image, Row } from "react-bootstrap";
+import { Col, Row } from "react-bootstrap";
 import { ERC20StakeMiningV1 } from "../../components/contracts/mining-pool/ERC20StakeMiningV1";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "@ethersproject/bignumber";
 import { useWeb3React } from "@web3-react/core";
 import { ERC20BurnMiningV1 } from "../../components/contracts/mining-pool/ERC20BurnMiningV1";
-import {
-  errorHandler,
-  handleTransaction,
-  prefix,
-  TxStatus,
-} from "../../utils/utils";
+import { errorHandler, handleTransaction, TxStatus } from "../../utils/utils";
 import { useToasts } from "react-toast-notifications";
 import { observer } from "mobx-react";
 import { SerHelpPlz } from "../../components/views/HelpSer";
@@ -136,22 +131,6 @@ const Mine = observer(() => {
 
   return (
     <Page>
-      <Image
-        className="jumbotron"
-        src={process.env.PUBLIC_URL + "/images/goldrush.jpg"}
-        style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-      />
-      {mineStore.distributable && (
-        <Alert variant={"info"}>
-          You just discovered a{" "}
-          {workhardCtx?.metadata.visionSymbol || "$VISION"} mine. Please call
-          that smart contract function now.
-          {"  "}
-          <Button onClick={distribute} variant={"info"}>
-            distribute()
-          </Button>
-        </Alert>
-      )}
       <TitleButSer link="https://whf.gitbook.io/docs/mine#main-pools">
         Main pools
       </TitleButSer>
@@ -224,7 +203,7 @@ const Mine = observer(() => {
                     ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
                     : "$VISION"
                 }`}
-                link={prefix(daoId, "/work")}
+                link={"/work"}
                 poolAddress={workhardCtx.periphery.commitMining.address}
                 totalEmission={mineStore.emission || BigNumber.from(0)}
                 emissionWeightSum={mineStore.emissionWeightSum}
@@ -282,7 +261,7 @@ const Mine = observer(() => {
           {workhardCtx && workhardCtx.daoId !== 0
             ? `${workhardCtx.metadata.visionName}(${workhardCtx.metadata.visionSymbol})`
             : "$VISION"}{" "}
-          <Link to={prefix(daoId, "/#emission-schedule")} className="text-info">
+          <Link to={"/#emission-schedule"} className="text-info">
             (Emission Detail)
           </Link>
           :
@@ -328,11 +307,7 @@ const Mine = observer(() => {
             ? workhardCtx.metadata.rightSymbol
             : "$veVISION"}
           ) and join to{" "}
-          <Link
-            to={prefix(daoId, "/gov")}
-            target="_blank"
-            className="text-info"
-          >
+          <Link to={"/gov"} target="_blank" className="text-info">
             govern
           </Link>{" "}
           the WORKER’S UNION. With{" "}

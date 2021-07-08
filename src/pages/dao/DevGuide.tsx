@@ -2,7 +2,6 @@ import { BigNumberish } from "ethers";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { ConditionalButton } from "../../components/ConditionalButton";
-import { prefix } from "../../utils/utils";
 
 export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
   const { projId } = useParams<{ step: string; projId?: string }>();
@@ -26,7 +25,7 @@ export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
           <ul>
             <li>
               Go to{" "}
-              <Link to={prefix(projId, "/gov/dividend/distribute")}>
+              <Link to={"/gov/dividend/distribute"}>
                 [gov {`>`} Escrow {`&`} Dividend {`>`} Distribute]
               </Link>
             </li>
@@ -61,10 +60,9 @@ export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
         </li>
         <li>
           Or, try to make your products own digital product and register them to
-          the{" "}
-          <Link to={prefix(projId, "/manufacturer/new")}>NFT marketplace</Link>{" "}
-          that we've created for you!. It supports ERC1155 for now but we're
-          looking forward to supporting ERC721 soon with the OpenSea storefront
+          the <Link to={"/manufacturer/new"}>NFT marketplace</Link> that we've
+          created for you!. It supports ERC1155 for now but we're looking
+          forward to supporting ERC721 soon with the OpenSea storefront
           integration :)
         </li>
       </ol>
@@ -74,7 +72,7 @@ export const DevGuide: React.FC<{ id?: BigNumberish }> = ({ id }) => {
       <ConditionalButton
         variant="info"
         as={Link}
-        to={prefix(projId, "/dashboard")}
+        to={"/dashboard"}
         enabledWhen={!!projId}
         whyDisabled={"This is a preview"}
         children="Go to dashboard"

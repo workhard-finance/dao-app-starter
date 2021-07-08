@@ -97,8 +97,10 @@ export const BuyCommit: React.FC<BuyCommitProps> = observer(({ style }) => {
   }, [account, workhardCtx, approveTxStatus, blockNumber]);
 
   return (
-    <Card border={"danger"} style={style}>
-      <Card.Header className="bg-danger text-white">Buy</Card.Header>
+    <Card border={"primary"} style={style}>
+      <Card.Header className="text-primary border-primary bg-white">
+        Buy
+      </Card.Header>
       <Card.Body>
         <Row>
           <Col md={7}>
@@ -145,7 +147,8 @@ export const BuyCommit: React.FC<BuyCommitProps> = observer(({ style }) => {
             }`}
           </Card.Text>
           <ConditionalButton
-            variant="danger"
+            variant={"outline-danger"}
+            className={"text-danger"}
             onClick={
               isApproved(store.allowance, spendingDai)
                 ? buyCommit

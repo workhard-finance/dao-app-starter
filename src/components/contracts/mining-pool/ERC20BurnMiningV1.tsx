@@ -335,8 +335,8 @@ export const ERC20BurnMiningV1: React.FC<ERC20BurnMiningV1Props> = ({
   );
 
   return (
-    <Card border="danger">
-      <Card.Header className="bg-danger text-white">
+    <Card border="primary">
+      <Card.Header className="bg-white border-primary text-primary">
         {title}{" "}
         {logos &&
           logos.map((logo) => (

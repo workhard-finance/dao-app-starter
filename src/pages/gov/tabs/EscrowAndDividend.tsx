@@ -10,7 +10,6 @@ import { useWorkhard } from "../../../providers/WorkhardProvider";
 import { Claim } from "./Claim";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { prefix } from "../../../utils/utils";
 
 export const EscrowAndDividend: React.FC = () => {
   const workhardCtx = useWorkhard();
@@ -72,7 +71,7 @@ export const EscrowAndDividend: React.FC = () => {
           <Tab.Content>
             <Tab.Pane
               eventKey="locks"
-              onEnter={() => history.push(prefix(daoId, "/gov/dividend/locks"))}
+              onEnter={() => history.push("/gov/dividend/locks")}
             >
               <CreateLock stakedAmount={stakedAmount} />
               <hr />
@@ -92,21 +91,19 @@ export const EscrowAndDividend: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="claim"
-              onEnter={() => history.push(prefix(daoId, "/gov/dividend/claim"))}
+              onEnter={() => history.push("/gov/dividend/claim")}
             >
               <Claim />
             </Tab.Pane>
             <Tab.Pane
               eventKey="distribute"
-              onEnter={() =>
-                history.push(prefix(daoId, "/gov/dividend/distribute"))
-              }
+              onEnter={() => history.push("/gov/dividend/distribute")}
             >
               <Distribute />
             </Tab.Pane>
             {/* <Tab.Pane
               eventKey="faq"
-              onEnter={() => history.push(prefix(daoId, "/gov/dividend/faq"))}
+              onEnter={() => history.push("/gov/dividend/faq")}
             >
               <h5>
                 <strong>What is Voting Escrow?</strong>

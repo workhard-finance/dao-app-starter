@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Container } from "react-bootstrap";
+import { Card, Container } from "react-bootstrap";
 import {
   Pie,
   Cell,
@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { PoolType, PoolTypeHash } from "../../utils/ERC165Interfaces";
 import { humanReadablePoolType } from "../../utils/utils";
+import vars from "../../custom.module.scss";
 
 export interface AllocationChartProps {
   pools: {
@@ -32,46 +33,53 @@ export const AllocationChart: React.FC<AllocationChartProps> = ({
   founder,
   sum,
 }) => {
-  const COLORS = ["#28a745", "#17a2b8", "#ffc107", "#dc3545"];
+  const COLORS = [
+    `${vars.primary}ff`,
+    `${vars.primary}dd`,
+    `${vars.primary}bb`,
+    `${vars.primary}99`,
+  ];
   const data = [
     ...pools.map((pool) => ({
       title: pool.name,
       value: (pool.weight / sum) * 100,
-      color: `#17a2b8${Math.floor(Math.random() * 200 + 55).toString(16)}`,
+      color: `${vars.primary}${Math.floor(Math.random() * 200 + 55).toString(
+        16
+      )}`,
       poolType: pool.poolType,
     })),
     {
       title: "Treasury",
       value: (treasury / sum) * 100,
-      color: "#28a745",
+      color: COLORS[0],
     },
     {
       title: "Founder",
       value: (founder / sum) * 100,
-      color: "#dc3545",
+      color: COLORS[1],
     },
-    { title: "Caller", value: (caller / sum) * 100, color: "#6A2135" },
+    { title: "Caller", value: (caller / sum) * 100, color: vars.danger },
   ];
   if (protocol !== 0) {
     data.push({
       title: "Protocol",
       value: (protocol / sum) * 100,
-      color: "#868e96",
+      color: COLORS[2],
     });
   }
 
   const getPoolColor = (poolType?: PoolTypeHash): string => {
     return poolType
       ? [PoolType.ERC20BurnV1, PoolType.ERC1155BurnV1].includes(poolType)
-        ? "#dc3545"
+        ? vars.danger
         : [
             PoolType.ERC20StakeV1,
             PoolType.ERC721StakeV1,
             PoolType.ERC1155StakeV1,
           ].includes(poolType)
-        ? "#28a745"
-        : "#17a2b8"
-      : "#17a2b8";
+        ? vars.success
+        : vars.primary
+      : vars.primary;
   };
 
   const renderCustomizedLabel = ({

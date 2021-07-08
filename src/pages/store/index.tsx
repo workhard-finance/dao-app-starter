@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
-import { Alert, Button, Col, Row, Tab, Tabs, Image } from "react-bootstrap";
+import { Alert, Button, Col, Row, Tab, Tabs } from "react-bootstrap";
 import { useWeb3React } from "@web3-react/core";
 import { useBlockNumber } from "../../providers/BlockNumberProvider";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber, providers } from "ethers";
-import { Link } from "react-router-dom";
 import { Product } from "../../components/contracts/marketplace/product/Product";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { prefix } from "../../utils/utils";
 import { SerHelpPlz } from "../../components/views/HelpSer";
 import { TitleButSer } from "../../components/views/TitleButSer";
 import config from "../../config.json";
@@ -67,20 +65,13 @@ const Store: React.FC = () => {
 
   return (
     <Page>
-      {!daoId && (
-        <Image
-          className="jumbotron"
-          src={process.env.PUBLIC_URL + "/images/nfts.jpg"}
-          style={{ width: "100%", padding: "0px", borderWidth: "5px" }}
-        />
-      )}
       <TitleButSer link="https://whf.gitbook.io/docs/store" />
       <Tabs defaultActiveKey={tab || "featured"}>
         <Tab
           eventKey="featured"
           title="Featured"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/store/featured"))}
+          onEnter={() => history.push("/store/featured")}
         >
           {config.nfts.featured.length === 0 && (
             <p>Coming soon :) We won't let you wait too long.</p>
@@ -106,7 +97,7 @@ const Store: React.FC = () => {
           eventKey="all"
           title="All"
           style={{ marginTop: "1rem" }}
-          onEnter={() => history.push(prefix(daoId, "/store/all"))}
+          onEnter={() => history.push("/store/all")}
         >
           {allProducts.length === 0 && (
             <p>Coming soon :) We won't let you wait too long.</p>

@@ -1,4 +1,6 @@
 {
+  "appName": "Your App Name",
+  "daoId": 0,
   "projects": {
     "banned": [],
     "featured": []

@@ -86,8 +86,10 @@ export const RedeemCommit: React.FC = observer(() => {
     }
   }, [account, workhardCtx, blockNumber]);
   return (
-    <Card border={"success"}>
-      <Card.Header className="bg-success text-white">Redeem</Card.Header>
+    <Card border={"primary"}>
+      <Card.Header className="text-primary border-primary bg-white">
+        Redeem
+      </Card.Header>
       <Card.Body>
         <Row>
           <Col md={7}>
@@ -136,7 +138,8 @@ export const RedeemCommit: React.FC = observer(() => {
             {`= ${formatEther(parseEther(redeemAmount || "0"))} $DAI`}
           </Card.Text>
           <ConditionalButton
-            variant="success"
+            variant={"outline-success"}
+            className={"text-success"}
             onClick={
               isApproved(store.allowance, redeemAmount)
                 ? redeem

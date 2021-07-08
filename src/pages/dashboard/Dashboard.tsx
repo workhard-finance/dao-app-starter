@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Page from "../../layouts/Page";
 import { Image, Col, Row, Card, Button, Table } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { EmissionChart } from "../../components/views/EmissionChart";
 import { useWorkhard } from "../../providers/WorkhardProvider";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -10,7 +10,6 @@ import {
   bigNumToFixed,
   errorHandler,
   fetchProjectMetadataFromIPFS,
-  prefix,
   ProjectMetadata,
   uriToURL,
 } from "../../utils/utils";
@@ -23,7 +22,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Allocation } from "../../components/contracts/vision-emitter/Allocation";
-import { SetEmission } from "../../components/contracts/vision-emitter/SetEmission";
 
 const Dashboard = () => {
   const { addToast } = useToasts();
@@ -177,7 +175,7 @@ const Dashboard = () => {
             address={workhardCtx?.dao.commit.address}
             symbolAlt={workhardCtx?.metadata.commitSymbol || "COMMIT"}
           >
-            <Button as={Link} to={prefix(daoId, "work")}>
+            <Button as={Link} to={"work"}>
               Go to work
             </Button>
           </Erc20Balance>
@@ -188,7 +186,7 @@ const Dashboard = () => {
             address={workhardCtx?.dao.vision.address}
             symbolAlt={workhardCtx?.metadata.visionSymbol || "VISION"}
           >
-            <Button as={Link} to={prefix(daoId, "mine")}>
+            <Button as={Link} to={"mine"}>
               Go to mine
             </Button>
           </Erc20Balance>
@@ -199,7 +197,7 @@ const Dashboard = () => {
             address={workhardCtx?.dao.right.address}
             symbolAlt={workhardCtx?.metadata.rightSymbol || "RIGHT"}
           >
-            <Button as={Link} to={prefix(daoId, "gov")}>
+            <Button as={Link} to={"gov"}>
               Go to lock ${workhardCtx?.metadata.visionSymbol}
             </Button>
           </Erc20Balance>
@@ -234,10 +232,10 @@ const Dashboard = () => {
       </h2>
       <Row>
         <Col md={3}>
-          <Card bg={"success"} text={"white"}>
+          <Card border={"primary"}>
             <Card.Body>
-              <Card.Title>
-                Mintable COMMIT
+              <Card.Title className={"text-primary"}>
+                <strong>Mintable COMMIT</strong>
                 <OverlayTooltip
                   tip={`Governance can mint more ${
                     workhardCtx?.metadata.commitSymbol || "COMMIT"
@@ -256,14 +254,16 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card bg={"danger"} text={"white"}>
+          <Card border={"primary"}>
             <Card.Body>
-              <Card.Title>
-                Burned {workhardCtx?.metadata.commitSymbol || "COMMIT"}
-                <OverlayTooltip
-                  tip={`A stablecoin to tokenize your revenue stream. Pay your workers with value-added money.`}
-                  text={`❔`}
-                />
+              <Card.Title className={"text-primary"}>
+                <strong>
+                  Burned {workhardCtx?.metadata.commitSymbol || "COMMIT"}
+                  <OverlayTooltip
+                    tip={`A stablecoin to tokenize your revenue stream. Pay your workers with value-added money.`}
+                    text={`❔`}
+                  />
+                </strong>
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
                 {bigNumToFixed(burnedCommit || 0)}
@@ -276,16 +276,18 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card bg={"warning"} text={"white"}>
+          <Card border={"primary"}>
             <Card.Body>
-              <Card.Title>
-                Total {workhardCtx?.metadata.visionSymbol || "VISION"}
-                <OverlayTooltip
-                  tip={`Liquid stock options for your project. Believers are ${
-                    workhardCtx?.metadata.visionSymbol || "VISION"
-                  } long term HODLers. Unbelievers can easily exit.`}
-                  text={`❔`}
-                />
+              <Card.Title className={"text-primary"}>
+                <strong>
+                  Total {workhardCtx?.metadata.visionSymbol || "VISION"}
+                  <OverlayTooltip
+                    tip={`Liquid stock options for your project. Believers are ${
+                      workhardCtx?.metadata.visionSymbol || "VISION"
+                    } long term HODLers. Unbelievers can easily exit.`}
+                    text={`❔`}
+                  />
+                </strong>
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
                 {bigNumToFixed(visionSupply || 0)}
@@ -298,17 +300,19 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card bg={"info"} text={"white"}>
+          <Card border={"primary"}>
             <Card.Body>
-              <Card.Title>
-                Total {workhardCtx?.metadata.rightSymbol || "RIGHT"}
-                <OverlayTooltip
-                  tip={`
+              <Card.Title className={"text-primary"}>
+                <strong>
+                  Total {workhardCtx?.metadata.rightSymbol || "RIGHT"}
+                  <OverlayTooltip
+                    tip={`
                   Reward your long term ${
                     workhardCtx?.metadata.visionSymbol || "VISION"
                   } believers with access to devidends and voting power.`}
-                  text={`❔`}
-                />
+                    text={`❔`}
+                  />
+                </strong>
               </Card.Title>
               <Card.Text style={{ fontSize: "2rem" }}>
                 {bigNumToFixed(rightSupply || 0)}

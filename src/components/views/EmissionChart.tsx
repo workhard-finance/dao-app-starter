@@ -12,6 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import vars from "../../custom.module.scss";
 
 export interface EmissionChartProps {
   width?: number;
@@ -75,12 +76,20 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
           >
             <defs>
               <linearGradient id="colorEmission" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#17a2b8" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#17a2b8" stopOpacity={0.3} />
+                <stop offset="5%" stopColor={vars.primary} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={vars.primary} stopOpacity={0.3} />
               </linearGradient>
               <linearGradient id="colorSupply" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#28a745" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#28a745" stopOpacity={0.3} />
+                <stop
+                  offset="5%"
+                  stopColor={vars.secondary}
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={vars.secondary}
+                  stopOpacity={0.3}
+                />
               </linearGradient>
             </defs>
             <Legend verticalAlign="top" height={36} />
@@ -103,7 +112,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
             <Area
               type="monotone"
               dataKey="emission"
-              stroke="#17a2b8"
+              stroke={vars.primary}
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorEmission)"
@@ -112,7 +121,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
             <Area
               type="monotone"
               dataKey="totalSupply"
-              stroke="#28a745"
+              stroke={vars.secondary}
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorSupply)"
@@ -122,7 +131,7 @@ export const EmissionChart: React.FC<EmissionChartProps> = ({
             {currentWeek !== undefined && (
               <ReferenceLine
                 x={currentWeek}
-                stroke="#dc3545"
+                stroke={vars.danger}
                 strokeWidth={2}
                 label={(props) => (
                   <text

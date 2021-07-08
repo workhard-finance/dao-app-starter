@@ -1,10 +1,8 @@
 import React from "react";
-import { themes } from "./theme";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Web3ReactProvider } from "@web3-react/core";
 import { getLibrary } from "./web3/provider";
 import "./App.css";
-import { WorkhardThemeProvider } from "./providers/WorkhardThemeProvider";
 import Mine from "./pages/mine";
 import Work from "./pages/work";
 import Gov from "./pages/gov";
@@ -35,49 +33,30 @@ function App() {
           <BlockNumberProvider>
             <Router>
               <WorkhardProvider>
-                {/* <WorkhardLoggedDataProvider> */}
-                <WorkhardThemeProvider theme={themes.light}>
-                  <Switch>
-                    <Route
-                      path="/:daoId?/work/:tab?/:subtab?"
-                      children={<Work />}
-                    />
-                    <Route path="/:daoId?/mine/:tab?" children={<Mine />} />
-                    <Route
-                      path="/:daoId?/gov/:tab?/:subtab?"
-                      children={<Gov />}
-                    />
-                    <Route path="/:daoId?/store/:tab?" children={<Store />} />
-                    <Route path="/:daoId?/res" children={<Res />} />
-                    <Route
-                      path="/:daoId?/dao/:step/:projId?"
-                      children={<ForkAndLaunch />}
-                    />
-                    <Route path="/:daoId?/dao" children={<DAO />} />
-                    <Route path="/:daoId?/proj/:id" children={<Project />} />
-                    <Route
-                      path="/:daoId?/product/:address"
-                      children={<ProductPage />}
-                    />
-                    <Route
-                      path="/:daoId?/manufacturer/new"
-                      children={<Manufacture />}
-                    />
-                    <Route
-                      path="/:daoId?/multisig"
-                      children={<MultisigAdmin />}
-                    />
-                    <Route
-                      path="/docs"
-                      component={() => {
-                        window.location.replace("https://gitbook.io");
-                        return null;
-                      }}
-                    />
-                    <Route path="/:daoId?/" children={<Dashboard />} />
-                  </Switch>
-                </WorkhardThemeProvider>
-                {/* </WorkhardLoggedDataProvider> */}
+                <Switch>
+                  <Route path="/work/:tab?/:subtab?" children={<Work />} />
+                  <Route path="/mine/:tab?" children={<Mine />} />
+                  <Route path="/gov/:tab?/:subtab?" children={<Gov />} />
+                  <Route path="/store/:tab?" children={<Store />} />
+                  <Route path="/res" children={<Res />} />
+                  <Route
+                    path="/dao/:step/:projId?"
+                    children={<ForkAndLaunch />}
+                  />
+                  <Route path="/dao" children={<DAO />} />
+                  <Route path="/proj/:id" children={<Project />} />
+                  <Route path="/product/:address" children={<ProductPage />} />
+                  <Route path="/manufacturer/new" children={<Manufacture />} />
+                  <Route path="/multisig" children={<MultisigAdmin />} />
+                  <Route
+                    path="/docs"
+                    component={() => {
+                      window.location.replace("https://gitbook.io");
+                      return null;
+                    }}
+                  />
+                  <Route path="/" children={<Dashboard />} />
+                </Switch>
               </WorkhardProvider>
             </Router>
           </BlockNumberProvider>

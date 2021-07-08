@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Nav, Row, Tab } from "react-bootstrap";
 import { useWorkhard } from "../../../providers/WorkhardProvider";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { BigNumber } from "ethers";
 import { ProjectBox } from "../../../components/contracts/contribution-board/ProjectBox";
 import { CreateProject } from "../../../components/contracts/workhard/CreateProject";
-import { prefix } from "../../../utils/utils";
 import config from "../../../config.json";
 
 export const ContributionBoard: React.FC = () => {
@@ -97,7 +96,7 @@ export const ContributionBoard: React.FC = () => {
             <Tab.Pane
               eventKey="projects"
               onEnter={() => {
-                history.push(prefix(daoId, "/work/job/projects"));
+                history.push("/work/job/projects");
               }}
             >
               <Row>
@@ -109,9 +108,7 @@ export const ContributionBoard: React.FC = () => {
                       <Col
                         md={4}
                         style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          history.push(prefix(daoId, `/proj/${id}`))
-                        }
+                        onClick={() => history.push(`/proj/${id}`)}
                       >
                         <ProjectBox projId={id} active={true} />
                         <br />
@@ -125,7 +122,7 @@ export const ContributionBoard: React.FC = () => {
             </Tab.Pane>
             <Tab.Pane
               eventKey="post"
-              onEnter={() => history.push(prefix(daoId, "/work/job/post"))}
+              onEnter={() => history.push("/work/job/post")}
             >
               <Card>
                 <Card.Body>
