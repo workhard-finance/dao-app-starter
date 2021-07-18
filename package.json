@@ -28,7 +28,7 @@
     "@web3-react/walletlink-connector": "^6.1.6",
     "@workhard/protocol": "1.0.3",
     "bootstrap": "^4.6.0",
-    "bootswatch": "^4.6.0",
+    "bootswatch": "^5.0.2",
     "deepmerge": "^4.2.2",
     "ethers": "^5.0.26",
     "ipfs-core": "^0.5.4",
