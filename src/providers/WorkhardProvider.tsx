@@ -29,7 +29,9 @@ if (process.env.NODE_ENV === "development") {
       localhost,
       hardhat,
     };
-  } catch (_err) {}
+  } catch (_err) {
+    deployedContracts = deployed;
+  }
 } else {
   deployedContracts = deployed;
 }
