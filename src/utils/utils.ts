@@ -73,10 +73,7 @@ export const wrapUrl = (text: string) => {
 
 export const acceptableTokenList = (chainId?: number) => {
   if (!chainId) return [];
-  const dao =
-    process.env.NODE_ENV === "development"
-      ? require("../deployed.dev.json")
-      : deployed;
+  const dao = deployed as any;
   return [
     {
       symbol: "Base Currency",
@@ -87,8 +84,8 @@ export const acceptableTokenList = (chainId?: number) => {
 
 export const getStablecoinList = (chainId?: number) => {
   if (!chainId) return [];
+  const dao = deployed as any;
   if (process.env.NODE_ENV === "development") {
-    const dao = require("../deployed.dev.json");
     return [
       {
         symbol: "Mock",
