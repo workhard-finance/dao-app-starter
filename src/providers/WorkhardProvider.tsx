@@ -94,7 +94,7 @@ export const WorkhardProvider: React.FC = ({ children }) => {
     const workhard = await Workhard.from(library, workhardAddress);
     const [dao, periphery, daoName, daoSymbol] = await Promise.all([
       workhard.getDAO(daoId),
-      workhard.getPeriphery(daoId),
+      workhard.getPeriphery(daoId, { pool2Factory: config.pool2Factory }),
       workhard.project.nameOf(daoId),
       workhard.project.symbolOf(daoId),
     ]);
