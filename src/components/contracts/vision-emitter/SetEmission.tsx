@@ -111,8 +111,8 @@ export const SetEmission = () => {
   useEffect(() => {
     if (pools && emissionWeight && founderShareDenom) {
       let sum = BigNumber.from(0)
-        .add(emissionWeight.treasury)
-        .add(emissionWeight.caller);
+        .add(treasuryWeight || emissionWeight.treasury)
+        .add(callerWeight || emissionWeight.caller);
       sum = pools.reduce((acc, pool) => acc.add(pool.weight), sum);
       const dev = sum.div(founderShareDenom);
       sum = sum.add(dev);
