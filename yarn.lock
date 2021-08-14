@@ -4990,10 +4990,10 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@workhard/protocol@1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.3.tgz#9dcccb713590e360400b68f82cc7c70915380b2f"
-  integrity sha512-FDuzbabCFdoTPMph9bU8EMY6tAQXAvDfb3I9mPf7ScCBBmVIkES77qSSjqIkM/FiNwDP5tXIwS0fUwJlvMzGew==
+"@workhard/protocol@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@workhard/protocol/-/protocol-1.0.4.tgz#6cc44b3bde3dfd865c8930aaf40568821e7901d2"
+  integrity sha512-RwL9qjzQ2H2QqqWAUCvc4AH01jIqrH9PKYlD4LL+7sqHRXNgUCCOKo8oAYgarjfN8R8SaJI0F76jWE0VQ7oXBw==
   dependencies:
     "@openzeppelin/contracts" "3.4.0-solc-0.7 "
     "@uniswap/v2-core" "^1.0.1"
@@ -19426,7 +19426,7 @@ recharts-scale@^0.4.4:
   dependencies:
     decimal.js-light "^2.4.1"
 
-recharts@^2.0.9:
+recharts@2.0.9:
   version "2.0.9"
   resolved "https://registry.yarnpkg.com/recharts/-/recharts-2.0.9.tgz#048068eb01383291104548388712026948275f70"
   integrity sha512-JNsXE80PuF3hugUCE7JqDOMSvu5xQLxtjOaqFKKZI2pCJ1PVJzhwDv4TWk0nO4AvADbeWzYEHbg8C5Hcrh42UA==
