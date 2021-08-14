@@ -94,7 +94,7 @@ export const MiningPool: React.FC<MiningPoolProps> = (props) => {
     return (
       <ERC20BurnMiningV1
         poolIdx={props.poolIdx}
-        title={props.title || `Burn Mining: ${tokenSymbol || baseToken}`}
+        title={props.title || `Burn ${tokenSymbol || baseToken}`}
         tokenName={tokenSymbol || baseToken}
         poolAddress={props.poolAddress}
         totalEmission={props.totalEmission}
@@ -108,7 +108,7 @@ export const MiningPool: React.FC<MiningPoolProps> = (props) => {
     return (
       <ERC20StakeMiningV1
         poolIdx={props.poolIdx}
-        title={props.title || `Stake Mining: ${tokenSymbol || baseToken}`}
+        title={props.title || `Stake ${tokenSymbol || baseToken}`}
         tokenName={tokenSymbol || baseToken}
         poolAddress={props.poolAddress}
         totalEmission={props.totalEmission}

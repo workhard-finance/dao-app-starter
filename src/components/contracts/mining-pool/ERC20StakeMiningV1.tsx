@@ -367,7 +367,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
           {tokenName || tokenDetails?.name} is staked.
         </Card.Text>
         <Row>
-          <Col>
+          <Col md={8}>
             <ConditionalButton
               enabledWhen={!stakedAmount?.isZero()}
               whyDisabled="you are not mining."
@@ -385,7 +385,7 @@ export const ERC20StakeMiningV1: React.FC<ERC20StakeMiningV1Props> = ({
               Mine & Exit
             </ConditionalButton>
           </Col>
-          <Col style={{ textAlign: "end" }}>
+          <Col md={4} style={{ textAlign: "end" }}>
             <ConditionalButton
               variant="success"
               enabledWhen={isStakableAmount() && txStatus !== TxStatus.PENDING}

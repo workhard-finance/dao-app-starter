@@ -163,12 +163,12 @@ export class MineStore {
   loadLiquidityMiningAPY = async () => {
     if (this.lib) {
       const totalMiners = await this.lib.periphery.liquidityMining.totalMiners();
-      const visionPerYear = (
-        await this.lib.periphery.liquidityMining.miningRate()
-      )
-        .mul(86400 * 365)
-        .div(totalMiners)
-        .toNumber();
+      const visionPerYear = totalMiners.eq(0)
+        ? Infinity
+        : (await this.lib.periphery.liquidityMining.miningRate())
+            .mul(86400 * 365)
+            .div(totalMiners)
+            .toNumber();
       const apy = 100 * (visionPerYear / this.visionPerLP);
       this.apys[this.lib.periphery.liquidityMining.address] = apy;
     }
@@ -178,10 +178,12 @@ export class MineStore {
   loadCommitMiningAPY = async () => {
     if (this.lib) {
       const totalMiners = await this.lib.periphery.commitMining.totalMiners();
-      const visionPerYear = (await this.lib.periphery.commitMining.miningRate())
-        .mul(86400 * 365)
-        .div(totalMiners)
-        .toNumber();
+      const visionPerYear = totalMiners.eq(0)
+        ? Infinity
+        : (await this.lib.periphery.commitMining.miningRate())
+            .mul(86400 * 365)
+            .div(totalMiners)
+            .toNumber();
 
       let commitPrice =
         this.commitPrice ||
@@ -210,10 +212,12 @@ export class MineStore {
         this.lib.web3.library
       );
       const totalMiners = await initialContributorPool.totalMiners();
-      const visionPerYear = (await initialContributorPool.miningRate())
-        .mul(86400 * 365)
-        .div(totalMiners)
-        .toNumber();
+      const visionPerYear = totalMiners.eq(0)
+        ? Infinity
+        : (await initialContributorPool.miningRate())
+            .mul(86400 * 365)
+            .div(totalMiners)
+            .toNumber();
 
       const apy = 100 * (visionPerYear * (this.visionPrice || 0)) - 100;
       this.apys[this.initialContributorPool] = apy;
@@ -229,10 +233,12 @@ export class MineStore {
       );
       const totalMiners = await miningPool.totalMiners();
       const miningRate = await miningPool.miningRate();
-      const visionPerYear = miningRate
-        .mul(86400 * 365)
-        .div(totalMiners)
-        .toNumber();
+      const visionPerYear = totalMiners.eq(0)
+        ? Infinity
+        : miningRate
+            .mul(86400 * 365)
+            .div(totalMiners)
+            .toNumber();
       const baseToken = await miningPool.baseToken();
       const baseTokenPrice = await getPriceFromCoingecko(baseToken);
       const apy =
@@ -251,10 +257,12 @@ export class MineStore {
       );
       const totalMiners = await miningPool.totalMiners();
       const miningRate = await miningPool.miningRate();
-      const visionPerYear = miningRate
-        .mul(86400 * 365)
-        .div(totalMiners)
-        .toNumber();
+      const visionPerYear = totalMiners.eq(0)
+        ? Infinity
+        : miningRate
+            .mul(86400 * 365)
+            .div(totalMiners)
+            .toNumber();
       const baseToken = await miningPool.baseToken();
       const baseTokenPrice = await getPriceFromCoingecko(baseToken);
       const apy =
